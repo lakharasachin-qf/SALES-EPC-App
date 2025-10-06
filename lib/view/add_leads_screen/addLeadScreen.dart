@@ -93,26 +93,43 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                           children: [
                             // Step 1: Company Details
                             if (_currentStep == 0) ...[
+                              getLable("Company Name", isRequired: true),
                               Obx(() {
-                                return getTextField(
-                                  context: context,
-                                  wantLabel: true,
-                                  label: 'Company Name',
-                                  ctr: controller.companyNameCtr,
+                                return getReactiveFormField(
                                   node: controller.companyNameNode,
-                                  model: controller.companyNameModel.value,
-                                  function: (val) {
-                                    controller.validateFields(
-                                      val,
-                                      iscomman: true,
-                                      model: controller.companyNameModel,
-                                      errorText1: 'Company Name is required',
-                                    );
+                                  controller: controller.companyNameCtr,
+                                  hintLabel: "Enter Company Name",
+                                  onChanged: (val) {
+                                    controller.validateCompany(val);
                                   },
-                                  hint: 'Enter Company Name',
-                                  isRequired: true,
+                                  inputType: TextInputType.text,
+                                  formType: FieldType.text,
+                                  wantSuffix: false,
+                                  errorText:
+                                      controller.companyNameModel.value.error,
                                 );
                               }),
+                              // Obx(() {
+                              //   return getTextField(
+                              //     context: context,
+                              //     wantLabel: true,
+                              //     isBorderSideEnable: true,
+                              //     label: 'Company Name',
+                              //     ctr: controller.companyNameCtr,
+                              //     node: controller.companyNameNode,
+                              //     model: controller.companyNameModel.value,
+                              //     function: (val) {
+                              //       controller.validateFields(
+                              //         val,
+                              //         iscomman: true,
+                              //         model: controller.companyNameModel,
+                              //         errorText1: 'Company Name is required',
+                              //       );
+                              //     },
+                              //     hint: 'Enter Company Name',
+                              //     isRequired: true,
+                              //   );
+                              // }),
                               getDynamicSizedBox(height: 2.h),
                               getLable("Address", isRequired: true),
                               Obx(() {
@@ -217,7 +234,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                       controller.districtModel.value.error,
                                 );
                               }),
-                              getLable("Person Name", isRequired: true),
+                              getLable("Contact Person Name", isRequired: true),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.personNameNode,
@@ -234,7 +251,10 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable("Person Mobile", isRequired: true),
+                              getLable(
+                                "Contact Person Mobile",
+                                isRequired: true,
+                              ),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.personMobileNode,
@@ -251,7 +271,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable("Latitude", isRequired: true),
+                              getLable("Latitude"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.latitudeNode,
@@ -268,7 +288,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable("Longitude", isRequired: true),
+                              getLable("Longitude"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.longitudeNode,
@@ -387,7 +407,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable("DG Capacity", isRequired: true),
+                              getLable("DG Capacity (KVA)"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.dgCapacityNode,
@@ -404,7 +424,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable("DG Sync", isRequired: true),
+                              getLable("DG Sync Required"),
                               getReactiveDropdown(
                                 hint: "Enter DG Sync",
                                 items: controller.dgSync,
@@ -417,8 +437,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                               ),
                               getDynamicSizedBox(height: 2.h),
                               getLable(
-                                "Installed Solar Capacity",
-                                isRequired: true,
+                                "Current Installed Solar Capacity (KWp)",
                               ),
                               Obx(() {
                                 return getReactiveFormField(
@@ -438,7 +457,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable("Sanctioned Load", isRequired: true),
+                              getLable("Sanctioned Load (KVA)"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.sanctionedLoadNode,
@@ -457,7 +476,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable("VFD", isRequired: true),
+                              getLable("VFD Required"),
                               getReactiveDropdown(
                                 hint: "Enter VFD",
                                 items: controller.vfd,
@@ -469,7 +488,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 },
                               ),
                               getDynamicSizedBox(height: 2.h),
-                              getLable("Grid Availability", isRequired: true),
+                              getLable("Grid Availability (Hours)"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.gridAvailabilityNode,

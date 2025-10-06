@@ -529,6 +529,19 @@ class AddLeadsController extends GetxController {
     enableContactInfoButton();
   }
 
+  void validateCompany(String? val) {
+    companyNameModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Address is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    enableContactInfoButton();
+  }
+
   void validateCountry(String? val) {
     countryModel.update((model) {
       if (val == null || val.trim().isEmpty) {
@@ -982,31 +995,32 @@ class AddLeadsController extends GetxController {
     enableContactInfoButton();
   }
 
-  void validateFields(
-    dynamic val, {
-    required Rx<ValidationModel> model,
-    String? errorText1,
-    String? errorText2,
-    String? errorText3,
-    bool iscomman = false,
-    bool isemail = false,
-    bool ispassword = false,
-  }) {
-    return validateField(
-      val: val,
-      models: model,
-      isEmail: isemail,
-      iscomman: iscomman,
-      ispassword: ispassword,
-      errorText1: errorText1,
-      errorText2: errorText2,
-      errorText3: errorText3,
-      notifyListeners: refresh,
-      enableBtnFunction: enableContactInfoButton,
-    );
-  }
+  // void validateFields(
+  //   dynamic val, {
+  //   required Rx<ValidationModel> model,
+  //   String? errorText1,
+  //   String? errorText2,
+  //   String? errorText3,
+  //   bool iscomman = false,
+  //   bool isemail = false,
+  //   bool ispassword = false,
+  // }) {
+  //   return validateField(
+  //     val: val,
+  //     models: model,
+  //     isEmail: isemail,
+  //     iscomman: iscomman,
+  //     ispassword: ispassword,
+  //     errorText1: errorText1,
+  //     errorText2: errorText2,
+  //     errorText3: errorText3,
+  //     notifyListeners: refresh,
+  //     enableBtnFunction: enableContactInfoButton,
+  //   );
+  // }
 
   // 🔹 Final Button Enable Check
+  
   void enableContactInfoButton() {
     bool isValid = true;
 
@@ -1045,6 +1059,19 @@ class AddLeadsController extends GetxController {
     isFormInvalidate.value = isValid;
   }
 
+  void validatescheduleMeeeingModel(String? val) {
+    scheduleMeeeingModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "District is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    enableContactInfoButton();
+  }
+
   void openDatePicker({
     required BuildContext context,
     required String title,
@@ -1068,14 +1095,15 @@ class AddLeadsController extends GetxController {
         final formatted = dateTimeFormat.format(date);
         dateRx.value = formatted;
         controller.text = formatted;
-        validateFields(
-          controller.text,
-          iscomman: true,
-          model: model,
-          errorText1: showTimePickers
-              ? 'Please choose date and time'
-              : 'Please choose date',
-        );
+        validatescheduleMeeeingModel(controller.text);
+        // validateFields(
+        //   controller.text,
+        //   iscomman: true,
+        //   model: model,
+        //   errorText1: showTimePickers
+        //       ? 'Please choose date and time'
+        //       : 'Please choose date',
+        // );
       },
     );
   }
@@ -1633,18 +1661,32 @@ class AddLeadsController extends GetxController {
         uploadCategoryCtr.text = data.name;
         categoryId.value = data.id.toString();
         logcat('customerID', categoryId.value);
-        validateFields(
-          uploadCategoryCtr.text,
-          iscomman: true,
-          model: uploadCategoryModel,
-          errorText1: 'Enter Category',
-        );
+        validateuploadCategoryModel(uploadCategoryCtr.text);
+        // validateFields(
+        //   uploadCategoryCtr.text,
+        //   iscomman: true,
+        //   model: uploadCategoryModel,
+        //   errorText1: 'Enter Category',
+        // );
         update();
       },
       backBtn: () {
         Get.back();
       },
     );
+  }
+
+  void validateuploadCategoryModel(String? val) {
+    uploadCategoryModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "District is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    enableContactInfoButton();
   }
 
   void filterFetchData<T>(
