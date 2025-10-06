@@ -531,17 +531,14 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                             ],
                             // Step 2: Contact Information
                             if (_currentStep == 1) ...[
-                              getLable(
-                                "Peak Monthly Energy Cons (KWH)",
-                                isRequired: true,
-                              ),
+                              getLable("Peak Monthly Energy Cons (KWH)"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.peakMonthlyEnergyNode,
                                   controller: controller.peakMonthlyEnergyCtr,
                                   hintLabel: "Enter Peak Monthly Energy Cons",
                                   onChanged: (val) {
-                                    controller.validatePeakMonthlyEnergy(val);
+                                    // controller.validatePeakMonthlyEnergy(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -553,17 +550,14 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable(
-                                "Required Solar Cap (KWp)",
-                                isRequired: true,
-                              ),
+                              getLable("Required Solar Cap (KWp)"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.requiredSolarCapNode,
                                   controller: controller.requiredSolarCapCtr,
                                   hintLabel: "Enter Required Solar Cap",
                                   onChanged: (val) {
-                                    controller.validateRequiredSolarCap(val);
+                                    // controller.validateRequiredSolarCap(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -577,7 +571,6 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                               getDynamicSizedBox(height: 2.h),
                               getLable(
                                 "Distance to Nearest Transformer (Mtrs)",
-                                isRequired: true,
                               ),
                               Obx(() {
                                 return getReactiveFormField(
@@ -587,9 +580,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   hintLabel:
                                       "Enter Distance to Nearest Transformer",
                                   onChanged: (val) {
-                                    controller.validateDistanceToTransformer(
-                                      val,
-                                    );
+                                    // controller.validateDistanceToTransformer(
+                                    //   val,
+                                    // );
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -601,10 +594,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable(
-                                "Rating of Nearest Transformer (KVA)",
-                                isRequired: true,
-                              ),
+                              getLable("Rating of Nearest Transformer (KVA)"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.ratingOfTransformerNode,
@@ -612,7 +602,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   hintLabel:
                                       "Enter Rating of Nearest Transformer",
                                   onChanged: (val) {
-                                    controller.validateRatingOfTransformer(val);
+                                    // controller.validateRatingOfTransformer(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -624,10 +614,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable(
-                                "Purpose of Solarization",
-                                isRequired: true,
-                              ),
+                              getLable("Purpose of Solarization"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.purposeOfSolarizationNode,
@@ -635,9 +622,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                       controller.purposeOfSolarizationCtr,
                                   hintLabel: "Select Purpose of Solarization",
                                   onChanged: (val) {
-                                    controller.validatePurposeOfSolarization(
-                                      val,
-                                    );
+                                    // controller.validatePurposeOfSolarization(
+                                    //   val,
+                                    // );
                                   },
                                   onTap: () {
                                     controller.purposeOfSolarizationCtr.text =
@@ -667,10 +654,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable(
-                                "Dist. Inverter & ACDB Panel (Mtrs)",
-                                isRequired: true,
-                              ),
+                              getLable("Dist. Inverter & ACDB Panel (Mtrs)"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.distInverterACDBNode,
@@ -678,7 +662,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   hintLabel:
                                       "Enter Dist. Inverter & ACDB Panel",
                                   onChanged: (val) {
-                                    controller.validateDistInverterACDB(val);
+                                    // controller.validateDistInverterACDB(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -690,10 +674,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable(
-                                "Dist. Solar & ACDB Panel (Mtrs)",
-                                isRequired: true,
-                              ),
+                              getLable("Dist. Solar & ACDB Panel (Mtrs)"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.distSolarACDBNode,
@@ -701,7 +682,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   hintLabel:
                                       "Enter Dist. Solar & ACDB Panel (Mtrs)",
                                   onChanged: (val) {
-                                    controller.validateDistSolarACDB(val);
+                                    // controller.validateDistSolarACDB(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -711,17 +692,14 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable(
-                                "Building Height (Floors)",
-                                isRequired: true,
-                              ),
+                              getLable("Building Height (Floors)"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.buildHeightNode,
                                   controller: controller.buildingHeightCtr,
                                   hintLabel: "Enter Building Height (Floors)",
                                   onChanged: (val) {
-                                    controller.validateBuildingHeight(val);
+                                    // controller.validateBuildingHeight(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -733,17 +711,14 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable(
-                                "Roof Size Length (ft)",
-                                isRequired: true,
-                              ),
+                              getLable("Roof Size Length (ft)"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.roofSizeLengthNode,
                                   controller: controller.roofSizeLengthCtr,
                                   hintLabel: "Enter Roof Size Length",
                                   onChanged: (val) {
-                                    controller.validateRoofSizeLength(val);
+                                    // controller.validateRoofSizeLength(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -755,17 +730,14 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable(
-                                "Roof Size Breadth (ft)",
-                                isRequired: true,
-                              ),
+                              getLable("Roof Size Breadth (ft)"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.roofSizeBreadthNode,
                                   controller: controller.roofSizeBreadthCtr,
                                   hintLabel: "Enter Roof Size Breadth",
                                   onChanged: (val) {
-                                    controller.validateRoofSizeBreadth(val);
+                                    // controller.validateRoofSizeBreadth(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -808,17 +780,14 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable(
-                                "Age of Metal Sheet (years)",
-                                isRequired: true,
-                              ),
+                              getLable("Age of Metal Sheet (years)"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.ageOfMetalSheetNode,
                                   controller: controller.ageOfMetalSheetCtr,
                                   hintLabel: "Enter Age of Metal Sheet",
                                   onChanged: (val) {
-                                    controller.validateAgeOfMetalSheet(val);
+                                    // controller.validateAgeOfMetalSheet(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -830,17 +799,14 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable(
-                                "Ground Size Length (ft)",
-                                isRequired: true,
-                              ),
+                              getLable("Ground Size Length (ft)"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.groundSizeLengthNode,
                                   controller: controller.groundSizeLengthCtr,
                                   hintLabel: "Enter Ground Size Length",
                                   onChanged: (val) {
-                                    controller.validateGroundSizeLength(val);
+                                    // controller.validateGroundSizeLength(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -852,17 +818,14 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable(
-                                "Ground Size Breadth (ft)",
-                                isRequired: true,
-                              ),
+                              getLable("Ground Size Breadth (ft)"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.groundSizeBreadthNode,
                                   controller: controller.groundSizeBreadthCtr,
                                   hintLabel: "Enter Ground Size Breadth",
                                   onChanged: (val) {
-                                    controller.validateGroundSizeBreadth(val);
+                                    // controller.validateGroundSizeBreadth(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -874,14 +837,14 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable("Other Remarks", isRequired: true),
+                              getLable("Other Remarks"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.otherRemarksNode,
                                   controller: controller.otherRemarksCtr,
                                   hintLabel: "Enter Other Remarks",
                                   onChanged: (val) {
-                                    controller.validateOtherRemarks(val);
+                                    // controller.validateOtherRemarks(val);
                                   },
                                   inputType: TextInputType.text,
                                   formType: FieldType.text,
@@ -926,7 +889,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                             if (_currentStep == 2) ...[
                               getCommonLableWithButton(
                                 "Add Load Element",
-                                isRequired: true,
+                                // isRequired: true,
                                 onClick: () {
                                   controller.addLoadElement(context);
                                 },
@@ -967,7 +930,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                             if (_currentStep == 3) ...[
                               getCommonLableWithButton(
                                 "Add Files",
-                                isRequired: true,
+                                // isRequired: true,
                                 onClick: () {
                                   controller.addUploadFile(context);
                                 },

@@ -62,7 +62,7 @@ class AddLeadsController extends GetxController {
   RxBool isDynamicDesignationApiCallLoading = false.obs;
   var productDetailList = <LoadElement>[].obs;
   var fileList = <UploadFile>[].obs;
-  var hearAboutUsList = <String>[].obs;
+  var roofNature = <String>['Usa', 'India'].obs;
   var countryList = <String>['Usa', 'India'].obs;
   var requiredSolutuionList = <String>['Usa', 'India'].obs;
   var solutuionList = <String>['Usa', 'India'].obs;
@@ -779,9 +779,7 @@ class AddLeadsController extends GetxController {
                   minLeadingWidth: 5,
                   onTap: () async {
                     requiredSolutionTypeCtr.text = requiredSolutuionList[index];
-                    validateRequiredSolutionType(
-                      requiredSolutionTypeCtr.text,
-                    );
+                    validateRequiredSolutionType(requiredSolutionTypeCtr.text);
                     Get.back();
                   },
                   title: Text(
@@ -999,13 +997,13 @@ class AddLeadsController extends GetxController {
         );
       }
       return setDropDownContent(
-        hearAboutUsList, // Assuming this list is used for Purpose of Solarization
+        roofNature, // Assuming this list is used for Purpose of Solarization
         controller: purposeOfSolarizationCtr,
         noDataLable: "No Purpose",
         ListView.builder(
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          itemCount: hearAboutUsList.length,
+          itemCount: roofNature.length,
           itemBuilder: (BuildContext context, int index) {
             return Column(
               children: [
@@ -1023,14 +1021,14 @@ class AddLeadsController extends GetxController {
                   horizontalTitleGap: null,
                   minLeadingWidth: 5,
                   onTap: () async {
-                    purposeOfSolarizationCtr.text = hearAboutUsList[index];
+                    purposeOfSolarizationCtr.text = roofNature[index];
                     validatePurposeOfSolarization(
                       purposeOfSolarizationCtr.text,
                     );
                     Get.back();
                   },
                   title: Text(
-                    hearAboutUsList[index],
+                    roofNature[index],
                     style: TextStyle(fontSize: 14.sp),
                   ),
                 ),
@@ -1055,11 +1053,11 @@ class AddLeadsController extends GetxController {
   }
 
   void applyFilterForPurposeOfSolarization(String keyword) {
-    hearAboutUsList.clear();
+    roofNature.clear();
     if (keyword.isEmpty) {
-      hearAboutUsList.addAll(['Usa', 'India']); // Mock data
+      roofNature.addAll(['Usa', 'India']); // Mock data
     } else {
-      hearAboutUsList.addAll(
+      roofNature.addAll(
         ['Usa', 'India']
             .where(
               (purpose) =>
@@ -1082,13 +1080,13 @@ class AddLeadsController extends GetxController {
         );
       }
       return setDropDownContent(
-        hearAboutUsList, // Assuming this list is used for Roof Nature
+        roofNature, // Assuming this list is used for Roof Nature
         controller: roofNatureCtr,
         noDataLable: "No Roof Nature",
         ListView.builder(
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          itemCount: hearAboutUsList.length,
+          itemCount: roofNature.length,
           itemBuilder: (BuildContext context, int index) {
             return Column(
               children: [
@@ -1106,12 +1104,12 @@ class AddLeadsController extends GetxController {
                   horizontalTitleGap: null,
                   minLeadingWidth: 5,
                   onTap: () async {
-                    roofNatureCtr.text = hearAboutUsList[index];
+                    roofNatureCtr.text = roofNature[index];
                     validateRoofNature(roofNatureCtr.text);
                     Get.back();
                   },
                   title: Text(
-                    hearAboutUsList[index],
+                    roofNature[index],
                     style: TextStyle(fontSize: 14.sp),
                   ),
                 ),
@@ -1136,11 +1134,11 @@ class AddLeadsController extends GetxController {
   }
 
   void applyFilterForRoofNature(String keyword) {
-    hearAboutUsList.clear();
+    roofNature.clear();
     if (keyword.isEmpty) {
-      hearAboutUsList.addAll(['Usa', 'India']); // Mock data
+      roofNature.addAll(['Usa', 'India']); // Mock data
     } else {
-      hearAboutUsList.addAll(
+      roofNature.addAll(
         ['Usa', 'India']
             .where(
               (roofNature) =>
@@ -1630,7 +1628,7 @@ class AddLeadsController extends GetxController {
 
   void validateRoofNature(String? val) {
     roofNatureModel.update((model) {
-if (val == null || val.trim().isEmpty) {
+      if (val == null || val.trim().isEmpty) {
         model!.error = "Enter Roof Nature";
         model.isValidate = false;
       } else {
@@ -1734,21 +1732,21 @@ if (val == null || val.trim().isEmpty) {
 
   void validateStep2() {
     bool isValid = true;
-    if (!peakMonthlyEnergyModel.value.isValidate) isValid = false;
-    if (!requiredSolarCapModel.value.isValidate) isValid = false;
-    if (!distanceToTransformerModel.value.isValidate) isValid = false;
-    if (!ratingOfTransformerModel.value.isValidate) isValid = false;
-    if (!purposeOfSolarizationModel.value.isValidate) isValid = false;
-    if (!distInverterACDBModel.value.isValidate) isValid = false;
-    if (!distSolarACDBModel.value.isValidate) isValid = false;
-    if (!buildingHeightModel.value.isValidate) isValid = false;
-    if (!roofSizeLengthModel.value.isValidate) isValid = false;
-    if (!roofSizeBreadthModel.value.isValidate) isValid = false;
+    // if (!peakMonthlyEnergyModel.value.isValidate) isValid = false;
+    // if (!requiredSolarCapModel.value.isValidate) isValid = false;
+    // if (!distanceToTransformerModel.value.isValidate) isValid = false;
+    // if (!ratingOfTransformerModel.value.isValidate) isValid = false;
+    // if (!purposeOfSolarizationModel.value.isValidate) isValid = false;
+    // if (!distInverterACDBModel.value.isValidate) isValid = false;
+    // if (!distSolarACDBModel.value.isValidate) isValid = false;
+    // if (!buildingHeightModel.value.isValidate) isValid = false;
+    // if (!roofSizeLengthModel.value.isValidate) isValid = false;
+    // if (!roofSizeBreadthModel.value.isValidate) isValid = false;
     if (!roofNatureModel.value.isValidate) isValid = false;
-    if (!ageOfMetalSheetModel.value.isValidate) isValid = false;
-    if (!groundSizeLengthModel.value.isValidate) isValid = false;
-    if (!groundSizeBreadthModel.value.isValidate) isValid = false;
-    if (!otherRemarksModel.value.isValidate) isValid = false;
+    // if (!ageOfMetalSheetModel.value.isValidate) isValid = false;
+    // if (!groundSizeLengthModel.value.isValidate) isValid = false;
+    // if (!groundSizeBreadthModel.value.isValidate) isValid = false;
+    // if (!otherRemarksModel.value.isValidate) isValid = false;
     if (!scheduleMeeeingModel.value.isValidate) isValid = false;
     isStep2Valid.value = isValid;
     update();
