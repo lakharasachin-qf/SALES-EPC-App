@@ -62,6 +62,9 @@ class LeadScreenState extends State<LeadScreen> {
             },
             context: context,
             isFilter: true,
+            onFilterClick: () {
+              ctr.openFilterBottomSheet(context: context);
+            },
           ),
 
           getDynamicSizedBox(height: 2.h),
