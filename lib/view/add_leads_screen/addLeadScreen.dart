@@ -43,6 +43,37 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
     });
   }
 
+  void _onStepContinue() {
+    if (_currentStep < _steps.length - 1) {
+      setState(() {
+        _currentStep += 1;
+      });
+    } else {
+      // Submit logic
+      if (controller.isFormValid()) {
+        // Implement submit logic here
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Lead ${widget.isEdit ? "Updated" : "Added"} Successfully',
+            ),
+          ),
+        );
+        Get.back();
+      }
+    }
+  }
+
+  void _onStepCancel() {
+    if (_currentStep > 0) {
+      setState(() {
+        _currentStep -= 1;
+      });
+    } else {
+      Get.back();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Statusbar().trasparentStatusbarProfile(false);
@@ -100,7 +131,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.companyNameCtr,
                                   hintLabel: "Enter Company Name",
                                   onChanged: (val) {
-                                    controller.validateCompany(val);
+                                    controller.val.validateCompanyName(val);
                                   },
                                   inputType: TextInputType.text,
                                   formType: FieldType.text,
@@ -138,7 +169,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.addressCtr,
                                   hintLabel: "Enter Address",
                                   onChanged: (val) {
-                                    controller.validateAddress(val);
+                                    controller.val.validateAddress(val);
                                   },
                                   inputType: TextInputType.text,
                                   formType: FieldType.text,
@@ -154,7 +185,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.countryCtr,
                                   hintLabel: "Enter Country",
                                   onChanged: (val) {
-                                    controller.validateCountry(val);
+                                    controller.val.validateCountry(val);
                                   },
                                   onTap: () {
                                     controller.countrySearchCtr.text = "";
@@ -211,7 +242,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.districtCtr,
                                   hintLabel: "Enter District",
                                   onChanged: (val) {
-                                    controller.validateDistrict(val);
+                                    controller.val.validateDistrict(val);
                                   },
                                   onTap: () {
                                     controller.countryCtr.text = "";
@@ -241,7 +272,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.personNameCtr,
                                   hintLabel: "Enter Person Name",
                                   onChanged: (val) {
-                                    controller.validatePersonName(val);
+                                    controller.val.validatePersonName(val);
                                   },
                                   inputType: TextInputType.text,
                                   formType: FieldType.text,
@@ -261,7 +292,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.personMobileCtr,
                                   hintLabel: "Enter Mobile Number",
                                   onChanged: (val) {
-                                    controller.validatePersonMobile(val);
+                                    controller.val.validatePersonMobile(val);
                                   },
                                   inputType: TextInputType.phone,
                                   formType: FieldType.mobile,
@@ -278,7 +309,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.latitudeCtr,
                                   hintLabel: "Enter Latitude",
                                   onChanged: (val) {
-                                    controller.validateLatitude(val);
+                                    controller.val.validateLatitude(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -295,7 +326,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.longitudeCtr,
                                   hintLabel: "Enter Longitude",
                                   onChanged: (val) {
-                                    controller.validateLongitude(val);
+                                    controller.val.validateLongitude(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.mobile,
@@ -315,7 +346,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                       controller.requiredSolutionTypeCtr,
                                   hintLabel: "Enter Solution Type",
                                   onChanged: (val) {
-                                    controller.validateRequiredSolutionType(
+                                    controller.val.validateRequiredSolutionType(
                                       val,
                                     );
                                   },
@@ -350,7 +381,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.requiredSolutionCtr,
                                   hintLabel: "Enter Solution",
                                   onChanged: (val) {
-                                    controller.validateRequiredSolution(val);
+                                    controller.val.validateRequiredSolution(
+                                      val,
+                                    );
                                   },
                                   onTap: () {
                                     controller.countryCtr.text = "";
@@ -383,7 +416,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.leadCategoryCtr,
                                   hintLabel: "Enter Lead Category",
                                   onChanged: (val) {
-                                    controller.validateLeadCategory(val);
+                                    controller.val.validateLeadCategory(val);
                                   },
                                   onTap: () {
                                     controller.countryCtr.text = "";
@@ -414,7 +447,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.dgCapacityCtr,
                                   hintLabel: "Enter DG Capacity",
                                   onChanged: (val) {
-                                    controller.validateDGCapacity(val);
+                                    controller.val.validateDGCapacity(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -445,7 +478,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.installedSolarCapCtr,
                                   hintLabel: "Enter Installed Solar Capacity",
                                   onChanged: (val) {
-                                    controller.validateInstalledSolarCap(val);
+                                    controller.val.validateInstalledSolarCap(
+                                      val,
+                                    );
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.mobile,
@@ -464,7 +499,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.sanctionedLoadCtr,
                                   hintLabel: "Enter Sanctioned Load",
                                   onChanged: (val) {
-                                    controller.validateSanctionedLoad(val);
+                                    controller.val.validateSanctionedLoad(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.mobile,
@@ -495,7 +530,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.gridAvailabilityCtr,
                                   hintLabel: "Enter Grid Availability",
                                   onChanged: (val) {
-                                    controller.validateGridAvailability(val);
+                                    controller.val.validateGridAvailability(
+                                      val,
+                                    );
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.mobile,
@@ -519,7 +556,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.peakMonthlyEnergyCtr,
                                   hintLabel: "Enter Peak Monthly Energy Cons",
                                   onChanged: (val) {
-                                    controller.validatePeakMonthlyEnergy(val);
+                                    controller.val.validatePeakMonthlyEnergy(
+                                      val,
+                                    );
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -541,7 +580,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.requiredSolarCapCtr,
                                   hintLabel: "Enter Required Solar Cap",
                                   onChanged: (val) {
-                                    controller.validateRequiredSolarCap(val);
+                                    controller.val.validateRequiredSolarCap(
+                                      val,
+                                    );
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -565,9 +606,8 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   hintLabel:
                                       "Enter Distance to Nearest Transformer",
                                   onChanged: (val) {
-                                    controller.validateDistanceToTransformer(
-                                      val,
-                                    );
+                                    controller.val
+                                        .validateDistanceToTransformer(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -590,7 +630,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   hintLabel:
                                       "Enter Rating of Nearest Transformer",
                                   onChanged: (val) {
-                                    controller.validateRatingOfTransformer(val);
+                                    controller.val.validateRatingOfTransformer(
+                                      val,
+                                    );
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -613,9 +655,8 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                       controller.purposeOfSolarizationCtr,
                                   hintLabel: "Enter Purpose of Solarization",
                                   onChanged: (val) {
-                                    controller.validatePurposeOfSolarization(
-                                      val,
-                                    );
+                                    controller.val
+                                        .validatePurposeOfSolarization(val);
                                   },
                                   onTap: () {
                                     controller.countryCtr.text = "";
@@ -652,7 +693,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   hintLabel:
                                       "Enter Dist. Inverter & ACDB Panel",
                                   onChanged: (val) {
-                                    controller.validateDistInverterACDB(val);
+                                    controller.val.validateDistInverterACDB(
+                                      val,
+                                    );
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -675,7 +718,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   hintLabel:
                                       "Enter Dist. Solar & ACDB Panel (Mtrs)",
                                   onChanged: (val) {
-                                    controller.validateDistSolarACDB(val);
+                                    controller.val.validateDistSolarACDB(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -695,7 +738,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.buildingHeightCtr,
                                   hintLabel: "Enter Building Height (Floors)",
                                   onChanged: (val) {
-                                    controller.validateDistInverterACDB(val);
+                                    controller.val.validateDistInverterACDB(
+                                      val,
+                                    );
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -717,7 +762,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.roofSizeLengthCtr,
                                   hintLabel: "Enter Roof Size Length",
                                   onChanged: (val) {
-                                    controller.validateRoofSizeLength(val);
+                                    controller.val.validateRoofSizeLength(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -739,7 +784,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.roofSizeBreadthCtr,
                                   hintLabel: "Enter Roof Size Breadth",
                                   onChanged: (val) {
-                                    controller.validateRoofSizeBreadth(val);
+                                    controller.val.validateRoofSizeBreadth(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -758,7 +803,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.roofNatureCtr,
                                   hintLabel: "Enter Roof Nature",
                                   onChanged: (val) {
-                                    controller.validateRoofNature(val);
+                                    controller.val.validateRoofNature(val);
                                   },
                                   onTap: () {
                                     controller.countryCtr.text = "";
@@ -792,7 +837,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.ageOfMetalSheetCtr,
                                   hintLabel: "Enter Age of Metal Sheet",
                                   onChanged: (val) {
-                                    controller.validateAgeOfMetalSheet(val);
+                                    controller.val.validateAgeOfMetalSheet(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -814,7 +859,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.groundSizeLengthCtr,
                                   hintLabel: "Enter Ground Size Length",
                                   onChanged: (val) {
-                                    controller.validateGroundSizeLength(val);
+                                    controller.val.validateGroundSizeLength(
+                                      val,
+                                    );
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -836,7 +883,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.groundSizeBreadthCtr,
                                   hintLabel: "Enter Ground Size Breadth",
                                   onChanged: (val) {
-                                    controller.validateGroundSizeBreadth(val);
+                                    controller.val.validateGroundSizeBreadth(
+                                      val,
+                                    );
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -855,7 +904,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.otherRemarksCtr,
                                   hintLabel: "Enter Other Remarks",
                                   onChanged: (val) {
-                                    controller.validateOtherRemarks(val);
+                                    controller.val.validateOtherRemarks(val);
                                   },
                                   inputType: TextInputType.text,
                                   formType: FieldType.text,
@@ -872,7 +921,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.scheduleMeetingCtr,
                                   hintLabel: "Select Schedule Meeting",
                                   onChanged: (val) {
-                                    controller.validateScheduleMeetings(val);
+                                    controller.val.validateScheduleMeeting(val);
                                   },
                                   onTap: () {
                                     controller.openDatePicker(
@@ -977,91 +1026,49 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                             // if (_currentStep == 4) ...[],
                             getDynamicSizedBox(height: 2.h),
                             // Navigation Buttons
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                if (_currentStep > 0)
+                            Container(
+                              margin: EdgeInsets.symmetric(horizontal: 3.w),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
                                   Expanded(
                                     child: getFormButton(
                                       context,
-                                      () {
-                                        setState(() {
-                                          _currentStep--;
-                                        });
-                                      },
-                                      'Previous',
+                                      _onStepCancel,
+                                      _currentStep == 0 ? 'Cancel' : 'Previous',
                                       validate: true,
                                     ),
                                   ),
-
-                                // ElevatedButton(
-                                //   onPressed: () {
-                                //     setState(() {});
-                                //   },
-                                //   child: const Text('Previous'),
-                                // ),
-                                // if (_currentStep < _steps.length - 1)
-                                //   Expanded(
-                                //     child: getFormButton(
-                                //       context,
-                                //       () {
-                                //         setState(() {
-                                //           _currentStep++;
-                                //         });
-                                //       },
-                                //       'Previous',
-                                //       validate: true,
-                                //     ),
-                                //   ),
-                                if (_currentStep > 0)
-                                  getDynamicSizedBox(width: 4.w),
-                                Expanded(
-                                  child: getFormButton(
-                                    context,
-                                    () {
-                                      if (_currentStep == _steps.length - 1) {
-                                        setState(() {
-                                          controller.formKey.currentState
-                                              ?.validate();
-                                        });
-                                      } else {
-                                        setState(() {
-                                          _currentStep++;
-                                        });
+                                  getDynamicSizedBox(width: 3.w),
+                                  Expanded(
+                                    child: Obx(() {
+                                      bool isNextEnabled = false;
+                                      if (_currentStep == 0) {
+                                        isNextEnabled =
+                                            controller.isStep1Valid.value;
+                                      } else if (_currentStep == 1) {
+                                        isNextEnabled =
+                                            controller.isStep2Valid.value;
+                                      } else if (_currentStep == 2) {
+                                        isNextEnabled =
+                                            controller.isStep3Valid.value;
+                                      } else if (_currentStep == 3) {
+                                        isNextEnabled = controller
+                                            .isFormValid();
                                       }
-                                    },
-                                    _currentStep == _steps.length - 1
-                                        ? 'Submit'
-                                        : 'Next',
-                                    validate: true,
+                                      return getFormButton(
+                                        context,
+                                        _onStepContinue,
+                                        _currentStep == _steps.length - 1
+                                            ? 'Submit'
+                                            : 'Next',
+                                        validate: isNextEnabled,
+                                      );
+                                    }),
                                   ),
-                                ),
-                                // if (_currentStep == _steps.length - 1)
-                                //   Expanded(
-                                //     child: getFormButton(
-                                //       context,
-                                //       () {},
-                                //       'Submit',
-                                //       validate: true,
-                                //     ),
-                                //   ),
-
-                                // ElevatedButton(
-                                //   onPressed: () {
-                                //     // Assuming controller has a method to handle form submission
-                                //   },
-                                //   child: const Text('Next'),
-                                // ),
-                                // if (_currentStep == _steps.length - 1)
-                                //   ElevatedButton(
-                                //     onPressed: () {
-                                //       // Assuming controller has a method to handle form submission
-                                //       controller.formKey.currentState
-                                //           ?.validate();
-                                //     },
-                                //     child: const Text('Submit'),
-                                //   ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),
