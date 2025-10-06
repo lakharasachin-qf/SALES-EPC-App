@@ -66,6 +66,7 @@ class AddLeadsController extends GetxController {
   var countryList = <String>['Usa', 'India'].obs;
   var requiredSolutuionList = <String>['Usa', 'India'].obs;
   var solutuionList = <String>['Usa', 'India'].obs;
+  var leadCategoryList = <String>['Usa', 'India'].obs;
   var stateList = <String>['Usa', 'India'].obs;
   var districtList = <String>['Usa', 'India'].obs;
   DateTime? selectedDateTime;
@@ -581,7 +582,8 @@ class AddLeadsController extends GetxController {
     super.dispose();
   }
 
-  Widget setCountryListDialog() {
+  // Dialog for State List
+  Widget setStateListDialog() {
     return Obx(() {
       if (isCountryApiCallLoading.value == true) {
         return setDropDownContent(
@@ -591,13 +593,13 @@ class AddLeadsController extends GetxController {
         );
       }
       return setDropDownContent(
-        aboutUsFilterList,
-        controller: countrySearchCtr,
-        noDataLable: "No Country",
+        stateList,
+        controller: stateSearchCtr,
+        noDataLable: "No State",
         ListView.builder(
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          itemCount: aboutUsFilterList.length,
+          itemCount: stateList.length,
           itemBuilder: (BuildContext context, int index) {
             return Column(
               children: [
@@ -615,13 +617,582 @@ class AddLeadsController extends GetxController {
                   horizontalTitleGap: null,
                   minLeadingWidth: 5,
                   onTap: () async {
-                    countryId.value = aboutUsFilterList[index];
-                    countryCtr.text = aboutUsFilterList[index];
-                    val.validateCountry(countryCtr.text);
+                    stateCtr.text = stateList[index];
+                    validateState(stateCtr.text);
                     Get.back();
                   },
                   title: Text(
-                    aboutUsFilterList[index],
+                    stateList[index],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: stateSearchNode,
+          controller: stateSearchCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForState(val.toString());
+            update();
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: stateSearchModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForState(String keyword) {
+    stateList.clear();
+    if (keyword.isEmpty) {
+      stateList.addAll(['Usa', 'India']); // Mock data
+    } else {
+      stateList.addAll(
+        ['Usa', 'India']
+            .where(
+              (state) => state.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  // Dialog for District List
+  Widget setDistrictListDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value == true) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        districtList,
+        controller: districtSearchCtr,
+        noDataLable: "No District",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: districtList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(
+                    horizontal: 0,
+                    vertical: -4,
+                  ),
+                  contentPadding: const EdgeInsets.only(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                  ),
+                  horizontalTitleGap: null,
+                  minLeadingWidth: 5,
+                  onTap: () async {
+                    districtCtr.text = districtList[index];
+                    validateDistrict(districtCtr.text);
+                    Get.back();
+                  },
+                  title: Text(
+                    districtList[index],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: districtSearchNode,
+          controller: districtSearchCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForDistrict(val.toString());
+            update();
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: districtSearchModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForDistrict(String keyword) {
+    districtList.clear();
+    if (keyword.isEmpty) {
+      districtList.addAll(['Usa', 'India']); // Mock data
+    } else {
+      districtList.addAll(
+        ['Usa', 'India']
+            .where(
+              (district) =>
+                  district.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  // Dialog for Required Solution Type
+  Widget setRequiredSolutionTypeListDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value == true) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        requiredSolutuionList,
+        controller: requiredSolutionTypeCtr,
+        noDataLable: "No Solution Type",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: requiredSolutuionList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(
+                    horizontal: 0,
+                    vertical: -4,
+                  ),
+                  contentPadding: const EdgeInsets.only(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                  ),
+                  horizontalTitleGap: null,
+                  minLeadingWidth: 5,
+                  onTap: () async {
+                    requiredSolutionTypeCtr.text = requiredSolutuionList[index];
+                    validateRequiredSolutionType(
+                      requiredSolutionTypeCtr.text,
+                    );
+                    Get.back();
+                  },
+                  title: Text(
+                    requiredSolutuionList[index],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: requiredSolutionTypeNode,
+          controller: requiredSolutionTypeCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForRequiredSolutionType(val.toString());
+            update();
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: requiredSolutionTypeModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForRequiredSolutionType(String keyword) {
+    requiredSolutuionList.clear();
+    if (keyword.isEmpty) {
+      requiredSolutuionList.addAll(['Usa', 'India']); // Mock data
+    } else {
+      requiredSolutuionList.addAll(
+        ['Usa', 'India']
+            .where(
+              (solution) =>
+                  solution.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  // Dialog for Required Solution
+  Widget setRequiredSolutionListDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value == true) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        solutuionList,
+        controller: requiredSolutionCtr,
+        noDataLable: "No Solution",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: solutuionList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(
+                    horizontal: 0,
+                    vertical: -4,
+                  ),
+                  contentPadding: const EdgeInsets.only(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                  ),
+                  horizontalTitleGap: null,
+                  minLeadingWidth: 5,
+                  onTap: () async {
+                    requiredSolutionCtr.text = solutuionList[index];
+                    validateRequiredSolution(requiredSolutionCtr.text);
+                    Get.back();
+                  },
+                  title: Text(
+                    solutuionList[index],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: requiredSolutionNode,
+          controller: requiredSolutionCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForRequiredSolution(val.toString());
+            update();
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: requiredSolutionModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForRequiredSolution(String keyword) {
+    solutuionList.clear();
+    if (keyword.isEmpty) {
+      solutuionList.addAll(['Usa', 'India']); // Mock data
+    } else {
+      solutuionList.addAll(
+        ['Usa', 'India']
+            .where(
+              (solution) =>
+                  solution.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  // Dialog for Lead Category
+  Widget setLeadCategoryListDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value == true) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        leadCategoryList,
+        controller: leadCategoryCtr,
+        noDataLable: "No Lead Category",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: leadCategoryList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(
+                    horizontal: 0,
+                    vertical: -4,
+                  ),
+                  contentPadding: const EdgeInsets.only(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                  ),
+                  horizontalTitleGap: null,
+                  minLeadingWidth: 5,
+                  onTap: () async {
+                    leadCategoryCtr.text = leadCategoryList[index];
+                    validateLeadCategory(leadCategoryCtr.text);
+                    Get.back();
+                  },
+                  title: Text(
+                    leadCategoryList[index],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: leadCategoryNode,
+          controller: leadCategoryCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForLeadCategory(val.toString());
+            update();
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: leadCategoryModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForLeadCategory(String keyword) {
+    leadCategoryList.clear();
+    if (keyword.isEmpty) {
+      leadCategoryList.addAll(['Usa', 'India']); // Mock data
+    } else {
+      leadCategoryList.addAll(
+        ['Usa', 'India']
+            .where(
+              (category) =>
+                  category.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  // Dialog for Purpose of Solarization
+  Widget setPurposeOfSolarizationListDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value == true) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        hearAboutUsList, // Assuming this list is used for Purpose of Solarization
+        controller: purposeOfSolarizationCtr,
+        noDataLable: "No Purpose",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: hearAboutUsList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(
+                    horizontal: 0,
+                    vertical: -4,
+                  ),
+                  contentPadding: const EdgeInsets.only(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                  ),
+                  horizontalTitleGap: null,
+                  minLeadingWidth: 5,
+                  onTap: () async {
+                    purposeOfSolarizationCtr.text = hearAboutUsList[index];
+                    validatePurposeOfSolarization(
+                      purposeOfSolarizationCtr.text,
+                    );
+                    Get.back();
+                  },
+                  title: Text(
+                    hearAboutUsList[index],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: purposeOfSolarizationNode,
+          controller: purposeOfSolarizationCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForPurposeOfSolarization(val.toString());
+            update();
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: purposeOfSolarizationModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForPurposeOfSolarization(String keyword) {
+    hearAboutUsList.clear();
+    if (keyword.isEmpty) {
+      hearAboutUsList.addAll(['Usa', 'India']); // Mock data
+    } else {
+      hearAboutUsList.addAll(
+        ['Usa', 'India']
+            .where(
+              (purpose) =>
+                  purpose.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  // Dialog for Roof Nature
+  Widget setRoofNatureListDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value == true) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        hearAboutUsList, // Assuming this list is used for Roof Nature
+        controller: roofNatureCtr,
+        noDataLable: "No Roof Nature",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: hearAboutUsList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(
+                    horizontal: 0,
+                    vertical: -4,
+                  ),
+                  contentPadding: const EdgeInsets.only(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                  ),
+                  horizontalTitleGap: null,
+                  minLeadingWidth: 5,
+                  onTap: () async {
+                    roofNatureCtr.text = hearAboutUsList[index];
+                    validateRoofNature(roofNatureCtr.text);
+                    Get.back();
+                  },
+                  title: Text(
+                    hearAboutUsList[index],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: roofNatureNode,
+          controller: roofNatureCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForRoofNature(val.toString());
+            update();
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: roofNatureModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForRoofNature(String keyword) {
+    hearAboutUsList.clear();
+    if (keyword.isEmpty) {
+      hearAboutUsList.addAll(['Usa', 'India']); // Mock data
+    } else {
+      hearAboutUsList.addAll(
+        ['Usa', 'India']
+            .where(
+              (roofNature) =>
+                  roofNature.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  Widget setCountryListDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value == true) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        countryList,
+        controller: countrySearchCtr,
+        noDataLable: "No Country",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: countryList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(
+                    horizontal: 0,
+                    vertical: -4,
+                  ),
+                  contentPadding: const EdgeInsets.only(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                  ),
+                  horizontalTitleGap: null,
+                  minLeadingWidth: 5,
+                  onTap: () async {
+                    countryId.value = countryList[index];
+                    countryCtr.text = countryList[index];
+                    validateCountry(countryCtr.text);
+                    Get.back();
+                  },
+                  title: Text(
+                    countryList[index],
                     style: TextStyle(fontSize: 14.sp),
                   ),
                 ),
@@ -646,11 +1217,11 @@ class AddLeadsController extends GetxController {
   }
 
   void applyFilterforCountry(String keyword) {
-    aboutUsFilterList.clear();
+    countryList.clear();
     if (keyword.isEmpty) {
-      aboutUsFilterList.addAll(['USA', 'India', 'Canada']); // Mock data
+      countryList.addAll(['USA', 'India', 'Canada']); // Mock data
     } else {
-      aboutUsFilterList.addAll(
+      countryList.addAll(
         ['USA', 'India', 'Canada']
             .where(
               (country) =>
@@ -662,8 +1233,487 @@ class AddLeadsController extends GetxController {
     update();
   }
 
-  final ValidateAddLeadfileds val = ValidateAddLeadfileds();
   // Validation Methods
+  void validateCompanyName(String? val) {
+    companyNameModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Company Name is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateAddress(String? val) {
+    addressModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Address is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateCountry(String? val) {
+    countryModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Country is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateState(String? val) {
+    stateModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "State is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateDistrict(String? val) {
+    districtModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "District is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validatePersonName(String? val) {
+    personNameModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Contact Person Name is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validatePersonMobile(String? val) {
+    personMobileModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Contact Person Mobile is required";
+        model.isValidate = false;
+      } else if (val.length < 10) {
+        model!.error = "Enter valid mobile number";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateLatitude(String? val) {
+    latitudeModel.update((model) {
+      if (val != null && val.isNotEmpty && double.tryParse(val) == null) {
+        model!.error = "Enter valid latitude";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateLongitude(String? val) {
+    longitudeModel.update((model) {
+      if (val != null && val.isNotEmpty && double.tryParse(val) == null) {
+        model!.error = "Enter valid longitude";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateRequiredSolutionType(String? val) {
+    requiredSolutionTypeModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Solution Type";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateRequiredSolution(String? val) {
+    requiredSolutionModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Required Solution";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateLeadCategory(String? val) {
+    leadCategoryModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Lead Category";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateDGCapacity(String? val) {
+    dgCapacityModel.update((model) {
+      if (val != null && val.isNotEmpty && double.tryParse(val) == null) {
+        model!.error = "Enter valid DG Capacity";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateDGSync(String? val) {
+    dgSyncModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter DG Sync selection";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateInstalledSolarCap(String? val) {
+    installedSolarCapModel.update((model) {
+      if (val != null && val.isNotEmpty && double.tryParse(val) == null) {
+        model!.error = "Enter valid Installed Solar Capacity";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateSanctionedLoad(String? val) {
+    sanctionedLoadModel.update((model) {
+      if (val != null && val.isNotEmpty && double.tryParse(val) == null) {
+        model!.error = "Enter valid Sanctioned Load";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateVFD(String? val) {
+    vfdModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter VFD selection";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validateGridAvailability(String? val) {
+    gridAvailabilityModel.update((model) {
+      if (val != null && val.isNotEmpty && double.tryParse(val) == null) {
+        model!.error = "Enter valid Grid Availability (hours)";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep1();
+  }
+
+  void validatePeakMonthlyEnergy(String? val) {
+    peakMonthlyEnergyModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Peak Monthly Energy";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter valid Peak Monthly Energy (kWh)";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateRequiredSolarCap(String? val) {
+    requiredSolarCapModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Required Solar Cap";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter valid Required Solar Cap (kWp)";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateDistanceToTransformer(String? val) {
+    distanceToTransformerModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Distance to Nearest Transformer";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter valid distance (Mtrs)";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateRatingOfTransformer(String? val) {
+    ratingOfTransformerModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Rating of Nearest Transformer";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter valid rating (kVA)";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validatePurposeOfSolarization(String? val) {
+    purposeOfSolarizationModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Purpose of Solarization is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateDistInverterACDB(String? val) {
+    distInverterACDBModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Distance Inverter & ACDB Panel";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter valid distance (Mtrs)";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateDistSolarACDB(String? val) {
+    distSolarACDBModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Distance Solar & ACDB Panel";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter valid distance (Mtrs)";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateBuildingHeight(String? val) {
+    buildingHeightModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Building Height";
+        model.isValidate = false;
+      } else if (int.tryParse(val) == null) {
+        model!.error = "Enter valid number of floors";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateRoofSizeLength(String? val) {
+    roofSizeLengthModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Roof Size Length";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter valid length (ft)";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateRoofSizeBreadth(String? val) {
+    roofSizeBreadthModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Roof Size Breadth";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter valid breadth (ft)";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateRoofNature(String? val) {
+    roofNatureModel.update((model) {
+if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Roof Nature";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateAgeOfMetalSheet(String? val) {
+    ageOfMetalSheetModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Age of Metal Sheet";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter valid age (years)";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateGroundSizeLength(String? val) {
+    groundSizeLengthModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Ground Size Length";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter valid length (ft)";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateGroundSizeBreadth(String? val) {
+    groundSizeBreadthModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Enter Ground Size Breadth";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter valid breadth (ft)";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateOtherRemarks(String? val) {
+    otherRemarksModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Other Remarks is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateScheduleMeeting(String? val) {
+    scheduleMeeeingModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Schedule Meeting is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
 
   // Step-specific validation methods
   void validateStep1() {
@@ -747,7 +1797,7 @@ class AddLeadsController extends GetxController {
         final formatted = date.toString();
         dateRx.value = formatted;
         controller.text = formatted;
-        val.validateScheduleMeeting(controller.text);
+        validateScheduleMeeting(controller.text);
       },
     );
   }

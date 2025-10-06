@@ -26,7 +26,9 @@ class AddLeadScreen extends StatefulWidget {
 }
 
 class _AddLeadScreenState extends State<AddLeadScreen> {
-  var controller = Get.put(AddLeadsController());
+  final AddLeadsController controller = Get.isRegistered<AddLeadsController>()
+      ? Get.find<AddLeadsController>()
+      : Get.put(AddLeadsController());
   int _currentStep = 0;
 
   // Define steps for the stepper
@@ -131,7 +133,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.companyNameCtr,
                                   hintLabel: "Enter Company Name",
                                   onChanged: (val) {
-                                    controller.val.validateCompanyName(val);
+                                    controller.validateCompanyName(val);
                                   },
                                   inputType: TextInputType.text,
                                   formType: FieldType.text,
@@ -140,27 +142,6 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                       controller.companyNameModel.value.error,
                                 );
                               }),
-                              // Obx(() {
-                              //   return getTextField(
-                              //     context: context,
-                              //     wantLabel: true,
-                              //     isBorderSideEnable: true,
-                              //     label: 'Company Name',
-                              //     ctr: controller.companyNameCtr,
-                              //     node: controller.companyNameNode,
-                              //     model: controller.companyNameModel.value,
-                              //     function: (val) {
-                              //       controller.validateFields(
-                              //         val,
-                              //         iscomman: true,
-                              //         model: controller.companyNameModel,
-                              //         errorText1: 'Company Name is required',
-                              //       );
-                              //     },
-                              //     hint: 'Enter Company Name',
-                              //     isRequired: true,
-                              //   );
-                              // }),
                               getDynamicSizedBox(height: 2.h),
                               getLable("Address", isRequired: true),
                               Obx(() {
@@ -169,7 +150,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.addressCtr,
                                   hintLabel: "Enter Address",
                                   onChanged: (val) {
-                                    controller.val.validateAddress(val);
+                                    controller.validateAddress(val);
                                   },
                                   inputType: TextInputType.text,
                                   formType: FieldType.text,
@@ -183,9 +164,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 return getReactiveFormField(
                                   node: controller.countryNode,
                                   controller: controller.countryCtr,
-                                  hintLabel: "Enter Country",
+                                  hintLabel: "Select Country",
                                   onChanged: (val) {
-                                    controller.val.validateCountry(val);
+                                    controller.validateCountry(val);
                                   },
                                   onTap: () {
                                     controller.countrySearchCtr.text = "";
@@ -194,7 +175,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                       content: controller
                                           .setCountryListDialog(),
                                       title: "Country",
-                                      onCloseClick: () {},
+                                      onCloseClick: () {
+                                        controller.applyFilterforCountry('');
+                                      },
                                     ).then((_) {});
                                   },
                                   formType: FieldType.text,
@@ -212,17 +195,18 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 return getReactiveFormField(
                                   node: controller.stateNode,
                                   controller: controller.stateCtr,
-                                  hintLabel: "Enter State",
-                                  onChanged: (val) {},
+                                  hintLabel: "Select State",
+                                  onChanged: (val) {
+                                    controller.validateState(val);
+                                  },
                                   onTap: () {
-                                    controller.countryCtr.text = "";
+                                    controller.stateSearchCtr.text = "";
                                     commonDropDownDialog(
                                       context,
-                                      content: controller
-                                          .setCountryListDialog(),
+                                      content: controller.setStateListDialog(),
                                       title: "State",
                                       onCloseClick: () {
-                                        controller.applyFilterforCountry('');
+                                        controller.applyFilterForState('');
                                       },
                                     ).then((_) {});
                                   },
@@ -240,19 +224,19 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 return getReactiveFormField(
                                   node: controller.districtNode,
                                   controller: controller.districtCtr,
-                                  hintLabel: "Enter District",
+                                  hintLabel: "Select District",
                                   onChanged: (val) {
-                                    controller.val.validateDistrict(val);
+                                    controller.validateDistrict(val);
                                   },
                                   onTap: () {
-                                    controller.countryCtr.text = "";
+                                    controller.districtSearchCtr.text = "";
                                     commonDropDownDialog(
                                       context,
                                       content: controller
-                                          .setCountryListDialog(),
+                                          .setDistrictListDialog(),
                                       title: "District",
                                       onCloseClick: () {
-                                        controller.applyFilterforCountry('');
+                                        controller.applyFilterForDistrict('');
                                       },
                                     ).then((_) {});
                                   },
@@ -272,7 +256,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.personNameCtr,
                                   hintLabel: "Enter Person Name",
                                   onChanged: (val) {
-                                    controller.val.validatePersonName(val);
+                                    controller.validatePersonName(val);
                                   },
                                   inputType: TextInputType.text,
                                   formType: FieldType.text,
@@ -292,7 +276,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.personMobileCtr,
                                   hintLabel: "Enter Mobile Number",
                                   onChanged: (val) {
-                                    controller.val.validatePersonMobile(val);
+                                    controller.validatePersonMobile(val);
                                   },
                                   inputType: TextInputType.phone,
                                   formType: FieldType.mobile,
@@ -309,7 +293,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.latitudeCtr,
                                   hintLabel: "Enter Latitude",
                                   onChanged: (val) {
-                                    controller.val.validateLatitude(val);
+                                    controller.validateLatitude(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -326,7 +310,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.longitudeCtr,
                                   hintLabel: "Enter Longitude",
                                   onChanged: (val) {
-                                    controller.val.validateLongitude(val);
+                                    controller.validateLongitude(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.mobile,
@@ -344,21 +328,25 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   node: controller.requiredSolutionTypeNode,
                                   controller:
                                       controller.requiredSolutionTypeCtr,
-                                  hintLabel: "Enter Solution Type",
+                                  hintLabel: "Select Solution Type",
                                   onChanged: (val) {
-                                    controller.val.validateRequiredSolutionType(
+                                    controller.validateRequiredSolutionType(
                                       val,
                                     );
                                   },
                                   onTap: () {
-                                    controller.countryCtr.text = "";
+                                    controller.requiredSolutionTypeCtr.text =
+                                        "";
                                     commonDropDownDialog(
                                       context,
                                       content: controller
-                                          .setCountryListDialog(),
+                                          .setRequiredSolutionTypeListDialog(),
                                       title: "Solution Type",
                                       onCloseClick: () {
-                                        controller.applyFilterforCountry('');
+                                        controller
+                                            .applyFilterForRequiredSolutionType(
+                                              '',
+                                            );
                                       },
                                     ).then((_) {});
                                   },
@@ -379,21 +367,20 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 return getReactiveFormField(
                                   node: controller.requiredSolutionNode,
                                   controller: controller.requiredSolutionCtr,
-                                  hintLabel: "Enter Solution",
+                                  hintLabel: "Select Solution",
                                   onChanged: (val) {
-                                    controller.val.validateRequiredSolution(
-                                      val,
-                                    );
+                                    controller.validateRequiredSolution(val);
                                   },
                                   onTap: () {
-                                    controller.countryCtr.text = "";
+                                    controller.requiredSolutionCtr.text = "";
                                     commonDropDownDialog(
                                       context,
                                       content: controller
-                                          .setCountryListDialog(),
+                                          .setRequiredSolutionListDialog(),
                                       title: "Required Solution",
                                       onCloseClick: () {
-                                        controller.applyFilterforCountry('');
+                                        controller
+                                            .applyFilterForRequiredSolution('');
                                       },
                                     ).then((_) {});
                                   },
@@ -414,19 +401,21 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 return getReactiveFormField(
                                   node: controller.leadCategoryNode,
                                   controller: controller.leadCategoryCtr,
-                                  hintLabel: "Enter Lead Category",
+                                  hintLabel: "Select Lead Category",
                                   onChanged: (val) {
-                                    controller.val.validateLeadCategory(val);
+                                    controller.validateLeadCategory(val);
                                   },
                                   onTap: () {
-                                    controller.countryCtr.text = "";
+                                    controller.leadCategoryCtr.text = "";
                                     commonDropDownDialog(
                                       context,
                                       content: controller
-                                          .setCountryListDialog(),
+                                          .setLeadCategoryListDialog(),
                                       title: "Lead Category",
                                       onCloseClick: () {
-                                        controller.applyFilterforCountry('');
+                                        controller.applyFilterForLeadCategory(
+                                          '',
+                                        );
                                       },
                                     ).then((_) {});
                                   },
@@ -447,7 +436,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.dgCapacityCtr,
                                   hintLabel: "Enter DG Capacity",
                                   onChanged: (val) {
-                                    controller.val.validateDGCapacity(val);
+                                    controller.validateDGCapacity(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -459,7 +448,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                               getDynamicSizedBox(height: 2.h),
                               getLable("DG Sync Required"),
                               getReactiveDropdown(
-                                hint: "Enter DG Sync",
+                                hint: "Select DG Sync",
                                 items: controller.dgSync,
                                 selectedValue: controller.selectDgSync,
                                 onChanged: (value) {
@@ -478,9 +467,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.installedSolarCapCtr,
                                   hintLabel: "Enter Installed Solar Capacity",
                                   onChanged: (val) {
-                                    controller.val.validateInstalledSolarCap(
-                                      val,
-                                    );
+                                    controller.validateInstalledSolarCap(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.mobile,
@@ -499,7 +486,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.sanctionedLoadCtr,
                                   hintLabel: "Enter Sanctioned Load",
                                   onChanged: (val) {
-                                    controller.val.validateSanctionedLoad(val);
+                                    controller.validateSanctionedLoad(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.mobile,
@@ -513,7 +500,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                               getDynamicSizedBox(height: 2.h),
                               getLable("VFD Required"),
                               getReactiveDropdown(
-                                hint: "Enter VFD",
+                                hint: "Select VFD",
                                 items: controller.vfd,
                                 selectedValue: controller.selectVfd,
                                 onChanged: (value) {
@@ -530,9 +517,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.gridAvailabilityCtr,
                                   hintLabel: "Enter Grid Availability",
                                   onChanged: (val) {
-                                    controller.val.validateGridAvailability(
-                                      val,
-                                    );
+                                    controller.validateGridAvailability(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.mobile,
@@ -556,9 +541,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.peakMonthlyEnergyCtr,
                                   hintLabel: "Enter Peak Monthly Energy Cons",
                                   onChanged: (val) {
-                                    controller.val.validatePeakMonthlyEnergy(
-                                      val,
-                                    );
+                                    controller.validatePeakMonthlyEnergy(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -580,9 +563,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.requiredSolarCapCtr,
                                   hintLabel: "Enter Required Solar Cap",
                                   onChanged: (val) {
-                                    controller.val.validateRequiredSolarCap(
-                                      val,
-                                    );
+                                    controller.validateRequiredSolarCap(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -606,8 +587,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   hintLabel:
                                       "Enter Distance to Nearest Transformer",
                                   onChanged: (val) {
-                                    controller.val
-                                        .validateDistanceToTransformer(val);
+                                    controller.validateDistanceToTransformer(
+                                      val,
+                                    );
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -630,9 +612,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   hintLabel:
                                       "Enter Rating of Nearest Transformer",
                                   onChanged: (val) {
-                                    controller.val.validateRatingOfTransformer(
-                                      val,
-                                    );
+                                    controller.validateRatingOfTransformer(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -653,20 +633,25 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   node: controller.purposeOfSolarizationNode,
                                   controller:
                                       controller.purposeOfSolarizationCtr,
-                                  hintLabel: "Enter Purpose of Solarization",
+                                  hintLabel: "Select Purpose of Solarization",
                                   onChanged: (val) {
-                                    controller.val
-                                        .validatePurposeOfSolarization(val);
+                                    controller.validatePurposeOfSolarization(
+                                      val,
+                                    );
                                   },
                                   onTap: () {
-                                    controller.countryCtr.text = "";
+                                    controller.purposeOfSolarizationCtr.text =
+                                        "";
                                     commonDropDownDialog(
                                       context,
                                       content: controller
-                                          .setCountryListDialog(),
+                                          .setPurposeOfSolarizationListDialog(),
                                       title: "Purpose of Solarization",
                                       onCloseClick: () {
-                                        controller.applyFilterforCountry('');
+                                        controller
+                                            .applyFilterForPurposeOfSolarization(
+                                              '',
+                                            );
                                       },
                                     ).then((_) {});
                                   },
@@ -693,9 +678,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   hintLabel:
                                       "Enter Dist. Inverter & ACDB Panel",
                                   onChanged: (val) {
-                                    controller.val.validateDistInverterACDB(
-                                      val,
-                                    );
+                                    controller.validateDistInverterACDB(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -718,7 +701,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   hintLabel:
                                       "Enter Dist. Solar & ACDB Panel (Mtrs)",
                                   onChanged: (val) {
-                                    controller.val.validateDistSolarACDB(val);
+                                    controller.validateDistSolarACDB(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -738,9 +721,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.buildingHeightCtr,
                                   hintLabel: "Enter Building Height (Floors)",
                                   onChanged: (val) {
-                                    controller.val.validateDistInverterACDB(
-                                      val,
-                                    );
+                                    controller.validateBuildingHeight(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -762,7 +743,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.roofSizeLengthCtr,
                                   hintLabel: "Enter Roof Size Length",
                                   onChanged: (val) {
-                                    controller.val.validateRoofSizeLength(val);
+                                    controller.validateRoofSizeLength(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -784,7 +765,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.roofSizeBreadthCtr,
                                   hintLabel: "Enter Roof Size Breadth",
                                   onChanged: (val) {
-                                    controller.val.validateRoofSizeBreadth(val);
+                                    controller.validateRoofSizeBreadth(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -801,19 +782,19 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                 return getReactiveFormField(
                                   node: controller.roofNatureNode,
                                   controller: controller.roofNatureCtr,
-                                  hintLabel: "Enter Roof Nature",
+                                  hintLabel: "Select Roof Nature",
                                   onChanged: (val) {
-                                    controller.val.validateRoofNature(val);
+                                    controller.validateRoofNature(val);
                                   },
                                   onTap: () {
-                                    controller.countryCtr.text = "";
+                                    controller.roofNatureCtr.text = "";
                                     commonDropDownDialog(
                                       context,
                                       content: controller
-                                          .setCountryListDialog(),
+                                          .setRoofNatureListDialog(),
                                       title: "Roof Nature",
                                       onCloseClick: () {
-                                        controller.applyFilterforCountry('');
+                                        controller.applyFilterForRoofNature('');
                                       },
                                     ).then((_) {});
                                   },
@@ -837,7 +818,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.ageOfMetalSheetCtr,
                                   hintLabel: "Enter Age of Metal Sheet",
                                   onChanged: (val) {
-                                    controller.val.validateAgeOfMetalSheet(val);
+                                    controller.validateAgeOfMetalSheet(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -859,9 +840,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.groundSizeLengthCtr,
                                   hintLabel: "Enter Ground Size Length",
                                   onChanged: (val) {
-                                    controller.val.validateGroundSizeLength(
-                                      val,
-                                    );
+                                    controller.validateGroundSizeLength(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -883,9 +862,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.groundSizeBreadthCtr,
                                   hintLabel: "Enter Ground Size Breadth",
                                   onChanged: (val) {
-                                    controller.val.validateGroundSizeBreadth(
-                                      val,
-                                    );
+                                    controller.validateGroundSizeBreadth(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -904,7 +881,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.otherRemarksCtr,
                                   hintLabel: "Enter Other Remarks",
                                   onChanged: (val) {
-                                    controller.val.validateOtherRemarks(val);
+                                    controller.validateOtherRemarks(val);
                                   },
                                   inputType: TextInputType.text,
                                   formType: FieldType.text,
@@ -921,7 +898,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                   controller: controller.scheduleMeetingCtr,
                                   hintLabel: "Select Schedule Meeting",
                                   onChanged: (val) {
-                                    controller.val.validateScheduleMeeting(val);
+                                    controller.validateScheduleMeeting(val);
                                   },
                                   onTap: () {
                                     controller.openDatePicker(
@@ -969,8 +946,8 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                       item.category.toString(),
                                       item.power.toString(),
                                       item.usageHrs.toString(),
-                                      item.usageHrs.toString(),
-                                      item.usageHrs.toString(),
+                                      item.energyWh.toString(),
+                                      item.energyKWh.toString(),
                                     ],
                                     onEdit: (i, item) {
                                       controller.addLoadElement(
@@ -1022,8 +999,6 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                               }),
                               getDynamicSizedBox(height: 2.h),
                             ],
-                            // Step 5: Additional Details
-                            // if (_currentStep == 4) ...[],
                             getDynamicSizedBox(height: 2.h),
                             // Navigation Buttons
                             Container(
