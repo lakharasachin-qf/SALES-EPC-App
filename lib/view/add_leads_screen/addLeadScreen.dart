@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide ScreenType;
+import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
 import 'package:sales_app/componant/input/custom_text_field.dart';
 import 'package:sales_app/componant/input/form_inputs.dart';
@@ -7,6 +8,7 @@ import 'package:sales_app/componant/input/getReactiveDropdown.dart';
 import 'package:sales_app/componant/parentWidgets/CustomeParentBackground.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
+import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/controller/leads_controller/leads_controller.dart';
 import 'package:sales_app/utils/buildDynamicTable.dart';
@@ -30,13 +32,15 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
   final List<String> _steps = [
     'Company Details',
     'Contact Info',
-    'Location Details',
-    'Solution Requirements',
-    'sdsa',
-    'sdadas',
-    'asdads',
-    'asdadd',
+    'Load Element',
+    'Files',
   ];
+  // Callback to handle step tap
+  void _onStepTapped(int index) {
+    setState(() {
+      _currentStep = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +68,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
             CustomLinearStepper(
               currentStep: _currentStep,
               steps: _steps,
-              activeColor: Colors.blue,
+              activeColor: primaryColor,
               inactiveColor: Colors.grey[300]!,
+              onStepTapped: _onStepTapped,
             ),
             getDynamicSizedBox(height: 2.h),
             Expanded(
@@ -956,32 +961,86 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 if (_currentStep > 0)
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _currentStep--;
-                                      });
-                                    },
-                                    child: const Text('Previous'),
+                                  Expanded(
+                                    child: getFormButton(
+                                      context,
+                                      () {
+                                        setState(() {
+                                          _currentStep--;
+                                        });
+                                      },
+                                      'Previous',
+                                      validate: true,
+                                    ),
                                   ),
-                                if (_currentStep < _steps.length - 1)
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _currentStep++;
-                                      });
+
+                                // ElevatedButton(
+                                //   onPressed: () {
+                                //     setState(() {});
+                                //   },
+                                //   child: const Text('Previous'),
+                                // ),
+                                // if (_currentStep < _steps.length - 1)
+                                //   Expanded(
+                                //     child: getFormButton(
+                                //       context,
+                                //       () {
+                                //         setState(() {
+                                //           _currentStep++;
+                                //         });
+                                //       },
+                                //       'Previous',
+                                //       validate: true,
+                                //     ),
+                                //   ),
+                                if (_currentStep > 0)
+                                  getDynamicSizedBox(width: 4.w),
+                                Expanded(
+                                  child: getFormButton(
+                                    context,
+                                    () {
+                                      if (_currentStep == _steps.length - 1) {
+                                        setState(() {
+                                          controller.formKey.currentState
+                                              ?.validate();
+                                        });
+                                      } else {
+                                        setState(() {
+                                          _currentStep++;
+                                        });
+                                      }
                                     },
-                                    child: const Text('Next'),
+                                    _currentStep == _steps.length - 1
+                                        ? 'Submit'
+                                        : 'Next',
+                                    validate: true,
                                   ),
-                                if (_currentStep == _steps.length - 1)
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      // Assuming controller has a method to handle form submission
-                                      controller.formKey.currentState
-                                          ?.validate();
-                                    },
-                                    child: const Text('Submit'),
-                                  ),
+                                ),
+                                // if (_currentStep == _steps.length - 1)
+                                //   Expanded(
+                                //     child: getFormButton(
+                                //       context,
+                                //       () {},
+                                //       'Submit',
+                                //       validate: true,
+                                //     ),
+                                //   ),
+
+                                // ElevatedButton(
+                                //   onPressed: () {
+                                //     // Assuming controller has a method to handle form submission
+                                //   },
+                                //   child: const Text('Next'),
+                                // ),
+                                // if (_currentStep == _steps.length - 1)
+                                //   ElevatedButton(
+                                //     onPressed: () {
+                                //       // Assuming controller has a method to handle form submission
+                                //       controller.formKey.currentState
+                                //           ?.validate();
+                                //     },
+                                //     child: const Text('Submit'),
+                                //   ),
                               ],
                             ),
                           ],
