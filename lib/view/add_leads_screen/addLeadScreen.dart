@@ -10,7 +10,7 @@ import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
-import 'package:sales_app/controller/leads_controller/leads_controller.dart';
+import 'package:sales_app/controller/leads_controller/add_leads_controller.dart';
 import 'package:sales_app/utils/buildDynamicTable.dart';
 import 'package:sales_app/utils/custom_stepper_widget.dart';
 import 'package:sales_app/utils/helper.dart';
@@ -18,14 +18,15 @@ import 'package:sizer/sizer.dart';
 
 // Assuming CustomLinearStepper is in a separate file or included here
 class AddLeadScreen extends StatefulWidget {
-  const AddLeadScreen({super.key});
+  final bool isEdit;
+  const AddLeadScreen({super.key, required this.isEdit});
 
   @override
   State<AddLeadScreen> createState() => _AddLeadScreenState();
 }
 
 class _AddLeadScreenState extends State<AddLeadScreen> {
-  var controller = Get.put(LeadsController());
+  var controller = Get.put(AddLeadsController());
   int _currentStep = 0;
 
   // Define steps for the stepper
@@ -59,7 +60,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
         child: Column(
           children: [
             getCommonToolbar(
-              "Add Leads",
+              widget.isEdit == true ? 'Edit Lead' : "Add Leads",
               onClick: () {
                 Get.back();
               },

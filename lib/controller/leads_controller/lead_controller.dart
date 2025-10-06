@@ -22,7 +22,7 @@ import 'package:sizer/sizer.dart';
 import '../../api_handle/Repository.dart';
 import '../../models/fillter_model.dart' hide Result;
 
-class MeetingsCalendarController extends GetxController {
+class LeadController extends GetxController {
   final InternetController networkManager = Get.find<InternetController>();
   Rx<ScreenState> state = ScreenState.apiLoading.obs;
   RxString message = ''.obs;
@@ -220,11 +220,11 @@ class MeetingsCalendarController extends GetxController {
 
   final RxList<String> customerHeaders = <String>[
     "Sr No.",
-    "Lead Id",
+    "Company",
     "Contact Person",
-    "Latest Appointment",
-    "Contacted",
-    "Status",
+    "Mobile",
+    "Category",
+    "Lead Status",
     "Action",
   ].obs;
 

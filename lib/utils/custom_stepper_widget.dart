@@ -109,6 +109,7 @@ class _CustomLinearStepperState extends State<CustomLinearStepper> {
               children: List.generate(totalSteps, (index) {
                 final isActive = index <= widget.currentStep;
                 return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onTap: () {
                     widget.onStepTapped(
                       index,

@@ -22,7 +22,7 @@ import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/log.dart';
 import 'package:sizer/sizer.dart';
 
-class LeadsController extends GetxController {
+class AddLeadsController extends GetxController {
   final InternetController networkManager = Get.find<InternetController>();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   Rx<ScreenState> state = ScreenState.apiLoading.obs;
@@ -76,7 +76,7 @@ class LeadsController extends GetxController {
     update();
   }
 
-   deleteLoad(int index) {
+  deleteLoad(int index) {
     productDetailList.removeAt(index);
     update();
   }

@@ -14,6 +14,7 @@ import 'package:sales_app/preference/UserPreference.dart';
 import 'package:sales_app/utils/log.dart';
 import 'package:sales_app/view/add_leads_screen/addLeadScreen.dart';
 import 'package:sales_app/view/customer_screen.dart/customer_screen.dart';
+import 'package:sales_app/view/lead_screenn/lead_screen.dart';
 import 'package:sales_app/view/meetings_calendar_screen/meetings_calendar_screen.dart';
 import 'package:sales_app/view/signin_screen/signin_screen.dart';
 import 'package:sizer/sizer.dart';
@@ -143,7 +144,7 @@ Widget getDashboardDrawer(
         return ctr.isAddMeterReadings.value == true
             ? buildDrawerItem(Asset.leads, HomeScreenConst.leads, () {
                 ctr.scaffoldKey.currentState?.closeDrawer();
-                Get.to(AddLeadScreen());
+                Get.to(LeadScreen());
               })
             : SizedBox.shrink();
       }),

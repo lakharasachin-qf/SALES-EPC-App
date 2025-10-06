@@ -1,30 +1,17 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide ScreenType;
-import 'package:intl/intl.dart';
-import 'package:sales_app/componant/button/form_button.dart';
-import 'package:sales_app/componant/dialogs/common_date_time_picker.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
-import 'package:sales_app/componant/toolbar/toolbar.dart';
-import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/configs/apicall_constant.dart';
-import 'package:sales_app/configs/colors_constant.dart';
-import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
 import 'package:sales_app/models/customer_model.dart';
-import 'package:sales_app/models/customer_model_wo_p.dart';
 import 'package:sales_app/models/login_model.dart';
-import 'package:sales_app/models/sign_in_form_validation.dart';
 import 'package:sales_app/preference/UserPreference.dart';
 import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sales_app/utils/log.dart';
-import 'package:sizer/sizer.dart';
 import '../../api_handle/Repository.dart';
-import '../../models/fillter_model.dart' hide Result;
 
 class MeetingsHistoryController extends GetxController {
   final InternetController networkManager = Get.find<InternetController>();
