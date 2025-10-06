@@ -44,6 +44,34 @@ class LeadsController extends GetxController {
   var productDetailList = <LoadElement>[].obs;
   var fileList = <UploadFile>[].obs;
 
+  RxInt currentStep = 0.obs;
+  //stepper
+  final _stepperValue = 0.obs;
+  int get StepperValue => _stepperValue.value;
+  set StepperValue(int value) => _stepperValue.value = value;
+
+  //for stepper
+  final _isMovingForward = true.obs;
+  bool get ismovingForward => _isMovingForward.value;
+  set ismovingForward(bool value) => _isMovingForward.value = value;
+
+  var locationFetched = true.obs;
+
+  //stepper
+  final _activeStepper = 0.obs;
+  int get activeStepperValue => _activeStepper.value;
+  set activeStepper(int value) => _activeStepper.value = value;
+
+  void incrementstepper() {
+    StepperValue += 1;
+    update();
+  }
+
+  void decerementstepper() {
+    StepperValue -= 1;
+    update();
+  }
+
   var hearAboutUsList = <String>[].obs;
   var aboutUsFilterList = <String>[].obs;
   DateTime? selectedDateTime;
@@ -76,7 +104,7 @@ class LeadsController extends GetxController {
     update();
   }
 
-   deleteLoad(int index) {
+  deleteLoad(int index) {
     productDetailList.removeAt(index);
     update();
   }

@@ -7,6 +7,8 @@ import 'package:sales_app/componant/dialogs/dialogs.dart';
 import 'package:sales_app/componant/dialogs/loading_indicator.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
+import 'package:sales_app/models/ClusterData.dart';
+import 'package:sales_app/models/LeadData.dart';
 import 'package:sales_app/models/dashboard1_model.dart';
 import 'package:sales_app/models/fillter_model.dart';
 import 'package:sales_app/models/login_model.dart';
@@ -307,6 +309,61 @@ class DashboardController extends GetxController {
 
     enableSubmitButton();
   }
+
+  final List<LeadData> leadData = [
+    LeadData('New Lead', 34, Colors.lightBlueAccent),
+    LeadData('Contacted', 4, Colors.orange),
+    LeadData('Proposal Sent', 4, Colors.amber),
+    LeadData('Qualified', 4, Colors.green),
+    LeadData('Won', 50, Colors.blue),
+    LeadData('Lost', 4, Colors.red),
+  ].obs;
+
+  List<ClusterData> clusterData = [
+    ClusterData(
+      clusterName: 'Cluster 1',
+      leads: 9,
+      won: 4,
+      lost: 0,
+      ongoing: 5,
+    ),
+    ClusterData(
+      clusterName: 'Cluster 2',
+      leads: 9,
+      won: 2,
+      lost: 0,
+      ongoing: 6,
+    ),
+    ClusterData(
+      clusterName: 'Cluster 3',
+      leads: 9,
+      won: 4,
+      lost: 0,
+      ongoing: 5,
+    ),
+    ClusterData(
+      clusterName: 'Cluster 4',
+      leads: 9,
+      won: 4,
+      lost: 0,
+      ongoing: 5,
+    ),
+  ].obs;
+
+  final List<LeadsWonData> leadWonData = [
+    LeadsWonData(clusterName: 'WK-1', won: 0),
+    LeadsWonData(clusterName: 'WK-2', won: 0),
+    LeadsWonData(clusterName: 'WK-3', won: 12),
+    LeadsWonData(clusterName: 'WK-4', won: 13),
+    LeadsWonData(clusterName: 'WK-5', won: 0),
+  ];
+
+  final List<RevenueData> revenuesData = [
+    RevenueData(clusterName: 'Cluster 1', target: 600000, achieved: 156000),
+    RevenueData(clusterName: 'Cluster 2', target: 400000, achieved: 1005000),
+    RevenueData(clusterName: 'Cluster 3', target: 200000, achieved: 0),
+    RevenueData(clusterName: 'Cluster 4', target: 200000, achieved: 60000),
+  ].obs;
 
   void enableSubmitButton() {
     isFormInvalidate.value =

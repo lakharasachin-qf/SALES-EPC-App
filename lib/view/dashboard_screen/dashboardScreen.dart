@@ -5,7 +5,6 @@ import 'package:sales_app/componant/parentWidgets/CustomeParentBackground.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/configs/assets_constant.dart';
 import 'package:sales_app/configs/colors_constant.dart';
-import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/dashboard_controller/dashboard_controller.dart';
@@ -139,9 +138,60 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ),
-
-                    Obx(
-                      () => Container(
+                    Container(
+                      width: Device.width,
+                      margin: EdgeInsets.only(right: 4.w, left: 4.w, top: 3.h),
+                      decoration: BoxDecoration(
+                        color: white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: black.withOpacity(0.05),
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: buildCircularChart(data: ctr.leadData),
+                    ),
+                    Container(
+                      width: Device.width,
+                      margin: EdgeInsets.only(right: 4.w, left: 4.w, top: 3.h),
+                      decoration: BoxDecoration(
+                        color: white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: black.withOpacity(0.05),
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: buildLeadByClusterChart(data: ctr.clusterData),
+                    ),
+                    Container(
+                      width: Device.width,
+                      margin: EdgeInsets.only(right: 4.w, left: 4.w, top: 3.h),
+                      decoration: BoxDecoration(
+                        color: white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: black.withOpacity(0.05),
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: buildLeadsWonOverTimeChart(data: ctr.leadWonData),
+                    ),
+                    Obx(() {
+                      return Container(
+                        width: Device.width,
                         margin: EdgeInsets.only(
                           right: 4.w,
                           left: 4.w,
@@ -152,130 +202,152 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color: black.withOpacity(0.05),
                               offset: const Offset(0, 2),
                               blurRadius: 4,
                               spreadRadius: 0,
                             ),
                           ],
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            buildChart(data: ctr.paginatedChartData),
-                            buildPaginationButtons(
-                              currentPage: ctr.chartPage.value,
-                              maxPage: ctr.maxChartPage,
-                              onBack: () => ctr.chartPage.value--,
-                              onForward: () => ctr.chartPage.value++,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Obx(
-                      () => Container(
-                        margin: EdgeInsets.only(
-                          right: 4.w,
-                          left: 4.w,
-                          top: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              offset: const Offset(0, 2),
-                              blurRadius: 4,
-                              spreadRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            buildRevenueChart(ctr.paginatedRevenueData),
-                            buildPaginationButtons(
-                              currentPage: ctr.revenuePage.value,
-                              maxPage: ctr.maxRevenuePage,
-                              onBack: () => ctr.revenuePage.value--,
-                              onForward: () => ctr.revenuePage.value++,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Obx(
-                      () => Container(
-                        margin: EdgeInsets.only(
-                          right: 4.w,
-                          left: 4.w,
-                          top: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              offset: const Offset(0, 2),
-                              blurRadius: 4,
-                              spreadRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            buildUnitChart(ctr.paginatedUnitData),
-                            buildPaginationButtons(
-                              currentPage: ctr.unitPage.value,
-                              maxPage: ctr.maxUnitPage,
-                              onBack: () => ctr.unitPage.value--,
-                              onForward: () => ctr.unitPage.value++,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Obx(
-                      () => Container(
-                        margin: EdgeInsets.only(
-                          right: 4.w,
-                          left: 4.w,
-                          top: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              offset: const Offset(0, 2),
-                              blurRadius: 4,
-                              spreadRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            buildKpiChart(ctr.paginatedKpiData),
-                            buildPaginationButtons(
-                              currentPage: ctr.kpiPage.value,
-                              maxPage: ctr.maxKpiPage,
-                              onBack: () => ctr.kpiPage.value--,
-                              onForward: () => ctr.kpiPage.value++,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                        child: buildRevenueTargetsChart(data: ctr.revenuesData),
+                      );
+                    }),
+                    // Obx(
+                    //   () => Container(
+                    //     margin: EdgeInsets.only(
+                    //       right: 4.w,
+                    //       left: 4.w,
+                    //       top: 3.h,
+                    //     ),
+                    //     decoration: BoxDecoration(
+                    //       color: white,
+                    //       borderRadius: BorderRadius.circular(10),
+                    //       boxShadow: [
+                    //         BoxShadow(
+                    //           color: black.withOpacity(0.05),
+                    //           offset: const Offset(0, 2),
+                    //           blurRadius: 4,
+                    //           spreadRadius: 0,
+                    //         ),
+                    //       ],
+                    //     ),
+                    //     child: Column(
+                    //       mainAxisAlignment: MainAxisAlignment.start,
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         buildChart(data: ctr.paginatedChartData),
+                    //         buildPaginationButtons(
+                    //           currentPage: ctr.chartPage.value,
+                    //           maxPage: ctr.maxChartPage,
+                    //           onBack: () => ctr.chartPage.value--,
+                    //           onForward: () => ctr.chartPage.value++,
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // Obx(
+                    //   () => Container(
+                    //     margin: EdgeInsets.only(
+                    //       right: 4.w,
+                    //       left: 4.w,
+                    //       top: 2.h,
+                    //     ),
+                    //     decoration: BoxDecoration(
+                    //       color: white,
+                    //       borderRadius: BorderRadius.circular(10),
+                    //       boxShadow: [
+                    //         BoxShadow(
+                    //           color: black.withOpacity(0.05),
+                    //           offset: const Offset(0, 2),
+                    //           blurRadius: 4,
+                    //           spreadRadius: 0,
+                    //         ),
+                    //       ],
+                    //     ),
+                    //     child: Column(
+                    //       mainAxisAlignment: MainAxisAlignment.start,
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         buildRevenueChart(ctr.paginatedRevenueData),
+                    //         buildPaginationButtons(
+                    //           currentPage: ctr.revenuePage.value,
+                    //           maxPage: ctr.maxRevenuePage,
+                    //           onBack: () => ctr.revenuePage.value--,
+                    //           onForward: () => ctr.revenuePage.value++,
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // Obx(
+                    //   () => Container(
+                    //     margin: EdgeInsets.only(
+                    //       right: 4.w,
+                    //       left: 4.w,
+                    //       top: 2.h,
+                    //     ),
+                    //     decoration: BoxDecoration(
+                    //       color: white,
+                    //       borderRadius: BorderRadius.circular(10),
+                    //       boxShadow: [
+                    //         BoxShadow(
+                    //           color: black.withOpacity(0.05),
+                    //           offset: const Offset(0, 2),
+                    //           blurRadius: 4,
+                    //           spreadRadius: 0,
+                    //         ),
+                    //       ],
+                    //     ),
+                    //     child: Column(
+                    //       mainAxisAlignment: MainAxisAlignment.start,
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         buildUnitChart(ctr.paginatedUnitData),
+                    //         buildPaginationButtons(
+                    //           currentPage: ctr.unitPage.value,
+                    //           maxPage: ctr.maxUnitPage,
+                    //           onBack: () => ctr.unitPage.value--,
+                    //           onForward: () => ctr.unitPage.value++,
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // Obx(
+                    //   () => Container(
+                    //     margin: EdgeInsets.only(
+                    //       right: 4.w,
+                    //       left: 4.w,
+                    //       top: 2.h,
+                    //     ),
+                    //     decoration: BoxDecoration(
+                    //       color: white,
+                    //       borderRadius: BorderRadius.circular(10),
+                    //       boxShadow: [
+                    //         BoxShadow(
+                    //           color: black.withOpacity(0.05),
+                    //           offset: const Offset(0, 2),
+                    //           blurRadius: 4,
+                    //           spreadRadius: 0,
+                    //         ),
+                    //       ],
+                    //     ),
+                    //     child: Column(
+                    //       mainAxisAlignment: MainAxisAlignment.start,
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         buildKpiChart(ctr.paginatedKpiData),
+                    //         buildPaginationButtons(
+                    //           currentPage: ctr.kpiPage.value,
+                    //           maxPage: ctr.maxKpiPage,
+                    //           onBack: () => ctr.kpiPage.value--,
+                    //           onForward: () => ctr.kpiPage.value++,
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
                     getDynamicSizedBox(height: 12.h),
                   ],
                 ),

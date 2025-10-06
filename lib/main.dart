@@ -1,13 +1,17 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sales_app/OCRScanner.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sales_app/view/splash_screen/splash_screen.dart';
 import 'package:sizer/sizer.dart';
 
+late List<CameraDescription> cameras;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  cameras = await availableCameras();
   await screenOrientations();
   runApp(const MyApp());
 }
@@ -38,6 +42,7 @@ class _MyAppState extends State<MyApp> {
           enableLog: true,
           title: AppConstant.name,
           debugShowCheckedModeBanner: false,
+          // home: TextRecognizerView(),
           home: SplashScreen(),
           defaultTransition: Transition.fadeIn,
         );
