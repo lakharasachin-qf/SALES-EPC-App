@@ -1,8 +1,8 @@
 class ApiUrl {
   // LOCAL
 
-  static const baseUrl = "http://resco-billing.omcpower.co.in/";
-  // static const baseUrl = "http://103.255.64.69:81/";
+  // static const baseUrl = "http://resco-billing.omcpower.co.in/";
+  static const baseUrl = "http://103.255.64.69:81/";
   // static const buildApiUrl = '${baseUrl}swooosh_admin/api/';
   // static const imageUrl = '${baseUrl}swooosh_admin/public/storage/';
 

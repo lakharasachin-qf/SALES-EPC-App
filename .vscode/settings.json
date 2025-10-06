@@ -1,4 +1,5 @@
 {
-    "cmake.sourceDirectory": "D:/FLUTTER_PROJECTS_LIVE/sales_app/windows/flutter",
-    "java.configuration.updateBuildConfiguration": "interactive"
+  "cmake.sourceDirectory": "D:/FLUTTER_PROJECTS_LIVE/sales_app/windows/flutter",
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "dart.flutterSdkPath": ".fvm/versions/3.35.5"
 }

@@ -1,8 +1,6 @@
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide ScreenType;
+import 'package:file_picker/file_picker.dart';
 import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/common_date_time_picker.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
@@ -14,20 +12,41 @@ import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
-import 'package:sales_app/controller/master_controller/Master_Controller.dart';
 import 'package:sales_app/models/LoadElement.dart';
 import 'package:sales_app/models/customer_model_wo_p.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
 import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/log.dart';
+import 'package:sales_app/view/add_leads_screen/validateFileds.dart';
 import 'package:sizer/sizer.dart';
+import 'dart:io';
 
-class LeadsController extends GetxController {
+class CategoryModel {
+  final String id;
+  final String name;
+
+  CategoryModel({required this.id, required this.name});
+}
+
+class UploadFile {
+  final String uploadFile;
+  final String category;
+
+  UploadFile({required this.uploadFile, required this.category});
+}
+
+class AddLeadsController extends GetxController {
   final InternetController networkManager = Get.find<InternetController>();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   Rx<ScreenState> state = ScreenState.apiLoading.obs;
   RxString message = "".obs;
-  RxBool isFormInvalidate = true.obs;
+
+  // Step-specific validation flags
+  RxBool isStep1Valid = false.obs;
+  RxBool isStep2Valid = false.obs;
+  RxBool isStep3Valid = true.obs; // Load Element is optional
+  RxBool isStep4Valid = true.obs; // Files are optional
+
   final ScrollController scrollController = ScrollController();
   RxBool isDesignationApiCallLoading = false.obs;
   RxBool isCountryApiCallLoading = false.obs;
@@ -43,6 +62,7 @@ class LeadsController extends GetxController {
   RxBool isDynamicDesignationApiCallLoading = false.obs;
   var productDetailList = <LoadElement>[].obs;
   var fileList = <UploadFile>[].obs;
+<<<<<<< HEAD:lib/controller/leads_controller/leads_controller.dart
 
   RxInt currentStep = 0.obs;
   //stepper
@@ -72,10 +92,18 @@ class LeadsController extends GetxController {
     update();
   }
 
+=======
+>>>>>>> 42cf05b08d848dbf5055e53b85de8cd319e792ff:lib/controller/leads_controller/add_leads_controller.dart
   var hearAboutUsList = <String>[].obs;
-  var aboutUsFilterList = <String>[].obs;
+  var countryList = <String>['Usa', 'India'].obs;
+  var requiredSolutuionList = <String>['Usa', 'India'].obs;
+  var solutuionList = <String>['Usa', 'India'].obs;
+  var leadCategoryList = <String>['Usa', 'India'].obs;
+  var stateList = <String>['Usa', 'India'].obs;
+  var districtList = <String>['Usa', 'India'].obs;
   DateTime? selectedDateTime;
   final RxString startDate = ''.obs;
+
   late List<DataColumn> leadsColumns = [
     setColumn("Sr"),
     setColumn("Action"),
@@ -94,34 +122,56 @@ class LeadsController extends GetxController {
     setColumn("Category"),
   ];
 
+  DataColumn setColumn(String label) {
+    return DataColumn(
+      label: Text(
+        label,
+        style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
   void addLoad(LoadElement element) {
     productDetailList.add(element);
+    validateStep3();
     update();
   }
 
   void updateLoad(int index, LoadElement element) {
     productDetailList[index] = element;
+    validateStep3();
     update();
   }
 
+<<<<<<< HEAD:lib/controller/leads_controller/leads_controller.dart
   deleteLoad(int index) {
+=======
+  void deleteLoad(int index) {
+>>>>>>> 42cf05b08d848dbf5055e53b85de8cd319e792ff:lib/controller/leads_controller/add_leads_controller.dart
     productDetailList.removeAt(index);
+    validateStep3();
     update();
   }
 
   void addFile(UploadFile file) {
     fileList.add(file);
+    validateStep4();
+    update();
   }
 
   void updateFile(int index, UploadFile file) {
     fileList[index] = file;
+    validateStep4();
+    update();
   }
 
-  deleteFile(int index) {
+  void deleteFile(int index) {
     fileList.removeAt(index);
+    validateStep4();
+    update();
   }
 
-  // 🔹 Controllers
+  // Controllers
   late TextEditingController companyNameCtr,
       addressCtr,
       countryCtr,
@@ -160,7 +210,7 @@ class LeadsController extends GetxController {
       otherRemarksCtr,
       scheduleMeetingCtr;
 
-  // 🔹 FocusNodes
+  // FocusNodes
   late FocusNode companyNameNode,
       addressNode,
       countryNode,
@@ -199,7 +249,7 @@ class LeadsController extends GetxController {
       otherRemarksNode,
       scheduleMeetingNode;
 
-  // 🔹 Validation Models
+  // Validation Models
   var companyNameModel = ValidationModel(null, null, isValidate: false).obs;
   var addressModel = ValidationModel(null, null, isValidate: false).obs;
   var countryModel = ValidationModel(null, null, isValidate: false).obs;
@@ -210,8 +260,16 @@ class LeadsController extends GetxController {
   var districtSearchModel = ValidationModel(null, null, isValidate: false).obs;
   var personNameModel = ValidationModel(null, null, isValidate: false).obs;
   var personMobileModel = ValidationModel(null, null, isValidate: false).obs;
-  var latitudeModel = ValidationModel(null, null, isValidate: false).obs;
-  var longitudeModel = ValidationModel(null, null, isValidate: false).obs;
+  var latitudeModel = ValidationModel(
+    null,
+    null,
+    isValidate: true,
+  ).obs; // Optional
+  var longitudeModel = ValidationModel(
+    null,
+    null,
+    isValidate: true,
+  ).obs; // Optional
   var requiredSolutionTypeModel = ValidationModel(
     null,
     null,
@@ -223,20 +281,28 @@ class LeadsController extends GetxController {
     isValidate: false,
   ).obs;
   var leadCategoryModel = ValidationModel(null, null, isValidate: false).obs;
-  var dgCapacityModel = ValidationModel(null, null, isValidate: false).obs;
+  var dgCapacityModel = ValidationModel(
+    null,
+    null,
+    isValidate: true,
+  ).obs; // Optional
   var dgSyncModel = ValidationModel(null, null, isValidate: false).obs;
   var installedSolarCapModel = ValidationModel(
     null,
     null,
-    isValidate: false,
-  ).obs;
-  var sanctionedLoadModel = ValidationModel(null, null, isValidate: false).obs;
+    isValidate: true,
+  ).obs; // Optional
+  var sanctionedLoadModel = ValidationModel(
+    null,
+    null,
+    isValidate: true,
+  ).obs; // Optional
   var vfdModel = ValidationModel(null, null, isValidate: false).obs;
   var gridAvailabilityModel = ValidationModel(
     null,
     null,
-    isValidate: false,
-  ).obs;
+    isValidate: true,
+  ).obs; // Optional
   var peakMonthlyEnergyModel = ValidationModel(
     null,
     null,
@@ -291,7 +357,7 @@ class LeadsController extends GetxController {
   final List<String> vfd = ['Yes', 'No'];
   String? selectVfd;
 
-  //Dynamic Lead Element
+  // Dynamic Lead Element
   late TextEditingController deviceNameCtr,
       categoryCtr,
       powerCtr,
@@ -299,7 +365,6 @@ class LeadsController extends GetxController {
       energyWhCtr,
       energyKWhCtr;
 
-  // 🔹 FocusNodes
   late FocusNode deviceNameNode,
       categorysNode,
       powerNode,
@@ -314,12 +379,11 @@ class LeadsController extends GetxController {
   var energyWhModel = ValidationModel(null, null, isValidate: false).obs;
   var energyKWhModel = ValidationModel(null, null, isValidate: false).obs;
 
-  //Dynamic Lead Element
+  // Dynamic File Upload
   late TextEditingController uploadFileCtr,
       uploadCategoryCtr,
       searchUploadCategoryCtr;
 
-  // 🔹 FocusNodes
   late FocusNode uploadFileNode, uploadCategoryNode, searchUploadCategoryNode;
 
   var uploadFileModel = ValidationModel(null, null, isValidate: false).obs;
@@ -330,8 +394,21 @@ class LeadsController extends GetxController {
     isValidate: false,
   ).obs;
 
+  // Category List
+  RxList<CategoryModel> categoryList = <CategoryModel>[
+    CategoryModel(id: "1", name: "Invoice"),
+    CategoryModel(id: "2", name: "Bills"),
+    CategoryModel(id: "3", name: "Reports"),
+    CategoryModel(id: "4", name: "Others"),
+  ].obs;
+
+  var currentFilterSource = [].obs;
+  var filteredData = [].obs;
+  RxString categoryId = "".obs;
+
   @override
   void onInit() {
+    // Initialize Controllers
     companyNameCtr = TextEditingController();
     addressCtr = TextEditingController();
     countryCtr = TextEditingController();
@@ -370,7 +447,7 @@ class LeadsController extends GetxController {
     otherRemarksCtr = TextEditingController();
     scheduleMeetingCtr = TextEditingController();
 
-    //Dynamic
+    // Dynamic
     deviceNameCtr = TextEditingController();
     categoryCtr = TextEditingController();
     powerCtr = TextEditingController();
@@ -378,7 +455,7 @@ class LeadsController extends GetxController {
     energyWhCtr = TextEditingController();
     energyKWhCtr = TextEditingController();
 
-    //Dynamic file choose
+    // Dynamic file choose
     uploadFileCtr = TextEditingController();
     uploadCategoryCtr = TextEditingController();
     searchUploadCategoryCtr = TextEditingController();
@@ -422,7 +499,7 @@ class LeadsController extends GetxController {
     otherRemarksNode = FocusNode();
     scheduleMeetingNode = FocusNode();
 
-    //Dynamic
+    // Dynamic
     deviceNameNode = FocusNode();
     categorysNode = FocusNode();
     powerNode = FocusNode();
@@ -430,7 +507,7 @@ class LeadsController extends GetxController {
     energyWhNode = FocusNode();
     energyKWhNode = FocusNode();
 
-    //Dynamic upload file
+    // Dynamic upload file
     uploadFileNode = FocusNode();
     uploadCategoryNode = FocusNode();
     searchUploadCategoryNode = FocusNode();
@@ -442,10 +519,107 @@ class LeadsController extends GetxController {
   @override
   void dispose() {
     scrollController.dispose();
+    // Dispose controllers
+    companyNameCtr.dispose();
+    addressCtr.dispose();
+    countryCtr.dispose();
+    countrySearchCtr.dispose();
+    stateCtr.dispose();
+    stateSearchCtr.dispose();
+    districtCtr.dispose();
+    districtSearchCtr.dispose();
+    personNameCtr.dispose();
+    personMobileCtr.dispose();
+    latitudeCtr.dispose();
+    longitudeCtr.dispose();
+    requiredSolutionTypeCtr.dispose();
+    requiredSolutionCtr.dispose();
+    leadCategoryCtr.dispose();
+    dgCapacityCtr.dispose();
+    dgSyncCtr.dispose();
+    installedSolarCapCtr.dispose();
+    sanctionedLoadCtr.dispose();
+    vfdCtr.dispose();
+    gridAvailabilityCtr.dispose();
+    peakMonthlyEnergyCtr.dispose();
+    requiredSolarCapCtr.dispose();
+    distanceToTransformerCtr.dispose();
+    ratingOfTransformerCtr.dispose();
+    purposeOfSolarizationCtr.dispose();
+    distInverterACDBCtr.dispose();
+    distSolarACDBCtr.dispose();
+    buildingHeightCtr.dispose();
+    roofSizeLengthCtr.dispose();
+    roofSizeBreadthCtr.dispose();
+    roofNatureCtr.dispose();
+    ageOfMetalSheetCtr.dispose();
+    groundSizeLengthCtr.dispose();
+    groundSizeBreadthCtr.dispose();
+    otherRemarksCtr.dispose();
+    scheduleMeetingCtr.dispose();
+    deviceNameCtr.dispose();
+    categoryCtr.dispose();
+    powerCtr.dispose();
+    usageHrsCtr.dispose();
+    energyWhCtr.dispose();
+    energyKWhCtr.dispose();
+    uploadFileCtr.dispose();
+    uploadCategoryCtr.dispose();
+    searchUploadCategoryCtr.dispose();
+
+    // Dispose focus nodes
+    companyNameNode.dispose();
+    addressNode.dispose();
+    countryNode.dispose();
+    countrySearchNode.dispose();
+    stateNode.dispose();
+    stateSearchNode.dispose();
+    districtNode.dispose();
+    districtSearchNode.dispose();
+    personNameNode.dispose();
+    personMobileNode.dispose();
+    latitudeNode.dispose();
+    longitudeNode.dispose();
+    requiredSolutionTypeNode.dispose();
+    requiredSolutionNode.dispose();
+    leadCategoryNode.dispose();
+    dgCapacityNode.dispose();
+    dgSyncNode.dispose();
+    installedSolarCapNode.dispose();
+    sanctionedLoadNode.dispose();
+    vfdNode.dispose();
+    gridAvailabilityNode.dispose();
+    peakMonthlyEnergyNode.dispose();
+    requiredSolarCapNode.dispose();
+    distanceToTransformerNode.dispose();
+    ratingOfTransformerNode.dispose();
+    purposeOfSolarizationNode.dispose();
+    distInverterACDBNode.dispose();
+    distSolarACDBNode.dispose();
+    buildHeightNode.dispose();
+    roofSizeLengthNode.dispose();
+    roofSizeBreadthNode.dispose();
+    roofNatureNode.dispose();
+    ageOfMetalSheetNode.dispose();
+    groundSizeLengthNode.dispose();
+    groundSizeBreadthNode.dispose();
+    otherRemarksNode.dispose();
+    scheduleMeetingNode.dispose();
+    deviceNameNode.dispose();
+    categorysNode.dispose();
+    powerNode.dispose();
+    usageHrsNode.dispose();
+    energyWhNode.dispose();
+    energyKWhNode.dispose();
+    uploadFileNode.dispose();
+    uploadCategoryNode.dispose();
+    searchUploadCategoryNode.dispose();
+
     super.dispose();
   }
 
-  Widget setCountryListDialog() {
+  // Dialog for State List
+  Widget setStateListDialog() {
     return Obx(() {
       if (isCountryApiCallLoading.value == true) {
         return setDropDownContent(
@@ -455,13 +629,13 @@ class LeadsController extends GetxController {
         );
       }
       return setDropDownContent(
-        aboutUsFilterList,
-        controller: countrySearchCtr,
-        noDataLable: "No Country",
+        stateList,
+        controller: stateSearchCtr,
+        noDataLable: "No State",
         ListView.builder(
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          itemCount: aboutUsFilterList.length,
+          itemCount: stateList.length,
           itemBuilder: (BuildContext context, int index) {
             return Column(
               children: [
@@ -479,24 +653,585 @@ class LeadsController extends GetxController {
                   horizontalTitleGap: null,
                   minLeadingWidth: 5,
                   onTap: () async {
-                    // Get.back();
-                    // Navigator.pop(context);
-                    // countryId.value = countryFilterList[index].countryId
-                    //     .toString();
-                    // countryCtr.text = countryFilterList[index].shortName;
-                    // if (countryCtr.text.toString().isNotEmpty) {
-                    //   countryFilterList.clear();
-                    //   countryFilterList.addAll(countryList);
-                    // }
-                    validateCountry(countryCtr.text);
+                    stateCtr.text = stateList[index];
+                    validateState(stateCtr.text);
+                    Get.back();
                   },
-                  title: showSelectedTextInDialog(
-                    // name: countryFilterList[index].shortName,
-                    // modelId: countryFilterList[index].countryId.toString(),
-                    storeId: countryId.value,
+                  title: Text(
+                    stateList[index],
+                    style: TextStyle(fontSize: 14.sp),
                   ),
                 ),
-                // commonListDevider(),
+              ],
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: stateSearchNode,
+          controller: stateSearchCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForState(val.toString());
+            update();
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: stateSearchModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForState(String keyword) {
+    stateList.clear();
+    if (keyword.isEmpty) {
+      stateList.addAll(['Usa', 'India']); // Mock data
+    } else {
+      stateList.addAll(
+        ['Usa', 'India']
+            .where(
+              (state) => state.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  // Dialog for District List
+  Widget setDistrictListDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value == true) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        districtList,
+        controller: districtSearchCtr,
+        noDataLable: "No District",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: districtList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(
+                    horizontal: 0,
+                    vertical: -4,
+                  ),
+                  contentPadding: const EdgeInsets.only(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                  ),
+                  horizontalTitleGap: null,
+                  minLeadingWidth: 5,
+                  onTap: () async {
+                    districtCtr.text = districtList[index];
+                    validateDistrict(districtCtr.text);
+                    Get.back();
+                  },
+                  title: Text(
+                    districtList[index],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: districtSearchNode,
+          controller: districtSearchCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForDistrict(val.toString());
+            update();
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: districtSearchModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForDistrict(String keyword) {
+    districtList.clear();
+    if (keyword.isEmpty) {
+      districtList.addAll(['Usa', 'India']); // Mock data
+    } else {
+      districtList.addAll(
+        ['Usa', 'India']
+            .where(
+              (district) =>
+                  district.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  // Dialog for Required Solution Type
+  Widget setRequiredSolutionTypeListDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value == true) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        requiredSolutuionList,
+        controller: requiredSolutionTypeCtr,
+        noDataLable: "No Solution Type",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: requiredSolutuionList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(
+                    horizontal: 0,
+                    vertical: -4,
+                  ),
+                  contentPadding: const EdgeInsets.only(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                  ),
+                  horizontalTitleGap: null,
+                  minLeadingWidth: 5,
+                  onTap: () async {
+                    requiredSolutionTypeCtr.text = requiredSolutuionList[index];
+                    validateRequiredSolutionType(
+                      requiredSolutionTypeCtr.text,
+                    );
+                    Get.back();
+                  },
+                  title: Text(
+                    requiredSolutuionList[index],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: requiredSolutionTypeNode,
+          controller: requiredSolutionTypeCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForRequiredSolutionType(val.toString());
+            update();
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: requiredSolutionTypeModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForRequiredSolutionType(String keyword) {
+    requiredSolutuionList.clear();
+    if (keyword.isEmpty) {
+      requiredSolutuionList.addAll(['Usa', 'India']); // Mock data
+    } else {
+      requiredSolutuionList.addAll(
+        ['Usa', 'India']
+            .where(
+              (solution) =>
+                  solution.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  // Dialog for Required Solution
+  Widget setRequiredSolutionListDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value == true) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        solutuionList,
+        controller: requiredSolutionCtr,
+        noDataLable: "No Solution",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: solutuionList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(
+                    horizontal: 0,
+                    vertical: -4,
+                  ),
+                  contentPadding: const EdgeInsets.only(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                  ),
+                  horizontalTitleGap: null,
+                  minLeadingWidth: 5,
+                  onTap: () async {
+                    requiredSolutionCtr.text = solutuionList[index];
+                    validateRequiredSolution(requiredSolutionCtr.text);
+                    Get.back();
+                  },
+                  title: Text(
+                    solutuionList[index],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: requiredSolutionNode,
+          controller: requiredSolutionCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForRequiredSolution(val.toString());
+            update();
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: requiredSolutionModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForRequiredSolution(String keyword) {
+    solutuionList.clear();
+    if (keyword.isEmpty) {
+      solutuionList.addAll(['Usa', 'India']); // Mock data
+    } else {
+      solutuionList.addAll(
+        ['Usa', 'India']
+            .where(
+              (solution) =>
+                  solution.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  // Dialog for Lead Category
+  Widget setLeadCategoryListDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value == true) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        leadCategoryList,
+        controller: leadCategoryCtr,
+        noDataLable: "No Lead Category",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: leadCategoryList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(
+                    horizontal: 0,
+                    vertical: -4,
+                  ),
+                  contentPadding: const EdgeInsets.only(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                  ),
+                  horizontalTitleGap: null,
+                  minLeadingWidth: 5,
+                  onTap: () async {
+                    leadCategoryCtr.text = leadCategoryList[index];
+                    validateLeadCategory(leadCategoryCtr.text);
+                    Get.back();
+                  },
+                  title: Text(
+                    leadCategoryList[index],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: leadCategoryNode,
+          controller: leadCategoryCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForLeadCategory(val.toString());
+            update();
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: leadCategoryModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForLeadCategory(String keyword) {
+    leadCategoryList.clear();
+    if (keyword.isEmpty) {
+      leadCategoryList.addAll(['Usa', 'India']); // Mock data
+    } else {
+      leadCategoryList.addAll(
+        ['Usa', 'India']
+            .where(
+              (category) =>
+                  category.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  // Dialog for Purpose of Solarization
+  Widget setPurposeOfSolarizationListDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value == true) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        hearAboutUsList, // Assuming this list is used for Purpose of Solarization
+        controller: purposeOfSolarizationCtr,
+        noDataLable: "No Purpose",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: hearAboutUsList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(
+                    horizontal: 0,
+                    vertical: -4,
+                  ),
+                  contentPadding: const EdgeInsets.only(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                  ),
+                  horizontalTitleGap: null,
+                  minLeadingWidth: 5,
+                  onTap: () async {
+                    purposeOfSolarizationCtr.text = hearAboutUsList[index];
+                    validatePurposeOfSolarization(
+                      purposeOfSolarizationCtr.text,
+                    );
+                    Get.back();
+                  },
+                  title: Text(
+                    hearAboutUsList[index],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: purposeOfSolarizationNode,
+          controller: purposeOfSolarizationCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForPurposeOfSolarization(val.toString());
+            update();
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: purposeOfSolarizationModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForPurposeOfSolarization(String keyword) {
+    hearAboutUsList.clear();
+    if (keyword.isEmpty) {
+      hearAboutUsList.addAll(['Usa', 'India']); // Mock data
+    } else {
+      hearAboutUsList.addAll(
+        ['Usa', 'India']
+            .where(
+              (purpose) =>
+                  purpose.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  // Dialog for Roof Nature
+  Widget setRoofNatureListDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value == true) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        hearAboutUsList, // Assuming this list is used for Roof Nature
+        controller: roofNatureCtr,
+        noDataLable: "No Roof Nature",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: hearAboutUsList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(
+                    horizontal: 0,
+                    vertical: -4,
+                  ),
+                  contentPadding: const EdgeInsets.only(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                  ),
+                  horizontalTitleGap: null,
+                  minLeadingWidth: 5,
+                  onTap: () async {
+                    roofNatureCtr.text = hearAboutUsList[index];
+                    validateRoofNature(roofNatureCtr.text);
+                    Get.back();
+                  },
+                  title: Text(
+                    hearAboutUsList[index],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: roofNatureNode,
+          controller: roofNatureCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForRoofNature(val.toString());
+            update();
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: roofNatureModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForRoofNature(String keyword) {
+    hearAboutUsList.clear();
+    if (keyword.isEmpty) {
+      hearAboutUsList.addAll(['Usa', 'India']); // Mock data
+    } else {
+      hearAboutUsList.addAll(
+        ['Usa', 'India']
+            .where(
+              (roofNature) =>
+                  roofNature.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  Widget setCountryListDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value == true) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        countryList,
+        controller: countrySearchCtr,
+        noDataLable: "No Country",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: countryList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              children: [
+                ListTile(
+                  dense: true,
+                  visualDensity: const VisualDensity(
+                    horizontal: 0,
+                    vertical: -4,
+                  ),
+                  contentPadding: const EdgeInsets.only(
+                    left: 0.0,
+                    right: 0.0,
+                    top: 0.0,
+                  ),
+                  horizontalTitleGap: null,
+                  minLeadingWidth: 5,
+                  onTap: () async {
+                    countryId.value = countryList[index];
+                    countryCtr.text = countryList[index];
+                    validateCountry(countryCtr.text);
+                    Get.back();
+                  },
+                  title: Text(
+                    countryList[index],
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                ),
               ],
             );
           },
@@ -518,19 +1253,23 @@ class LeadsController extends GetxController {
   }
 
   void applyFilterforCountry(String keyword) {
-    // countryFilterList.clear();
-    // for (TicketsCountry model in countryList) {
-    //   if (model.shortName.toLowerCase().contains(keyword.toLowerCase())) {
-    //     countryFilterList.add(model);
-    //   }
-    // }
-    // countryFilterList.refresh();
-    // countryFilterList.call();
-    // logcat('filterApply', countryFilterList.length.toString());
+    countryList.clear();
+    if (keyword.isEmpty) {
+      countryList.addAll(['USA', 'India', 'Canada']); // Mock data
+    } else {
+      countryList.addAll(
+        ['USA', 'India', 'Canada']
+            .where(
+              (country) =>
+                  country.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
     update();
   }
 
-  // 🔹 Existing Validation Functions
+  // Validation Methods
   void validateCompanyName(String? val) {
     companyNameModel.update((model) {
       if (val == null || val.trim().isEmpty) {
@@ -541,7 +1280,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateAddress(String? val) {
@@ -554,7 +1293,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateCountry(String? val) {
@@ -567,7 +1306,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateState(String? val) {
@@ -580,7 +1319,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateDistrict(String? val) {
@@ -593,7 +1332,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validatePersonName(String? val) {
@@ -606,7 +1345,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validatePersonMobile(String? val) {
@@ -622,33 +1361,33 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateLatitude(String? val) {
     latitudeModel.update((model) {
       if (val != null && val.isNotEmpty && double.tryParse(val) == null) {
-        model!.error = "Enter latitude";
+        model!.error = "Enter valid latitude";
         model.isValidate = false;
       } else {
         model!.error = null;
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateLongitude(String? val) {
     longitudeModel.update((model) {
       if (val != null && val.isNotEmpty && double.tryParse(val) == null) {
-        model!.error = "Enter longitude";
+        model!.error = "Enter valid longitude";
         model.isValidate = false;
       } else {
         model!.error = null;
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateRequiredSolutionType(String? val) {
@@ -661,7 +1400,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateRequiredSolution(String? val) {
@@ -674,7 +1413,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateLeadCategory(String? val) {
@@ -687,7 +1426,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateDGCapacity(String? val) {
@@ -700,7 +1439,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateDGSync(String? val) {
@@ -713,7 +1452,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateInstalledSolarCap(String? val) {
@@ -726,7 +1465,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateSanctionedLoad(String? val) {
@@ -739,7 +1478,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateVFD(String? val) {
@@ -752,7 +1491,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
   void validateGridAvailability(String? val) {
@@ -765,10 +1504,9 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep1();
   }
 
-  // 🔹 New Validation Functions
   void validatePeakMonthlyEnergy(String? val) {
     peakMonthlyEnergyModel.update((model) {
       if (val == null || val.trim().isEmpty) {
@@ -782,7 +1520,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
   void validateRequiredSolarCap(String? val) {
@@ -798,7 +1536,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
   void validateDistanceToTransformer(String? val) {
@@ -814,7 +1552,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
   void validateRatingOfTransformer(String? val) {
@@ -830,7 +1568,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
   void validatePurposeOfSolarization(String? val) {
@@ -843,7 +1581,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
   void validateDistInverterACDB(String? val) {
@@ -859,7 +1597,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
   void validateDistSolarACDB(String? val) {
@@ -875,20 +1613,23 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
-  void validateBuildingHeightACDB(String? val) {
+  void validateBuildingHeight(String? val) {
     buildingHeightModel.update((model) {
       if (val == null || val.trim().isEmpty) {
         model!.error = "Enter Building Height";
+        model.isValidate = false;
+      } else if (int.tryParse(val) == null) {
+        model!.error = "Enter valid number of floors";
         model.isValidate = false;
       } else {
         model!.error = null;
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
   void validateRoofSizeLength(String? val) {
@@ -904,7 +1645,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
   void validateRoofSizeBreadth(String? val) {
@@ -920,12 +1661,12 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
   void validateRoofNature(String? val) {
     roofNatureModel.update((model) {
-      if (val == null || val.trim().isEmpty) {
+if (val == null || val.trim().isEmpty) {
         model!.error = "Enter Roof Nature";
         model.isValidate = false;
       } else {
@@ -933,7 +1674,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
   void validateAgeOfMetalSheet(String? val) {
@@ -949,7 +1690,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
   void validateGroundSizeLength(String? val) {
@@ -965,7 +1706,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
   void validateGroundSizeBreadth(String? val) {
@@ -981,7 +1722,7 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
   void validateOtherRemarks(String? val) {
@@ -994,50 +1735,25 @@ class LeadsController extends GetxController {
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
-  void validateScheduleMeetings(String? val) {
-    otherRemarksModel.update((model) {
+  void validateScheduleMeeting(String? val) {
+    scheduleMeeeingModel.update((model) {
       if (val == null || val.trim().isEmpty) {
-        model!.error = "Other Remarks is required";
+        model!.error = "Schedule Meeting is required";
         model.isValidate = false;
       } else {
         model!.error = null;
         model.isValidate = true;
       }
     });
-    enableContactInfoButton();
+    validateStep2();
   }
 
-  void validateFields(
-    dynamic val, {
-    required Rx<ValidationModel> model,
-    String? errorText1,
-    String? errorText2,
-    String? errorText3,
-    bool iscomman = false,
-    bool isemail = false,
-    bool ispassword = false,
-  }) {
-    return validateField(
-      val: val,
-      models: model,
-      isEmail: isemail,
-      iscomman: iscomman,
-      ispassword: ispassword,
-      errorText1: errorText1,
-      errorText2: errorText2,
-      errorText3: errorText3,
-      notifyListeners: refresh,
-      enableBtnFunction: enableContactInfoButton,
-    );
-  }
-
-  // 🔹 Final Button Enable Check
-  void enableContactInfoButton() {
+  // Step-specific validation methods
+  void validateStep1() {
     bool isValid = true;
-
     if (!companyNameModel.value.isValidate) isValid = false;
     if (!addressModel.value.isValidate) isValid = false;
     if (!countryModel.value.isValidate) isValid = false;
@@ -1045,23 +1761,23 @@ class LeadsController extends GetxController {
     if (!districtModel.value.isValidate) isValid = false;
     if (!personNameModel.value.isValidate) isValid = false;
     if (!personMobileModel.value.isValidate) isValid = false;
-    if (!latitudeModel.value.isValidate) isValid = false;
-    if (!longitudeModel.value.isValidate) isValid = false;
     if (!requiredSolutionTypeModel.value.isValidate) isValid = false;
     if (!requiredSolutionModel.value.isValidate) isValid = false;
     if (!leadCategoryModel.value.isValidate) isValid = false;
-    if (!dgCapacityModel.value.isValidate) isValid = false;
-    if (!dgSyncModel.value.isValidate) isValid = false;
-    if (!installedSolarCapModel.value.isValidate) isValid = false;
-    if (!sanctionedLoadModel.value.isValidate) isValid = false;
-    if (!vfdModel.value.isValidate) isValid = false;
-    if (!gridAvailabilityModel.value.isValidate) isValid = false;
+    isStep1Valid.value = isValid;
+    update();
+  }
+
+  void validateStep2() {
+    bool isValid = true;
     if (!peakMonthlyEnergyModel.value.isValidate) isValid = false;
     if (!requiredSolarCapModel.value.isValidate) isValid = false;
     if (!distanceToTransformerModel.value.isValidate) isValid = false;
     if (!ratingOfTransformerModel.value.isValidate) isValid = false;
     if (!purposeOfSolarizationModel.value.isValidate) isValid = false;
     if (!distInverterACDBModel.value.isValidate) isValid = false;
+    if (!distSolarACDBModel.value.isValidate) isValid = false;
+    if (!buildingHeightModel.value.isValidate) isValid = false;
     if (!roofSizeLengthModel.value.isValidate) isValid = false;
     if (!roofSizeBreadthModel.value.isValidate) isValid = false;
     if (!roofNatureModel.value.isValidate) isValid = false;
@@ -1069,8 +1785,29 @@ class LeadsController extends GetxController {
     if (!groundSizeLengthModel.value.isValidate) isValid = false;
     if (!groundSizeBreadthModel.value.isValidate) isValid = false;
     if (!otherRemarksModel.value.isValidate) isValid = false;
+    if (!scheduleMeeeingModel.value.isValidate) isValid = false;
+    isStep2Valid.value = isValid;
+    update();
+  }
 
-    isFormInvalidate.value = isValid;
+  void validateStep3() {
+    // Optional: Make mandatory if at least one load element is required
+    isStep3Valid.value = productDetailList.isNotEmpty;
+    update();
+  }
+
+  void validateStep4() {
+    // Optional: Make mandatory if at least one file is required
+    isStep4Valid.value = fileList.isNotEmpty;
+    update();
+  }
+
+  // Check if all steps are valid for Submit button
+  bool isFormValid() {
+    return isStep1Valid.value &&
+        isStep2Valid.value &&
+        isStep3Valid.value &&
+        isStep4Valid.value;
   }
 
   void openDatePicker({
@@ -1080,30 +1817,23 @@ class LeadsController extends GetxController {
     required RxString dateRx,
     required Rx<ValidationModel> model,
     bool showTimePickers = true,
-    bool isEndDate = false, // Added to identify end date picker
+    bool isEndDate = false,
   }) {
     showCommonDatePicker(
       context: context,
       title: title,
       initialDate: dateRx.value.isNotEmpty
-          ? dateTimeFormat.parse(dateRx.value)
+          ? DateTime.parse(dateRx.value)
           : null,
       minDate: isEndDate && startDate.value.isNotEmpty
-          ? dateTimeFormat.parse(startDate.value)
+          ? DateTime.parse(startDate.value)
           : null,
       showTimePickers: showTimePickers,
       onDatePicked: (DateTime date) {
-        final formatted = dateTimeFormat.format(date);
+        final formatted = date.toString();
         dateRx.value = formatted;
         controller.text = formatted;
-        validateFields(
-          controller.text,
-          iscomman: true,
-          model: model,
-          errorText1: showTimePickers
-              ? 'Please choose date and time'
-              : 'Please choose date',
-        );
+        validateScheduleMeeting(controller.text);
       },
     );
   }
@@ -1133,7 +1863,7 @@ class LeadsController extends GetxController {
         borderRadius: BorderRadius.only(topLeft: Radius.circular(13.w)),
       ),
       isScrollControlled: true,
-      constraints: BoxConstraints(maxWidth: Device.width),
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -1222,7 +1952,15 @@ class LeadsController extends GetxController {
                                 controller: deviceNameCtr,
                                 hintLabel: "Enter Device Name",
                                 onChanged: (val) {
-                                  validateLongitude(val);
+                                  deviceNameModel.update((model) {
+                                    if (val == null || val.trim().isEmpty) {
+                                      model!.error = "Device Name is required";
+                                      model.isValidate = false;
+                                    } else {
+                                      model!.error = null;
+                                      model.isValidate = true;
+                                    }
+                                  });
                                 },
                                 inputType: TextInputType.text,
                                 formType: FieldType.text,
@@ -1241,7 +1979,15 @@ class LeadsController extends GetxController {
                                 controller: categoryCtr,
                                 hintLabel: "Enter Category",
                                 onChanged: (val) {
-                                  validateLongitude(val);
+                                  categoryModel.update((model) {
+                                    if (val == null || val.trim().isEmpty) {
+                                      model!.error = "Category is required";
+                                      model.isValidate = false;
+                                    } else {
+                                      model!.error = null;
+                                      model.isValidate = true;
+                                    }
+                                  });
                                 },
                                 inputType: TextInputType.text,
                                 formType: FieldType.text,
@@ -1260,9 +2006,20 @@ class LeadsController extends GetxController {
                                 controller: powerCtr,
                                 hintLabel: "Enter Power (W)",
                                 onChanged: (val) {
-                                  validateLongitude(val);
+                                  powerModel.update((model) {
+                                    if (val == null || val.trim().isEmpty) {
+                                      model!.error = "Power is required";
+                                      model.isValidate = false;
+                                    } else if (double.tryParse(val) == null) {
+                                      model!.error = "Enter valid power";
+                                      model.isValidate = false;
+                                    } else {
+                                      model!.error = null;
+                                      model.isValidate = true;
+                                    }
+                                  });
                                 },
-                                inputType: TextInputType.text,
+                                inputType: TextInputType.number,
                                 formType: FieldType.text,
                                 wantSuffix: false,
                                 errorText: powerModel.value.error,
@@ -1279,9 +2036,20 @@ class LeadsController extends GetxController {
                                 controller: usageHrsCtr,
                                 hintLabel: "Enter Usage (hrs)",
                                 onChanged: (val) {
-                                  validateLongitude(val);
+                                  usageHrsModel.update((model) {
+                                    if (val == null || val.trim().isEmpty) {
+                                      model!.error = "Usage hours is required";
+                                      model.isValidate = false;
+                                    } else if (double.tryParse(val) == null) {
+                                      model!.error = "Enter valid usage hours";
+                                      model.isValidate = false;
+                                    } else {
+                                      model!.error = null;
+                                      model.isValidate = true;
+                                    }
+                                  });
                                 },
-                                inputType: TextInputType.text,
+                                inputType: TextInputType.number,
                                 formType: FieldType.text,
                                 wantSuffix: false,
                                 errorText: usageHrsModel.value.error,
@@ -1309,9 +2077,24 @@ class LeadsController extends GetxController {
                                           controller: energyWhCtr,
                                           hintLabel: "Energy (Wh)",
                                           onChanged: (val) {
-                                            validateLongitude(val);
+                                            energyWhModel.update((model) {
+                                              if (val == null ||
+                                                  val.trim().isEmpty) {
+                                                model!.error =
+                                                    "Energy (Wh) is required";
+                                                model.isValidate = false;
+                                              } else if (double.tryParse(val) ==
+                                                  null) {
+                                                model!.error =
+                                                    "Enter valid energy (Wh)";
+                                                model.isValidate = false;
+                                              } else {
+                                                model!.error = null;
+                                                model.isValidate = true;
+                                              }
+                                            });
                                           },
-                                          inputType: TextInputType.text,
+                                          inputType: TextInputType.number,
                                           formType: FieldType.text,
                                           wantSuffix: false,
                                           errorText: energyWhModel.value.error,
@@ -1338,9 +2121,24 @@ class LeadsController extends GetxController {
                                           controller: energyKWhCtr,
                                           hintLabel: "Energy (KWh)",
                                           onChanged: (val) {
-                                            validateLongitude(val);
+                                            energyKWhModel.update((model) {
+                                              if (val == null ||
+                                                  val.trim().isEmpty) {
+                                                model!.error =
+                                                    "Energy (KWh) is required";
+                                                model.isValidate = false;
+                                              } else if (double.tryParse(val) ==
+                                                  null) {
+                                                model!.error =
+                                                    "Enter valid energy (KWh)";
+                                                model.isValidate = false;
+                                              } else {
+                                                model!.error = null;
+                                                model.isValidate = true;
+                                              }
+                                            });
                                           },
-                                          inputType: TextInputType.text,
+                                          inputType: TextInputType.number,
                                           formType: FieldType.text,
                                           wantSuffix: false,
                                           errorText: energyKWhModel.value.error,
@@ -1362,7 +2160,7 @@ class LeadsController extends GetxController {
                                   () {
                                     Get.back();
                                   },
-                                  'Cancle',
+                                  'Cancel',
                                   validate: true,
                                 ),
                               ),
@@ -1371,23 +2169,36 @@ class LeadsController extends GetxController {
                                 child: getFormButton(
                                   context,
                                   () {
-                                    final newElement = LoadElement(
-                                      deviceName: deviceNameCtr.text,
-                                      category: categoryCtr.text,
-                                      power: powerCtr.text,
-                                      usageHrs: usageHrsCtr.text,
-                                      energyWh: energyWhCtr.text,
-                                      energyKWh: energyKWhCtr.text,
-                                    );
-                                    if (index == null) {
-                                      addLoad(newElement);
-                                    } else {
-                                      updateLoad(index, newElement);
+                                    if (deviceNameModel.value.isValidate &&
+                                        categoryModel.value.isValidate &&
+                                        powerModel.value.isValidate &&
+                                        usageHrsModel.value.isValidate &&
+                                        energyWhModel.value.isValidate &&
+                                        energyKWhModel.value.isValidate) {
+                                      final newElement = LoadElement(
+                                        deviceName: deviceNameCtr.text,
+                                        category: categoryCtr.text,
+                                        power: powerCtr.text,
+                                        usageHrs: usageHrsCtr.text,
+                                        energyWh: energyWhCtr.text,
+                                        energyKWh: energyKWhCtr.text,
+                                      );
+                                      if (index == null) {
+                                        addLoad(newElement);
+                                      } else {
+                                        updateLoad(index, newElement);
+                                      }
+                                      Get.back();
                                     }
-                                    Get.back();
                                   },
                                   loadElementItem != null ? "Update" : 'Add',
-                                  validate: true,
+                                  validate:
+                                      deviceNameModel.value.isValidate &&
+                                      categoryModel.value.isValidate &&
+                                      powerModel.value.isValidate &&
+                                      usageHrsModel.value.isValidate &&
+                                      energyWhModel.value.isValidate &&
+                                      energyKWhModel.value.isValidate,
                                 ),
                               ),
                             ],
@@ -1395,7 +2206,10 @@ class LeadsController extends GetxController {
                         ],
                       ),
                     ),
-                    getDynamicSizedBox(height: 2.h, width: Device.width),
+                    getDynamicSizedBox(
+                      height: 2.h,
+                      width: MediaQuery.of(context).size.width,
+                    ),
                   ],
                 ),
               ),
@@ -1404,7 +2218,6 @@ class LeadsController extends GetxController {
         );
       },
     );
-    // Check if the bottom sheet was dismissed by pressing submit button
     if (result != null && result == true) {
       logcat("DismissDialog", 'DONE');
     }
@@ -1427,7 +2240,7 @@ class LeadsController extends GetxController {
         borderRadius: BorderRadius.only(topLeft: Radius.circular(13.w)),
       ),
       isScrollControlled: true,
-      constraints: BoxConstraints(maxWidth: Device.width),
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -1457,7 +2270,7 @@ class LeadsController extends GetxController {
                             child: Align(
                               alignment: Alignment.center,
                               child: Text(
-                                "Load Element",
+                                "Upload File",
                                 style: TextStyle(
                                   color: white,
                                   fontSize: 16.sp,
@@ -1546,7 +2359,6 @@ class LeadsController extends GetxController {
                               isRequired: true,
                             );
                           }),
-
                           getDynamicSizedBox(height: 3.h),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1557,7 +2369,7 @@ class LeadsController extends GetxController {
                                   () {
                                     Get.back();
                                   },
-                                  'Cancle',
+                                  'Cancel',
                                   validate: true,
                                 ),
                               ),
@@ -1566,23 +2378,24 @@ class LeadsController extends GetxController {
                                 child: getFormButton(
                                   context,
                                   () {
-                                    final newFile = UploadFile(
-                                      uploadFile: uploadFileCtr.text,
-                                      category: uploadCategoryCtr.text,
-                                    );
-
-                                    if (index == null) {
-                                      addFile(newFile); // Add new
-                                    } else {
-                                      updateFile(
-                                        index,
-                                        newFile,
-                                      ); // Update existing
+                                    if (uploadFileModel.value.isValidate &&
+                                        uploadCategoryModel.value.isValidate) {
+                                      final newFile = UploadFile(
+                                        uploadFile: uploadFileCtr.text,
+                                        category: uploadCategoryCtr.text,
+                                      );
+                                      if (index == null) {
+                                        addFile(newFile);
+                                      } else {
+                                        updateFile(index, newFile);
+                                      }
+                                      Get.back();
                                     }
-                                    Get.back();
                                   },
                                   fileItem != null ? "Update" : 'Add',
-                                  validate: true,
+                                  validate:
+                                      uploadFileModel.value.isValidate &&
+                                      uploadCategoryModel.value.isValidate,
                                 ),
                               ),
                             ],
@@ -1590,7 +2403,10 @@ class LeadsController extends GetxController {
                         ],
                       ),
                     ),
-                    getDynamicSizedBox(height: 2.h, width: Device.width),
+                    getDynamicSizedBox(
+                      height: 2.h,
+                      width: MediaQuery.of(context).size.width,
+                    ),
                   ],
                 ),
               ),
@@ -1599,48 +2415,34 @@ class LeadsController extends GetxController {
         );
       },
     );
-    // Check if the bottom sheet was dismissed by pressing submit button
     if (result != null && result == true) {
       logcat("DismissDialog", 'DONE');
     }
   }
 
-  // Open system file picker
   Future<void> pickAnyFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.any, // 👈 allows ALL types (images, pdf, docs, etc.)
-    );
-
+    final result = await FilePicker.platform.pickFiles(type: FileType.any);
     if (result != null && result.files.isNotEmpty) {
-      final file = File(result.files.single.path!);
       final fileName = result.files.single.name;
-
-      // show file name in your text field controller
       uploadFileCtr.text = fileName;
+      uploadFileModel.update((model) {
+        if (fileName.isEmpty) {
+          model!.error = "File is required";
+          model.isValidate = false;
+        } else {
+          model!.error = null;
+          model.isValidate = true;
+        }
+      });
+      validateStep4();
       update();
-      print("Picked file path: ${file.path}");
-      print("Picked file name: $fileName");
     }
   }
-
-  // Common filter
-  var currentFilterSource = [].obs;
-  var filteredData = [].obs;
-  RxString categoryId = "".obs;
-  // RxList<ResultWp> customerList = <ResultWp>[].obs;
-
-  RxList<CategoryModel> categoryList = <CategoryModel>[
-    CategoryModel(id: "1", name: "Invoice"),
-    CategoryModel(id: "2", name: "Bills"),
-    CategoryModel(id: "3", name: "Reports"),
-    CategoryModel(id: "4", name: "Others"),
-  ].obs;
 
   void showCategorySelectionPopups(BuildContext context) {
     currentFilterSource.value = List.from(categoryList);
     filteredData.value = List.from(categoryList);
     searchUploadCategoryCtr.clear();
-
     fetchSelectionPopup<CategoryModel>(
       context,
       title: 'Category',
@@ -1657,22 +2459,28 @@ class LeadsController extends GetxController {
       },
       getTitle: (value) => value.name,
       onSelected: (data) {
-        uploadCategoryCtr.clear();
         uploadCategoryCtr.text = data.name;
         categoryId.value = data.id.toString();
-        logcat('customerID', categoryId.value);
-        validateFields(
-          uploadCategoryCtr.text,
-          iscomman: true,
-          model: uploadCategoryModel,
-          errorText1: 'Enter Category',
-        );
+        validateUploadCategory(uploadCategoryCtr.text);
         update();
       },
       backBtn: () {
         Get.back();
       },
     );
+  }
+
+  void validateUploadCategory(String? val) {
+    uploadCategoryModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Category is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep4();
   }
 
   void filterFetchData<T>(
@@ -1690,4 +2498,6 @@ class LeadsController extends GetxController {
     }
     update();
   }
+
+  // Placeholder for missing methods
 }

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide ScreenType;
-import 'package:intl/intl.dart';
 import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/common_date_time_picker.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide ScreenType;
 import 'package:sales_app/componant/button/form_button.dart';
+import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
 import 'package:sales_app/componant/input/custom_text_field.dart';
 import 'package:sales_app/componant/input/form_inputs.dart';
@@ -9,21 +10,73 @@ import 'package:sales_app/componant/parentWidgets/CustomeParentBackground.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/configs/colors_constant.dart';
+import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
-import 'package:sales_app/controller/leads_controller/leads_controller.dart';
+import 'package:sales_app/controller/leads_controller/add_leads_controller.dart';
 import 'package:sales_app/utils/buildDynamicTable.dart';
+import 'package:sales_app/utils/custom_stepper_widget.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sizer/sizer.dart';
 
+// Assuming CustomLinearStepper is in a separate file or included here
 class AddLeadScreen extends StatefulWidget {
-  const AddLeadScreen({super.key});
+  final bool isEdit;
+  const AddLeadScreen({super.key, required this.isEdit});
 
   @override
   State<AddLeadScreen> createState() => _AddLeadScreenState();
 }
 
 class _AddLeadScreenState extends State<AddLeadScreen> {
-  var controller = Get.put(LeadsController());
+  final AddLeadsController controller = Get.isRegistered<AddLeadsController>()
+      ? Get.find<AddLeadsController>()
+      : Get.put(AddLeadsController());
+  int _currentStep = 0;
+
+  // Define steps for the stepper
+  final List<String> _steps = [
+    'Company Details',
+    'Contact Info',
+    'Load Element',
+    'Files',
+  ];
+  // Callback to handle step tap
+  void _onStepTapped(int index) {
+    setState(() {
+      _currentStep = index;
+    });
+  }
+
+  void _onStepContinue() {
+    if (_currentStep < _steps.length - 1) {
+      setState(() {
+        _currentStep += 1;
+      });
+    } else {
+      // Submit logic
+      if (controller.isFormValid()) {
+        // Implement submit logic here
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Lead ${widget.isEdit ? "Updated" : "Added"} Successfully',
+            ),
+          ),
+        );
+        Get.back();
+      }
+    }
+  }
+
+  void _onStepCancel() {
+    if (_currentStep > 0) {
+      setState(() {
+        _currentStep -= 1;
+      });
+    } else {
+      Get.back();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +95,20 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
         child: Column(
           children: [
             getCommonToolbar(
-              "Add Leads",
+              widget.isEdit == true ? 'Edit Lead' : "Add Leads",
               onClick: () {
                 Get.back();
               },
             ),
             getDynamicSizedBox(height: 1.h),
+            CustomLinearStepper(
+              currentStep: _currentStep,
+              steps: _steps,
+              activeColor: primaryColor,
+              inactiveColor: Colors.grey[300]!,
+              onStepTapped: _onStepTapped,
+            ),
+            getDynamicSizedBox(height: 2.h),
             Expanded(
               child: Theme(
                 data: ThemeData(
