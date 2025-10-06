@@ -7,6 +7,7 @@ import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/common_date_time_picker.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
 import 'package:sales_app/componant/dialogs/loading_indicator.dart';
+import 'package:sales_app/componant/input/form_inputs.dart';
 import 'package:sales_app/componant/input/getReactiveDropdown.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
@@ -38,8 +39,11 @@ class LeadController extends GetxController {
   RxBool isDistrictSelected = false.obs;
   RxBool isClusterSelected = false.obs;
   RxBool isFormInvalidate = false.obs;
+  RxBool isStatusSelected = false.obs;
+  RxBool isCategorySelected = false.obs;
   RxList<Category> districtList = <Category>[].obs;
   RxList<Category> clustersList = <Category>[].obs;
+  RxList<Category> categoryList = <Category>[].obs;
 
   @override
   void onInit() {
@@ -51,17 +55,21 @@ class LeadController extends GetxController {
     categoryNode = FocusNode();
     clusterNode = FocusNode();
     customerNode = FocusNode();
+    statusNode = FocusNode();
     searchGroupNode = FocusNode();
     searchCategoriesNode = FocusNode();
     searchClusterNode = FocusNode();
     searchCustomerNode = FocusNode();
+    countrySearchNode = FocusNode();
 
     startTimeCtr = TextEditingController();
+    countrySearchCtr = TextEditingController();
     endTimeCtr = TextEditingController();
     district = TextEditingController();
     categoryCtr = TextEditingController();
     clusterCtr = TextEditingController();
     customerCtr = TextEditingController();
+    statusCtr = TextEditingController();
     searchDistrictCtr = TextEditingController();
     searchCategoriesCtr = TextEditingController();
     searchClusterCtr = TextEditingController();
@@ -76,10 +84,13 @@ class LeadController extends GetxController {
     categoryNode.dispose();
     clusterNode.dispose();
     customerNode.dispose();
+    statusNode.dispose();
     searchGroupNode.dispose();
     searchCategoriesNode.dispose();
     searchClusterNode.dispose();
     searchCustomerNode.dispose();
+    countrySearchNode.dispose();
+    countrySearchCtr.dispose();
 
     startTimeCtr.dispose();
     endTimeCtr.dispose();
@@ -87,6 +98,7 @@ class LeadController extends GetxController {
     categoryCtr.dispose();
     clusterCtr.dispose();
     customerCtr.dispose();
+    statusCtr.dispose();
     searchDistrictCtr.dispose();
     searchCategoriesCtr.dispose();
     searchClusterCtr.dispose();
@@ -101,11 +113,13 @@ class LeadController extends GetxController {
   void resetForm() {
     unfocusAll();
     startTimeCtr.clear();
+    countrySearchCtr.clear();
     endTimeCtr.clear();
     district.clear();
     categoryCtr.clear();
     clusterCtr.clear();
     customerCtr.clear();
+    statusCtr.clear();
     searchDistrictCtr.clear();
     searchCategoriesCtr.clear();
     searchClusterCtr.clear();
@@ -116,8 +130,12 @@ class LeadController extends GetxController {
     endDateApi.value = '';
     selectedDistrictId.value = '';
     selectedClusterId.value = '';
+    selectedCategoryId.value = '';
+    selectedStatus.value = 'Select Status';
     isDistrictSelected.value = false;
     isClusterSelected.value = false;
+    isCategorySelected.value = false;
+    isStatusSelected.value = false;
     isStartDateSelected.value = false;
     districtListInt.clear();
     categoryListInt.clear();
@@ -130,6 +148,7 @@ class LeadController extends GetxController {
     categoryModel.value = ValidationModel(null, null, isValidate: false);
     clusterModel.value = ValidationModel(null, null, isValidate: false);
     customerModel.value = ValidationModel(null, null, isValidate: false);
+    statusModel.value = ValidationModel(null, null, isValidate: false);
     isFormInvalidate.value = false;
     update();
   }
@@ -144,16 +163,24 @@ class LeadController extends GetxController {
 
   var isCustomerLoading = false.obs;
 
-  //filter logic
-
+  // Filter logic
   late FocusNode startTimeNode, endTimeNode;
-  late FocusNode districtNode, categoryNode, clusterNode, customerNode;
+  late FocusNode districtNode,
+      categoryNode,
+      clusterNode,
+      customerNode,
+      statusNode;
   late FocusNode searchGroupNode,
       searchCategoriesNode,
       searchClusterNode,
       searchCustomerNode;
-  late TextEditingController startTimeCtr, endTimeCtr;
-  late TextEditingController district, categoryCtr, clusterCtr, customerCtr;
+  late FocusNode countrySearchNode;
+  late TextEditingController startTimeCtr, endTimeCtr, countrySearchCtr;
+  late TextEditingController district,
+      categoryCtr,
+      clusterCtr,
+      customerCtr,
+      statusCtr;
   late TextEditingController searchDistrictCtr,
       searchCategoriesCtr,
       searchClusterCtr,
@@ -171,9 +198,12 @@ class LeadController extends GetxController {
   var categoryModel = ValidationModel(null, null, isValidate: false).obs;
   var clusterModel = ValidationModel(null, null, isValidate: false).obs;
   var customerModel = ValidationModel(null, null, isValidate: false).obs;
-
+  var statusModel = ValidationModel(null, null, isValidate: false).obs;
+  var countrySearchModel = ValidationModel(null, null, isValidate: false).obs;
   RxString selectedDistrictId = ''.obs;
   RxString selectedClusterId = ''.obs;
+  RxString selectedCategoryId = ''.obs;
+  RxString selectedStatus = 'Select Status'.obs;
   RxList districtListInt = [].obs;
   RxList categoryListInt = [].obs;
   RxList clusterListInt = [].obs;
@@ -182,6 +212,8 @@ class LeadController extends GetxController {
   void resetSelectionFlags() {
     isDistrictSelected.value = false;
     isClusterSelected.value = false;
+    isCategorySelected.value = false;
+    isStatusSelected.value = false;
   }
 
   void openFilterBottomSheet({required BuildContext context}) {
@@ -207,6 +239,19 @@ class LeadController extends GetxController {
               .map((c) => c.name)
               .join(', ')
         : '';
+    categoryCtr.text = selectedCategoryId.value.isNotEmpty
+        ? categoryList
+              .where(
+                (c) => selectedCategoryId.value
+                    .split(', ')
+                    .contains(c.id.toString()),
+              )
+              .map((c) => c.name)
+              .join(', ')
+        : '';
+    statusCtr.text = selectedStatus.value != 'Select Status'
+        ? selectedStatus.value
+        : '';
 
     startTimeModel.value = ValidationModel(
       startDate.value.isNotEmpty ? startDate.value : null,
@@ -228,9 +273,21 @@ class LeadController extends GetxController {
       null,
       isValidate: clusterCtr.text.isNotEmpty,
     );
+    categoryModel.value = ValidationModel(
+      categoryCtr.text.isNotEmpty ? categoryCtr.text : null,
+      null,
+      isValidate: categoryCtr.text.isNotEmpty,
+    );
+    statusModel.value = ValidationModel(
+      statusCtr.text.isNotEmpty ? statusCtr.text : null,
+      null,
+      isValidate: statusCtr.text.isNotEmpty,
+    );
 
     isDistrictSelected.value = selectedDistrictId.value.isNotEmpty;
     isClusterSelected.value = selectedClusterId.value.isNotEmpty;
+    isCategorySelected.value = selectedCategoryId.value.isNotEmpty;
+    isStatusSelected.value = selectedStatus.value != 'Select Status';
 
     getFillterOptions(context);
 
@@ -287,9 +344,11 @@ class LeadController extends GetxController {
       onResponse: (data) {
         districtList.clear();
         clustersList.clear();
+        categoryList.clear();
         FiltterModel responseDetail = FiltterModel.fromJson(data);
         districtList.addAll(responseDetail.result.groups);
         clustersList.addAll(responseDetail.result.clusters);
+        categoryList.addAll(responseDetail.result.categories);
         update();
       },
       networkManager: networkManager,
@@ -308,9 +367,7 @@ class LeadController extends GetxController {
       state.value = ScreenState.apiLoading;
     }
     if (isFirstTime == true) {
-      isCustomerLoading(
-        true,
-      ); // Assuming you have a loading state for customers
+      isCustomerLoading(true);
     }
 
     try {
@@ -359,13 +416,12 @@ class LeadController extends GetxController {
             customerList.clear();
           }
 
-          // ✅ Set pagination info
           this.currentPage.value = customerListData.pagination.currentPage;
           lastPage.value = customerListData.pagination.lastPage;
           totalItems.value = customerListData.pagination.total;
           fromItem.value = customerListData.pagination.from;
           toItem.value = customerListData.pagination.to;
-          // Handle pagination
+
           if (customerListData.pagination.currentPage <
               customerListData.pagination.lastPage) {
             nextPageURL.value =
@@ -409,8 +465,6 @@ class LeadController extends GetxController {
         isCustomerLoading(false);
       }
       state.value = ScreenState.apiError;
-      // message.value = ServerError.servererror;
-      // showDialogForScreen(context, 'Meter Screen', ServerError.servererror, callback: () {});
     }
   }
 
@@ -424,7 +478,6 @@ class LeadController extends GetxController {
     "Action",
   ].obs;
 
-  // Provide all customer data without pagination
   List<List<String>> get meetingsData {
     if (customerList.isEmpty) return [];
 
@@ -433,7 +486,7 @@ class LeadController extends GetxController {
       final e = entry.value;
 
       return [
-        index.toString(), // Sr No.
+        index.toString(),
         e.businessUnit ?? 'N/A',
         e.cafNo ?? 'N/A',
         e.customerName ?? 'N/A',
@@ -474,7 +527,19 @@ class LeadController extends GetxController {
     enableSubmitButton();
   }
 
-  final List<String> status = ['Select Status', 'Reschedule'];
+  final List<String> status = [
+    'Select Status',
+    'Reschedule',
+    'Active',
+    'Inactive',
+  ];
+
+  final List<String> cateory = [
+    'Select Status',
+    'Reschedule',
+    'Active',
+    'Inactive',
+  ];
   RxString selectStatus = 'Select Status'.obs;
 
   DateTime? selectedDateTime;
@@ -484,36 +549,94 @@ class LeadController extends GetxController {
     required TextEditingController controller,
     required RxString dateRx,
     required Rx<ValidationModel> model,
-    bool showTimePickers = true,
-    bool isEndDate = false, // Added to identify end date picker
+    bool showTimePickers = false,
+    bool isEndDate = false,
   }) {
     showCommonDatePicker(
       context: context,
       title: title,
       initialDate: dateRx.value.isNotEmpty
-          ? dateTimeFormat.parse(dateRx.value)
+          ? dateFormat.parse(dateRx.value)
           : null,
       minDate: startDate.value.isNotEmpty
-          ? dateTimeFormat.parse(startDate.value)
+          ? dateFormat.parse(startDate.value)
           : null,
       showTimePickers: showTimePickers,
       onDatePicked: (DateTime date) {
-        final formatted = dateTimeFormat.format(date);
+        final formatted = dateFormat.format(date);
         dateRx.value = formatted;
         controller.text = formatted;
-        // validateFields(
-        //   controller.text,
-        //   iscomman: true,
-        //   model: model,
-        //   errorText1: showTimePickers
-        //       ? 'Please choose date and time'
-        //       : 'Please choose date',
-        // );
+        model.value = ValidationModel(formatted, null, isValidate: true);
+        enableSubmitButton();
       },
     );
   }
 
-  // Common filter
+  void showCategorySelectionPopups(BuildContext context) {
+    fetchSelectionPopup<String>(
+      context,
+      title: 'Categories',
+      controller: categoryCtr,
+      list: cateory,
+      searchCtr: searchCategoriesCtr,
+      searchNode: searchCategoriesNode,
+      filterFunction: (val) {
+        return categoryList
+            .where(
+              (item) => item.name.toLowerCase().contains(val.toLowerCase()),
+            )
+            .toList();
+      },
+      getTitle: (value) => value,
+      // getId: (value) => value.id.toString(),
+      onSelected: (selectedList) {
+        selectedCategoryId.value = selectedList;
+        //     .map((e) => e.id.toString())
+        //     .join(', ');
+        // categoryListInt.value = selectedList.map((e) => e.id).toList();
+
+        // if (selectedList.isNotEmpty) {
+        //   isCategorySelected.value = true;
+        // } else {
+        //   isCategorySelected.value = false;
+        // }
+      },
+      function: () {},
+      backBtn: () {},
+    );
+  }
+
+  void showStatusSelectionPopups(BuildContext context) {
+    fetchSelectionPopup<String>(
+      context,
+      title: 'Status',
+      controller: statusCtr,
+      list: status,
+      searchCtr: searchCustomerCtr,
+      searchNode: searchCustomerNode,
+      filterFunction: (val) {
+        return status
+            .where((item) => item.toLowerCase().contains(val.toLowerCase()))
+            .toList();
+      },
+      getTitle: (value) => value,
+      // getId: (value) => value,
+      onSelected: (selected) {
+        selectedStatus.value = selected;
+        statusCtr.text = selected;
+        statusModel.value = ValidationModel(
+          selected,
+          null,
+          isValidate: selected != 'Select Status',
+        );
+        isStatusSelected.value = selected != 'Select Status';
+        enableSubmitButton();
+      },
+      function: () {},
+      backBtn: () {},
+    );
+  }
+
   var currentFilterSource = [].obs;
   var filteredData = [].obs;
   RxString categoryId = "".obs;
@@ -523,6 +646,86 @@ class LeadController extends GetxController {
     CategoryModel(id: "3", name: "Reports"),
     CategoryModel(id: "4", name: "Others"),
   ].obs;
+
+  void showDistrictSelectionPopups(BuildContext context) {
+    currentFilterSource.value = List.from(districtList);
+    searchDistrictCtr.clear();
+
+    showUpdatedMultpleSelectionPopup<Category>(
+      context,
+      title: 'District',
+      controller: district,
+      list: districtList,
+      searchCtr: searchDistrictCtr,
+      searchNode: searchGroupNode,
+      filterFunction: (val) {
+        return districtList
+            .where(
+              (item) => item.name.toLowerCase().contains(val.toLowerCase()),
+            )
+            .toList();
+      },
+      getTitle: (value) => value.name,
+      getId: (value) => value.id.toString(),
+      onSelected: (selectedList) {
+        selectedDistrictId.value = selectedList
+            .map((e) => e.id.toString())
+            .join(', ');
+        districtListInt.value = selectedList.map((e) => e.id).toList();
+
+        if (selectedList.isNotEmpty) {
+          isDistrictSelected.value = true;
+          isClusterSelected.value = false;
+        } else {
+          isDistrictSelected.value = false;
+          if (!isClusterSelected.value) {
+            resetSelectionFlags();
+          }
+        }
+      },
+      function: () {},
+    );
+  }
+
+  void showClusterSelectionPopups(BuildContext context) {
+    currentFilterSource.value = List.from(clustersList);
+    searchClusterCtr.clear();
+
+    showUpdatedMultpleSelectionPopup<Category>(
+      context,
+      title: 'Clusters',
+      controller: clusterCtr,
+      list: clustersList,
+      searchCtr: searchClusterCtr,
+      searchNode: searchClusterNode,
+      filterFunction: (val) {
+        return clustersList
+            .where(
+              (item) => item.name.toLowerCase().contains(val.toLowerCase()),
+            )
+            .toList();
+      },
+      getTitle: (value) => value.name,
+      getId: (value) => value.id.toString(),
+      onSelected: (selectedList) {
+        selectedClusterId.value = selectedList
+            .map((e) => e.id.toString())
+            .join(', ');
+        clusterListInt.value = selectedList.map((e) => e.id).toList();
+
+        if (selectedList.isNotEmpty) {
+          isDistrictSelected.value = false;
+          isClusterSelected.value = true;
+        } else {
+          isClusterSelected.value = false;
+          if (!isDistrictSelected.value) {
+            resetSelectionFlags();
+          }
+        }
+      },
+      function: () {},
+    );
+  }
 }
 
 Widget addFilterSheetWidget(
@@ -541,8 +744,6 @@ Widget addFilterSheetWidget(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // getCustomDivider(),
-            // getDynamicSizedBox(height: 4.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -601,59 +802,110 @@ Widget addFilterSheetWidget(
               ],
             ),
             getDynamicSizedBox(height: 1.h),
-
-            /// District
-            Obx(() {
-              return getTextField(
-                context: context,
-                wantLabel: true,
-                label: 'District',
-                ctr: ctr.district,
-                node: ctr.districtNode,
-                model: ctr.disitrict.value,
-                isenable: false,
-                isdropdown: true,
-                wantsuffix: true,
-                usegesture:
-                    (!ctr.isDistrictSelected.value &&
-                        !ctr.isClusterSelected.value) ||
-                    ctr.isDistrictSelected.value,
-                isVerified:
-                    !ctr.isDistrictSelected.value &&
-                    (ctr.isClusterSelected.value),
-                gestureFunction: () {
-                  // ctr.showDistrictSelectionPopups(context);
-                },
-                hint: 'Select District',
-              );
-            }),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Obx(() {
+                    return getTextField(
+                      context: context,
+                      wantLabel: true,
+                      label: 'District',
+                      ctr: ctr.district,
+                      node: ctr.districtNode,
+                      model: ctr.disitrict.value,
+                      isenable: false,
+                      isdropdown: true,
+                      wantsuffix: true,
+                      usegesture:
+                          (!ctr.isDistrictSelected.value &&
+                              !ctr.isClusterSelected.value) ||
+                          ctr.isDistrictSelected.value,
+                      isVerified:
+                          !ctr.isDistrictSelected.value &&
+                          (ctr.isClusterSelected.value),
+                      gestureFunction: () {
+                        ctr.showDistrictSelectionPopups(context);
+                      },
+                      hint: 'Select District',
+                    );
+                  }),
+                ),
+                getDynamicSizedBox(width: 4.w),
+                Expanded(
+                  child: Obx(() {
+                    return getTextField(
+                      context: context,
+                      wantLabel: true,
+                      label: 'Clusters',
+                      ctr: ctr.clusterCtr,
+                      node: ctr.clusterNode,
+                      model: ctr.clusterModel.value,
+                      isenable: false,
+                      isdropdown: true,
+                      wantsuffix: true,
+                      usegesture:
+                          (!ctr.isDistrictSelected.value) ||
+                          ctr.isClusterSelected.value,
+                      isVerified:
+                          !ctr.isClusterSelected.value &&
+                          (ctr.isDistrictSelected.value),
+                      gestureFunction: () {
+                        ctr.showClusterSelectionPopups(context);
+                      },
+                      hint: 'Select Clusters',
+                    );
+                  }),
+                ),
+              ],
+            ),
             getDynamicSizedBox(height: 1.h),
-
-            /// Clusters
-            Obx(() {
-              return getTextField(
-                context: context,
-                wantLabel: true,
-                label: 'Clusters',
-                ctr: ctr.clusterCtr,
-                node: ctr.clusterNode,
-                model: ctr.clusterModel.value,
-                isenable: false,
-                isdropdown: true,
-                wantsuffix: true,
-                usegesture:
-                    (!ctr.isDistrictSelected.value) ||
-                    ctr.isClusterSelected.value,
-                isVerified:
-                    !ctr.isClusterSelected.value &&
-                    (ctr.isDistrictSelected.value),
-                gestureFunction: () {
-                  // ctr.showClusterSelectionPopups(context);
-                },
-                hint: 'Select Clusters',
-              );
-            }),
-
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Obx(() {
+                    return getTextField(
+                      context: context,
+                      wantLabel: true,
+                      label: 'Category',
+                      ctr: ctr.categoryCtr,
+                      node: ctr.categoryNode,
+                      model: ctr.categoryModel.value,
+                      isenable: false,
+                      isdropdown: true,
+                      wantsuffix: true,
+                      usegesture: true,
+                      gestureFunction: () {
+                        ctr.showCategorySelectionPopups(context);
+                      },
+                      hint: 'Select Category',
+                    );
+                  }),
+                ),
+                getDynamicSizedBox(width: 4.w),
+                Expanded(
+                  child: Obx(() {
+                    return getTextField(
+                      context: context,
+                      wantLabel: true,
+                      label: 'Status',
+                      ctr: ctr.statusCtr,
+                      node: ctr.statusNode,
+                      model: ctr.statusModel.value,
+                      isenable: false,
+                      isdropdown: true,
+                      wantsuffix: true,
+                      usegesture: true,
+                      gestureFunction: () {
+                        ctr.showStatusSelectionPopups(context);
+                      },
+                      hint: 'Select Status',
+                    );
+                  }),
+                ),
+              ],
+            ),
             getDynamicSizedBox(height: 3.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -663,8 +915,6 @@ Widget addFilterSheetWidget(
                     context,
                     () {
                       ctr.resetForm();
-                      ctr.isStartDateSelected = false.obs;
-                      // ctr.getDashboardData(context, 1, isFirstTime: true);
                       Get.back();
                     },
                     'Clear',
@@ -676,7 +926,6 @@ Widget addFilterSheetWidget(
                   child: getFormButton(
                     context,
                     () {
-                      // ctr.makeApiCall(context);
                       Get.back();
                     },
                     'Search',
@@ -704,27 +953,23 @@ void openDatePickerDash(
   DateTime? initialDate;
   if (selected.isNotEmpty) {
     try {
-      // Try parsing with the new display format (MMMM yyyy)
       initialDate = ctr.dateFormat.parse(selected);
     } catch (e) {
       try {
-        // Fallback to legacy format (dd-MM-yyyy) for backward compatibility
         initialDate = DateFormat('dd-MM-yyyy').parse(selected);
       } catch (e) {
-        initialDate = null; // Handle invalid format gracefully
+        initialDate = null;
       }
     }
   }
 
-  // Determine minDate for end date selection
   DateTime? minDate;
   if (!isStart && ctr.startDate.value.isNotEmpty) {
     try {
       minDate = ctr.dateFormat.parse(ctr.startDate.value);
-      // Set minDate to the first of the start month
       minDate = DateTime(minDate.year, minDate.month, 1);
     } catch (e) {
-      minDate = null; // Handle invalid start date gracefully
+      minDate = null;
     }
   }
 
@@ -752,25 +997,20 @@ void openDatePickerDash(
             Expanded(
               child: SfDateRangePicker(
                 selectionMode: DateRangePickerSelectionMode.single,
-                view: DateRangePickerView.year, // Show year view with months
+                view: DateRangePickerView.year,
                 initialSelectedDate: initialDate,
                 initialDisplayDate: initialDate,
-                minDate:
-                    minDate, // Restrict end date to be on or after start date
+                minDate: minDate,
                 onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
                   if (args.value is DateTime) {
                     DateTime selectedDate = args.value;
-
-                    // Set date to 1st of the month to ignore day
                     selectedDate = DateTime(
                       selectedDate.year,
                       selectedDate.month,
                       1,
                     );
-
-                    // Pass DateTime to controller
                     ctr.onDateSelected(selectedDate);
-                    Navigator.of(context).pop(); // Close dialog immediately
+                    Navigator.of(context).pop();
                   }
                 },
                 showTodayButton: false,
@@ -788,7 +1028,7 @@ void openDatePickerDash(
                 ),
                 selectionColor: primaryColor,
                 todayHighlightColor: primaryColor,
-                allowViewNavigation: false, // Prevent switching to day view
+                allowViewNavigation: false,
               ),
             ),
           ],
