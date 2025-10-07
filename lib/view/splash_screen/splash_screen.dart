@@ -5,6 +5,7 @@ import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/preference/UserPreference.dart';
+import 'package:sales_app/utils/AppPermissions.dart';
 import 'package:sales_app/view/dashboard_screen/dashboardScreen.dart';
 import 'package:sales_app/view/signin_screen/signin_screen.dart';
 import 'package:sizer/sizer.dart';
@@ -29,6 +30,9 @@ class SplashScreenState extends State<SplashScreen> {
     bool islogin = await UserPreferences().getLogin();
 
     if (islogin && userData != null) {
+      // AppPermissions().setRights(userData.rights);
+      // Load rights inside AppPermissions
+      await AppPermissions().loadRights();
       Get.offAll(() => DashboardScreen());
     } else {
       Get.offAll(() => const Signinscreen());

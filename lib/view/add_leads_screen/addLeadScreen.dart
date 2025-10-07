@@ -98,7 +98,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                 Get.back();
               },
             ),
-            getDynamicSizedBox(height: 1.h),
+            getDynamicSizedBox(height: 2.h),
             CustomLinearStepper(
               currentStep: _currentStep,
               steps: _steps,

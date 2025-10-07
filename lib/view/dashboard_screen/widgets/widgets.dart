@@ -26,6 +26,15 @@ Widget buildCircularChart({required List<LeadData> data}) {
     width: double.infinity,
     child: Center(
       child: SfCircularChart(
+        title: ChartTitle(
+          text: 'Leads by Status',
+          alignment: ChartAlignment.center,
+          textStyle: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14.5.sp,
+            fontFamily: plusJakartaSansMedium,
+          ),
+        ),
         margin: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
         legend: Legend(
           isVisible: true,

@@ -7,6 +7,7 @@ import 'package:sales_app/controller/internet_controller/internet_controller.dar
 import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
 import 'package:sales_app/preference/UserPreference.dart';
+import 'package:sales_app/utils/AppPermissions.dart';
 import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/log.dart';
 import 'package:sales_app/view/dashboard_screen/dashboardScreen.dart';
@@ -132,6 +133,7 @@ class Signinscreencontroller extends GetxController {
         logcat('tag', 'data');
         LoginModel responseDetail = LoginModel.fromJson(data);
         UserPreferences().saveSignInInfo(responseDetail.user);
+        AppPermissions().setRights(responseDetail.user.rights);
         UserPreferences().setPassword(passCtr.text);
         UserPreferences().setisLogin(true);
         logcat("LoginResponse::", jsonEncode(responseDetail.user));

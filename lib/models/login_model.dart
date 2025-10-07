@@ -16,6 +16,7 @@ class LoginModel {
     status: json["status"],
     message: json["message"],
     user: User.fromJson(json["user"]),
+    // user: User.fromJson(json["result"]),
   );
 
   Map<String, dynamic> toJson() => {

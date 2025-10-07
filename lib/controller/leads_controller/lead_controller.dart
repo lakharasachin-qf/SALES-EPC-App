@@ -635,7 +635,9 @@ class LeadController extends GetxController {
         // }
       },
       function: () {},
-      backBtn: () {},
+      backBtn: () {
+        Get.back();
+      },
     );
   }
 
@@ -666,7 +668,9 @@ class LeadController extends GetxController {
         enableSubmitButton();
       },
       function: () {},
-      backBtn: () {},
+      backBtn: () {
+        Get.back();
+      },
     );
   }
 

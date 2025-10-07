@@ -96,15 +96,15 @@ class DashboardController extends GetxController {
   var currentFilterSource = [].obs;
   var filteredData = [].obs;
 
-  RxBool isRescoTileVisible = false.obs;
-  RxBool isPerformanceTileVisible = false.obs;
-  RxBool isKpiRevenueTileVisible = false.obs;
-  RxBool isRevenueTileVisible = false.obs;
-  RxBool isDashboard1Visible = false.obs;
+  RxBool isRescoTileVisible = true.obs;
+  RxBool isPerformanceTileVisible = true.obs;
+  RxBool isKpiRevenueTileVisible = true.obs;
+  RxBool isRevenueTileVisible = true.obs;
+  RxBool isDashboard1Visible = true.obs;
 
-  RxBool isAddMeterReadings = false.obs;
-  RxBool isViewMeterReadings = false.obs;
-  RxBool isViewCustomer = false.obs;
+  RxBool isAddMeterReadings = true.obs;
+  RxBool isViewMeterReadings = true.obs;
+  RxBool isViewCustomer = true.obs;
 
   RxList<Category> districtList = <Category>[].obs;
   RxList<Category> clustersList = <Category>[].obs;
