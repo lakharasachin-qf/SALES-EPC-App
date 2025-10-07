@@ -13,13 +13,10 @@ import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
 import 'package:sales_app/models/LoadElement.dart';
-import 'package:sales_app/models/customer_model_wo_p.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
 import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/log.dart';
-import 'package:sales_app/view/add_leads_screen/validateFileds.dart';
 import 'package:sizer/sizer.dart';
-import 'dart:io';
 
 class CategoryModel {
   final String id;
@@ -1766,10 +1763,9 @@ class AddLeadsController extends GetxController {
 
   // Check if all steps are valid for Submit button
   bool isFormValid() {
-    return isStep1Valid.value &&
-        isStep2Valid.value &&
-        isStep3Valid.value &&
-        isStep4Valid.value;
+    return isStep1Valid.value && isStep2Valid.value;
+    // isStep3Valid.value &&
+    // isStep4Valid.value;
   }
 
   void openDatePicker({

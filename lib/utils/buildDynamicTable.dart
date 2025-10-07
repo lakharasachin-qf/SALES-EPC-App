@@ -96,7 +96,10 @@ Widget buildDynamicTable<T>({
     horizontalMargin: 13,
     columns: columns,
     headingRowColor: MaterialStateProperty.all(primaryColor),
-    headingTextStyle: const TextStyle(fontFamily: plusJakartaSansBold),
+    headingTextStyle: const TextStyle(
+      fontFamily: plusJakartaSansBold,
+      color: white,
+    ),
     border: TableBorder.all(
       color: grey,
       borderRadius: BorderRadius.only(
