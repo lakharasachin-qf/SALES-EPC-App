@@ -11,7 +11,6 @@ import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/controller/meetings_calendar_controller/meetings_calendar_controller.dart';
 import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/helper.dart';
-import 'package:sales_app/view/customer_screen.dart/view_customer_screen.dart';
 import 'package:sales_app/view/meetings_calendar_screen/meetings_history_screen.dart';
 import 'package:sizer/sizer.dart';
 

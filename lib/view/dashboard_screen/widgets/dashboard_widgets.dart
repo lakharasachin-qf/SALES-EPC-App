@@ -12,7 +12,6 @@ import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/dashboard_controller/dashboard_controller.dart';
 import 'package:sales_app/preference/UserPreference.dart';
 import 'package:sales_app/utils/log.dart';
-import 'package:sales_app/view/add_leads_screen/addLeadScreen.dart';
 import 'package:sales_app/view/customer_screen.dart/customer_screen.dart';
 import 'package:sales_app/view/lead_screenn/lead_screen.dart';
 import 'package:sales_app/view/meetings_calendar_screen/meetings_calendar_screen.dart';
@@ -161,15 +160,15 @@ Widget getDashboardDrawer(
               })
             : SizedBox.shrink();
       }),
-      getDynamicSizedBox(height: 1.h),
-      buildDrawerItem(
-        Asset.meetingsCalendar,
-        HomeScreenConst.meetingsCalendar,
-        () {
-          ctr.scaffoldKey.currentState?.closeDrawer();
-          Get.to(MeetingsCalendarScreen());
-        },
-      ),
+      // getDynamicSizedBox(height: 1.h),
+      // buildDrawerItem(
+      //   Asset.meetingsCalendar,
+      //   HomeScreenConst.meetingsCalendar,
+      //   () {
+      //     ctr.scaffoldKey.currentState?.closeDrawer();
+      //     Get.to(MeetingsCalendarScreen());
+      //   },
+      // ),
       buildDrawerItem("", 'Logout', () async {
         ctr.scaffoldKey.currentState?.closeDrawer();
         getpopup(

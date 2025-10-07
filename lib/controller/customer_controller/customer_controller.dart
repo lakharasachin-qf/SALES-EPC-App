@@ -27,9 +27,31 @@ import '../../api_handle/Repository.dart';
 import '../../models/fillter_model.dart' hide Result;
 import '../../view/customer_screen.dart/customer_widgets.dart';
 
+// New model for static customer data
+class CustomerData {
+  final String companyName;
+  final String contactPerson;
+  final String mobile;
+  final String status;
+  final DateTime liveData;
+  final String warrantyType;
+  final DateTime expiry;
+
+  CustomerData({
+    required this.companyName,
+    required this.contactPerson,
+    required this.mobile,
+    required this.status,
+    required this.liveData,
+    required this.warrantyType,
+    required this.expiry,
+  });
+}
+
 class CustomerScreenController extends GetxController {
   final InternetController networkManager = Get.find<InternetController>();
-  Rx<ScreenState> state = ScreenState.apiLoading.obs;
+  Rx<ScreenState> state =
+      ScreenState.apiSuccess.obs; // Set to apiSuccess for static data
   RxString message = ''.obs;
 
   RxBool isTextEmpty = false.obs;
@@ -127,6 +149,9 @@ class CustomerScreenController extends GetxController {
   void onInit() {
     super.onInit();
 
+    // Initialize static data
+    initializeStaticData();
+
     // 🔹 Initialize Controllers
     dateCtr = TextEditingController();
     uploadFileCtr = TextEditingController();
@@ -162,6 +187,113 @@ class CustomerScreenController extends GetxController {
     searchWarrantyTypeNode = FocusNode();
     searchCustomerStatusNode = FocusNode();
     searchNode = FocusNode();
+  }
+
+  // Initialize static customer data
+  void initializeStaticData() {
+    customerList.clear();
+    customerList.addAll([
+      CustomerData(
+        companyName: "Tech Corp",
+        contactPerson: "John Doe",
+        mobile: "123-456-7890",
+        status: "Active",
+        liveData: DateTime(2025, 1, 15),
+        warrantyType: "Invoice",
+        expiry: DateTime(2026, 1, 15),
+      ),
+      CustomerData(
+        companyName: "Innovate Ltd",
+        contactPerson: "Jane Smith",
+        mobile: "234-567-8901",
+        status: "Inactive",
+        liveData: DateTime(2024, 12, 10),
+        warrantyType: "Bills",
+        expiry: DateTime(2025, 12, 10),
+      ),
+      CustomerData(
+        companyName: "Global Solutions",
+        contactPerson: "Alice Johnson",
+        mobile: "345-678-9012",
+        status: "Reschedule",
+        liveData: DateTime(2025, 3, 20),
+        warrantyType: "Reports",
+        expiry: DateTime(2026, 3, 20),
+      ),
+      CustomerData(
+        companyName: "Future Tech",
+        contactPerson: "Bob Wilson",
+        mobile: "456-789-0123",
+        status: "Active",
+        liveData: DateTime(2025, 6, 5),
+        warrantyType: "Invoice",
+        expiry: DateTime(2027, 6, 5),
+      ),
+      CustomerData(
+        companyName: "Star Enterprises",
+        contactPerson: "Emma Brown",
+        mobile: "567-890-1234",
+        status: "Inactive",
+        liveData: DateTime(2024, 11, 30),
+        warrantyType: "Others",
+        expiry: DateTime(2025, 11, 30),
+      ),
+      CustomerData(
+        companyName: "NextGen Systems",
+        contactPerson: "Liam Davis",
+        mobile: "678-901-2345",
+        status: "Active",
+        liveData: DateTime(2025, 2, 18),
+        warrantyType: "Invoice",
+        expiry: DateTime(2026, 2, 18),
+      ),
+      CustomerData(
+        companyName: "Prime Innovations",
+        contactPerson: "Olivia Taylor",
+        mobile: "789-012-3456",
+        status: "Reschedule",
+        liveData: DateTime(2025, 4, 12),
+        warrantyType: "Reports",
+        expiry: DateTime(2026, 4, 12),
+      ),
+      CustomerData(
+        companyName: "Bright Solutions",
+        contactPerson: "Noah Anderson",
+        mobile: "890-123-4567",
+        status: "Inactive",
+        liveData: DateTime(2024, 10, 25),
+        warrantyType: "Bills",
+        expiry: DateTime(2025, 10, 25),
+      ),
+      CustomerData(
+        companyName: "Visionary Works",
+        contactPerson: "Sophia Martinez",
+        mobile: "901-234-5678",
+        status: "Active",
+        liveData: DateTime(2025, 7, 8),
+        warrantyType: "Invoice",
+        expiry: DateTime(2027, 7, 8),
+      ),
+      CustomerData(
+        companyName: "Skyline Industries",
+        contactPerson: "Ethan Thomas",
+        mobile: "012-345-6789",
+        status: "Reschedule",
+        liveData: DateTime(2025, 5, 3),
+        warrantyType: "Others",
+        expiry: DateTime(2026, 5, 3),
+      ),
+    ]);
+
+    // Set pagination details for static data
+    totalItems.value = customerList.length;
+    currentPage.value = 1;
+    lastPage.value = 1; // Static data fits in one page
+    fromItem.value = 1;
+    toItem.value = customerList.length;
+    nextPageURL.value = "";
+    state.value = ScreenState.apiSuccess;
+    update();
   }
 
   @override
@@ -205,7 +337,7 @@ class CustomerScreenController extends GetxController {
     update();
   }
 
-  RxList<Result> customerList = <Result>[].obs;
+  RxList<CustomerData> customerList = <CustomerData>[].obs;
   RxString nextPageURL = "".obs;
   final RxInt currentPage = 1.obs;
   final RxInt lastPage = 1.obs;
@@ -215,123 +347,123 @@ class CustomerScreenController extends GetxController {
 
   var isCustomerLoading = false.obs;
 
-  Future<void> getCustomerbyID(
-    BuildContext context,
-    int currentPage,
-    bool hideLoading, {
-    bool isFirstTime = false,
-  }) async {
-    User? userData = await UserPreferences().getSignInInfo();
+  // Future<void> getCustomerbyID(
+  //   BuildContext context,
+  //   int currentPage,
+  //   bool hideLoading, {
+  //   bool isFirstTime = false,
+  // }) async {
+  //   User? userData = await UserPreferences().getSignInInfo();
 
-    if (hideLoading == false) {
-      state.value = ScreenState.apiLoading;
-    }
-    if (isFirstTime == true) {
-      isCustomerLoading(
-        true,
-      ); // Assuming you have a loading state for customers
-    }
+  //   if (hideLoading == false) {
+  //     state.value = ScreenState.apiLoading;
+  //   }
+  //   if (isFirstTime == true) {
+  //     isCustomerLoading(
+  //       true,
+  //     ); // Assuming you have a loading state for customers
+  //   }
 
-    try {
-      if (networkManager.connectionType.value == 0) {
-        if (isFirstTime == true) {
-          isCustomerLoading(false);
-        }
-        showDialogForScreen(
-          context,
-          'Meter Screen',
-          Connection.noConnection,
-          callback: () {
-            Get.back();
-          },
-        );
-        return;
-      }
+  //   try {
+  //     if (networkManager.connectionType.value == 0) {
+  //       if (isFirstTime == true) {
+  //         isCustomerLoading(false);
+  //       }
+  //       showDialogForScreen(
+  //         context,
+  //         'Meter Screen',
+  //         Connection.noConnection,
+  //         callback: () {
+  //           Get.back();
+  //         },
+  //       );
+  //       return;
+  //     }
 
-      var pageURL =
-          "${ApiUrl.getcustomerbyIdwwithpagination}=${userData?.userId ?? ''}&page=$currentPage&per_page=10";
-      var response = await Repository.get({}, pageURL, allowHeader: true);
+  //     var pageURL =
+  //         "${ApiUrl.getcustomerbyIdwwithpagination}=${userData?.userId ?? ''}&page=$currentPage&per_page=10";
+  //     var response = await Repository.get({}, pageURL, allowHeader: true);
 
-      if (isFirstTime == true) {
-        isCustomerLoading(false);
-      }
+  //     if (isFirstTime == true) {
+  //       isCustomerLoading(false);
+  //     }
 
-      logcat("RESPONSE::", response.body);
-      var responseData = jsonDecode(response.body);
+  //     logcat("RESPONSE::", response.body);
+  //     var responseData = jsonDecode(response.body);
 
-      if (response.statusCode == 200) {
-        if (responseData['status'] == true) {
-          state.value = ScreenState.apiSuccess;
-          message.value = '';
+  //     if (response.statusCode == 200) {
+  //       if (responseData['status'] == true) {
+  //         state.value = ScreenState.apiSuccess;
+  //         message.value = '';
 
-          if (isFirstTime == true && customerList.isNotEmpty) {
-            currentPage = 1;
-            customerList.clear();
-          }
+  //         if (isFirstTime == true && customerList.isNotEmpty) {
+  //           currentPage = 1;
+  //           customerList.clear();
+  //         }
 
-          var customerListData = CustomerModel.fromJson(responseData);
-          if (customerListData.result.isNotEmpty) {
-            customerList.addAll(customerListData.result);
-            customerList.refresh();
-            update();
-          } else {
-            customerList.clear();
-          }
+  //         var customerListData = CustomerModel.fromJson(responseData);
+  //         if (customerListData.result.isNotEmpty) {
+  //           customerList.addAll(customerListData.result);
+  //           customerList.refresh();
+  //           update();
+  //         } else {
+  //           customerList.clear();
+  //         }
 
-          // ✅ Set pagination info
-          this.currentPage.value = customerListData.pagination.currentPage;
-          lastPage.value = customerListData.pagination.lastPage;
-          totalItems.value = customerListData.pagination.total;
-          fromItem.value = customerListData.pagination.from;
-          toItem.value = customerListData.pagination.to;
-          // Handle pagination
-          if (customerListData.pagination.currentPage <
-              customerListData.pagination.lastPage) {
-            nextPageURL.value =
-                "${ApiUrl.getcustomerbyIdwwithpagination}=${userData?.userId ?? ''}&page=${currentPage + 1}&per_page=10";
-            logcat("nextPageURL-1", nextPageURL.value.toString());
-            update();
-          } else {
-            nextPageURL.value = "";
-            logcat("nextPageURL-2", nextPageURL.value.toString());
-            update();
-          }
-          logcat("nextPageURL", nextPageURL.value.toString());
-        } else {
-          message.value = responseData['message'];
-          showDialogForScreen(
-            context,
-            'Meter Screen',
-            responseData['message'],
-            callback: () {},
-          );
-        }
-      } else {
-        state.value = ScreenState.apiError;
-        message.value = APIResponseHandleText.serverError;
-        showDialogForScreen(
-          context,
-          'Meter Screen',
-          responseData['message'] ?? ServerError.servererror,
-          callback: () {
-            getUnauthenticatedUser(
-              context,
-              responseData['message'],
-              "Unauthenticated user",
-            );
-          },
-        );
-      }
-    } catch (e) {
-      logcat("Exception", e);
-      if (isFirstTime == true) {
-        isCustomerLoading(false);
-      }
-      state.value = ScreenState.apiError;
-      // message.value = ServerError.servererror;
-      // showDialogForScreen(context, 'Meter Screen', ServerError.servererror, callback: () {});
-    }
-  }
+  //         // ✅ Set pagination info
+  //         this.currentPage.value = customerListData.pagination.currentPage;
+  //         lastPage.value = customerListData.pagination.lastPage;
+  //         totalItems.value = customerListData.pagination.total;
+  //         fromItem.value = customerListData.pagination.from;
+  //         toItem.value = customerListData.pagination.to;
+  //         // Handle pagination
+  //         if (customerListData.pagination.currentPage <
+  //             customerListData.pagination.lastPage) {
+  //           nextPageURL.value =
+  //               "${ApiUrl.getcustomerbyIdwwithpagination}=${userData?.userId ?? ''}&page=${currentPage + 1}&per_page=10";
+  //           logcat("nextPageURL-1", nextPageURL.value.toString());
+  //           update();
+  //         } else {
+  //           nextPageURL.value = "";
+  //           logcat("nextPageURL-2", nextPageURL.value.toString());
+  //           update();
+  //         }
+  //         logcat("nextPageURL", nextPageURL.value.toString());
+  //       } else {
+  //         message.value = responseData['message'];
+  //         showDialogForScreen(
+  //           context,
+  //           'Meter Screen',
+  //           responseData['message'],
+  //           callback: () {},
+  //         );
+  //       }
+  //     } else {
+  //       state.value = ScreenState.apiError;
+  //       message.value = APIResponseHandleText.serverError;
+  //       showDialogForScreen(
+  //         context,
+  //         'Meter Screen',
+  //         responseData['message'] ?? ServerError.servererror,
+  //         callback: () {
+  //           getUnauthenticatedUser(
+  //             context,
+  //             responseData['message'],
+  //             "Unauthenticated user",
+  //           );
+  //         },
+  //       );
+  //     }
+  //   } catch (e) {
+  //     logcat("Exception", e);
+  //     if (isFirstTime == true) {
+  //       isCustomerLoading(false);
+  //     }
+  //     state.value = ScreenState.apiError;
+  //     // message.value = ServerError.servererror;
+  //     // showDialogForScreen(context, 'Meter Screen', ServerError.servererror, callback: () {});
+  //   }
+  // }
 
   final RxList<String> customerHeaders = <String>[
     "Sr No.",
@@ -344,6 +476,7 @@ class CustomerScreenController extends GetxController {
     "Expiry",
     "Action",
   ].obs;
+
   // Provide all customer data without pagination
   List<List<String>> get customerData {
     if (customerList.isEmpty) return [];
@@ -354,14 +487,14 @@ class CustomerScreenController extends GetxController {
 
       return [
         index.toString(), // Sr No.
-        e.businessUnit ?? 'N/A',
-        e.cafNo ?? 'N/A',
-        e.customerName ?? 'N/A',
-        e.categoryName.toString().split('.').last,
-        e.location ?? 'N/A',
-        e.solarCapacity?.toString() ?? '0',
-        e.customerStatus.toString().split('.').last,
-        "${e.liveDate.year}-${e.liveDate.month.toString().padLeft(2, '0')}-${e.liveDate.day.toString().padLeft(2, '0')}",
+        e.companyName,
+        e.contactPerson,
+        e.mobile,
+        e.status,
+        "${e.liveData.year}-${e.liveData.month.toString().padLeft(2, '0')}-${e.liveData.day.toString().padLeft(2, '0')}",
+        e.warrantyType,
+        "${e.expiry.year}-${e.expiry.month.toString().padLeft(2, '0')}-${e.expiry.day.toString().padLeft(2, '0')}",
+        "", // Action column (handled by UI)
       ];
     }).toList();
   }
@@ -471,13 +604,13 @@ class CustomerScreenController extends GetxController {
                               isdate: true,
                               wantsuffix: true,
                               gestureFunction: () async {
-                                openDatePicker(
-                                  context: context,
-                                  title: 'Select Start Date',
-                                  controller: dateCtr,
-                                  dateRx: startDate,
-                                  model: dateModel,
-                                );
+                                // openDatePicker(
+                                //   context: context,
+                                //   title: 'Select Start Date',
+                                //   controller: dateCtr,
+                                //   dateRx: startDate,
+                                //   model: dateModel,
+                                // );
                                 // final picked = await showDatePicker(
                                 //   context: context,
                                 //   initialDate: DateTime.now(),
@@ -506,7 +639,7 @@ class CustomerScreenController extends GetxController {
                               wantsuffix: false,
                               usegesture: true,
                               gestureFunction: () {
-                                pickAnyFile();
+                                // pickAnyFile();
                               },
                               hint: 'Select File',
                               isRequired: false,
@@ -744,7 +877,7 @@ class CustomerScreenController extends GetxController {
                     wantsuffix: true,
                     usegesture: true,
                     gestureFunction: () {
-                      openCustomerDatePicker(context, isStart: true, ctr: this);
+                      // openCustomerDatePicker(context, isStart: true, ctr: this);
                     },
                     hint: 'Select Date',
                     isRequired: false,
@@ -766,20 +899,20 @@ class CustomerScreenController extends GetxController {
                     wantsuffix: true,
                     usegesture: true,
                     gestureFunction: () {
-                      if (!isStartDateSelected.value) {
-                        showDialogForScreen(
-                          context,
-                          'Dashboard',
-                          'Please select the start date first.',
-                          callback: () {},
-                        );
-                      } else {
-                        openCustomerDatePicker(
-                          context,
-                          isStart: false,
-                          ctr: this,
-                        );
-                      }
+                      // if (!isStartDateSelected.value) {
+                      //   showDialogForScreen(
+                      //     context,
+                      //     'Dashboard',
+                      //     'Please select the start date first.',
+                      //     callback: () {},
+                      //   );
+                      // } else {
+                      //   openCustomerDatePicker(
+                      //     context,
+                      //     isStart: false,
+                      //     ctr: this,
+                      //   );
+                      // }
                     },
                     hint: 'Select End Date',
                     isRequired: false,
@@ -808,7 +941,7 @@ class CustomerScreenController extends GetxController {
               isVerified:
                   !isDistrictSelected.value && (isClusterSelected.value),
               gestureFunction: () {
-                showDistrictSelectionPopups(context);
+                // showDistrictSelectionPopups(context);
               },
               hint: 'Select District',
             );
@@ -832,7 +965,7 @@ class CustomerScreenController extends GetxController {
               isVerified:
                   !isClusterSelected.value && (isDistrictSelected.value),
               gestureFunction: () {
-                showClusterSelectionPopups(context);
+                // showClusterSelectionPopups(context);
               },
               hint: 'Select Clusters',
             );
@@ -851,7 +984,7 @@ class CustomerScreenController extends GetxController {
               wantsuffix: true,
               usegesture: true,
               gestureFunction: () {
-                showWarrantyTypeSelectionPopups(context);
+                // showWarrantyTypeSelectionPopups(context);
               },
               hint: 'Select Warranty Type',
               isRequired: true,
@@ -871,7 +1004,7 @@ class CustomerScreenController extends GetxController {
               wantsuffix: true,
               usegesture: true,
               gestureFunction: () {
-                showCustomerStatusSelectionPopups(context);
+                // showCustomerStatusSelectionPopups(context);
               },
               hint: 'Select Customer Status',
               isRequired: true,
