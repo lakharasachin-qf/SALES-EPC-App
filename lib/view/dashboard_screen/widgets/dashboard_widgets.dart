@@ -201,25 +201,32 @@ Widget buildDrawerItem(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
       ),
       onPressed: onTap,
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Row(
-          children: [
-            iconData != null
-                ? Icon(iconData, size: 18.sp, color: color)
-                : getSvgAsset(
-                    icon,
-                    18.sp,
-                    18.sp,
-                    color: ColorFilter.mode(black, BlendMode.srcIn),
-                  ),
-            getDynamicSizedBox(width: 2.w),
-            Text(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          iconData != null
+              ? Icon(iconData, size: 18.sp, color: color)
+              : getSvgAsset(
+                  icon,
+                  18.sp,
+                  18.sp,
+                  color: ColorFilter.mode(black, BlendMode.srcIn),
+                ),
+          getDynamicSizedBox(width: 2.w),
+          Container(
+            margin: EdgeInsets.only(bottom: 0.2.h),
+            child: Text(
               title,
-              style: TextStyle(fontSize: 18.sp, color: color),
+              style: TextStyle(
+                fontSize: 18.sp,
+                color: color,
+                // fontWeight: FontWeight.w500,
+                fontFamily: plusJakartaSansSemiBold,
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     ),
   );
