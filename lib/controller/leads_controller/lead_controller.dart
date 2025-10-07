@@ -7,8 +7,6 @@ import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/common_date_time_picker.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
 import 'package:sales_app/componant/dialogs/loading_indicator.dart';
-import 'package:sales_app/componant/input/form_inputs.dart';
-import 'package:sales_app/componant/input/getReactiveDropdown.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/configs/apicall_constant.dart';
@@ -300,6 +298,24 @@ class LeadController extends GetxController {
         setStateTrigger: () {
           update();
         },
+      ),
+    );
+
+    enableSubmitButton();
+  }
+
+  void openDeleteBottomSheet({required BuildContext context}) {
+    openBottomtsheetDialog(
+      context,
+      title: "Delete",
+      widget: deleteWidget(
+        title: 'Are you sure you want to delete?',
+        context,
+        setStateTrigger: () {
+          update();
+        },
+        cancelBtn: () {},
+        deleletBtn: () {},
       ),
     );
 

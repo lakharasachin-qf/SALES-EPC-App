@@ -248,6 +248,10 @@ class LeadScreenState extends State<LeadScreen> {
                                                                             red,
                                                                       ),
                                                                       onPressed: () {
+                                                                        ctr.openDeleteBottomSheet(
+                                                                          context:
+                                                                              context,
+                                                                        );
                                                                         // ctr.updateMeetings(
                                                                         //   context,
                                                                         // );

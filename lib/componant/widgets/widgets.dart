@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
+import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/input/form_inputs.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/configs/assets_constant.dart';
@@ -12,6 +13,74 @@ import 'package:sales_app/configs/string_constant.dart';
 import 'package:sizer/sizer.dart';
 import '../../configs/colors_constant.dart';
 import '../../configs/font_constant.dart';
+
+Widget deleteWidget(
+  BuildContext context, {
+  title,
+  required cancelBtn,
+  required deleletBtn,
+  required setStateTrigger,
+}) {
+  return SingleChildScrollView(
+    padding: EdgeInsets.only(bottom: 2.h, left: 6.w, right: 6.w, top: 2.h),
+    child: SizedBox(
+      width: Device.width,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 6.w),
+            child: Text(
+              textAlign: TextAlign.center,
+              title,
+              style: TextStyle(
+                fontFamily: plusJakartaSansRegular,
+                fontSize: 18.sp,
+              ),
+            ),
+          ),
+
+          getDynamicSizedBox(height: 3.h),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 1.w),
+            child: Row(
+              children: [
+                Expanded(
+                  child: getFormButton(
+                    isBorderEnable: true,
+                    btnColor: transparent,
+                    textColor: secondaryColor,
+                    context,
+                    () {
+                      cancelBtn();
+                      Navigator.of(context).pop();
+                    },
+                    'Cancel',
+                    validate: true,
+                  ),
+                ),
+                getDynamicSizedBox(width: 4.w),
+
+                Expanded(
+                  child: getFormButton(
+                    context,
+                    () {
+                      deleletBtn();
+                      Navigator.of(context).pop();
+                    },
+                    'Delete',
+                    validate: true,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          getDynamicSizedBox(height: 3.h),
+        ],
+      ),
+    ),
+  );
+}
 
 getleftsidebackbtn({
   required backFunction,
@@ -168,7 +237,7 @@ openBottomtsheetDialog(
                               title!,
                               style: TextStyle(
                                 color: white,
-                                fontSize: 16.sp,
+                                fontSize: 18.sp,
                                 fontFamily: plusJakartaSansBold,
                               ),
                               textAlign: TextAlign.center,
