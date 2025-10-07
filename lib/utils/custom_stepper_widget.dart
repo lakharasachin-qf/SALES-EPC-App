@@ -29,24 +29,19 @@ class _CustomLinearStepperState extends State<CustomLinearStepper> {
   void didUpdateWidget(CustomLinearStepper oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.currentStep != oldWidget.currentStep) {
-      // Auto-scroll to the current step
       _scrollToCurrentStep();
     }
   }
 
   void _scrollToCurrentStep() {
-    final stepWidth = 116.0; // Width of each step label (100 + 8 + 8 padding)
+    final stepWidth = 116.0; // Width of each step label
     final totalSteps = widget.steps.length;
     final currentStep = widget.currentStep.clamp(0, totalSteps - 1);
     final targetOffset = currentStep * stepWidth;
 
-    // Calculate max scroll extent
     final maxScrollExtent = _scrollController.position.maxScrollExtent;
-
-    // Ensure the target offset is within bounds
     final scrollOffset = targetOffset.clamp(0.0, maxScrollExtent);
 
-    // Animate to the current step
     _scrollController.animateTo(
       scrollOffset,
       duration: widget.animationDuration,
@@ -68,35 +63,70 @@ class _CustomLinearStepperState extends State<CustomLinearStepper> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
-          // --- Progress Bar ---
-          Stack(
-            children: [
-              // Background line
-              Container(
-                height: 6,
-                decoration: BoxDecoration(
-                  color: widget.inactiveColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              // Filled portion
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final width = constraints.maxWidth;
-                  final progress = (widget.currentStep / (totalSteps - 1))
-                      .clamp(0.0, 1.0);
-                  return AnimatedContainer(
-                    duration: widget.animationDuration,
-                    height: 6,
-                    width: width * progress,
-                    decoration: BoxDecoration(
-                      color: widget.activeColor,
-                      borderRadius: BorderRadius.circular(10),
+          // --- Circles and Step-Based Progress Bar ---
+          SizedBox(
+            height: 30,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final fullWidth = constraints.maxWidth;
+                final stepWidth = fullWidth / (totalSteps - 1);
+                final filledWidth = stepWidth * widget.currentStep;
+
+                return Stack(
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    // Background line
+                    Positioned(
+                      top: 12,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: widget.inactiveColor,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
                     ),
-                  );
-                },
-              ),
-            ],
+                    // Filled line (step-based)
+                    Positioned(
+                      top: 12,
+                      left: 0,
+                      child: AnimatedContainer(
+                        duration: widget.animationDuration,
+                        height: 6,
+                        width: filledWidth,
+                        decoration: BoxDecoration(
+                          color: widget.activeColor,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    // Step circles
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(totalSteps, (index) {
+                        final isActive = index <= widget.currentStep;
+                        return GestureDetector(
+                          onTap: () => widget.onStepTapped(index),
+                          child: AnimatedContainer(
+                            duration: widget.animationDuration,
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: isActive
+                                  ? widget.activeColor
+                                  : widget.inactiveColor,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
           const SizedBox(height: 8),
           // --- Step Labels with Scrolling ---
@@ -111,14 +141,12 @@ class _CustomLinearStepperState extends State<CustomLinearStepper> {
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
-                    widget.onStepTapped(
-                      index,
-                    ); // Call callback to update current step
+                    widget.onStepTapped(index);
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: SizedBox(
-                      width: 100, // Fixed width for each step label
+                      width: 100,
                       child: Text(
                         widget.steps[index],
                         textAlign: TextAlign.center,
