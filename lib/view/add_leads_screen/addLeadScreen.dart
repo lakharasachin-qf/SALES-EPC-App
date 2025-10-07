@@ -32,12 +32,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
   int _currentStep = 0;
 
   // Define steps for the stepper
-  final List<String> _steps = [
-    'Company Details',
-    'Contact Info',
-    'Load Element',
-    'Files',
-  ];
+  final List<String> _steps = ['Info', 'Site', 'Load Element', 'Files'];
   // Callback to handle step tap
   void _onStepTapped(int index) {
     setState(() {
@@ -105,7 +100,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
               activeColor: primaryColor,
               inactiveColor: Colors.grey[300]!,
               onStepTapped: (val) {
-                // _onStepTapped(val);
+                _onStepTapped(val);
               },
             ),
             getDynamicSizedBox(height: 2.h),
