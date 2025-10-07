@@ -116,8 +116,8 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                   SliverToBoxAdapter(
                     child: Container(
                       margin: EdgeInsets.only(
-                        left: 3.w,
-                        right: 3.w,
+                        left: 6.w,
+                        right: 6.w,
                         top: 2.h,
                         bottom: 10.h,
                       ),
@@ -161,6 +161,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                       controller.addressModel.value.error,
                                 );
                               }),
+                              getDynamicSizedBox(height: 2.h),
                               getLable("Country", isRequired: true),
                               Obx(() {
                                 return getReactiveFormField(
@@ -251,6 +252,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                       controller.districtModel.value.error,
                                 );
                               }),
+                              getDynamicSizedBox(height: 2.h),
                               getLable("Contact Person Name", isRequired: true),
                               Obx(() {
                                 return getReactiveFormField(
@@ -321,6 +323,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                       controller.longitudeModel.value.error,
                                 );
                               }),
+                              getDynamicSizedBox(height: 2.h),
                               getLable(
                                 "Required Solution Type",
                                 isRequired: true,
