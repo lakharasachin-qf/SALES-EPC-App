@@ -105,7 +105,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
               activeColor: primaryColor,
               inactiveColor: Colors.grey[300]!,
               onStepTapped: (val) {
-                _onStepTapped(val);
+                // _onStepTapped(val);
               },
             ),
             getDynamicSizedBox(height: 2.h),

@@ -620,7 +620,7 @@ class AddLeadsController extends GetxController {
                   },
                   title: Text(
                     stateList[index],
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: 17.sp),
                   ),
                 ),
               ],
@@ -700,7 +700,7 @@ class AddLeadsController extends GetxController {
                   },
                   title: Text(
                     districtList[index],
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: 17.sp),
                   ),
                 ),
               ],
@@ -781,7 +781,7 @@ class AddLeadsController extends GetxController {
                   },
                   title: Text(
                     requiredSolutuionList[index],
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: 17.sp),
                   ),
                 ),
               ],
@@ -862,7 +862,7 @@ class AddLeadsController extends GetxController {
                   },
                   title: Text(
                     solutuionList[index],
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: 17.sp),
                   ),
                 ),
               ],
@@ -943,7 +943,7 @@ class AddLeadsController extends GetxController {
                   },
                   title: Text(
                     leadCategoryList[index],
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: 17.sp),
                   ),
                 ),
               ],
@@ -1026,7 +1026,7 @@ class AddLeadsController extends GetxController {
                   },
                   title: Text(
                     roofNature[index],
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: 17.sp),
                   ),
                 ),
               ],
@@ -1107,7 +1107,7 @@ class AddLeadsController extends GetxController {
                   },
                   title: Text(
                     roofNature[index],
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: 17.sp),
                   ),
                 ),
               ],
@@ -1188,7 +1188,7 @@ class AddLeadsController extends GetxController {
                   },
                   title: Text(
                     countryList[index],
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: 17.sp),
                   ),
                 ),
               ],

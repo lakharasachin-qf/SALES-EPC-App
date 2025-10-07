@@ -252,6 +252,7 @@ fetchSelectionPopup<T>(
                                 ? 'Standard :- $displayData'
                                 : displayData,
                             style: TextStyle(
+                              fontSize: 18.sp,
                               color: displayData == selecteddata
                                   ? primaryColor
                                   : black,
