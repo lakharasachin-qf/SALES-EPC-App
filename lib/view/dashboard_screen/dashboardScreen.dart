@@ -62,8 +62,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               onRefresh: () async {
                 await futureDelay(() {
-                  ctr.getDashboardData(context, 1, isFirstTime: true);
-                  ctr.getCurrentMonth(context);
+                  // ctr.getDashboardData(context, 1, isFirstTime: true);
+                  // ctr.getCurrentMonth(context);
                 }, isOneSecond: false);
                 _refreshController.refreshCompleted();
               },
