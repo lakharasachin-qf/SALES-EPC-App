@@ -30,7 +30,7 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
   void initState() {
     super.initState();
     futureDelay(() {
-      ctr.getCustomerbyID(context, 1, false, isFirstTime: true);
+      // ctr.getCustomerbyID(context, 1, false, isFirstTime: true);
     }, isOneSecond: true);
   }
 
@@ -75,7 +75,7 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
               onRefresh: () async {
                 await futureDelay(() {
                   ctr.currentPage.value = 1;
-                  ctr.getCustomerbyID(context, 1, false, isFirstTime: true);
+                  // ctr.getCustomerbyID(context, 1, false, isFirstTime: true);
                 }, isOneSecond: false);
                 _refreshController.refreshCompleted();
               },

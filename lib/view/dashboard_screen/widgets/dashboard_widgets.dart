@@ -372,7 +372,7 @@ Widget addFilterSheetWidget(
                       wantsuffix: true,
                       usegesture: true,
                       gestureFunction: () {
-                        openDatePickerDash(context, isStart: true, ctr: ctr);
+                        // openDatePickerDash(context, isStart: true, ctr: ctr);
                       },
                       hint: 'Select Date',
                       isRequired: false,
@@ -394,16 +394,16 @@ Widget addFilterSheetWidget(
                       wantsuffix: true,
                       usegesture: true,
                       gestureFunction: () {
-                        if (!ctr.isStartDateSelected.value) {
-                          showDialogForScreen(
-                            context,
-                            'Dashboard',
-                            'Please select the start date first.',
-                            callback: () {},
-                          );
-                        } else {
-                          openDatePickerDash(context, isStart: false, ctr: ctr);
-                        }
+                        // if (!ctr.isStartDateSelected.value) {
+                        //   showDialogForScreen(
+                        //     context,
+                        //     'Dashboard',
+                        //     'Please select the start date first.',
+                        //     callback: () {},
+                        //   );
+                        // } else {
+                        //   openDatePickerDash(context, isStart: false, ctr: ctr);
+                        // }
                       },
                       hint: 'Select End Date',
                       isRequired: false,
@@ -434,7 +434,7 @@ Widget addFilterSheetWidget(
                     !ctr.isDistrictSelected.value &&
                     (ctr.isClusterSelected.value),
                 gestureFunction: () {
-                  ctr.showDistrictSelectionPopups(context);
+                  // ctr.showDistrictSelectionPopups(context);
                 },
                 hint: 'Select District',
               );
@@ -460,7 +460,7 @@ Widget addFilterSheetWidget(
                     !ctr.isClusterSelected.value &&
                     (ctr.isDistrictSelected.value),
                 gestureFunction: () {
-                  ctr.showClusterSelectionPopups(context);
+                  // ctr.showClusterSelectionPopups(context);
                 },
                 hint: 'Select Clusters',
               );

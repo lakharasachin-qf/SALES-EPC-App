@@ -49,7 +49,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           getDynamicSizedBox(height: 5.h),
           dashboardToolbar(
             onClick: () {
-              // ctr.openFilterBottomSheet(context: context);
+              ctr.openFilterBottomSheet(context: context);
             },
           ),
           Expanded(
