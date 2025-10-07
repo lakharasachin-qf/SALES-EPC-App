@@ -12,6 +12,13 @@ class Asset {
   static const customers = '$assets${svgFolder}customers.svg';
   static const meetingsCalendar = '$assets${svgFolder}meetingsCalendar.svg';
 
+  static const compass = '$assets${svgFolder}compass.svg';
+  static const dashboard = '$assets${svgFolder}dashboard.svg';
+  static const logout = '$assets${svgFolder}logout.svg';
+  static const users = '$assets${svgFolder}users.svg';
+  static const users2 = '$assets${svgFolder}users2.svg';
+  static const dashboard2 = '$assets${svgFolder}dashboard2.svg';
+
   //SVGS
   static const arrowBack = '$assets${svgFolder}arrowback.svg';
   static const filter = '$assets${svgFolder}filter.svg';

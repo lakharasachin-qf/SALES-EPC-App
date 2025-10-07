@@ -134,14 +134,14 @@ Widget getDashboardDrawer(
       getDynamicSizedBox(height: 4.h),
       getappLine(),
       getDynamicSizedBox(height: 1.h),
-      buildDrawerItem(Asset.home, HomeScreenConst.dashboard, () {
+      buildDrawerItem(Asset.dashboard2, HomeScreenConst.dashboard, () {
         ctr.scaffoldKey.currentState?.closeDrawer();
         logcat("onTap", "Done");
       }),
       getDynamicSizedBox(height: 1.h),
       Obx(() {
         return ctr.isAddMeterReadings.value == true
-            ? buildDrawerItem(Asset.leads, HomeScreenConst.leads, () {
+            ? buildDrawerItem(Asset.compass, HomeScreenConst.leads, () {
                 ctr.scaffoldKey.currentState?.closeDrawer();
                 Get.to(LeadScreen());
               })
@@ -154,7 +154,7 @@ Widget getDashboardDrawer(
       }),
       Obx(() {
         return ctr.isViewCustomer.value == true
-            ? buildDrawerItem(Asset.customers, HomeScreenConst.customers, () {
+            ? buildDrawerItem(Asset.users2, HomeScreenConst.customers, () {
                 ctr.scaffoldKey.currentState?.closeDrawer();
                 Get.to(Customerscreen());
               })
@@ -169,7 +169,7 @@ Widget getDashboardDrawer(
       //     Get.to(MeetingsCalendarScreen());
       //   },
       // ),
-      buildDrawerItem("", 'Logout', () async {
+      buildDrawerItem(Asset.logout, 'Logout', () async {
         ctr.scaffoldKey.currentState?.closeDrawer();
         getpopup(
           context,
@@ -180,7 +180,7 @@ Widget getDashboardDrawer(
             Get.offAll(Signinscreen());
           },
         );
-      }, iconData: Icons.logout),
+      }),
     ],
   );
 }
