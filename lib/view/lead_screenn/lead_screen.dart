@@ -254,12 +254,12 @@ class LeadScreenState extends State<LeadScreen> {
                                                                             primaryColor,
                                                                       ),
                                                                       onPressed: () {
-                                                                        Get.to(
-                                                                          AddLeadScreen(
-                                                                            isEdit:
-                                                                                true,
-                                                                          ),
-                                                                        );
+                                                                        // Get.to(
+                                                                        //   AddLeadScreen(
+                                                                        //     isEdit:
+                                                                        //         true,
+                                                                        //   ),
+                                                                        // );
                                                                       },
                                                                     ),
                                                                   ),
@@ -280,10 +280,10 @@ class LeadScreenState extends State<LeadScreen> {
                                                                             red,
                                                                       ),
                                                                       onPressed: () {
-                                                                        ctr.openDeleteBottomSheet(
-                                                                          context:
-                                                                              context,
-                                                                        );
+                                                                        // ctr.openDeleteBottomSheet(
+                                                                        //   context:
+                                                                        //       context,
+                                                                        // );
                                                                         // ctr.updateMeetings(
                                                                         //   context,
                                                                         // );
@@ -741,11 +741,11 @@ class LeadScreenState extends State<LeadScreen> {
                       getFormButton(
                         context,
                         () async {
-                          final result = await Get.to(
-                            AddLeadScreen(isEdit: false),
-                          );
+                          // final result = await Get.to(
+                          //   AddLeadScreen(isEdit: false),
+                          // );
 
-                          if (result == true) {}
+                          // if (result == true) {}
                         },
                         'Add Lead',
                         validate: true,
