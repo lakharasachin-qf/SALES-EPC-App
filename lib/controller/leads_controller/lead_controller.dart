@@ -59,8 +59,10 @@ class LeadController extends GetxController {
     searchClusterNode = FocusNode();
     searchCustomerNode = FocusNode();
     countrySearchNode = FocusNode();
+    searchNode = FocusNode();
 
     startTimeCtr = TextEditingController();
+    searchCtr = TextEditingController();
     countrySearchCtr = TextEditingController();
     endTimeCtr = TextEditingController();
     district = TextEditingController();
@@ -84,6 +86,7 @@ class LeadController extends GetxController {
     customerNode.dispose();
     statusNode.dispose();
     searchGroupNode.dispose();
+    searchNode.dispose();
     searchCategoriesNode.dispose();
     searchClusterNode.dispose();
     searchCustomerNode.dispose();
@@ -94,6 +97,7 @@ class LeadController extends GetxController {
     endTimeCtr.dispose();
     district.dispose();
     categoryCtr.dispose();
+    searchCtr.dispose();
     clusterCtr.dispose();
     customerCtr.dispose();
     statusCtr.dispose();
@@ -115,6 +119,7 @@ class LeadController extends GetxController {
     endTimeCtr.clear();
     district.clear();
     categoryCtr.clear();
+    searchCtr.clear();
     clusterCtr.clear();
     customerCtr.clear();
     statusCtr.clear();
@@ -167,13 +172,17 @@ class LeadController extends GetxController {
       categoryNode,
       clusterNode,
       customerNode,
+      searchNode,
       statusNode;
   late FocusNode searchGroupNode,
       searchCategoriesNode,
       searchClusterNode,
       searchCustomerNode;
   late FocusNode countrySearchNode;
-  late TextEditingController startTimeCtr, endTimeCtr, countrySearchCtr;
+  late TextEditingController startTimeCtr,
+      searchCtr,
+      endTimeCtr,
+      countrySearchCtr;
   late TextEditingController district,
       categoryCtr,
       clusterCtr,
@@ -541,6 +550,14 @@ class LeadController extends GetxController {
     }
 
     enableSubmitButton();
+  }
+
+  RxBool isTextEmpty = false.obs;
+
+  void clearSearch() {
+    searchCtr.clear();
+    // filterData('');
+    unfocusAll();
   }
 
   final List<String> status = [

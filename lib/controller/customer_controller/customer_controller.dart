@@ -32,6 +32,14 @@ class CustomerScreenController extends GetxController {
   Rx<ScreenState> state = ScreenState.apiLoading.obs;
   RxString message = ''.obs;
 
+  RxBool isTextEmpty = false.obs;
+
+  void clearSearch() {
+    searchCtr.clear();
+    // filterData('');
+    unfocusAll();
+  }
+
   // 🔹 Controllers
   late TextEditingController dateCtr,
       uploadFileCtr,
@@ -47,6 +55,7 @@ class CustomerScreenController extends GetxController {
       searchDistrictCtr,
       searchClusterCtr,
       searchWarrantyTypeCtr,
+      searchCtr,
       searchCustomerStatusCtr;
 
   // 🔹 FocusNodes
@@ -60,6 +69,7 @@ class CustomerScreenController extends GetxController {
       districtNode,
       clusterNode,
       warrantyTypeNode,
+      searchNode,
       customerStatusNode,
       searchDistrictNode,
       searchClusterNode,
@@ -120,6 +130,7 @@ class CustomerScreenController extends GetxController {
     // 🔹 Initialize Controllers
     dateCtr = TextEditingController();
     uploadFileCtr = TextEditingController();
+    searchCtr = TextEditingController();
     warrantyCtr = TextEditingController();
     warrantyPeriodCtr = TextEditingController();
     amountCtr = TextEditingController();
@@ -150,6 +161,7 @@ class CustomerScreenController extends GetxController {
     searchClusterNode = FocusNode();
     searchWarrantyTypeNode = FocusNode();
     searchCustomerStatusNode = FocusNode();
+    searchNode = FocusNode();
   }
 
   @override
@@ -166,7 +178,7 @@ class CustomerScreenController extends GetxController {
     clusterCtr.dispose();
     warrantyTypeCtr.dispose();
     customerStatusCtr.dispose();
-
+    searchCtr.dispose();
     // 🔹 Dispose FocusNodes
     dateNode.dispose();
     uploadFileNode.dispose();
@@ -179,6 +191,7 @@ class CustomerScreenController extends GetxController {
     clusterNode.dispose();
     warrantyTypeNode.dispose();
     customerStatusNode.dispose();
+    searchNode.dispose();
 
     super.onClose();
   }

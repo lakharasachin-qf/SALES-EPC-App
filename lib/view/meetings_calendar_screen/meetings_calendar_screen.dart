@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
+import 'package:sales_app/componant/input/custom_text_field.dart';
+import 'package:sales_app/componant/input/form_inputs.dart';
 import 'package:sales_app/componant/parentWidgets/CustomeParentBackground.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
@@ -85,6 +87,35 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       getDynamicSizedBox(height: 1.h),
+                      Obx(() {
+                        return getReactiveFormField(
+                          wantSuffix: ctr.isTextEmpty.value == true
+                              ? true
+                              : false,
+                          isClose: true,
+                          onPrefixTap: () {
+                            ctr.clearSearch();
+                            ctr.isTextEmpty.value = false;
+                          },
+                          node: ctr.searchNode,
+                          controller: ctr.searchCtr,
+                          hintLabel: 'Search',
+                          onChanged: (val) {
+                            if (val!.isNotEmpty) {
+                              ctr.isTextEmpty.value = true;
+                            } else {
+                              ctr.isTextEmpty.value = false;
+                            }
+                            // ctr.filterData(val!);
+                          },
+                          inputType: TextInputType.text,
+                          isBorderSideEnable: false,
+                          // wantSuffix: true,
+                          // isMick: true,
+                          formType: FieldType.search,
+                        );
+                      }),
+                      getDynamicSizedBox(height: 2.h),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
@@ -361,96 +392,123 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                       ),
 
                       getDynamicSizedBox(height: 1.5.h),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 2.w),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 0.w),
                         child: Obx(() {
-                          if (ctr.totalItems.value == 0) {
-                            return const Text(
-                              "0–0 of 0",
-                              style: TextStyle(fontSize: 14, color: black),
-                            );
-                          }
+                          // if (ctr.totalItems.value == 0) {
+                          //   return const Text(
+                          //     "0–0 of 0",
+                          //     style: TextStyle(
+                          //       fontSize: 14,
+                          //       color: Colors.black,
+                          //     ),
+                          //   );
+                          // }
 
                           return Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 3.w,
-                              vertical: 0.5.h,
-                            ),
                             decoration: BoxDecoration(
                               color: white,
                               borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 6,
-                                  offset: Offset(0, 3),
-                                ),
-                              ],
+                            ),
+
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 3.w,
+                              vertical: 1.h,
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  "${ctr.fromItem.value}–${ctr.toItem.value} of ${ctr.totalItems.value}",
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black87,
-                                  ),
-                                ),
+                                // ==== UPDATED DESIGN ====
                                 Row(
                                   children: [
-                                    IconButton(
-                                      onPressed: ctr.currentPage.value > 1
-                                          ? () {
-                                              ctr.getCustomerbyID(
-                                                context,
-                                                ctr.currentPage.value - 1,
-                                                false,
-                                                isFirstTime: true,
-                                              );
-                                            }
-                                          : null,
-                                      icon: Icon(
-                                        Icons.chevron_left,
-                                        color: ctr.currentPage.value > 1
-                                            ? Colors.black
-                                            : Colors.grey.shade400,
-                                      ),
-                                      splashRadius: 20,
+                                    const Icon(
+                                      Icons.list_alt_rounded,
+                                      size: 18,
+                                      color: primaryColor,
                                     ),
                                     SizedBox(width: 6),
                                     Text(
-                                      "Page ${ctr.currentPage.value} of ${ctr.lastPage.value}",
+                                      "Showing ${ctr.fromItem.value}–${ctr.toItem.value}",
                                       style: TextStyle(
                                         fontSize: 13.sp,
-                                        fontWeight: FontWeight.w500,
                                         color: Colors.black87,
                                       ),
                                     ),
-                                    SizedBox(width: 6),
-                                    IconButton(
+                                    SizedBox(width: 4),
+                                    Text(
+                                      "of ${ctr.totalItems.value}",
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: primaryColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                // ==== PAGINATION BUTTONS ====
+                                Row(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: ctr.currentPage.value > 1
+                                          ? () => ctr.getCustomerbyID(
+                                              context,
+                                              ctr.currentPage.value - 1,
+                                              false,
+                                              isFirstTime: true,
+                                            )
+                                          : null,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            ctr.currentPage.value > 1
+                                            ? primaryColor
+                                            : Colors.grey.shade300,
+                                        minimumSize: const Size(36, 36),
+                                        shape: const CircleBorder(),
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      child: const Icon(
+                                        Icons.chevron_left,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 2.w,
+                                      ),
+                                      child: Text(
+                                        "Page ${ctr.currentPage.value}/${ctr.lastPage.value}",
+                                        style: TextStyle(fontSize: 12.sp),
+                                      ),
+                                    ),
+                                    ElevatedButton(
                                       onPressed:
                                           ctr.currentPage.value <
                                               ctr.lastPage.value
-                                          ? () {
-                                              ctr.getCustomerbyID(
-                                                context,
-                                                ctr.currentPage.value + 1,
-                                                false,
-                                                isFirstTime: true,
-                                              );
-                                            }
+                                          ? () => ctr.getCustomerbyID(
+                                              context,
+                                              ctr.currentPage.value + 1,
+                                              false,
+                                              isFirstTime: true,
+                                            )
                                           : null,
-                                      icon: Icon(
-                                        Icons.chevron_right,
-                                        color:
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
                                             ctr.currentPage.value <
                                                 ctr.lastPage.value
-                                            ? Colors.black
-                                            : Colors.grey.shade400,
+                                            ? primaryColor
+                                            : Colors.grey.shade300,
+                                        minimumSize: const Size(36, 36),
+                                        shape: const CircleBorder(),
+                                        padding: EdgeInsets.zero,
                                       ),
-                                      splashRadius: 20,
+                                      child: const Icon(
+                                        Icons.chevron_right,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ],
                                 ),

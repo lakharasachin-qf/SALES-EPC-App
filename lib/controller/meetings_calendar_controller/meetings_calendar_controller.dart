@@ -26,12 +26,19 @@ class MeetingsCalendarController extends GetxController {
   final InternetController networkManager = Get.find<InternetController>();
   Rx<ScreenState> state = ScreenState.apiLoading.obs;
   RxString message = ''.obs;
+  RxBool isTextEmpty = false.obs;
+
+  void clearSearch() {
+    searchCtr.clear();
+    // filterData('');
+    unfocusAll();
+  }
 
   // 🔹 Controllers
-  late TextEditingController statusCtr, dateCtr, reasonCtr, notesCtr;
+  late TextEditingController statusCtr, searchCtr, dateCtr, reasonCtr, notesCtr;
 
   // 🔹 FocusNodes
-  late FocusNode statusNode, dateNode, reasonNode, notesNode;
+  late FocusNode statusNode, dateNode, searchNode, reasonNode, notesNode;
 
   // 🔹 Validation Models
   var statusModel = ValidationModel(null, null, isValidate: false).obs;
@@ -56,12 +63,14 @@ class MeetingsCalendarController extends GetxController {
     dateCtr = TextEditingController();
     reasonCtr = TextEditingController();
     notesCtr = TextEditingController();
+    searchCtr = TextEditingController();
 
     // 🔹 Initialize FocusNodes
     statusNode = FocusNode();
     dateNode = FocusNode();
     reasonNode = FocusNode();
     notesNode = FocusNode();
+    searchNode = FocusNode();
   }
 
   @override
@@ -71,12 +80,14 @@ class MeetingsCalendarController extends GetxController {
     dateCtr.dispose();
     reasonCtr.dispose();
     notesCtr.dispose();
+    searchCtr.dispose();
 
     // 🔹 Dispose FocusNodes
     statusNode.dispose();
     dateNode.dispose();
     reasonNode.dispose();
     notesNode.dispose();
+    searchNode.dispose();
 
     super.onClose();
   }
