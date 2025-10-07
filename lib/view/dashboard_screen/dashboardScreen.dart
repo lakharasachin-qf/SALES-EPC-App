@@ -8,6 +8,7 @@ import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/dashboard_controller/dashboard_controller.dart';
+import 'package:sales_app/utils/AppPermissions.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sales_app/view/dashboard_screen/widgets/dashboard_widgets.dart';
 import 'package:sales_app/view/dashboard_screen/widgets/widgets.dart';
@@ -28,9 +29,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     futureDelay(() {
-      ctr.getRights();
-      ctr.getCurrentMonth(context);
-      ctr.getDashboardData(context, 1, isFirstTime: true);
+      // ctr.getRights();
+      // ctr.getCurrentMonth(context);
+      // ctr.getDashboardData(context, 1, isFirstTime: true);
     }, isOneSecond: true);
   }
 
@@ -75,6 +76,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     getDynamicSizedBox(height: 2.h),
+                    // if (AppPermissions().canAddUser)
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 4.w),
                       child: Obx(

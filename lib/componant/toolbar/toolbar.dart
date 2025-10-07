@@ -254,23 +254,42 @@ Widget backPress(callback) {
   );
 }
 
-Widget backButtonWidget(callback, {isWhiteText}) {
+Widget backButtonWidget(callback, {bool isWhiteText = false}) {
   return Container(
     margin: EdgeInsets.only(
-      left: Device.screenType == ScreenType.mobile ? 5.w : 2.w,
+      left: Device.screenType == ScreenType.mobile ? 3.w : 2.w,
     ),
-    child: GestureDetector(
-      onTap: () {
-        callback();
-      },
-      child: SvgPicture.asset(
+    child: IconButton(
+      onPressed: callback,
+      icon: SvgPicture.asset(
         Asset.arrowBack,
-        color: isWhiteText == true ? white : black,
-        height: Device.screenType == ScreenType.mobile ? 4.h : 5.h,
+        color: isWhiteText ? white : black,
+        height: Device.screenType == ScreenType.mobile ? 5.h : 5.h,
       ),
+      padding: EdgeInsets.zero, // removes default padding
+      constraints: const BoxConstraints(), // prevents extra space
+      splashRadius: 24, // gives a better ripple size
     ),
   );
 }
+
+// Widget backButtonWidget(callback, {isWhiteText}) {
+//   return Container(
+//     margin: EdgeInsets.only(
+//       left: Device.screenType == ScreenType.mobile ? 5.w : 2.w,
+//     ),
+//     child: GestureDetector(
+//       onTap: () {
+//         callback();
+//       },
+//       child: SvgPicture.asset(
+//         Asset.arrowBack,
+//         color: isWhiteText == true ? white : black,
+//         height: Device.screenType == ScreenType.mobile ? 4.h : 5.h,
+//       ),
+//     ),
+//   );
+// }
 
 getCommonToolbar(
   String title, {
@@ -286,6 +305,7 @@ getCommonToolbar(
       children: [
         Positioned(
           left: 0,
+          bottom: 0,
           top: 0,
           child: showBackButton == true
               ? backButtonWidget(onClick)
