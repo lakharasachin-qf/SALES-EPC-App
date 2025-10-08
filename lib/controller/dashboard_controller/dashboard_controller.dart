@@ -307,6 +307,9 @@ class DashboardController extends GetxController {
     openBottomtsheetDialog(
       context,
       title: "Filter",
+      onClosing: () {
+        resetForm();
+      },
       widget: addFilterSheetWidget(
         context,
         ctr: this,
