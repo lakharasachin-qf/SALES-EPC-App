@@ -41,8 +41,13 @@ Widget getSvgDropdownButton({
 
       /// Dropdown style
       dropdownStyleData: DropdownStyleData(
+        // 👈 align dropdown to the right of button
+        offset: const Offset(
+          -155,
+          8,
+        ), // 👈 fine-tune horizontal positioning if needed
         width: Device.width * dropdownWidthFactor, // ✅ wider dropdown
-        offset: const Offset(0, 8), // small spacing below icon
+        // offset: const Offset(0, 8), // small spacing below icon
         decoration: BoxDecoration(
           color: white,
           borderRadius: BorderRadius.circular(10),

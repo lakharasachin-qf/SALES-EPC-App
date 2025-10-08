@@ -227,27 +227,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ),
-                    getDynamicSizedBox(height: 2.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 5.w),
-                      alignment: Alignment.centerRight,
-                      child: Obx(() {
-                        return getSvgDropdownButton(
-                          svgAssetPath: Asset.menufilter,
-                          items: ctr.selectedTargetList,
-                          selectedValue: ctr.selectedTarget.value,
-                          onChanged: (value) {
-                            ctr.selectedTarget.value = value!;
+                    // Container(
+                    //   padding: EdgeInsets.symmetric(horizontal: 5.w),
+                    //   alignment: Alignment.centerRight,
+                    //   child: Obx(() {
+                    //     return getSvgDropdownButton(
+                    //       svgAssetPath: Asset.menufilter,
+                    //       items: ctr.selectedTargetList,
+                    //       selectedValue: ctr.selectedTarget.value,
+                    //       onChanged: (value) {
+                    //         ctr.selectedTarget.value = value!;
 
-                            if (ctr.selectedTarget.value == 'Revenue Targets') {
-                              ctr.isRevenueVisible.value = true;
-                            } else {
-                              ctr.isRevenueVisible.value = false;
-                            }
-                          },
-                        );
-                      }),
-                    ),
+                    //         if (ctr.selectedTarget.value == 'Revenue Targets') {
+                    //           ctr.isRevenueVisible.value = true;
+                    //         } else {
+                    //           ctr.isRevenueVisible.value = false;
+                    //         }
+                    //       },
+                    //     );
+                    //   }),
+                    // ),
                     // getReactiveDropdown(
                     //   hint: "Select DG Sync",
                     //   items: ctr.selectedTargetList,
@@ -281,9 +280,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: ctr.isRevenueVisible.value
                             ? buildRevenueTargetsChart(
                                 data: ctr.revenueVsTargets.value,
+                                ctr: ctr,
                               )
                             : buildCustomerTargetsChart(
                                 data: ctr.revenueVsTargets.value,
+                                ctr: ctr,
                               ),
                       ),
                     ),
