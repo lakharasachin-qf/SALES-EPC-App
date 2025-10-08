@@ -11,6 +11,7 @@ import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/dashboard_controller/dashboard_controller.dart';
 import 'package:sales_app/preference/UserPreference.dart';
+import 'package:sales_app/utils/AppPermissions.dart';
 import 'package:sales_app/utils/log.dart';
 import 'package:sales_app/view/customer_screen.dart/customer_screen.dart';
 import 'package:sales_app/view/lead_screenn/lead_screen.dart';
@@ -127,6 +128,15 @@ Widget getDashboardDrawer(
   BuildContext context, {
   required DashboardController ctr,
 }) {
+  logcat(
+    'AppPermissions().isLeadManagement',
+    AppPermissions().isLeadManagement,
+  );
+  logcat('AppPermissions().canViewCustomer', AppPermissions().canViewCustomer);
+  logcat(
+    'AppPermissions().canAccessMeetingCalendar',
+    AppPermissions().canAccessMeetingCalendar,
+  );
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -143,11 +153,14 @@ Widget getDashboardDrawer(
         logcat("onTap", "Done");
       }),
       getDynamicSizedBox(height: 1.h),
-      buildDrawerItem(Asset.compass, HomeScreenConst.leads, () {
-        ctr.scaffoldKey.currentState?.closeDrawer();
-        Get.to(LeadScreen());
-      }),
+      AppPermissions().isLeadManagement
+          ? buildDrawerItem(Asset.compass, HomeScreenConst.leads, () {
+              ctr.scaffoldKey.currentState?.closeDrawer();
+              Get.to(LeadScreen());
+            })
+          : SizedBox.shrink(),
       getDynamicSizedBox(height: 1.h),
+
       // Obx(() {
       //   return ctr.isAddMeterReadings.value == true
       //       ? buildDrawerItem(Asset.compass, HomeScreenConst.leads, () {
@@ -161,10 +174,12 @@ Widget getDashboardDrawer(
       //       ? getDynamicSizedBox(height: 1.h)
       //       : SizedBox.shrink();
       // }),
-      buildDrawerItem(Asset.users2, HomeScreenConst.customers, () {
-        ctr.scaffoldKey.currentState?.closeDrawer();
-        Get.to(Customerscreen());
-      }),
+      AppPermissions().canViewCustomer
+          ? buildDrawerItem(Asset.users2, HomeScreenConst.customers, () {
+              ctr.scaffoldKey.currentState?.closeDrawer();
+              Get.to(Customerscreen());
+            })
+          : SizedBox.shrink(),
       // Obx(() {
       //   return ctr.isViewCustomer.value == true
       //       ? buildDrawerItem(Asset.users2, HomeScreenConst.customers, () {
@@ -174,14 +189,16 @@ Widget getDashboardDrawer(
       //       : SizedBox.shrink();
       // }),
       // getDynamicSizedBox(height: 1.h),
-      buildDrawerItem(
-        Asset.meetingsCalendar,
-        HomeScreenConst.meetingsCalendar,
-        () {
-          ctr.scaffoldKey.currentState?.closeDrawer();
-          Get.to(MeetingsCalendarScreen());
-        },
-      ),
+      AppPermissions().canAccessMeetingCalendar
+          ? buildDrawerItem(
+              Asset.meetingsCalendar,
+              HomeScreenConst.meetingsCalendar,
+              () {
+                ctr.scaffoldKey.currentState?.closeDrawer();
+                Get.to(MeetingsCalendarScreen());
+              },
+            )
+          : SizedBox.shrink(),
       buildDrawerItem(Asset.logout, 'Logout', () async {
         ctr.scaffoldKey.currentState?.closeDrawer();
         getpopup(
