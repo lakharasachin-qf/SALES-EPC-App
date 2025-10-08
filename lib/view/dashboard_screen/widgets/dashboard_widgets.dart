@@ -143,36 +143,45 @@ Widget getDashboardDrawer(
         logcat("onTap", "Done");
       }),
       getDynamicSizedBox(height: 1.h),
-      Obx(() {
-        return ctr.isAddMeterReadings.value == true
-            ? buildDrawerItem(Asset.compass, HomeScreenConst.leads, () {
-                ctr.scaffoldKey.currentState?.closeDrawer();
-                Get.to(LeadScreen());
-              })
-            : SizedBox.shrink();
+      buildDrawerItem(Asset.compass, HomeScreenConst.leads, () {
+        ctr.scaffoldKey.currentState?.closeDrawer();
+        Get.to(LeadScreen());
       }),
-      Obx(() {
-        return ctr.isAddMeterReadings.value == true
-            ? getDynamicSizedBox(height: 1.h)
-            : SizedBox.shrink();
+      getDynamicSizedBox(height: 1.h),
+      // Obx(() {
+      //   return ctr.isAddMeterReadings.value == true
+      //       ? buildDrawerItem(Asset.compass, HomeScreenConst.leads, () {
+      //           ctr.scaffoldKey.currentState?.closeDrawer();
+      //           Get.to(LeadScreen());
+      //         })
+      //       : SizedBox.shrink();
+      // }),
+      // Obx(() {
+      //   return ctr.isAddMeterReadings.value == true
+      //       ? getDynamicSizedBox(height: 1.h)
+      //       : SizedBox.shrink();
+      // }),
+      buildDrawerItem(Asset.users2, HomeScreenConst.customers, () {
+        ctr.scaffoldKey.currentState?.closeDrawer();
+        Get.to(Customerscreen());
       }),
-      Obx(() {
-        return ctr.isViewCustomer.value == true
-            ? buildDrawerItem(Asset.users2, HomeScreenConst.customers, () {
-                ctr.scaffoldKey.currentState?.closeDrawer();
-                Get.to(Customerscreen());
-              })
-            : SizedBox.shrink();
-      }),
+      // Obx(() {
+      //   return ctr.isViewCustomer.value == true
+      //       ? buildDrawerItem(Asset.users2, HomeScreenConst.customers, () {
+      //           ctr.scaffoldKey.currentState?.closeDrawer();
+      //           Get.to(Customerscreen());
+      //         })
+      //       : SizedBox.shrink();
+      // }),
       // getDynamicSizedBox(height: 1.h),
-      // buildDrawerItem(
-      //   Asset.meetingsCalendar,
-      //   HomeScreenConst.meetingsCalendar,
-      //   () {
-      //     ctr.scaffoldKey.currentState?.closeDrawer();
-      //     Get.to(MeetingsCalendarScreen());
-      //   },
-      // ),
+      buildDrawerItem(
+        Asset.meetingsCalendar,
+        HomeScreenConst.meetingsCalendar,
+        () {
+          ctr.scaffoldKey.currentState?.closeDrawer();
+          Get.to(MeetingsCalendarScreen());
+        },
+      ),
       buildDrawerItem(Asset.logout, 'Logout', () async {
         ctr.scaffoldKey.currentState?.closeDrawer();
         getpopup(

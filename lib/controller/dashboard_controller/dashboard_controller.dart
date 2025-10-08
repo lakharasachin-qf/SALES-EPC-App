@@ -74,14 +74,14 @@ class DashboardController extends GetxController {
   var currentFilterSource = [].obs;
   var filteredData = [].obs;
 
-  RxBool isRescoTileVisible = true.obs;
-  RxBool isPerformanceTileVisible = true.obs;
-  RxBool isKpiRevenueTileVisible = true.obs;
-  RxBool isRevenueTileVisible = true.obs;
-  RxBool isDashboard1Visible = true.obs;
-  RxBool isAddMeterReadings = true.obs;
-  RxBool isViewMeterReadings = true.obs;
-  RxBool isViewCustomer = true.obs;
+  // RxBool isRescoTileVisible = true.obs;
+  // RxBool isPerformanceTileVisible = true.obs;
+  // RxBool isKpiRevenueTileVisible = true.obs;
+  // RxBool isRevenueTileVisible = true.obs;
+  // RxBool isDashboard1Visible = true.obs;
+  // RxBool isAddMeterReadings = true.obs;
+  // RxBool isViewMeterReadings = true.obs;
+  // RxBool isViewCustomer = true.obs;
 
   RxList<Cluster> districtList = <Cluster>[].obs;
   RxList<Cluster> clustersList = <Cluster>[].obs;
@@ -122,37 +122,37 @@ class DashboardController extends GetxController {
     super.onClose();
   }
 
-  Future<void> getRights() async {
-    User? user = await UserPreferences().getSignInInfo();
-    List<String> rights = user?.rights ?? [];
+  // Future<void> getRights() async {
+  //   User? user = await UserPreferences().getSignInInfo();
+  //   List<String> rights = user?.rights ?? [];
 
-    logcat('allrights 2:::', rights);
+  //   logcat('allrights 2:::', rights);
 
-    isRescoTileVisible.value = rights.contains("mobile_app_resco_tile");
-    isPerformanceTileVisible.value = rights.contains(
-      "mobile_app_performance_tile",
-    );
-    isKpiRevenueTileVisible.value = rights.contains("mobile_app_kpi_tile");
-    isRevenueTileVisible.value = rights.contains("mobile_app_revenue_tile");
-    isDashboard1Visible.value = rights.contains(
-      "mobile_app_dashboard_without_graph",
-    );
-    isAddMeterReadings.value = rights.contains("mobile_app_add_meter_reading");
-    isViewMeterReadings.value = rights.contains(
-      "mobile_app_view_meter_reading",
-    );
-    isViewCustomer.value = rights.contains("mobile_app_customers");
+  //   // isRescoTileVisible.value = rights.contains("mobile_app_resco_tile");
+  //   // isPerformanceTileVisible.value = rights.contains(
+  //   //   "mobile_app_performance_tile",
+  //   // );
+  //   // isKpiRevenueTileVisible.value = rights.contains("mobile_app_kpi_tile");
+  //   // isRevenueTileVisible.value = rights.contains("mobile_app_revenue_tile");
+  //   // isDashboard1Visible.value = rights.contains(
+  //   //   "mobile_app_dashboard_without_graph",
+  //   // );
+  //   // isAddMeterReadings.value = rights.contains("mobile_app_add_meter_reading");
+  //   // isViewMeterReadings.value = rights.contains(
+  //   //   "mobile_app_view_meter_reading",
+  //   // );
+  //   // isViewCustomer.value = rights.contains("mobile_app_customers");
 
-    logcat('User Rights', rights);
-    logcat('isRescoTileVisible', isRescoTileVisible.value);
-    logcat('isPerformanceTileVisible', isPerformanceTileVisible.value);
-    logcat('isKpiRevenueTileVisible', isKpiRevenueTileVisible.value);
-    logcat('isRevenueTileVisible', isRevenueTileVisible.value);
-    logcat('isDashboard1Visible', isDashboard1Visible.value);
-    logcat('isAddMeterReadings', isAddMeterReadings.value);
-    logcat('isViewMeterReadings', isViewMeterReadings.value);
-    logcat('isViewCustomer', isViewCustomer.value);
-  }
+  //   // logcat('User Rights', rights);
+  //   // logcat('isRescoTileVisible', isRescoTileVisible.value);
+  //   // logcat('isPerformanceTileVisible', isPerformanceTileVisible.value);
+  //   // logcat('isKpiRevenueTileVisible', isKpiRevenueTileVisible.value);
+  //   // logcat('isRevenueTileVisible', isRevenueTileVisible.value);
+  //   // logcat('isDashboard1Visible', isDashboard1Visible.value);
+  //   // logcat('isAddMeterReadings', isAddMeterReadings.value);
+  //   // logcat('isViewMeterReadings', isViewMeterReadings.value);
+  //   // logcat('isViewCustomer', isViewCustomer.value);
+  // }
 
   void unfocusAll() => FocusManager.instance.primaryFocus?.unfocus();
 
