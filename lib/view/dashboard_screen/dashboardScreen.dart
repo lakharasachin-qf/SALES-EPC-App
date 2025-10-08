@@ -1,14 +1,12 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
-import 'package:sales_app/componant/input/getReactiveDropdown.dart';
 import 'package:sales_app/componant/parentWidgets/CustomeParentBackground.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/configs/assets_constant.dart';
 import 'package:sales_app/configs/colors_constant.dart';
+import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/dashboard_controller/dashboard_controller.dart';
@@ -34,6 +32,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     futureDelay(() {
       // ctr.getRights();
       // ctr.getCurrentMonth(context);
+      ctr.getFillterOptions(context);
       ctr.getDashboardData(context, isFirstTime: true);
     }, isOneSecond: true);
   }
@@ -57,6 +56,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ctr.openFilterBottomSheet(context: context);
             },
           ),
+
           Expanded(
             child: SmartRefresher(
               controller: _refreshController,
@@ -67,6 +67,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               onRefresh: () async {
                 await futureDelay(() {
+                  ctr.getFillterOptions(context);
                   ctr.getDashboardData(context, isFirstTime: true);
                 }, isOneSecond: false);
                 _refreshController.refreshCompleted();
@@ -77,6 +78,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Obx(() {
+                      final start = ctr.startDate.value;
+                      final end = ctr.endDate.value;
+
+                      String displayText = (start == end)
+                          ? start
+                          : '$start - $end';
+
+                      return Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 6.w),
+                          child: Text(
+                            displayText,
+                            style: TextStyle(
+                              fontSize: 15.sp,
+                              fontFamily: plusJakartaSansBold,
+                              color: primaryColor,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
                     getDynamicSizedBox(height: 2.h),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 4.w),
