@@ -20,6 +20,9 @@ class Asset {
   static const dashboard2 = '$assets${svgFolder}dashboard2.svg';
 
   //SVGS
+
+  static const menufilter = '$assets${svgFolder}menufilter.svg';
+
   static const arrowBack = '$assets${svgFolder}arrowback.svg';
   static const filter = '$assets${svgFolder}filter.svg';
   static const dropdown = '$assets${svgFolder}dropdown.svg';

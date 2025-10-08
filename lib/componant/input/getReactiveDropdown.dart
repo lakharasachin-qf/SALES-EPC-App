@@ -1,8 +1,66 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:sales_app/componant/input/style.dart';
 import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sizer/sizer.dart';
+
+Widget getSvgDropdownButton({
+  required String svgAssetPath,
+  required List<String> items,
+  required String? selectedValue,
+  required Function(String?) onChanged,
+  double iconSize = 22,
+  double dropdownWidthFactor =
+      0.5, // <-- control how wide the dropdown should be (screen width × factor)
+}) {
+  return DropdownButtonHideUnderline(
+    child: DropdownButton2<String>(
+      customButton: SvgPicture.asset(
+        svgAssetPath,
+        height: iconSize,
+        width: iconSize,
+        colorFilter: ColorFilter.mode(black.withOpacity(0.6), BlendMode.srcIn),
+      ),
+
+      /// Dropdown menu items
+      items: items
+          .map(
+            (item) => DropdownMenuItem<String>(
+              value: item,
+              child: Text(item, style: styleTextFormFieldText()),
+            ),
+          )
+          .toList(),
+
+      /// Safe value check
+      value: (selectedValue != null && items.contains(selectedValue))
+          ? selectedValue
+          : null,
+      onChanged: onChanged,
+
+      /// Dropdown style
+      dropdownStyleData: DropdownStyleData(
+        width: Device.width * dropdownWidthFactor, // ✅ wider dropdown
+        offset: const Offset(0, 8), // small spacing below icon
+        decoration: BoxDecoration(
+          color: white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: grey.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+      ),
+
+      /// Remove arrow
+      iconStyleData: const IconStyleData(icon: SizedBox()),
+    ),
+  );
+}
 
 Widget getReactiveDropdown({
   required String hint,

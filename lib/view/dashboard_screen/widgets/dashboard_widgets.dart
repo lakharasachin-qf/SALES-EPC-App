@@ -154,10 +154,15 @@ Widget getDashboardDrawer(
       }),
       getDynamicSizedBox(height: 1.h),
       AppPermissions().isLeadManagement
-          ? buildDrawerItem(Asset.compass, HomeScreenConst.leads, () {
-              ctr.scaffoldKey.currentState?.closeDrawer();
-              Get.to(LeadScreen());
-            })
+          ? buildDrawerItem(
+              Asset.compass,
+              iconHeight: 20,
+              HomeScreenConst.leads,
+              () {
+                ctr.scaffoldKey.currentState?.closeDrawer();
+                Get.to(LeadScreen());
+              },
+            )
           : SizedBox.shrink(),
       getDynamicSizedBox(height: 1.h),
 
@@ -220,6 +225,7 @@ Widget buildDrawerItem(
   String title,
   VoidCallback onTap, {
   Color color = black,
+  double iconHeight = 18,
   IconData? iconData,
 }) {
   return SizedBox(
@@ -239,8 +245,8 @@ Widget buildDrawerItem(
               ? Icon(iconData, size: 18.sp, color: color)
               : getSvgAsset(
                   icon,
-                  18.sp,
-                  18.sp,
+                  iconHeight.sp,
+                  iconHeight.sp,
                   color: ColorFilter.mode(black, BlendMode.srcIn),
                 ),
           getDynamicSizedBox(width: 2.w),

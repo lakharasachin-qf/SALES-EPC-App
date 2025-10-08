@@ -477,3 +477,119 @@ Widget buildRevenueTargetsChart({required RevenueVsTargetsComparison? data}) {
     ),
   );
 }
+
+Widget buildCustomerTargetsChart({required RevenueVsTargetsComparison? data}) {
+  if (data == null ||
+      data.labels == null ||
+      data.customer == null ||
+      data.labels!.isEmpty) {
+    return SizedBox(
+      height: 30.h,
+      child: Center(
+        child: Text(
+          'No Customer Targets available',
+          style: TextStyle(fontSize: 14.sp, color: grey),
+        ),
+      ),
+    );
+  }
+
+  // Prepare data for the chart
+  final List<Map<String, dynamic>> chartData = List.generate(
+    data.labels!.length,
+    (index) {
+      return {
+        'clusterName': data.labels![index],
+        'target': data.customer!.target![index],
+        'achieved': data.customer!.achieved![index],
+      };
+    },
+  );
+
+  return Center(
+    child: SizedBox(
+      height: 30.h,
+      child: SfCartesianChart(
+        title: ChartTitle(
+          text: 'Customer Targets',
+          alignment: ChartAlignment.center,
+          textStyle: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14.sp,
+            fontFamily: plusJakartaSansMedium,
+          ),
+        ),
+        legend: Legend(
+          isVisible: true,
+          position: LegendPosition.bottom,
+          overflowMode: LegendItemOverflowMode.wrap,
+        ),
+        primaryXAxis: CategoryAxis(
+          labelPlacement: LabelPlacement.betweenTicks,
+          majorTickLines: const MajorTickLines(size: 0),
+          majorGridLines: const MajorGridLines(width: 0),
+          labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp),
+        ),
+        primaryYAxis: NumericAxis(
+          minimum: 0,
+          maximum:
+              (chartData
+                          .map(
+                            (e) =>
+                                (e['target'] > e['achieved']
+                                        ? e['target']
+                                        : e['achieved'])
+                                    .toDouble(),
+                          )
+                          .reduce((a, b) => a > b ? a : b) *
+                      1.2)
+                  .toDouble(),
+          numberFormat: NumberFormat.decimalPattern('en_IN'),
+          axisLine: const AxisLine(width: 1),
+          majorGridLines: const MajorGridLines(width: 0.5),
+          labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp),
+        ),
+        tooltipBehavior: TooltipBehavior(enable: true),
+        series: <CartesianSeries>[
+          ColumnSeries<Map<String, dynamic>, String>(
+            dataSource: chartData,
+            xValueMapper: (Map<String, dynamic> r, _) => r['clusterName'],
+            yValueMapper: (Map<String, dynamic> r, _) => r['target'].toDouble(),
+            name: 'Target',
+            color: Colors.lightBlue,
+            spacing: 0.2,
+            borderRadius: BorderRadius.circular(4),
+            dataLabelSettings: DataLabelSettings(
+              isVisible: true,
+              labelPosition: ChartDataLabelPosition.outside,
+              textStyle: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 11.sp,
+              ),
+            ),
+          ),
+          ColumnSeries<Map<String, dynamic>, String>(
+            dataSource: chartData,
+            xValueMapper: (Map<String, dynamic> r, _) => r['clusterName'],
+            yValueMapper: (Map<String, dynamic> r, _) =>
+                r['achieved'].toDouble(),
+            name: 'Achieved',
+            color: Colors.green,
+            spacing: 0.2,
+            borderRadius: BorderRadius.circular(4),
+            dataLabelSettings: DataLabelSettings(
+              isVisible: true,
+              labelPosition: ChartDataLabelPosition.outside,
+              textStyle: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 11.sp,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
