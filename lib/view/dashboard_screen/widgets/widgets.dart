@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:intl/intl.dart';
+import 'package:sales_app/componant/input/getReactiveDropdown.dart';
+import 'package:sales_app/configs/assets_constant.dart';
 import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/font_constant.dart';
+import 'package:sales_app/controller/dashboard_controller/dashboard_controller.dart';
 import 'package:sales_app/models/dashboard1_model.dart';
 import 'package:sizer/sizer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -362,7 +366,10 @@ Widget buildLeadsWonOverTimeChart({required LeadsWonProgressOverTime? data}) {
   );
 }
 
-Widget buildRevenueTargetsChart({required RevenueVsTargetsComparison? data}) {
+Widget buildRevenueTargetsChart({
+  required DashboardController ctr,
+  required RevenueVsTargetsComparison? data,
+}) {
   if (data == null ||
       data.labels == null ||
       data.revenue == null ||
@@ -390,90 +397,279 @@ Widget buildRevenueTargetsChart({required RevenueVsTargetsComparison? data}) {
     },
   );
 
-  return Center(
-    child: SizedBox(
-      height: 30.h,
-      child: SfCartesianChart(
-        title: ChartTitle(
-          text: 'Revenue Targets',
-          alignment: ChartAlignment.center,
-          textStyle: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14.sp,
-            fontFamily: plusJakartaSansMedium,
-          ),
-        ),
-        legend: Legend(
-          isVisible: true,
-          position: LegendPosition.bottom,
-          overflowMode: LegendItemOverflowMode.wrap,
-        ),
-        primaryXAxis: CategoryAxis(
-          labelPlacement: LabelPlacement.betweenTicks,
-          majorTickLines: const MajorTickLines(size: 0),
-          majorGridLines: const MajorGridLines(width: 0),
-          labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp),
-        ),
-        primaryYAxis: NumericAxis(
-          minimum: 0,
-          maximum:
-              (chartData
-                          .map(
-                            (e) =>
-                                (e['target'] > e['achieved']
-                                        ? e['target']
-                                        : e['achieved'])
-                                    .toDouble(),
-                          )
-                          .reduce((a, b) => a > b ? a : b) *
-                      1.2)
-                  .toDouble(),
-          numberFormat: NumberFormat.decimalPattern('en_IN'),
-          axisLine: const AxisLine(width: 1),
-          majorGridLines: const MajorGridLines(width: 0.5),
-          labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp),
-        ),
-        tooltipBehavior: TooltipBehavior(enable: true),
-        series: <CartesianSeries>[
-          ColumnSeries<Map<String, dynamic>, String>(
-            dataSource: chartData,
-            xValueMapper: (Map<String, dynamic> r, _) => r['clusterName'],
-            yValueMapper: (Map<String, dynamic> r, _) => r['target'].toDouble(),
-            name: 'Target',
-            color: Colors.lightBlue,
-            spacing: 0.2,
-            borderRadius: BorderRadius.circular(4),
-            dataLabelSettings: DataLabelSettings(
-              isVisible: true,
-              labelPosition: ChartDataLabelPosition.outside,
+  return Stack(
+    children: [
+      Center(
+        child: SizedBox(
+          height: 30.h,
+          child: SfCartesianChart(
+            title: ChartTitle(
+              text: 'Revenue Targets',
+              alignment: ChartAlignment.center,
               textStyle: TextStyle(
-                color: Colors.black,
                 fontWeight: FontWeight.bold,
-                fontSize: 11.sp,
+                fontSize: 14.sp,
+                fontFamily: plusJakartaSansMedium,
               ),
             ),
-          ),
-          ColumnSeries<Map<String, dynamic>, String>(
-            dataSource: chartData,
-            xValueMapper: (Map<String, dynamic> r, _) => r['clusterName'],
-            yValueMapper: (Map<String, dynamic> r, _) =>
-                r['achieved'].toDouble(),
-            name: 'Achieved',
-            color: Colors.green,
-            spacing: 0.2,
-            borderRadius: BorderRadius.circular(4),
-            dataLabelSettings: DataLabelSettings(
+            legend: Legend(
               isVisible: true,
-              labelPosition: ChartDataLabelPosition.outside,
-              textStyle: TextStyle(
-                color: Colors.black,
+              position: LegendPosition.bottom,
+              overflowMode: LegendItemOverflowMode.wrap,
+            ),
+            primaryXAxis: CategoryAxis(
+              labelPlacement: LabelPlacement.betweenTicks,
+              majorTickLines: const MajorTickLines(size: 0),
+              majorGridLines: const MajorGridLines(width: 0),
+              labelStyle: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 11.sp,
+                fontSize: 12.sp,
               ),
             ),
+            primaryYAxis: NumericAxis(
+              minimum: 0,
+              maximum:
+                  (chartData
+                              .map(
+                                (e) =>
+                                    (e['target'] > e['achieved']
+                                            ? e['target']
+                                            : e['achieved'])
+                                        .toDouble(),
+                              )
+                              .reduce((a, b) => a > b ? a : b) *
+                          1.2)
+                      .toDouble(),
+              numberFormat: NumberFormat.decimalPattern('en_IN'),
+              axisLine: const AxisLine(width: 1),
+              majorGridLines: const MajorGridLines(width: 0.5),
+              labelStyle: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12.sp,
+              ),
+            ),
+            tooltipBehavior: TooltipBehavior(enable: true),
+            series: <CartesianSeries>[
+              ColumnSeries<Map<String, dynamic>, String>(
+                dataSource: chartData,
+                xValueMapper: (Map<String, dynamic> r, _) => r['clusterName'],
+                yValueMapper: (Map<String, dynamic> r, _) =>
+                    r['target'].toDouble(),
+                name: 'Target',
+                color: Colors.lightBlue,
+                spacing: 0.2,
+                borderRadius: BorderRadius.circular(4),
+                dataLabelSettings: DataLabelSettings(
+                  isVisible: true,
+                  labelPosition: ChartDataLabelPosition.outside,
+                  textStyle: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11.sp,
+                  ),
+                ),
+              ),
+              ColumnSeries<Map<String, dynamic>, String>(
+                dataSource: chartData,
+                xValueMapper: (Map<String, dynamic> r, _) => r['clusterName'],
+                yValueMapper: (Map<String, dynamic> r, _) =>
+                    r['achieved'].toDouble(),
+                name: 'Achieved',
+                color: Colors.green,
+                spacing: 0.2,
+                borderRadius: BorderRadius.circular(4),
+                dataLabelSettings: DataLabelSettings(
+                  isVisible: true,
+                  labelPosition: ChartDataLabelPosition.outside,
+                  textStyle: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11.sp,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-    ),
+      Positioned(
+        top: 1.h,
+        right: -1.w,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 5.w),
+          alignment: Alignment.centerRight,
+          child: Obx(() {
+            return getSvgDropdownButton(
+              svgAssetPath: Asset.menufilter,
+              items: ctr.selectedTargetList,
+              selectedValue: ctr.selectedTarget.value,
+              onChanged: (value) {
+                ctr.selectedTarget.value = value!;
+
+                if (ctr.selectedTarget.value == 'Revenue Targets') {
+                  ctr.isRevenueVisible.value = true;
+                } else {
+                  ctr.isRevenueVisible.value = false;
+                }
+              },
+            );
+          }),
+        ),
+      ),
+    ],
+  );
+}
+
+Widget buildCustomerTargetsChart({
+  required DashboardController ctr,
+  required RevenueVsTargetsComparison? data,
+}) {
+  if (data == null ||
+      data.labels == null ||
+      data.customer == null ||
+      data.labels!.isEmpty) {
+    return SizedBox(
+      height: 30.h,
+      child: Center(
+        child: Text(
+          'No Customer Targets available',
+          style: TextStyle(fontSize: 14.sp, color: grey),
+        ),
+      ),
+    );
+  }
+
+  // Prepare data for the chart
+  final List<Map<String, dynamic>> chartData = List.generate(
+    data.labels!.length,
+    (index) {
+      return {
+        'clusterName': data.labels![index],
+        'target': data.customer!.target![index],
+        'achieved': data.customer!.achieved![index],
+      };
+    },
+  );
+
+  return Stack(
+    children: [
+      Center(
+        child: SizedBox(
+          height: 30.h,
+          child: SfCartesianChart(
+            title: ChartTitle(
+              text: 'Customer Targets',
+              alignment: ChartAlignment.center,
+              textStyle: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14.sp,
+                fontFamily: plusJakartaSansMedium,
+              ),
+            ),
+            legend: Legend(
+              isVisible: true,
+              position: LegendPosition.bottom,
+              overflowMode: LegendItemOverflowMode.wrap,
+            ),
+            primaryXAxis: CategoryAxis(
+              labelPlacement: LabelPlacement.betweenTicks,
+              majorTickLines: const MajorTickLines(size: 0),
+              majorGridLines: const MajorGridLines(width: 0),
+              labelStyle: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12.sp,
+              ),
+            ),
+            primaryYAxis: NumericAxis(
+              minimum: 0,
+              maximum:
+                  (chartData
+                              .map(
+                                (e) =>
+                                    (e['target'] > e['achieved']
+                                            ? e['target']
+                                            : e['achieved'])
+                                        .toDouble(),
+                              )
+                              .reduce((a, b) => a > b ? a : b) *
+                          1.2)
+                      .toDouble(),
+              numberFormat: NumberFormat.decimalPattern('en_IN'),
+              axisLine: const AxisLine(width: 1),
+              majorGridLines: const MajorGridLines(width: 0.5),
+              labelStyle: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12.sp,
+              ),
+            ),
+            tooltipBehavior: TooltipBehavior(enable: true),
+            series: <CartesianSeries>[
+              ColumnSeries<Map<String, dynamic>, String>(
+                dataSource: chartData,
+                xValueMapper: (Map<String, dynamic> r, _) => r['clusterName'],
+                yValueMapper: (Map<String, dynamic> r, _) =>
+                    r['target'].toDouble(),
+                name: 'Target',
+                color: Colors.lightBlue,
+                spacing: 0.2,
+                borderRadius: BorderRadius.circular(4),
+                dataLabelSettings: DataLabelSettings(
+                  isVisible: true,
+                  labelPosition: ChartDataLabelPosition.outside,
+                  textStyle: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11.sp,
+                  ),
+                ),
+              ),
+              ColumnSeries<Map<String, dynamic>, String>(
+                dataSource: chartData,
+                xValueMapper: (Map<String, dynamic> r, _) => r['clusterName'],
+                yValueMapper: (Map<String, dynamic> r, _) =>
+                    r['achieved'].toDouble(),
+                name: 'Achieved',
+                color: Colors.green,
+                spacing: 0.2,
+                borderRadius: BorderRadius.circular(4),
+                dataLabelSettings: DataLabelSettings(
+                  isVisible: true,
+                  labelPosition: ChartDataLabelPosition.outside,
+                  textStyle: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11.sp,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      Positioned(
+        top: 1.h,
+        right: -1.w,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 5.w),
+          alignment: Alignment.centerRight,
+          child: Obx(() {
+            return getSvgDropdownButton(
+              svgAssetPath: Asset.menufilter,
+              items: ctr.selectedTargetList,
+              selectedValue: ctr.selectedTarget.value,
+              onChanged: (value) {
+                ctr.selectedTarget.value = value!;
+
+                if (ctr.selectedTarget.value == 'Revenue Targets') {
+                  ctr.isRevenueVisible.value = true;
+                } else {
+                  ctr.isRevenueVisible.value = false;
+                }
+              },
+            );
+          }),
+        ),
+      ),
+    ],
   );
 }

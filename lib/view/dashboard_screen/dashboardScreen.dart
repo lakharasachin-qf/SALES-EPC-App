@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
+import 'package:sales_app/componant/input/getReactiveDropdown.dart';
 import 'package:sales_app/componant/parentWidgets/CustomeParentBackground.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/configs/assets_constant.dart';
@@ -224,6 +227,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ),
+                    // Container(
+                    //   padding: EdgeInsets.symmetric(horizontal: 5.w),
+                    //   alignment: Alignment.centerRight,
+                    //   child: Obx(() {
+                    //     return getSvgDropdownButton(
+                    //       svgAssetPath: Asset.menufilter,
+                    //       items: ctr.selectedTargetList,
+                    //       selectedValue: ctr.selectedTarget.value,
+                    //       onChanged: (value) {
+                    //         ctr.selectedTarget.value = value!;
+
+                    //         if (ctr.selectedTarget.value == 'Revenue Targets') {
+                    //           ctr.isRevenueVisible.value = true;
+                    //         } else {
+                    //           ctr.isRevenueVisible.value = false;
+                    //         }
+                    //       },
+                    //     );
+                    //   }),
+                    // ),
+                    // getReactiveDropdown(
+                    //   hint: "Select DG Sync",
+                    //   items: ctr.selectedTargetList,
+                    //   selectedValue: ctr.selectedTarget,
+                    //   onChanged: (value) {
+                    //     setState(() {
+                    //       ctr.selectedTarget = value!;
+                    //     });
+                    //   },
+                    // ),
                     Obx(
                       () => Container(
                         width: Device.width,
@@ -244,9 +277,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ],
                         ),
-                        child: buildRevenueTargetsChart(
-                          data: ctr.revenueVsTargets.value,
-                        ),
+                        child: ctr.isRevenueVisible.value
+                            ? buildRevenueTargetsChart(
+                                data: ctr.revenueVsTargets.value,
+                                ctr: ctr,
+                              )
+                            : buildCustomerTargetsChart(
+                                data: ctr.revenueVsTargets.value,
+                                ctr: ctr,
+                              ),
                       ),
                     ),
                     getDynamicSizedBox(height: 12.h),

@@ -36,6 +36,16 @@ class DashboardController extends GetxController {
   late TextEditingController searchDistrictCtr, searchClusterCtr;
 
   final RxString startDate = ''.obs;
+  //select target
+  final List<String> selectedTargetList = [
+    'Revenue Targets',
+    'Customer Targets',
+  ];
+
+  RxnString selectedTarget = RxnString();
+
+  RxBool isRevenueVisible = true.obs;
+  //
   final RxString endDate = ''.obs;
   final RxString startDateApi = ''.obs;
   final RxString endDateApi = ''.obs;
@@ -68,6 +78,7 @@ class DashboardController extends GetxController {
       Rx<LeadsWonProgressOverTime?>(null);
   final Rx<RevenueVsTargetsComparison?> revenueVsTargets =
       Rx<RevenueVsTargetsComparison?>(null);
+
   RxString message = ''.obs;
 
   // Filter source and filtered data
@@ -173,11 +184,13 @@ class DashboardController extends GetxController {
     endDate.value = '';
     startDateApi.value = '';
     endDateApi.value = '';
+    selectedTarget.value = '';
     selectedDistrictId.value = '';
     selectedClusterId.value = '';
     isDistrictSelected.value = false;
     isClusterSelected.value = false;
     isStartDateSelected.value = false;
+    isRevenueVisible.value = true;
     districtListInt.clear();
     clusterListInt.clear();
 
