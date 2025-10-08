@@ -29,7 +29,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     futureDelay(() {
-      ctr.getRights();
+      // ctr.getRights();
       // ctr.getCurrentMonth(context);
       ctr.getDashboardData(context, isFirstTime: true);
     }, isOneSecond: true);

@@ -18,6 +18,10 @@ class ApiUrl {
   static const graphicaldashboard = 'dashboard';
   static const getfillter = 'get-user-filter-options';
 
+  //Add Lead
+  static const addLead = 'leads';
+  static const leadList = 'leads';
+
   //below are not using
   static const getbillingMonth = 'get-billing-month-year';
 

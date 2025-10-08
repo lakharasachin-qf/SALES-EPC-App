@@ -71,7 +71,8 @@ commonPostApiCallFormate(
     if (response.statusCode == 200) {
       logcat("RESPONSE::STATUS", 200);
       message?.value = '';
-      if (data['status'] == 'success' || true) {
+      // if (data['status'] == 'success' || true) {
+      if (data['status']?.toString().toLowerCase() == 'success') {
         if (isModelResponse == true) {
           onResponse(data);
         } else {

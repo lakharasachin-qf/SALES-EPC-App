@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide ScreenType;
 import 'package:file_picker/file_picker.dart';
+import 'package:sales_app/api_handle/apiCallingFormate.dart';
 import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/common_date_time_picker.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
@@ -13,10 +14,14 @@ import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
 import 'package:sales_app/models/LoadElement.dart';
+import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
+import 'package:sales_app/preference/UserPreference.dart';
 import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/log.dart';
 import 'package:sizer/sizer.dart';
+
+import '../../configs/apicall_constant.dart';
 
 class CategoryModel {
   final String id;
@@ -2457,5 +2462,86 @@ class AddLeadsController extends GetxController {
     update();
   }
 
-  // Placeholder for missing methods
+  Future<void> addLeadApi(BuildContext context) async {
+    // Step 1: Base lead data
+    User? user = await UserPreferences().getSignInInfo();
+    final body = <String, dynamic>{
+      'company_name': companyNameCtr.text.trim(),
+      'address': addressCtr.text.trim(),
+      'country': countryCtr.text.trim(),
+      'state': stateCtr.text.trim(),
+      'district': districtCtr.text.trim(),
+      'contact_person_name': personNameCtr.text.trim(),
+      'contact_person_mobile': personMobileCtr.text.trim(),
+      'latitude': latitudeCtr.text.trim(),
+      'longitude': longitudeCtr.text.trim(),
+      'required_solution_type': requiredSolutionTypeCtr.text.trim(),
+      'required_solution': requiredSolutionCtr.text.trim(),
+      'lead_category': leadCategoryCtr.text.trim(),
+      'dg_capacity_kva': dgCapacityCtr.text.trim(),
+      'dg_sync_required': dgSyncCtr.text.trim(),
+      'curr_inst_solar_cap_kwp': installedSolarCapCtr.text.trim(),
+      'sanctioned_load_kva': sanctionedLoadCtr.text.trim(),
+      'vfd_required': vfdCtr.text.trim(),
+      'grid_availability_hrs': gridAvailabilityCtr.text.trim(),
+      'peak_monthly_energy_cons_kwh': peakMonthlyEnergyCtr.text.trim(),
+      'required_solar_cap_kwp': requiredSolarCapCtr.text.trim(),
+      'dist_to_nearest_transformer': distanceToTransformerCtr.text.trim(),
+      'rating_of_nearest_transformer_kva': ratingOfTransformerCtr.text.trim(),
+      'purpose_of_solarisation': purposeOfSolarizationCtr.text.trim(),
+      'dist_btw_inverter_acdb_panel_mtrs': distInverterACDBCtr.text.trim(),
+      'dist_btw_solar_acdb_panel_mtrs': distSolarACDBCtr.text.trim(),
+      'building_height': buildingHeightCtr.text.trim(),
+      'roof_size_length_ft': roofSizeLengthCtr.text.trim(),
+      'roof_size_breadth_ft': roofSizeBreadthCtr.text.trim(),
+      'roof_nature': roofNatureCtr.text.trim(),
+      'age_of_metal_sheet': ageOfMetalSheetCtr.text.trim(),
+      'ground_size_length_ft': groundSizeLengthCtr.text.trim(),
+      'ground_size_breadth_ft': groundSizeBreadthCtr.text.trim(),
+      'other_remarks': otherRemarksCtr.text.trim(),
+      'schedule_meeting': scheduleMeetingCtr.text.trim(),
+      'user_id': user != null ? user.userId : '',
+    };
+
+    // Step 2: Add load elements
+    for (int i = 0; i < productDetailList.length; i++) {
+      final product = productDetailList[i];
+      body.addAll({
+        'load_elements[$i][device_name]': product.deviceName,
+        'load_elements[$i][category]': product.category,
+        'load_elements[$i][power_rating_w]': product.power,
+        'load_elements[$i][daily_usage_hrs]': product.usageHrs,
+      });
+    }
+
+    // Step 3: Add uploaded files
+    for (int i = 0; i < fileList.length; i++) {
+      final file = fileList[i];
+      body.addAll({
+        'uploaded_files[$i][category]': file.category,
+        'uploaded_files[$i][file]': file.uploadFile,
+      });
+    }
+
+    // Step 4: API Call
+    await commonPostApiCallFormate(
+      context,
+      title: 'Add Lead Screen',
+      body: body,
+      allowHeader: true,
+      apiEndPoint: ApiUrl.addLead,
+      onResponse: (data) async {
+        logcat('AddLeadApi', 'Response: $data');
+        Get.snackbar(
+          "Success",
+          "Lead added successfully",
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      },
+      state: state,
+      message: message,
+      networkManager: networkManager,
+      isModelResponse: true,
+    );
+  }
 }

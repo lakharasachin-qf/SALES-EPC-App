@@ -43,7 +43,7 @@ class Repository {
     Map<String, String> headers = {
       'Content-Type': "application/json",
       'X-USER-EMAIL': user?.email ?? '',
-      'X-USER-PASSWORD': password ?? '',
+      'X-USER-PASSWORD': password,
     };
 
     var response = await client.post(

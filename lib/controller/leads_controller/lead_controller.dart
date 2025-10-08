@@ -14,6 +14,7 @@ import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
 import 'package:sales_app/controller/master_controller/Master_Controller.dart';
+import 'package:sales_app/models/LeadModel.dart';
 import 'package:sales_app/models/customer_model.dart';
 import 'package:sales_app/models/customer_model_wo_p.dart';
 import 'package:sales_app/models/login_model.dart';
@@ -265,6 +266,7 @@ class LeadController extends GetxController {
   }
 
   RxList<CustomerData> customerList = <CustomerData>[].obs;
+  RxList<LeadData> leadList = <LeadData>[].obs;
   RxString nextPageURL = "".obs;
   final RxInt currentPage = 1.obs;
   final RxInt lastPage = 1.obs;
@@ -488,7 +490,95 @@ class LeadController extends GetxController {
     );
   }
 
-  // Future<void> getCustomerbyID(
+  Future<void> getLeadList({
+    required BuildContext context,
+    int page = 1,
+    bool? hideLoading,
+    bool isInitialLoad = false,
+  }) async {
+    User? userData = await UserPreferences().getSignInInfo();
+
+    if (hideLoading == false) {
+      state.value = ScreenState.apiLoading;
+    }
+    if (isInitialLoad == true) {
+      isCustomerLoading(true);
+    }
+
+    try {
+      if (networkManager.connectionType.value == 0) {
+        if (isInitialLoad == true) {
+          isCustomerLoading(false);
+        }
+        showDialogForScreen(
+          context,
+          'Lead Screen',
+          Connection.noConnection,
+          callback: Get.back,
+        );
+        return;
+      }
+
+      final apiUrl = "${ApiUrl.leadList}?user_id=${1}&page=$page&per_page=1";
+
+      final response = await Repository.get({}, apiUrl, allowHeader: true);
+
+      isCustomerLoading(false);
+      if (isInitialLoad == true) {
+        isCustomerLoading(false);
+      }
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        if (responseData['status'] == "success") {
+          state.value = ScreenState.apiSuccess;
+          message.value = '';
+          final model = LeadsModel.fromJson(responseData);
+          leadList.clear();
+          if (model.result.data.isNotEmpty) {
+            leadList.addAll(model.result.data);
+            leadList.refresh();
+
+            // Update pagination info
+            currentPage.value = model.result.meta.page;
+            lastPage.value = model.result.meta.lastPage;
+            totalItems.value = model.result.meta.total;
+          }
+        } else {
+          message.value = responseData['message'];
+          showDialogForScreen(
+            context,
+            'Lead Screen',
+            responseData['message'],
+            callback: Get.back,
+          );
+        }
+      } else {
+        state.value = ScreenState.apiError;
+        message.value = APIResponseHandleText.serverError;
+        showDialogForScreen(
+          context,
+          'Meter Screen',
+          responseData['message'] ?? ServerError.servererror,
+          callback: () {
+            getUnauthenticatedUser(
+              context,
+              responseData['message'],
+              "Unauthenticated user",
+            );
+          },
+        );
+      }
+    } catch (e) {
+      logcat("Exception", e);
+      if (isInitialLoad == true) {
+        isCustomerLoading(false);
+      }
+      state.value = ScreenState.apiError;
+    }
+  }
+
+  // Future<void> getLeadLists(
   //   BuildContext context,
   //   int currentPage,
   //   bool hideLoading, {
@@ -510,7 +600,7 @@ class LeadController extends GetxController {
   //       }
   //       showDialogForScreen(
   //         context,
-  //         'Meter Screen',
+  //         'Lead Screen',
   //         Connection.noConnection,
   //         callback: () {
   //           Get.back();
@@ -540,7 +630,7 @@ class LeadController extends GetxController {
   //           customerList.clear();
   //         }
 
-  //         var customerListData = CustomerModel.fromJson(responseData);
+  //         var customerListData = LeadsModel.fromJson(responseData);
   //         if (customerListData.result.isNotEmpty) {
   //           customerList.addAll(customerListData.result);
   //           customerList.refresh();
@@ -611,19 +701,19 @@ class LeadController extends GetxController {
     "Action",
   ].obs;
 
-  List<List<String>> get meetingsData {
+  List<List<String>> get leadData {
     if (customerList.isEmpty) return [];
 
-    return customerList.asMap().entries.map((entry) {
+    return leadList.asMap().entries.map((entry) {
       final index = entry.key + 1 + ((currentPage.value - 1) * 10);
       final e = entry.value;
 
       return [
         index.toString(),
-        e.company,
-        e.contactPerson,
-        e.mobile,
-        e.category,
+        e.companyName,
+        e.contactPersonName,
+        e.contactPersonMobile,
+        e.leadCategory,
         e.leadStatus,
         "",
       ];

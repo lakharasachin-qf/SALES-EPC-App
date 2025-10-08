@@ -31,8 +31,13 @@ class LeadScreenState extends State<LeadScreen> {
   void initState() {
     super.initState();
     futureDelay(() {
-      // ctr.getCustomerbyID(context, 1, false, isFirstTime: true);
-    }, isOneSecond: true);
+      ctr.getLeadList(
+        context: context,
+        isInitialLoad: true,
+        page: 1,
+        hideLoading: false,
+      );
+    }, isOneSecond: false);
   }
 
   final Map<String, double> columnWidths = {
@@ -81,7 +86,11 @@ class LeadScreenState extends State<LeadScreen> {
               onRefresh: () async {
                 await futureDelay(() {
                   ctr.currentPage.value = 1;
-                  // ctr.getCustomerbyID(context, 1, false, isFirstTime: true);
+                  ctr.getLeadList(
+                    context: context,
+                    isInitialLoad: true,
+                    page: 1,
+                  );
                 }, isOneSecond: false);
                 _refreshController.refreshCompleted();
               },
@@ -92,7 +101,6 @@ class LeadScreenState extends State<LeadScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       getDynamicSizedBox(height: 1.h),
-
                       Obx(() {
                         return getReactiveFormField(
                           wantSuffix: ctr.isTextEmpty.value == true
@@ -217,7 +225,7 @@ class LeadScreenState extends State<LeadScreen> {
                                                         );
                                                       })
                                                       .toList(),
-                                                  rows: ctr.meetingsData.asMap().entries.map((
+                                                  rows: ctr.leadData.asMap().entries.map((
                                                     entry,
                                                   ) {
                                                     final row = entry
@@ -254,12 +262,12 @@ class LeadScreenState extends State<LeadScreen> {
                                                                             primaryColor,
                                                                       ),
                                                                       onPressed: () {
-                                                                        // Get.to(
-                                                                        //   AddLeadScreen(
-                                                                        //     isEdit:
-                                                                        //         true,
-                                                                        //   ),
-                                                                        // );
+                                                                        Get.to(
+                                                                          AddLeadScreen(
+                                                                            isEdit:
+                                                                                true,
+                                                                          ),
+                                                                        );
                                                                       },
                                                                     ),
                                                                   ),
@@ -406,131 +414,130 @@ class LeadScreenState extends State<LeadScreen> {
 
                       getDynamicSizedBox(height: 1.5.h),
 
-                      // Container(
-                      //   decoration: BoxDecoration(
-                      //     color: white,
-                      //     borderRadius: BorderRadius.circular(12),
-                      //   ),
-                      //   padding: EdgeInsets.symmetric(horizontal: 0.w),
-                      //   child: Obx(() {
-                      //     // if (ctr.totalItems.value == 0) {
-                      //     //   return const Text(
-                      //     //     "0–0 of 0",
-                      //     //     style: TextStyle(
-                      //     //       fontSize: 14,
-                      //     //       color: Colors.black,
-                      //     //     ),
-                      //     //   );
-                      //     // }
+                      Container(
+                        decoration: BoxDecoration(
+                          color: white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 0.w),
+                        child: Obx(() {
+                          // if (ctr.totalItems.value == 0) {
+                          //   return const Text(
+                          //     "0–0 of 0",
+                          //     style: TextStyle(
+                          //       fontSize: 14,
+                          //       color: Colors.black,
+                          //     ),
+                          //   );
+                          // }
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: white,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
 
-                      //     return Container(
-                      //       decoration: BoxDecoration(
-                      //         color: white,
-                      //         borderRadius: BorderRadius.circular(12),
-                      //       ),
-
-                      //       padding: EdgeInsets.symmetric(
-                      //         horizontal: 3.w,
-                      //         vertical: 1.h,
-                      //       ),
-                      //       child: Row(
-                      //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      //         children: [
-                      //           // ==== UPDATED DESIGN ====
-                      //           Row(
-                      //             children: [
-                      //               const Icon(
-                      //                 Icons.list_alt_rounded,
-                      //                 size: 18,
-                      //                 color: primaryColor,
-                      //               ),
-                      //               SizedBox(width: 6),
-                      //               Text(
-                      //                 "Showing ${ctr.fromItem.value}–${ctr.toItem.value}",
-                      //                 style: TextStyle(
-                      //                   fontSize: 13.sp,
-                      //                   color: Colors.black87,
-                      //                 ),
-                      //               ),
-                      //               SizedBox(width: 4),
-                      //               Text(
-                      //                 "of ${ctr.totalItems.value}",
-                      //                 style: TextStyle(
-                      //                   fontSize: 13.sp,
-                      //                   fontWeight: FontWeight.w600,
-                      //                   color: primaryColor,
-                      //                 ),
-                      //               ),
-                      //             ],
-                      //           ),
-                      //           // ==== PAGINATION BUTTONS ====
-                      //           Row(
-                      //             children: [
-                      //               ElevatedButton(
-                      //                 onPressed: ctr.currentPage.value > 1
-                      //                     ? () => ctr.getCustomerbyID(
-                      //                         context,
-                      //                         ctr.currentPage.value - 1,
-                      //                         false,
-                      //                         isFirstTime: true,
-                      //                       )
-                      //                     : null,
-                      //                 style: ElevatedButton.styleFrom(
-                      //                   backgroundColor:
-                      //                       ctr.currentPage.value > 1
-                      //                       ? primaryColor
-                      //                       : Colors.grey.shade300,
-                      //                   minimumSize: const Size(36, 36),
-                      //                   shape: const CircleBorder(),
-                      //                   padding: EdgeInsets.zero,
-                      //                 ),
-                      //                 child: const Icon(
-                      //                   Icons.chevron_left,
-                      //                   color: Colors.white,
-                      //                 ),
-                      //               ),
-                      //               Padding(
-                      //                 padding: EdgeInsets.symmetric(
-                      //                   horizontal: 2.w,
-                      //                 ),
-                      //                 child: Text(
-                      //                   "Page ${ctr.currentPage.value}/${ctr.lastPage.value}",
-                      //                   style: TextStyle(fontSize: 12.sp),
-                      //                 ),
-                      //               ),
-                      //               ElevatedButton(
-                      //                 onPressed:
-                      //                     ctr.currentPage.value <
-                      //                         ctr.lastPage.value
-                      //                     ? () => ctr.getCustomerbyID(
-                      //                         context,
-                      //                         ctr.currentPage.value + 1,
-                      //                         false,
-                      //                         isFirstTime: true,
-                      //                       )
-                      //                     : null,
-                      //                 style: ElevatedButton.styleFrom(
-                      //                   backgroundColor:
-                      //                       ctr.currentPage.value <
-                      //                           ctr.lastPage.value
-                      //                       ? primaryColor
-                      //                       : Colors.grey.shade300,
-                      //                   minimumSize: const Size(36, 36),
-                      //                   shape: const CircleBorder(),
-                      //                   padding: EdgeInsets.zero,
-                      //                 ),
-                      //                 child: const Icon(
-                      //                   Icons.chevron_right,
-                      //                   color: Colors.white,
-                      //                 ),
-                      //               ),
-                      //             ],
-                      //           ),
-                      //         ],
-                      //       ),
-                      //     );
-                      //   }),
-                      // ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 3.w,
+                              vertical: 1.h,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // ==== UPDATED DESIGN ====
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.list_alt_rounded,
+                                      size: 18,
+                                      color: primaryColor,
+                                    ),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      "Showing ${ctr.fromItem.value}–${ctr.toItem.value}",
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      "of ${ctr.totalItems.value}",
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: primaryColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                // ==== PAGINATION BUTTONS ====
+                                Row(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: ctr.currentPage.value > 1
+                                          ? () => ctr.getLeadList(
+                                              context: context,
+                                              page: ctr.currentPage.value - 1,
+                                              isInitialLoad: true,
+                                              hideLoading: false,
+                                            )
+                                          : null,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            ctr.currentPage.value > 1
+                                            ? primaryColor
+                                            : Colors.grey.shade300,
+                                        minimumSize: const Size(36, 36),
+                                        shape: const CircleBorder(),
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      child: const Icon(
+                                        Icons.chevron_left,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 2.w,
+                                      ),
+                                      child: Text(
+                                        "Page ${ctr.currentPage.value}/${ctr.lastPage.value}",
+                                        style: TextStyle(fontSize: 12.sp),
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed:
+                                          ctr.currentPage.value <
+                                              ctr.lastPage.value
+                                          ? () => ctr.getLeadList(
+                                              context: context,
+                                              page: ctr.currentPage.value + 1,
+                                              isInitialLoad: false,
+                                              hideLoading: false,
+                                            )
+                                          : null,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            ctr.currentPage.value <
+                                                ctr.lastPage.value
+                                            ? primaryColor
+                                            : Colors.grey.shade300,
+                                        minimumSize: const Size(36, 36),
+                                        shape: const CircleBorder(),
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      child: const Icon(
+                                        Icons.chevron_right,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
 
                       //                     Padding(
                       //   padding: EdgeInsets.symmetric(horizontal: 2.w),
@@ -741,11 +748,9 @@ class LeadScreenState extends State<LeadScreen> {
                       getFormButton(
                         context,
                         () async {
-                          // final result = await Get.to(
-                          //   AddLeadScreen(isEdit: false),
-                          // );
-
-                          // if (result == true) {}
+                          final result = await Get.to(
+                            AddLeadScreen(isEdit: false),
+                          );
                         },
                         'Add Lead',
                         validate: true,

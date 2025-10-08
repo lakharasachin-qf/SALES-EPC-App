@@ -19,10 +19,10 @@ class CustomLinearStepper extends StatefulWidget {
   });
 
   @override
-  _CustomLinearStepperState createState() => _CustomLinearStepperState();
+  CustomLinearStepperState createState() => CustomLinearStepperState();
 }
 
-class _CustomLinearStepperState extends State<CustomLinearStepper> {
+class CustomLinearStepperState extends State<CustomLinearStepper> {
   final ScrollController _scrollController = ScrollController();
 
   @override
