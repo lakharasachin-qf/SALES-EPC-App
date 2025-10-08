@@ -8,12 +8,9 @@ import 'package:sales_app/componant/dialogs/loading_indicator.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
 import 'package:sales_app/controller/master_controller/Master_Controller.dart';
-import 'package:sales_app/models/ClusterData.dart';
 import 'package:sales_app/models/dashboard1_model.dart';
 import 'package:sales_app/models/dashboard_fillter_model.dart';
-import 'package:sales_app/models/fillter_model.dart';
 import 'package:sales_app/models/login_model.dart';
-import 'package:sales_app/models/month_model.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
 import 'package:sales_app/preference/UserPreference.dart';
 import 'package:sales_app/utils/enum.dart';
@@ -192,9 +189,50 @@ class DashboardController extends GetxController {
     update();
   }
 
-  void openFilterBottomSheet({required BuildContext context}) {
-    startTimeCtr.text = startDate.value;
-    endTimeCtr.text = endDate.value;
+  void openFilterBottomSheet({required BuildContext context}) async {
+    // Set current year and month as default
+    final now = DateTime.now();
+    final displayFormatted = dateFormat.format(now);
+    final apiFormatted = apiDateFormat.format(now);
+
+    // Prefill with current year and month if no previous selection
+    if (startDate.value.isEmpty) {
+      startDate.value = displayFormatted;
+      startDateApi.value = apiFormatted;
+      startTimeCtr.text = displayFormatted;
+      startTimeModel.value = ValidationModel(
+        displayFormatted,
+        null,
+        isValidate: true,
+      );
+    } else {
+      startTimeCtr.text = startDate.value;
+      startTimeModel.value = ValidationModel(
+        startDate.value,
+        null,
+        isValidate: startDate.value.isNotEmpty,
+      );
+    }
+
+    if (endDate.value.isEmpty) {
+      endDate.value = displayFormatted;
+      endDateApi.value = apiFormatted;
+      endTimeCtr.text = displayFormatted;
+      endTimeModel.value = ValidationModel(
+        displayFormatted,
+        null,
+        isValidate: true,
+      );
+    } else {
+      endTimeCtr.text = endDate.value;
+      endTimeModel.value = ValidationModel(
+        endDate.value,
+        null,
+        isValidate: endDate.value.isNotEmpty,
+      );
+    }
+
+    // Prefill district and cluster fields
     district.text = selectedDistrictId.value.isNotEmpty
         ? districtList
               .where(
@@ -216,16 +254,6 @@ class DashboardController extends GetxController {
               .join(', ')
         : '';
 
-    startTimeModel.value = ValidationModel(
-      startDate.value.isNotEmpty ? startDate.value : null,
-      null,
-      isValidate: startDate.value.isNotEmpty,
-    );
-    endTimeModel.value = ValidationModel(
-      endDate.value.isNotEmpty ? endDate.value : null,
-      null,
-      isValidate: endDate.value.isNotEmpty,
-    );
     districtModel.value = ValidationModel(
       district.text.isNotEmpty ? district.text : null,
       null,
@@ -239,6 +267,7 @@ class DashboardController extends GetxController {
 
     isDistrictSelected.value = selectedDistrictId.value.isNotEmpty;
     isClusterSelected.value = selectedClusterId.value.isNotEmpty;
+    isStartDateSelected.value = startDate.value.isNotEmpty;
 
     getFillterOptions(context);
 
@@ -426,11 +455,40 @@ class DashboardController extends GetxController {
         }
       },
       onResponse: (data) {
+        logcat('Filter Options Data', data.toString());
+
         districtList.clear();
         clustersList.clear();
-        FiltterData responseDetail = FiltterData.fromJson(data);
+
+        // Extract the inner 'data' object
+        var innerData = data['data'];
+
+        // Parse into your model
+        FiltterData responseDetail = FiltterData.fromJson(innerData);
+
         districtList.addAll(responseDetail.districts);
         clustersList.addAll(responseDetail.clusters);
+
+        logcat('District List', districtList.length.toString());
+        logcat('Clusters List', clustersList.length.toString());
+
+        // Prefill selectedClusterId with cluster ID from API request (e.g., "8")
+        // if (selectedClusterId.value.isEmpty && clustersList.isNotEmpty) {
+        //   final defaultCluster = clustersList.firstWhere(
+        //     (cluster) => cluster.id.toString() == '8',
+        //     orElse: () => clustersList.first,
+        //   );
+        //   selectedClusterId.value = defaultCluster.id.toString();
+        //   clusterListInt.value = [defaultCluster.id];
+        //   clusterCtr.text = defaultCluster.name;
+        //   clusterModel.value = ValidationModel(
+        //     defaultCluster.name,
+        //     null,
+        //     isValidate: true,
+        //   );
+        //   isClusterSelected.value = true;
+        // }
+
         update();
       },
       networkManager: networkManager,
@@ -474,11 +532,15 @@ class DashboardController extends GetxController {
       User? userData = await UserPreferences().getSignInInfo();
       if (userData == null || userData.userId == null) return;
 
-      // Use current year and month
+      // Use current year and month if not set
       final now = DateTime.now();
-      startDateApi.value =
-          '${now.year}-${now.month.toString().padLeft(2, '0')}';
-      endDateApi.value = startDateApi.value;
+      if (startDateApi.value.isEmpty) {
+        startDateApi.value =
+            '${now.year}-${now.month.toString().padLeft(2, '0')}';
+      }
+      if (endDateApi.value.isEmpty) {
+        endDateApi.value = startDateApi.value;
+      }
 
       logcat('Start Date:', startDateApi.value);
       logcat('End Date:', endDateApi.value);
@@ -487,15 +549,18 @@ class DashboardController extends GetxController {
 
       final Map<String, dynamic> body = {
         'user_id': userData.userId,
-        'startYear': now.year.toString(),
-        'startMonth': now.month.toString().padLeft(2, '0'),
-        'endYear': now.year.toString(),
-        'endMonth': now.month.toString().padLeft(2, '0'),
+        'startYear': startDateApi.value.split('-')[0],
+        'startMonth': startDateApi.value.split('-')[1],
+        'endYear': endDateApi.value.split('-')[0],
+        'endMonth': endDateApi.value.split('-')[1],
       };
 
-      if (districtListInt.isNotEmpty) body['districtIds'] = districtListInt;
-      if (clusterListInt.isNotEmpty) body['clusterIds'] = clusterListInt;
-
+      if (districtListInt.isNotEmpty) {
+        body['districtIds'] = districtListInt.map((e) => e.toString()).toList();
+      }
+      if (clusterListInt.isNotEmpty) {
+        body['clusterIds'] = clusterListInt.map((e) => e.toString()).toList();
+      }
       logcat('Final API Request Body', jsonEncode(body));
 
       final response = await Repository.post(

@@ -343,7 +343,7 @@ void openDatePickerDash(
 
 Widget addFilterSheetWidget(
   BuildContext context, {
-  required ctr,
+  required DashboardController ctr,
   required setStateTrigger,
 }) {
   return GestureDetector(
@@ -376,7 +376,7 @@ Widget addFilterSheetWidget(
                       wantsuffix: true,
                       usegesture: true,
                       gestureFunction: () {
-                        // openDatePickerDash(context, isStart: true, ctr: ctr);
+                        openDatePickerDash(context, isStart: true, ctr: ctr);
                       },
                       hint: 'Select Date',
                       isRequired: false,
@@ -398,16 +398,16 @@ Widget addFilterSheetWidget(
                       wantsuffix: true,
                       usegesture: true,
                       gestureFunction: () {
-                        // if (!ctr.isStartDateSelected.value) {
-                        //   showDialogForScreen(
-                        //     context,
-                        //     'Dashboard',
-                        //     'Please select the start date first.',
-                        //     callback: () {},
-                        //   );
-                        // } else {
-                        //   openDatePickerDash(context, isStart: false, ctr: ctr);
-                        // }
+                        if (!ctr.isStartDateSelected.value) {
+                          showDialogForScreen(
+                            context,
+                            'Dashboard',
+                            'Please select the start date first.',
+                            callback: () {},
+                          );
+                        } else {
+                          openDatePickerDash(context, isStart: false, ctr: ctr);
+                        }
                       },
                       hint: 'Select End Date',
                       isRequired: false,
@@ -426,7 +426,7 @@ Widget addFilterSheetWidget(
                 label: 'District',
                 ctr: ctr.district,
                 node: ctr.districtNode,
-                model: ctr.disitrict.value,
+                model: ctr.districtModel.value,
                 isenable: false,
                 isdropdown: true,
                 wantsuffix: true,
@@ -438,7 +438,7 @@ Widget addFilterSheetWidget(
                     !ctr.isDistrictSelected.value &&
                     (ctr.isClusterSelected.value),
                 gestureFunction: () {
-                  // ctr.showDistrictSelectionPopups(context);
+                  ctr.showDistrictSelectionPopups(context);
                 },
                 hint: 'Select District',
               );
@@ -464,7 +464,7 @@ Widget addFilterSheetWidget(
                     !ctr.isClusterSelected.value &&
                     (ctr.isDistrictSelected.value),
                 gestureFunction: () {
-                  // ctr.showClusterSelectionPopups(context);
+                  ctr.showClusterSelectionPopups(context);
                 },
                 hint: 'Select Clusters',
               );
@@ -480,7 +480,7 @@ Widget addFilterSheetWidget(
                     () {
                       ctr.resetForm();
                       ctr.isStartDateSelected = false.obs;
-                      ctr.getDashboardData(context, 1, isFirstTime: true);
+                      ctr.getDashboardData(context, isFirstTime: true);
                       Get.back();
                     },
                     'Clear',

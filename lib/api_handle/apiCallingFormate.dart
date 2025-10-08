@@ -185,7 +185,7 @@ void commonGetApiCallFormate(
       state?.value = ScreenState.apiSuccess;
       message?.value = '';
 
-      if (responseData['status'] == true) {
+      if (responseData['status']?.toString().toLowerCase() == 'success') {
         onResponse(responseData);
         print('common get api if case');
       } else {
