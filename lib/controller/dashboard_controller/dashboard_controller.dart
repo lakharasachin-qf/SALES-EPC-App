@@ -10,6 +10,7 @@ import 'package:sales_app/controller/internet_controller/internet_controller.dar
 import 'package:sales_app/controller/master_controller/Master_Controller.dart';
 import 'package:sales_app/models/ClusterData.dart';
 import 'package:sales_app/models/dashboard1_model.dart';
+import 'package:sales_app/models/dashboard_fillter_model.dart';
 import 'package:sales_app/models/fillter_model.dart';
 import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/models/month_model.dart';
@@ -85,8 +86,8 @@ class DashboardController extends GetxController {
   RxBool isViewMeterReadings = true.obs;
   RxBool isViewCustomer = true.obs;
 
-  RxList<Category> districtList = <Category>[].obs;
-  RxList<Category> clustersList = <Category>[].obs;
+  RxList<Cluster> districtList = <Cluster>[].obs;
+  RxList<Cluster> clustersList = <Cluster>[].obs;
 
   @override
   void onInit() {
@@ -331,7 +332,7 @@ class DashboardController extends GetxController {
     currentFilterSource.value = List.from(districtList);
     searchDistrictCtr.clear();
 
-    showUpdatedMultpleSelectionPopup<Category>(
+    showUpdatedMultpleSelectionPopup<Cluster>(
       context,
       title: 'District',
       controller: district,
@@ -371,7 +372,7 @@ class DashboardController extends GetxController {
     currentFilterSource.value = List.from(clustersList);
     searchClusterCtr.clear();
 
-    showUpdatedMultpleSelectionPopup<Category>(
+    showUpdatedMultpleSelectionPopup<Cluster>(
       context,
       title: 'Clusters',
       controller: clusterCtr,
@@ -413,8 +414,7 @@ class DashboardController extends GetxController {
     commonGetApiCallFormate(
       context,
       title: 'Dashboard Screen',
-      apiEndPoint:
-          "${ApiUrl.getfillter}/${userData?.userId ?? ''}/filter-options",
+      apiEndPoint: "${ApiUrl.getfillter}?user_id=${userData?.userId ?? ''}",
       allowHeader: true,
       state: state,
       message: message,
@@ -428,9 +428,9 @@ class DashboardController extends GetxController {
       onResponse: (data) {
         districtList.clear();
         clustersList.clear();
-        FiltterModel responseDetail = FiltterModel.fromJson(data);
-        districtList.addAll(responseDetail.result.groups);
-        clustersList.addAll(responseDetail.result.clusters);
+        FiltterData responseDetail = FiltterData.fromJson(data);
+        districtList.addAll(responseDetail.districts);
+        clustersList.addAll(responseDetail.clusters);
         update();
       },
       networkManager: networkManager,

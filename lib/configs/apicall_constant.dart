@@ -16,6 +16,7 @@ class ApiUrl {
 
   //dashboard
   static const graphicaldashboard = 'dashboard';
+  static const getfillter = 'get-user-filter-options';
 
   //below are not using
   static const getbillingMonth = 'get-billing-month-year';
@@ -27,7 +28,6 @@ class ApiUrl {
   static const getmeterdetail = 'get-meter-details';
 
   //fillter
-  static const getfillter = 'get';
 
   //customer list
   static const getcustomerbyIdwwithpagination = 'get-customers-by-user?user_id';
