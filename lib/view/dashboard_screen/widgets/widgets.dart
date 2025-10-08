@@ -148,135 +148,121 @@ Widget buildLeadByClusterChart({required LeadsByClusterBreakdown? data}) {
   return Center(
     child: SizedBox(
       height: 30.h,
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: max(chartData.length * 100, 300).toDouble(),
-          child: SfCartesianChart(
-            title: ChartTitle(
-              text: 'Leads By Clusters',
-              alignment: ChartAlignment.center,
-              textStyle: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16.sp,
-                fontFamily: plusJakartaSansMedium,
-              ),
+      width: double.infinity,
+      child: Center(
+        child: SfCartesianChart(
+          title: ChartTitle(
+            text: 'Leads By Clusters',
+            alignment: ChartAlignment.center,
+            textStyle: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16.sp,
+              fontFamily: plusJakartaSansMedium,
             ),
-            legend: Legend(
-              isVisible: true,
-              position: LegendPosition.bottom,
-              overflowMode: LegendItemOverflowMode.wrap,
-            ),
-            primaryXAxis: CategoryAxis(
-              title: AxisTitle(text: 'Clusters'),
-              labelPlacement: LabelPlacement.betweenTicks,
-              majorTickLines: const MajorTickLines(size: 0),
-              majorGridLines: const MajorGridLines(width: 0),
-              labelStyle: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12.sp,
-                fontFamily: plusJakartaSansMedium,
-              ),
-            ),
-            primaryYAxis: NumericAxis(
-              minimum: 0,
-              interval: 2,
-              labelStyle: TextStyle(
-                color: black,
-                fontWeight: FontWeight.bold,
-                fontSize: 12.sp,
-                fontFamily: plusJakartaSansMedium,
-              ),
-            ),
-            tooltipBehavior: TooltipBehavior(enable: true),
-            series: <CartesianSeries>[
-              ColumnSeries<Map<String, dynamic>, String>(
-                dataSource: chartData,
-                xValueMapper: (Map<String, dynamic> c, _) => c['clusterName'],
-                yValueMapper: (Map<String, dynamic> c, _) =>
-                    c['leads'].toDouble(),
-                name: 'Leads',
-                color: Colors.lightBlue,
-                spacing: 0.1,
-                borderRadius: BorderRadius.circular(3),
-                emptyPointSettings: EmptyPointSettings(
-                  mode: EmptyPointMode.zero,
-                ),
-                dataLabelSettings: const DataLabelSettings(
-                  isVisible: true,
-                  labelPosition: ChartDataLabelPosition.outside,
-                  textStyle: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              ColumnSeries<Map<String, dynamic>, String>(
-                dataSource: chartData,
-                xValueMapper: (Map<String, dynamic> c, _) => c['clusterName'],
-                yValueMapper: (Map<String, dynamic> c, _) =>
-                    c['won'].toDouble(),
-                name: 'Won',
-                color: Colors.green,
-                spacing: 0.1,
-                borderRadius: BorderRadius.circular(3),
-                emptyPointSettings: EmptyPointSettings(
-                  mode: EmptyPointMode.zero,
-                ),
-                dataLabelSettings: const DataLabelSettings(
-                  isVisible: true,
-                  labelPosition: ChartDataLabelPosition.outside,
-                  textStyle: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              ColumnSeries<Map<String, dynamic>, String>(
-                dataSource: chartData,
-                xValueMapper: (Map<String, dynamic> c, _) => c['clusterName'],
-                yValueMapper: (Map<String, dynamic> c, _) =>
-                    c['lost'].toDouble(),
-                name: 'Lost',
-                color: Colors.red,
-                spacing: 0.1,
-                borderRadius: BorderRadius.circular(3),
-                emptyPointSettings: EmptyPointSettings(
-                  mode: EmptyPointMode.zero,
-                ),
-                dataLabelSettings: const DataLabelSettings(
-                  isVisible: true,
-                  labelPosition: ChartDataLabelPosition.outside,
-                  textStyle: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              ColumnSeries<Map<String, dynamic>, String>(
-                dataSource: chartData,
-                xValueMapper: (Map<String, dynamic> c, _) => c['clusterName'],
-                yValueMapper: (Map<String, dynamic> c, _) =>
-                    c['ongoing'].toDouble(),
-                name: 'Ongoing',
-                color: Colors.orange,
-                spacing: 0.1,
-                borderRadius: BorderRadius.circular(3),
-                emptyPointSettings: EmptyPointSettings(
-                  mode: EmptyPointMode.zero,
-                ),
-                dataLabelSettings: const DataLabelSettings(
-                  isVisible: true,
-                  labelPosition: ChartDataLabelPosition.outside,
-                  textStyle: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
           ),
+          legend: Legend(
+            isVisible: true,
+            position: LegendPosition.bottom,
+            overflowMode: LegendItemOverflowMode.wrap,
+          ),
+          primaryXAxis: CategoryAxis(
+            title: AxisTitle(text: 'Clusters'),
+            labelPlacement: LabelPlacement.betweenTicks,
+            majorTickLines: const MajorTickLines(size: 0),
+            majorGridLines: const MajorGridLines(width: 0),
+            labelStyle: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12.sp,
+              fontFamily: plusJakartaSansMedium,
+            ),
+          ),
+          primaryYAxis: NumericAxis(
+            minimum: 0,
+            interval: 2,
+            labelStyle: TextStyle(
+              color: black,
+              fontWeight: FontWeight.bold,
+              fontSize: 12.sp,
+              fontFamily: plusJakartaSansMedium,
+            ),
+          ),
+          tooltipBehavior: TooltipBehavior(enable: true),
+          series: <CartesianSeries>[
+            ColumnSeries<Map<String, dynamic>, String>(
+              dataSource: chartData,
+              xValueMapper: (Map<String, dynamic> c, _) => c['clusterName'],
+              yValueMapper: (Map<String, dynamic> c, _) =>
+                  c['leads'].toDouble(),
+              name: 'Leads',
+              color: Colors.lightBlue,
+              spacing: 0.1,
+              borderRadius: BorderRadius.circular(3),
+              emptyPointSettings: EmptyPointSettings(mode: EmptyPointMode.zero),
+              dataLabelSettings: const DataLabelSettings(
+                isVisible: true,
+                labelPosition: ChartDataLabelPosition.outside,
+                textStyle: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ColumnSeries<Map<String, dynamic>, String>(
+              dataSource: chartData,
+              xValueMapper: (Map<String, dynamic> c, _) => c['clusterName'],
+              yValueMapper: (Map<String, dynamic> c, _) => c['won'].toDouble(),
+              name: 'Won',
+              color: Colors.green,
+              spacing: 0.1,
+              borderRadius: BorderRadius.circular(3),
+              emptyPointSettings: EmptyPointSettings(mode: EmptyPointMode.zero),
+              dataLabelSettings: const DataLabelSettings(
+                isVisible: true,
+                labelPosition: ChartDataLabelPosition.outside,
+                textStyle: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ColumnSeries<Map<String, dynamic>, String>(
+              dataSource: chartData,
+              xValueMapper: (Map<String, dynamic> c, _) => c['clusterName'],
+              yValueMapper: (Map<String, dynamic> c, _) => c['lost'].toDouble(),
+              name: 'Lost',
+              color: Colors.red,
+              spacing: 0.1,
+              borderRadius: BorderRadius.circular(3),
+              emptyPointSettings: EmptyPointSettings(mode: EmptyPointMode.zero),
+              dataLabelSettings: const DataLabelSettings(
+                isVisible: true,
+                labelPosition: ChartDataLabelPosition.outside,
+                textStyle: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ColumnSeries<Map<String, dynamic>, String>(
+              dataSource: chartData,
+              xValueMapper: (Map<String, dynamic> c, _) => c['clusterName'],
+              yValueMapper: (Map<String, dynamic> c, _) =>
+                  c['ongoing'].toDouble(),
+              name: 'Ongoing',
+              color: Colors.orange,
+              spacing: 0.1,
+              borderRadius: BorderRadius.circular(3),
+              emptyPointSettings: EmptyPointSettings(mode: EmptyPointMode.zero),
+              dataLabelSettings: const DataLabelSettings(
+                isVisible: true,
+                labelPosition: ChartDataLabelPosition.outside,
+                textStyle: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     ),
