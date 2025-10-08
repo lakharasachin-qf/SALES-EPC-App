@@ -7,6 +7,7 @@ import 'package:sales_app/componant/dialogs/dialogs.dart';
 import 'package:sales_app/componant/dialogs/loading_indicator.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
+import 'package:sales_app/controller/master_controller/Master_Controller.dart';
 import 'package:sales_app/models/ClusterData.dart';
 import 'package:sales_app/models/dashboard1_model.dart';
 import 'package:sales_app/models/fillter_model.dart';
@@ -18,10 +19,8 @@ import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sales_app/utils/log.dart';
 import 'package:sales_app/view/dashboard_screen/widgets/dashboard_widgets.dart';
-
 import '../../api_handle/Repository.dart';
 import '../../configs/apicall_constant.dart';
-import '../master_controller/Master_Controller.dart';
 
 class DashboardController extends GetxController {
   final InternetController networkManager = Get.find<InternetController>();
@@ -32,17 +31,11 @@ class DashboardController extends GetxController {
 
   // Filter-related variables
   late FocusNode startTimeNode, endTimeNode;
-  late FocusNode districtNode, categoryNode, clusterNode, customerNode;
-  late FocusNode searchGroupNode,
-      searchCategoriesNode,
-      searchClusterNode,
-      searchCustomerNode;
+  late FocusNode districtNode, clusterNode;
+  late FocusNode searchGroupNode, searchClusterNode;
   late TextEditingController startTimeCtr, endTimeCtr;
-  late TextEditingController district, categoryCtr, clusterCtr, customerCtr;
-  late TextEditingController searchDistrictCtr,
-      searchCategoriesCtr,
-      searchClusterCtr,
-      searchCustomerCtr;
+  late TextEditingController district, clusterCtr;
+  late TextEditingController searchDistrictCtr, searchClusterCtr;
 
   final RxString startDate = ''.obs;
   final RxString endDate = ''.obs;
@@ -53,10 +46,8 @@ class DashboardController extends GetxController {
 
   var startTimeModel = ValidationModel(null, null, isValidate: false).obs;
   var endTimeModel = ValidationModel(null, null, isValidate: false).obs;
-  var disitrict = ValidationModel(null, null, isValidate: false).obs;
-  var categoryModel = ValidationModel(null, null, isValidate: false).obs;
+  var districtModel = ValidationModel(null, null, isValidate: false).obs;
   var clusterModel = ValidationModel(null, null, isValidate: false).obs;
-  var customerModel = ValidationModel(null, null, isValidate: false).obs;
 
   RxBool isFormInvalidate = false.obs;
   RxBool isStartDateActive = true.obs;
@@ -67,29 +58,18 @@ class DashboardController extends GetxController {
   RxString selectedDistrictId = ''.obs;
   RxString selectedClusterId = ''.obs;
   RxList districtListInt = [].obs;
-  RxList categoryListInt = [].obs;
   RxList clusterListInt = [].obs;
-  RxList customerListInt = [].obs;
 
-  // Chart pagination
-  final int pageSize = 10;
-  final RxInt chartPage = 0.obs;
-  final RxInt revenuePage = 0.obs;
-  final RxInt unitPage = 0.obs;
-  final RxInt kpiPage = 0.obs;
-
-  // Chart data lists using BilledUnit
-  RxList<BilledUnit> data = <BilledUnit>[].obs;
-  RxList<BilledUnit> revenueData = <BilledUnit>[].obs;
-  RxList<BilledUnit> unitData = <BilledUnit>[].obs;
-  RxList<BilledUnit> kpiRevenueData = <BilledUnit>[].obs;
-
-  // Tile data
+  // Dashboard data
   final Rx<Tiles?> tilesData = Rx<Tiles?>(null);
-  final Rx<Resco?> resco = Rx<Resco?>(null);
-  final Rx<Performance?> performance = Rx<Performance?>(null);
-  final Rx<Kpi?> kpi = Rx<Kpi?>(null);
-  final Rx<Revenue?> revenue = Rx<Revenue?>(null);
+  final Rx<LeadsStatusDistribution?> leadsStatusDistribution =
+      Rx<LeadsStatusDistribution?>(null);
+  final Rx<LeadsByClusterBreakdown?> leadsByClusterBreakdown =
+      Rx<LeadsByClusterBreakdown?>(null);
+  final Rx<LeadsWonProgressOverTime?> leadsWonProgress =
+      Rx<LeadsWonProgressOverTime?>(null);
+  final Rx<RevenueVsTargetsComparison?> revenueVsTargets =
+      Rx<RevenueVsTargetsComparison?>(null);
   RxString message = ''.obs;
 
   // Filter source and filtered data
@@ -101,7 +81,6 @@ class DashboardController extends GetxController {
   RxBool isKpiRevenueTileVisible = true.obs;
   RxBool isRevenueTileVisible = true.obs;
   RxBool isDashboard1Visible = true.obs;
-
   RxBool isAddMeterReadings = true.obs;
   RxBool isViewMeterReadings = true.obs;
   RxBool isViewCustomer = true.obs;
@@ -115,24 +94,16 @@ class DashboardController extends GetxController {
     startTimeNode = FocusNode();
     endTimeNode = FocusNode();
     districtNode = FocusNode();
-    categoryNode = FocusNode();
     clusterNode = FocusNode();
-    customerNode = FocusNode();
     searchGroupNode = FocusNode();
-    searchCategoriesNode = FocusNode();
     searchClusterNode = FocusNode();
-    searchCustomerNode = FocusNode();
 
     startTimeCtr = TextEditingController();
     endTimeCtr = TextEditingController();
     district = TextEditingController();
-    categoryCtr = TextEditingController();
     clusterCtr = TextEditingController();
-    customerCtr = TextEditingController();
     searchDistrictCtr = TextEditingController();
-    searchCategoriesCtr = TextEditingController();
     searchClusterCtr = TextEditingController();
-    searchCustomerCtr = TextEditingController();
   }
 
   @override
@@ -140,24 +111,16 @@ class DashboardController extends GetxController {
     startTimeNode.dispose();
     endTimeNode.dispose();
     districtNode.dispose();
-    categoryNode.dispose();
     clusterNode.dispose();
-    customerNode.dispose();
     searchGroupNode.dispose();
-    searchCategoriesNode.dispose();
     searchClusterNode.dispose();
-    searchCustomerNode.dispose();
 
     startTimeCtr.dispose();
     endTimeCtr.dispose();
     district.dispose();
-    categoryCtr.dispose();
     clusterCtr.dispose();
-    customerCtr.dispose();
     searchDistrictCtr.dispose();
-    searchCategoriesCtr.dispose();
     searchClusterCtr.dispose();
-    searchCustomerCtr.dispose();
     super.onClose();
   }
 
@@ -182,7 +145,6 @@ class DashboardController extends GetxController {
     );
     isViewCustomer.value = rights.contains("mobile_app_customers");
 
-    // Final logging at the end
     logcat('User Rights', rights);
     logcat('isRescoTileVisible', isRescoTileVisible.value);
     logcat('isPerformanceTileVisible', isPerformanceTileVisible.value);
@@ -206,13 +168,9 @@ class DashboardController extends GetxController {
     startTimeCtr.clear();
     endTimeCtr.clear();
     district.clear();
-    categoryCtr.clear();
     clusterCtr.clear();
-    customerCtr.clear();
     searchDistrictCtr.clear();
-    searchCategoriesCtr.clear();
     searchClusterCtr.clear();
-    searchCustomerCtr.clear();
     startDate.value = '';
     endDate.value = '';
     startDateApi.value = '';
@@ -223,23 +181,12 @@ class DashboardController extends GetxController {
     isClusterSelected.value = false;
     isStartDateSelected.value = false;
     districtListInt.clear();
-    categoryListInt.clear();
     clusterListInt.clear();
-    customerListInt.clear();
-    data.clear();
-    revenueData.clear();
-    unitData.clear();
-    kpiRevenueData.clear();
-    chartPage.value = 0;
-    revenuePage.value = 0;
-    unitPage.value = 0;
-    kpiPage.value = 0;
+
     startTimeModel.value = ValidationModel(null, null, isValidate: false);
     endTimeModel.value = ValidationModel(null, null, isValidate: false);
-    disitrict.value = ValidationModel(null, null, isValidate: false);
-    categoryModel.value = ValidationModel(null, null, isValidate: false);
+    districtModel.value = ValidationModel(null, null, isValidate: false);
     clusterModel.value = ValidationModel(null, null, isValidate: false);
-    customerModel.value = ValidationModel(null, null, isValidate: false);
     isFormInvalidate.value = false;
     update();
   }
@@ -278,7 +225,7 @@ class DashboardController extends GetxController {
       null,
       isValidate: endDate.value.isNotEmpty,
     );
-    disitrict.value = ValidationModel(
+    districtModel.value = ValidationModel(
       district.text.isNotEmpty ? district.text : null,
       null,
       isValidate: district.text.isNotEmpty,
@@ -308,61 +255,6 @@ class DashboardController extends GetxController {
 
     enableSubmitButton();
   }
-
-  final List<LeadData> leadData = [
-    LeadData('New Lead', 34, Colors.lightBlueAccent),
-    LeadData('Contacted', 4, Colors.orange),
-    LeadData('Proposal Sent', 4, Colors.amber),
-    LeadData('Qualified', 4, Colors.green),
-    LeadData('Won', 50, Colors.blue),
-    LeadData('Lost', 4, Colors.red),
-  ].obs;
-
-  List<ClusterData> clusterData = [
-    ClusterData(
-      clusterName: 'Cluster 1',
-      leads: 9,
-      won: 4,
-      lost: 0,
-      ongoing: 5,
-    ),
-    ClusterData(
-      clusterName: 'Cluster 2',
-      leads: 9,
-      won: 2,
-      lost: 0,
-      ongoing: 6,
-    ),
-    ClusterData(
-      clusterName: 'Cluster 3',
-      leads: 9,
-      won: 4,
-      lost: 0,
-      ongoing: 5,
-    ),
-    ClusterData(
-      clusterName: 'Cluster 4',
-      leads: 9,
-      won: 4,
-      lost: 0,
-      ongoing: 5,
-    ),
-  ].obs;
-
-  final List<LeadsWonData> leadWonData = [
-    LeadsWonData(clusterName: 'WK-1', won: 0),
-    LeadsWonData(clusterName: 'WK-2', won: 0),
-    LeadsWonData(clusterName: 'WK-3', won: 12),
-    LeadsWonData(clusterName: 'WK-4', won: 13),
-    LeadsWonData(clusterName: 'WK-5', won: 0),
-  ];
-
-  final List<RevenueData> revenuesData = [
-    RevenueData(clusterName: 'Cluster 1', target: 600000, achieved: 156000),
-    RevenueData(clusterName: 'Cluster 2', target: 400000, achieved: 1005000),
-    RevenueData(clusterName: 'Cluster 3', target: 200000, achieved: 0),
-    RevenueData(clusterName: 'Cluster 4', target: 200000, achieved: 60000),
-  ].obs;
 
   void enableSubmitButton() {
     isFormInvalidate.value =
@@ -412,10 +304,10 @@ class DashboardController extends GetxController {
   }
 
   void makeApiCall(context) {
-    getDashboardData(context, 1, issearch: true);
+    getDashboardData(context, issearch: true);
     print('API Start Date: ${startDateApi.value}');
     print('API End Date: ${endDateApi.value}');
-    print('Selected Group IDs: ${selectedDistrictId.value}');
+    print('Selected District IDs: ${selectedDistrictId.value}');
     print('Selected Cluster IDs: ${selectedClusterId.value}');
   }
 
@@ -545,80 +437,22 @@ class DashboardController extends GetxController {
     );
   }
 
-  Future<void> getCurrentMonth(BuildContext context) async {
-    if (networkManager.connectionType.value == 0) {
-      showDialogForScreen(
-        context,
-        'Dashboard',
-        "No internet connection",
-        callback: () => Get.back(),
-      );
-      return;
-    }
-
-    try {
-      state.value = ScreenState.apiLoading;
-
-      final response = await Repository.get(
-        {},
-        ApiUrl.getbillingMonth,
-        allowHeader: true,
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonData = json.decode(response.body);
-        final MonthModel model = MonthModel.fromJson(jsonData);
-        logcat('date is:::', model.previousMonthYear);
-        await UserPreferences().setDate(model.previousMonthYear);
-
-        state.value = ScreenState.apiSuccess;
-        message.value = '';
-      } else {
-        state.value = ScreenState.apiError;
-        message.value = "Unexpected server error";
-
-        showDialogForScreen(
-          context,
-          "Dashboard",
-          "Server returned an error. Please try again.",
-          callback: () {},
-        );
-      }
-    } catch (e) {
-      state.value = ScreenState.apiError;
-      message.value = "Something went wrong";
-
-      showDialogForScreen(
-        context,
-        "Dashboard",
-        "Failed to load billing month.",
-        callback: () {},
-      );
-
-      print("getCurrentMonth Exception: $e");
-    }
-  }
-
   Future<void> getDashboardData(
-    BuildContext context,
-    int page, {
+    BuildContext context, {
     bool isFirstTime = false,
     bool issearch = false,
     bool hideLoading = false,
   }) async {
-    if (hideLoading == false) {
+    if (!hideLoading) {
       state.value = ScreenState.apiLoading;
     }
 
     if (issearch || isFirstTime) {
-      data.clear();
-      revenueData.clear();
-      unitData.clear();
-      kpiRevenueData.clear();
-      chartPage.value = 0;
-      revenuePage.value = 0;
-      unitPage.value = 0;
-      kpiPage.value = 0;
+      tilesData.value = null;
+      leadsStatusDistribution.value = null;
+      leadsByClusterBreakdown.value = null;
+      leadsWonProgress.value = null;
+      revenueVsTargets.value = null;
     }
 
     if (isFirstTime) {
@@ -640,25 +474,27 @@ class DashboardController extends GetxController {
       User? userData = await UserPreferences().getSignInInfo();
       if (userData == null || userData.userId == null) return;
 
-      // Fetch previousMonthYear from SharedPreferences and assign to both start and end
-      final previousMonth = await UserPreferences().getDate();
-      if (previousMonth != null && previousMonth.isNotEmpty) {
-        startDateApi.value = previousMonth;
-        endDateApi.value = previousMonth;
-      }
+      // Use current year and month
+      final now = DateTime.now();
+      startDateApi.value =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}';
+      endDateApi.value = startDateApi.value;
 
-      logcat('Start Date from SharedPref:', startDateApi.value);
-      logcat('End Date from SharedPref:', endDateApi.value);
+      logcat('Start Date:', startDateApi.value);
+      logcat('End Date:', endDateApi.value);
 
       loadingIndicator.show(context, '');
 
-      final Map<String, dynamic> body = {'user_id': userData.userId};
+      final Map<String, dynamic> body = {
+        'user_id': userData.userId,
+        'startYear': now.year.toString(),
+        'startMonth': now.month.toString().padLeft(2, '0'),
+        'endYear': now.year.toString(),
+        'endMonth': now.month.toString().padLeft(2, '0'),
+      };
 
-      if (districtListInt.isNotEmpty) body['groups'] = districtListInt;
-      if (clusterListInt.isNotEmpty) body['clusters'] = clusterListInt;
-      if (customerListInt.isNotEmpty) body['customers'] = customerListInt;
-      if (startDateApi.isNotEmpty) body['startMonthYear'] = startDateApi.value;
-      if (endDateApi.isNotEmpty) body['endMonthYear'] = endDateApi.value;
+      if (districtListInt.isNotEmpty) body['districtIds'] = districtListInt;
+      if (clusterListInt.isNotEmpty) body['clusterIds'] = clusterListInt;
 
       logcat('Final API Request Body', jsonEncode(body));
 
@@ -673,27 +509,24 @@ class DashboardController extends GetxController {
       loadingIndicator.hide(context);
 
       if (response.statusCode == 200) {
-        if (responseData['status'] == true) {
+        if (responseData['success'] == true) {
           state.value = ScreenState.apiSuccess;
-          message.value = '';
+          message.value = responseData['message'] ?? '';
 
           final Dashboard1Model responseDetail = Dashboard1Model.fromJson(
             responseData,
           );
 
-          // Update tiles
-          final tiles = responseDetail.result.tiles;
-          tilesData.value = tiles;
-          resco.value = tiles.resco;
-          performance.value = tiles.performance;
-          kpi.value = tiles.kpi;
-          revenue.value = tiles.revenue;
-
-          // Update chart data
-          data.value = responseDetail.result.graphs.sgf;
-          revenueData.value = responseDetail.result.graphs.revenue;
-          unitData.value = responseDetail.result.graphs.billedUnit;
-          kpiRevenueData.value = responseDetail.result.graphs.kpi;
+          // Update dashboard data
+          tilesData.value = responseDetail.tiles;
+          leadsStatusDistribution.value =
+              responseDetail.charts?.leadsStatusDistribution;
+          leadsByClusterBreakdown.value =
+              responseDetail.charts?.leadsByClusterBreakdown;
+          leadsWonProgress.value =
+              responseDetail.charts?.leadsWonProgressOverTime;
+          revenueVsTargets.value =
+              responseDetail.charts?.revenueVsTargetsComparison;
 
           update();
         } else {
@@ -742,18 +575,4 @@ class DashboardController extends GetxController {
       );
     }
   }
-
-  List<BilledUnit> get paginatedChartData =>
-      data.skip(chartPage.value * pageSize).take(pageSize).toList();
-  List<BilledUnit> get paginatedRevenueData =>
-      revenueData.skip(revenuePage.value * pageSize).take(pageSize).toList();
-  List<BilledUnit> get paginatedUnitData =>
-      unitData.skip(unitPage.value * pageSize).take(pageSize).toList();
-  List<BilledUnit> get paginatedKpiData =>
-      kpiRevenueData.skip(kpiPage.value * pageSize).take(pageSize).toList();
-
-  int get maxChartPage => (data.length / pageSize).ceil();
-  int get maxRevenuePage => (revenueData.length / pageSize).ceil();
-  int get maxUnitPage => (unitData.length / pageSize).ceil();
-  int get maxKpiPage => (kpiRevenueData.length / pageSize).ceil();
 }

@@ -46,7 +46,11 @@ Widget getContainer({
                 children: [
                   ...items.entries.map(
                     (e) => Padding(
-                      padding: EdgeInsets.only(bottom: 0.5.h),
+                      padding: EdgeInsets.only(
+                        bottom: 0.5.h,
+                        left: 2.w,
+                        right: 2.w,
+                      ),
                       child: Text(
                         "${e.key}: ${e.value}",
                         style: TextStyle(

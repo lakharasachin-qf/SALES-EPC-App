@@ -2,14 +2,49 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/font_constant.dart';
-import 'package:sales_app/models/ClusterData.dart';
 import 'package:sales_app/models/dashboard1_model.dart';
 import 'package:sizer/sizer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'dart:math' show max;
 
-Widget buildCircularChart({required List<LeadData> data}) {
-  if (data.isEmpty) {
+Widget buildCircularChart({required LeadsStatusDistribution? data}) {
+  if (data == null ||
+      (data.newLead == 0 &&
+          data.contacted == 0 &&
+          data.proposalSent == 0 &&
+          data.qualified == 0 &&
+          data.won == 0 &&
+          data.rejected == 0)) {
+    return SizedBox(
+      height: 35.h,
+      child: Center(
+        child: Text(
+          'No data available',
+          style: TextStyle(fontSize: 16.sp, color: grey),
+        ),
+      ),
+    );
+  }
+
+  // Prepare data for the pie chart
+  final List<Map<String, dynamic>> chartData = [
+    {
+      'status': 'New Lead',
+      'percent': data.newLead,
+      'color': Colors.lightBlueAccent,
+    },
+    {'status': 'Contacted', 'percent': data.contacted, 'color': Colors.orange},
+    {
+      'status': 'Proposal Sent',
+      'percent': data.proposalSent,
+      'color': Colors.amber,
+    },
+    {'status': 'Qualified', 'percent': data.qualified, 'color': Colors.green},
+    {'status': 'Won', 'percent': data.won, 'color': Colors.blue},
+    {'status': 'Rejected', 'percent': data.rejected, 'color': Colors.red},
+  ].where((item) => ((item['percent'] as num?) ?? 0) > 0).toList();
+
+  if (chartData.isEmpty) {
     return SizedBox(
       height: 35.h,
       child: Center(
@@ -51,13 +86,16 @@ Widget buildCircularChart({required List<LeadData> data}) {
         ),
         tooltipBehavior: TooltipBehavior(enable: true),
         series: <CircularSeries>[
-          PieSeries<LeadData, String>(
-            dataSource: data,
-            xValueMapper: (LeadData lead, _) => lead.status,
-            yValueMapper: (LeadData lead, _) => lead.percent,
-            pointColorMapper: (LeadData lead, _) => lead.color,
-            dataLabelMapper: (LeadData lead, _) => "${lead.percent}%",
-            radius: '85%', // makes chart bigger
+          PieSeries<Map<String, dynamic>, String>(
+            dataSource: chartData,
+            xValueMapper: (Map<String, dynamic> lead, _) => lead['status'],
+            yValueMapper: (Map<String, dynamic> lead, _) =>
+                lead['percent'].toDouble(),
+            pointColorMapper: (Map<String, dynamic> lead, _) =>
+                lead['color'] as Color,
+            dataLabelMapper: (Map<String, dynamic> lead, _) =>
+                "${lead['percent']}%",
+            radius: '85%',
             dataLabelSettings: DataLabelSettings(
               isVisible: true,
               textStyle: TextStyle(
@@ -73,8 +111,11 @@ Widget buildCircularChart({required List<LeadData> data}) {
   );
 }
 
-Widget buildLeadByClusterChart({required List<ClusterData> data}) {
-  if (data.isEmpty) {
+Widget buildLeadByClusterChart({required LeadsByClusterBreakdown? data}) {
+  if (data == null ||
+      data.labels == null ||
+      data.datasets == null ||
+      data.labels!.isEmpty) {
     return SizedBox(
       height: 30.h,
       child: Center(
@@ -86,6 +127,20 @@ Widget buildLeadByClusterChart({required List<ClusterData> data}) {
     );
   }
 
+  // Prepare data for the chart
+  final List<Map<String, dynamic>> chartData = List.generate(
+    data.labels!.length,
+    (index) {
+      return {
+        'clusterName': data.labels![index],
+        'leads': data.datasets!.leads![index],
+        'won': data.datasets!.won![index],
+        'lost': data.datasets!.lost![index],
+        'ongoing': data.datasets!.ongoing![index],
+      };
+    },
+  );
+
   return Center(
     child: SizedBox(
       height: 30.h,
@@ -93,10 +148,8 @@ Widget buildLeadByClusterChart({required List<ClusterData> data}) {
         fit: BoxFit.scaleDown,
         alignment: Alignment.topLeft,
         child: SizedBox(
-          width: Device.width,
-          // width: max(data.length * 50, 300).toDouble(),
+          width: max(chartData.length * 100, 300).toDouble(),
           child: SfCartesianChart(
-            // enableSideBySideSeriesPlacement: true,
             title: ChartTitle(
               text: 'Leads By Clusters',
               alignment: ChartAlignment.center,
@@ -106,23 +159,6 @@ Widget buildLeadByClusterChart({required List<ClusterData> data}) {
                 fontFamily: plusJakartaSansMedium,
               ),
             ),
-            // tooltipBehavior: TooltipBehavior(
-            //   enable: true,
-            //   builder:
-            //       (
-            //         dynamic data,
-            //         dynamic point,
-            //         dynamic series,
-            //         int pointIndex,
-            //         int seriesIndex,
-            //       ) {
-            //         return _buildTooltipContent(
-            //           label: data.customerShortName,
-            //           actual: data.actual,
-            //           target: data.target,
-            //         );
-            //       },
-            // ),
             legend: Legend(
               isVisible: true,
               position: LegendPosition.bottom,
@@ -140,7 +176,6 @@ Widget buildLeadByClusterChart({required List<ClusterData> data}) {
               ),
             ),
             primaryYAxis: NumericAxis(
-              // title: AxisTitle(text: 'Count'),
               minimum: 0,
               interval: 2,
               labelStyle: TextStyle(
@@ -152,10 +187,11 @@ Widget buildLeadByClusterChart({required List<ClusterData> data}) {
             ),
             tooltipBehavior: TooltipBehavior(enable: true),
             series: <CartesianSeries>[
-              ColumnSeries<ClusterData, String>(
-                dataSource: data,
-                xValueMapper: (ClusterData c, _) => c.clusterName,
-                yValueMapper: (ClusterData c, _) => c.leads,
+              ColumnSeries<Map<String, dynamic>, String>(
+                dataSource: chartData,
+                xValueMapper: (Map<String, dynamic> c, _) => c['clusterName'],
+                yValueMapper: (Map<String, dynamic> c, _) =>
+                    c['leads'].toDouble(),
                 name: 'Leads',
                 color: Colors.lightBlue,
                 spacing: 0.1,
@@ -165,7 +201,6 @@ Widget buildLeadByClusterChart({required List<ClusterData> data}) {
                 ),
                 dataLabelSettings: const DataLabelSettings(
                   isVisible: true,
-                  // labelAlignment: ChartDataLabelAlignment.top,
                   labelPosition: ChartDataLabelPosition.outside,
                   textStyle: TextStyle(
                     color: Colors.black,
@@ -173,10 +208,11 @@ Widget buildLeadByClusterChart({required List<ClusterData> data}) {
                   ),
                 ),
               ),
-              ColumnSeries<ClusterData, String>(
-                dataSource: data,
-                xValueMapper: (ClusterData c, _) => c.clusterName,
-                yValueMapper: (ClusterData c, _) => c.won,
+              ColumnSeries<Map<String, dynamic>, String>(
+                dataSource: chartData,
+                xValueMapper: (Map<String, dynamic> c, _) => c['clusterName'],
+                yValueMapper: (Map<String, dynamic> c, _) =>
+                    c['won'].toDouble(),
                 name: 'Won',
                 color: Colors.green,
                 spacing: 0.1,
@@ -186,7 +222,6 @@ Widget buildLeadByClusterChart({required List<ClusterData> data}) {
                 ),
                 dataLabelSettings: const DataLabelSettings(
                   isVisible: true,
-                  // labelAlignment: ChartDataLabelAlignment.top,
                   labelPosition: ChartDataLabelPosition.outside,
                   textStyle: TextStyle(
                     color: Colors.black,
@@ -194,10 +229,11 @@ Widget buildLeadByClusterChart({required List<ClusterData> data}) {
                   ),
                 ),
               ),
-              ColumnSeries<ClusterData, String>(
-                dataSource: data,
-                xValueMapper: (ClusterData c, _) => c.clusterName,
-                yValueMapper: (ClusterData c, _) => c.lost,
+              ColumnSeries<Map<String, dynamic>, String>(
+                dataSource: chartData,
+                xValueMapper: (Map<String, dynamic> c, _) => c['clusterName'],
+                yValueMapper: (Map<String, dynamic> c, _) =>
+                    c['lost'].toDouble(),
                 name: 'Lost',
                 color: Colors.red,
                 spacing: 0.1,
@@ -207,7 +243,6 @@ Widget buildLeadByClusterChart({required List<ClusterData> data}) {
                 ),
                 dataLabelSettings: const DataLabelSettings(
                   isVisible: true,
-                  // labelAlignment: ChartDataLabelAlignment.top,
                   labelPosition: ChartDataLabelPosition.outside,
                   textStyle: TextStyle(
                     color: Colors.black,
@@ -215,10 +250,11 @@ Widget buildLeadByClusterChart({required List<ClusterData> data}) {
                   ),
                 ),
               ),
-              ColumnSeries<ClusterData, String>(
-                dataSource: data,
-                xValueMapper: (ClusterData c, _) => c.clusterName,
-                yValueMapper: (ClusterData c, _) => c.ongoing,
+              ColumnSeries<Map<String, dynamic>, String>(
+                dataSource: chartData,
+                xValueMapper: (Map<String, dynamic> c, _) => c['clusterName'],
+                yValueMapper: (Map<String, dynamic> c, _) =>
+                    c['ongoing'].toDouble(),
                 name: 'Ongoing',
                 color: Colors.orange,
                 spacing: 0.1,
@@ -228,7 +264,6 @@ Widget buildLeadByClusterChart({required List<ClusterData> data}) {
                 ),
                 dataLabelSettings: const DataLabelSettings(
                   isVisible: true,
-                  // labelAlignment: ChartDataLabelAlignment.top,
                   labelPosition: ChartDataLabelPosition.outside,
                   textStyle: TextStyle(
                     color: Colors.black,
@@ -244,18 +279,32 @@ Widget buildLeadByClusterChart({required List<ClusterData> data}) {
   );
 }
 
-Widget buildLeadsWonOverTimeChart({required List<LeadsWonData> data}) {
-  if (data.isEmpty) {
+Widget buildLeadsWonOverTimeChart({required LeadsWonProgressOverTime? data}) {
+  if (data == null ||
+      data.labels == null ||
+      data.weeklyChanges == null ||
+      data.labels!.isEmpty) {
     return SizedBox(
       height: 30.h,
       child: Center(
         child: Text(
           'No data available',
-          style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+          style: TextStyle(fontSize: 14.sp, color: grey),
         ),
       ),
     );
   }
+
+  // Prepare data for the chart
+  final List<Map<String, dynamic>> chartData = List.generate(
+    data.labels!.length,
+    (index) {
+      return {
+        'clusterName': data.labels![index],
+        'won': data.weeklyChanges![index],
+      };
+    },
+  );
 
   return Center(
     child: SizedBox(
@@ -279,8 +328,10 @@ Widget buildLeadsWonOverTimeChart({required List<LeadsWonData> data}) {
         ),
         primaryYAxis: NumericAxis(
           minimum: 0,
-          maximum: (data.map((e) => e.won).reduce((a, b) => a > b ? a : b) + 3)
-              .toDouble(),
+          maximum:
+              (chartData.map((e) => e['won']).reduce((a, b) => a > b ? a : b) +
+                      3)
+                  .toDouble(),
           interval: 2,
           axisLine: const AxisLine(width: 1),
           majorGridLines: const MajorGridLines(width: 0.5),
@@ -288,10 +339,10 @@ Widget buildLeadsWonOverTimeChart({required List<LeadsWonData> data}) {
         ),
         tooltipBehavior: TooltipBehavior(enable: true),
         series: <CartesianSeries>[
-          ColumnSeries<LeadsWonData, String>(
-            dataSource: data,
-            xValueMapper: (LeadsWonData c, _) => c.clusterName,
-            yValueMapper: (LeadsWonData c, _) => c.won,
+          ColumnSeries<Map<String, dynamic>, String>(
+            dataSource: chartData,
+            xValueMapper: (Map<String, dynamic> c, _) => c['clusterName'],
+            yValueMapper: (Map<String, dynamic> c, _) => c['won'].toDouble(),
             name: 'Won',
             color: Colors.green,
             spacing: 0.3,
@@ -311,18 +362,33 @@ Widget buildLeadsWonOverTimeChart({required List<LeadsWonData> data}) {
   );
 }
 
-Widget buildRevenueTargetsChart({required List<RevenueData> data}) {
-  if (data.isEmpty) {
+Widget buildRevenueTargetsChart({required RevenueVsTargetsComparison? data}) {
+  if (data == null ||
+      data.labels == null ||
+      data.revenue == null ||
+      data.labels!.isEmpty) {
     return SizedBox(
       height: 30.h,
       child: Center(
         child: Text(
           'No Revenue Targets available',
-          style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+          style: TextStyle(fontSize: 14.sp, color: grey),
         ),
       ),
     );
   }
+
+  // Prepare data for the chart
+  final List<Map<String, dynamic>> chartData = List.generate(
+    data.labels!.length,
+    (index) {
+      return {
+        'clusterName': data.labels![index],
+        'target': data.revenue!.target![index],
+        'achieved': data.revenue!.achieved![index],
+      };
+    },
+  );
 
   return Center(
     child: SizedBox(
@@ -351,14 +417,17 @@ Widget buildRevenueTargetsChart({required List<RevenueData> data}) {
         primaryYAxis: NumericAxis(
           minimum: 0,
           maximum:
-              (data
+              (chartData
                           .map(
                             (e) =>
-                                e.target > e.achieved ? e.target : e.achieved,
+                                (e['target'] > e['achieved']
+                                        ? e['target']
+                                        : e['achieved'])
+                                    .toDouble(),
                           )
                           .reduce((a, b) => a > b ? a : b) *
                       1.2)
-                  .toDouble(), // add headroom
+                  .toDouble(),
           numberFormat: NumberFormat.decimalPattern('en_IN'),
           axisLine: const AxisLine(width: 1),
           majorGridLines: const MajorGridLines(width: 0.5),
@@ -366,10 +435,10 @@ Widget buildRevenueTargetsChart({required List<RevenueData> data}) {
         ),
         tooltipBehavior: TooltipBehavior(enable: true),
         series: <CartesianSeries>[
-          ColumnSeries<RevenueData, String>(
-            dataSource: data,
-            xValueMapper: (RevenueData r, _) => r.clusterName,
-            yValueMapper: (RevenueData r, _) => r.target,
+          ColumnSeries<Map<String, dynamic>, String>(
+            dataSource: chartData,
+            xValueMapper: (Map<String, dynamic> r, _) => r['clusterName'],
+            yValueMapper: (Map<String, dynamic> r, _) => r['target'].toDouble(),
             name: 'Target',
             color: Colors.lightBlue,
             spacing: 0.2,
@@ -384,10 +453,11 @@ Widget buildRevenueTargetsChart({required List<RevenueData> data}) {
               ),
             ),
           ),
-          ColumnSeries<RevenueData, String>(
-            dataSource: data,
-            xValueMapper: (RevenueData r, _) => r.clusterName,
-            yValueMapper: (RevenueData r, _) => r.achieved,
+          ColumnSeries<Map<String, dynamic>, String>(
+            dataSource: chartData,
+            xValueMapper: (Map<String, dynamic> r, _) => r['clusterName'],
+            yValueMapper: (Map<String, dynamic> r, _) =>
+                r['achieved'].toDouble(),
             name: 'Achieved',
             color: Colors.green,
             spacing: 0.2,
@@ -404,437 +474,6 @@ Widget buildRevenueTargetsChart({required List<RevenueData> data}) {
           ),
         ],
       ),
-    ),
-  );
-}
-
-Widget buildPaginationButtons({
-  required int currentPage,
-  required int maxPage,
-  required VoidCallback onBack,
-  required VoidCallback onForward,
-}) {
-  return Align(
-    alignment: Alignment.centerRight,
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.arrow_left_sharp),
-          onPressed: currentPage > 0 ? onBack : null,
-        ),
-        Text(
-          'Page ${currentPage + 1} of $maxPage',
-          style: TextStyle(fontSize: 14.sp),
-        ),
-        IconButton(
-          icon: const Icon(Icons.arrow_right_sharp),
-          onPressed: currentPage < maxPage - 1 ? onForward : null,
-        ),
-      ],
-    ),
-  );
-}
-
-Widget buildChart({required List<BilledUnit> data}) {
-  if (data.isEmpty) {
-    return SizedBox(
-      height: 30.h,
-      child: Center(
-        child: Text(
-          'No SGF data available',
-          style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-        ),
-      ),
-    );
-  }
-
-  return SizedBox(
-    height: 30.h,
-    child: FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: Alignment.topLeft,
-      child: SizedBox(
-        width: max(data.length * 50, 300).toDouble(),
-        child: SfCartesianChart(
-          title: ChartTitle(text: 'SGF → Actual Vs Target'),
-          tooltipBehavior: TooltipBehavior(
-            enable: true,
-            builder:
-                (
-                  dynamic data,
-                  dynamic point,
-                  dynamic series,
-                  int pointIndex,
-                  int seriesIndex,
-                ) {
-                  return _buildTooltipContent(
-                    label: data.customerShortName,
-                    actual: data.actual,
-                    target: data.target,
-                  );
-                },
-          ),
-          legend: const Legend(isVisible: true),
-          primaryXAxis: CategoryAxis(
-            labelPlacement: LabelPlacement.betweenTicks,
-            labelIntersectAction: AxisLabelIntersectAction.rotate45,
-            labelRotation: 45,
-            majorTickLines: const MajorTickLines(size: 0),
-            majorGridLines: const MajorGridLines(width: 0),
-            labelStyle: const TextStyle(fontSize: 10),
-          ),
-          primaryYAxis: NumericAxis(
-            title: AxisTitle(text: 'SGF'),
-            minimum: 0,
-            maximum: 13,
-            interval: 1,
-            labelStyle: const TextStyle(fontSize: 10),
-          ),
-          series: <CartesianSeries>[
-            LineSeries<BilledUnit, String>(
-              name: 'Target',
-              dataSource: data,
-              xValueMapper: (d, _) => d.customerShortName,
-              yValueMapper: (d, _) => d.target.toDouble(),
-              color: Colors.orange,
-              markerSettings: const MarkerSettings(isVisible: true),
-              enableTooltip: true,
-            ),
-            ColumnSeries<BilledUnit, String>(
-              name: 'Actual',
-              dataSource: data,
-              xValueMapper: (d, _) => d.customerShortName,
-              yValueMapper: (d, _) => d.actual,
-              color: primaryColor,
-              spacing: 0.2,
-              enableTooltip: true,
-              dataLabelSettings: const DataLabelSettings(isVisible: true),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-Widget buildRevenueChart(List<BilledUnit> data) {
-  if (data.isEmpty) {
-    return SizedBox(
-      height: 30.h,
-      child: Center(
-        child: Text(
-          'No revenue data available',
-          style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-        ),
-      ),
-    );
-  }
-
-  // Calculate max actual value
-  final maxActual = data.map((e) => e.actual).reduce((a, b) => a > b ? a : b);
-  final yAxisMax = (maxActual * 2).ceilToDouble();
-
-  return SizedBox(
-    height: 30.h,
-    child: FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: Alignment.topLeft,
-      child: SizedBox(
-        width: max(data.length * 50, 300).toDouble(),
-        child: SfCartesianChart(
-          title: ChartTitle(text: 'Revenue → Actual Vs Target'),
-          tooltipBehavior: TooltipBehavior(
-            enable: true,
-            builder:
-                (
-                  dynamic data,
-                  dynamic point,
-                  dynamic series,
-                  int pointIndex,
-                  int seriesIndex,
-                ) {
-                  return _buildTooltipContent(
-                    label: data.customerShortName,
-                    actual: data.actual,
-                    target: data.target,
-                  );
-                },
-          ),
-          legend: const Legend(isVisible: true),
-          primaryXAxis: CategoryAxis(
-            labelPlacement: LabelPlacement.betweenTicks,
-            labelRotation: 45,
-            labelIntersectAction: AxisLabelIntersectAction.rotate45,
-            majorTickLines: const MajorTickLines(size: 0),
-            majorGridLines: const MajorGridLines(width: 0),
-            labelStyle: const TextStyle(fontSize: 10),
-          ),
-          primaryYAxis: NumericAxis(
-            title: AxisTitle(text: 'Amount'),
-            minimum: 0,
-            maximum: yAxisMax,
-            interval: yAxisMax / 10,
-            labelStyle: const TextStyle(fontSize: 10),
-          ),
-          series: <CartesianSeries>[
-            ColumnSeries<BilledUnit, String>(
-              name: 'Target',
-              dataSource: data,
-              xValueMapper: (d, _) => d.customerShortName,
-              yValueMapper: (d, _) => d.target.toDouble(),
-              color: Colors.orange,
-              enableTooltip: true,
-            ),
-            ColumnSeries<BilledUnit, String>(
-              name: 'Actual',
-              dataSource: data,
-              xValueMapper: (d, _) => d.customerShortName,
-              yValueMapper: (d, _) => d.actual,
-              color: primaryColor,
-              enableTooltip: true,
-              dataLabelSettings: DataLabelSettings(
-                isVisible: true,
-                builder: (dynamic d, _, __, ___, ____) {
-                  final percentage = d.target == 0
-                      ? 0
-                      : (d.actual / d.target * 100);
-                  return Transform.translate(
-                    offset: const Offset(0, -6),
-                    child: Transform.rotate(
-                      angle: -1.5708,
-                      child: Text(
-                        '${percentage.ceil()}%',
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-Widget buildUnitChart(List<BilledUnit> data) {
-  if (data.isEmpty) {
-    return SizedBox(
-      height: 30.h,
-      child: Center(
-        child: Text(
-          'No billed units data available',
-          style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-        ),
-      ),
-    );
-  }
-
-  // Calculate max actual value
-  final maxActual = data.map((e) => e.actual).reduce((a, b) => a > b ? a : b);
-  final yAxisMax = (maxActual * 2).ceilToDouble();
-
-  return SizedBox(
-    height: 30.h,
-    child: FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: Alignment.topLeft,
-      child: SizedBox(
-        width: max(data.length * 50, 300).toDouble(),
-        child: SfCartesianChart(
-          title: ChartTitle(text: 'Billed Units → Actual Vs Target'),
-          tooltipBehavior: TooltipBehavior(
-            enable: true,
-            builder:
-                (
-                  dynamic data,
-                  dynamic point,
-                  dynamic series,
-                  int pointIndex,
-                  int seriesIndex,
-                ) {
-                  return _buildTooltipContent(
-                    label: data.customerShortName,
-                    actual: data.actual,
-                    target: data.target,
-                  );
-                },
-          ),
-          legend: const Legend(isVisible: true),
-          primaryXAxis: CategoryAxis(
-            labelPlacement: LabelPlacement.betweenTicks,
-            labelRotation: 45,
-            labelIntersectAction: AxisLabelIntersectAction.rotate45,
-            majorTickLines: const MajorTickLines(size: 0),
-            majorGridLines: const MajorGridLines(width: 0),
-            labelStyle: const TextStyle(fontSize: 10),
-          ),
-          primaryYAxis: NumericAxis(
-            title: AxisTitle(text: 'Units'),
-            minimum: 0,
-            maximum: yAxisMax,
-            interval: yAxisMax / 10,
-            labelStyle: const TextStyle(fontSize: 10),
-          ),
-          series: <CartesianSeries>[
-            ColumnSeries<BilledUnit, String>(
-              name: 'Target',
-              dataSource: data,
-              xValueMapper: (d, _) => d.customerShortName,
-              yValueMapper: (d, _) => d.target.toDouble(),
-              color: Colors.orange,
-              enableTooltip: true,
-            ),
-            ColumnSeries<BilledUnit, String>(
-              name: 'Actual',
-              dataSource: data,
-              xValueMapper: (d, _) => d.customerShortName,
-              yValueMapper: (d, _) => d.actual,
-              color: primaryColor,
-              enableTooltip: true,
-              dataLabelSettings: DataLabelSettings(
-                isVisible: true,
-                builder: (dynamic d, _, __, ___, ____) {
-                  final percentage = d.target == 0
-                      ? 0
-                      : (d.actual / d.target * 100);
-                  return Transform.translate(
-                    offset: const Offset(0, -6),
-                    child: Transform.rotate(
-                      angle: -1.5708,
-                      child: Text(
-                        '${percentage.ceil()}%',
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-Widget buildKpiChart(List<BilledUnit> data) {
-  if (data.isEmpty) {
-    return SizedBox(
-      height: 30.h,
-      child: Center(
-        child: Text(
-          'No KPI data available',
-          style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-        ),
-      ),
-    );
-  }
-
-  // Calculate max actual value
-  final maxActual = data.map((e) => e.actual).reduce((a, b) => a > b ? a : b);
-  final yAxisMax = (maxActual * 2).ceilToDouble();
-
-  return SizedBox(
-    height: 30.h,
-    child: FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: Alignment.topLeft,
-      child: SizedBox(
-        width: max(data.length * 50, 300).toDouble(),
-        child: SfCartesianChart(
-          title: ChartTitle(text: 'KPI (Revenue/MW) → Actual Vs Target'),
-          tooltipBehavior: TooltipBehavior(
-            enable: true,
-            builder:
-                (
-                  dynamic data,
-                  dynamic point,
-                  dynamic series,
-                  int pointIndex,
-                  int seriesIndex,
-                ) {
-                  return _buildTooltipContent(
-                    label: data.customerShortName,
-                    actual: data.actual,
-                    target: data.target,
-                  );
-                },
-          ),
-          legend: const Legend(isVisible: true),
-          primaryXAxis: CategoryAxis(
-            labelPlacement: LabelPlacement.betweenTicks,
-            labelRotation: 45,
-            labelIntersectAction: AxisLabelIntersectAction.rotate45,
-            majorTickLines: const MajorTickLines(size: 0),
-            majorGridLines: const MajorGridLines(width: 0),
-            labelStyle: const TextStyle(fontSize: 10),
-          ),
-          primaryYAxis: NumericAxis(
-            title: AxisTitle(text: 'Revenue/MW'),
-            minimum: 0,
-            maximum: yAxisMax,
-            interval: yAxisMax / 10,
-            labelStyle: const TextStyle(fontSize: 10),
-          ),
-          series: <CartesianSeries>[
-            ColumnSeries<BilledUnit, String>(
-              name: 'Target',
-              dataSource: data,
-              xValueMapper: (d, _) => d.customerShortName,
-              yValueMapper: (d, _) => d.target.toDouble(),
-              color: Colors.orange,
-              enableTooltip: true,
-            ),
-            ColumnSeries<BilledUnit, String>(
-              name: 'Actual',
-              dataSource: data,
-              xValueMapper: (d, _) => d.customerShortName,
-              yValueMapper: (d, _) => d.actual,
-              color: primaryColor,
-              enableTooltip: true,
-              dataLabelSettings: DataLabelSettings(
-                isVisible: true,
-                builder: (dynamic d, _, __, ___, ____) {
-                  final percentage = d.target == 0
-                      ? 0
-                      : (d.actual / d.target * 100);
-                  return Transform.translate(
-                    offset: const Offset(0, -6),
-                    child: Transform.rotate(
-                      angle: -1.5708,
-                      child: Text(
-                        '${percentage.ceil()}%',
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-Widget _buildTooltipContent({
-  required String label,
-  required num actual,
-  required num target,
-}) {
-  return Container(
-    padding: const EdgeInsets.all(8),
-    decoration: BoxDecoration(
-      color: Colors.black87,
-      borderRadius: BorderRadius.circular(6),
-    ),
-    child: Text(
-      'Label: $label\nTarget: $target\nActual: $actual',
-      style: const TextStyle(color: Colors.white, fontSize: 11),
     ),
   );
 }

@@ -15,7 +15,9 @@ class ApiUrl {
   static const login = 'login';
 
   //dashboard
-  static const graphicaldashboard = 'graphical-dashboard';
+  static const graphicaldashboard = 'dashboard';
+
+  //below are not using
   static const getbillingMonth = 'get-billing-month-year';
 
   //add meter

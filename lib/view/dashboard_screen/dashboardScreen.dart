@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
 import 'package:sales_app/componant/parentWidgets/CustomeParentBackground.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
@@ -28,9 +29,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     futureDelay(() {
-      // ctr.getRights();
+      ctr.getRights();
       // ctr.getCurrentMonth(context);
-      // ctr.getDashboardData(context, 1, isFirstTime: true);
+      ctr.getDashboardData(context, isFirstTime: true);
     }, isOneSecond: true);
   }
 
@@ -63,8 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               onRefresh: () async {
                 await futureDelay(() {
-                  // ctr.getDashboardData(context, 1, isFirstTime: true);
-                  // ctr.getCurrentMonth(context);
+                  ctr.getDashboardData(context, isFirstTime: true);
                 }, isOneSecond: false);
                 _refreshController.refreshCompleted();
               },
@@ -75,7 +75,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     getDynamicSizedBox(height: 2.h),
-                    // if (AppPermissions().canAddUser)
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 4.w),
                       child: Obx(
@@ -83,115 +82,75 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           children: [
                             Row(
                               children: [
-                                if (ctr.isRescoTileVisible.value)
-                                  Expanded(
-                                    child: getContainer(
-                                      titleText: HomeScreenConst.leads,
-                                      items: {
-                                        "Total": "18",
-                                        "Won": "13",
-                                        "Lost": "1",
-                                        "Ongoing": "4",
-                                      },
-                                      imagePath: Asset.lead,
-                                    ),
+                                // if (ctr.isRescoTileVisible.value)
+                                Expanded(
+                                  child: getContainer(
+                                    titleText: HomeScreenConst.leads,
+                                    items: {
+                                      "Total":
+                                          "${ctr.tilesData.value?.leads?.totalLeads ?? 0}",
+                                      "Won":
+                                          "${ctr.tilesData.value?.leads?.leadsWon ?? 0}",
+                                      "Lost":
+                                          "${ctr.tilesData.value?.leads?.leadsLost ?? 0}",
+                                      "Ongoing":
+                                          "${ctr.tilesData.value?.leads?.leadsInProgress ?? 0}",
+                                    },
+                                    imagePath: Asset.lead,
                                   ),
+                                ),
                                 SizedBox(width: 4.w),
-                                if (ctr.isPerformanceTileVisible.value)
-                                  Expanded(
-                                    child: getContainer(
-                                      titleText: HomeScreenConst.conversion,
-                                      items: {"Winning (%)": "72"},
-                                      imagePath: Asset.conversion,
-                                    ),
+                                // if (ctr.isPerformanceTileVisible.value)
+                                Expanded(
+                                  child: getContainer(
+                                    titleText: HomeScreenConst.conversion,
+                                    items: {
+                                      "Winning (%)":
+                                          "${ctr.tilesData.value?.leads?.conversion ?? 0}",
+                                    },
+                                    imagePath: Asset.conversion,
                                   ),
+                                ),
                               ],
                             ),
                             getDynamicSizedBox(height: 2.h),
                             Row(
                               children: [
-                                if (ctr.isKpiRevenueTileVisible.value)
-                                  Expanded(
-                                    child: getContainer(
-                                      titleText: HomeScreenConst.leadsCategory,
-                                      items: {
-                                        "Hot": "12",
-                                        "Warm": "4",
-                                        "Cold": "2",
-                                      },
-                                      imagePath: Asset.categories,
-                                    ),
+                                // if (ctr.isKpiRevenueTileVisible.value)
+                                Expanded(
+                                  child: getContainer(
+                                    titleText: HomeScreenConst.leadsCategory,
+                                    items: {
+                                      "Hot":
+                                          "${ctr.tilesData.value?.leads?.leadCategories?.hot ?? 0}",
+                                      "Warm":
+                                          "${ctr.tilesData.value?.leads?.leadCategories?.warm ?? 0}",
+                                      "Cold":
+                                          "${ctr.tilesData.value?.leads?.leadCategories?.cold ?? 0}",
+                                    },
+                                    imagePath: Asset.categories,
                                   ),
+                                ),
                                 getDynamicSizedBox(width: 4.w),
-                                if (ctr.isRevenueTileVisible.value)
-                                  Expanded(
-                                    child: getContainer(
-                                      titleText: HomeScreenConst.revenue,
-                                      items: {
-                                        "Total Revenue": "\nINR 18,59,000",
-                                      },
-                                      imagePath: Asset.revenue,
-                                    ),
+                                // if (ctr.isRevenueTileVisible.value)
+                                Expanded(
+                                  child: getContainer(
+                                    titleText: HomeScreenConst.revenue,
+                                    items: {
+                                      "Total Revenue":
+                                          "INR ${NumberFormat.currency(locale: 'en_IN', symbol: '').format(ctr.tilesData.value?.leads?.totalRevenue ?? 0)}",
+                                    },
+                                    imagePath: Asset.revenue,
                                   ),
+                                ),
                               ],
                             ),
                           ],
                         ),
                       ),
                     ),
-                    Container(
-                      width: Device.width,
-                      margin: EdgeInsets.only(right: 4.w, left: 4.w, top: 3.h),
-                      decoration: BoxDecoration(
-                        color: white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: black.withOpacity(0.05),
-                            offset: const Offset(0, 2),
-                            blurRadius: 4,
-                            spreadRadius: 0,
-                          ),
-                        ],
-                      ),
-                      child: buildCircularChart(data: ctr.leadData),
-                    ),
-                    Container(
-                      width: Device.width,
-                      margin: EdgeInsets.only(right: 4.w, left: 4.w, top: 3.h),
-                      decoration: BoxDecoration(
-                        color: white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: black.withOpacity(0.05),
-                            offset: const Offset(0, 2),
-                            blurRadius: 4,
-                            spreadRadius: 0,
-                          ),
-                        ],
-                      ),
-                      child: buildLeadByClusterChart(data: ctr.clusterData),
-                    ),
-                    Container(
-                      width: Device.width,
-                      margin: EdgeInsets.only(right: 4.w, left: 4.w, top: 3.h),
-                      decoration: BoxDecoration(
-                        color: white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: black.withOpacity(0.05),
-                            offset: const Offset(0, 2),
-                            blurRadius: 4,
-                            spreadRadius: 0,
-                          ),
-                        ],
-                      ),
-                      child: buildLeadsWonOverTimeChart(data: ctr.leadWonData),
-                    ),
-                    Obx(() {
-                      return Container(
+                    Obx(
+                      () => Container(
                         width: Device.width,
                         margin: EdgeInsets.only(
                           right: 4.w,
@@ -210,145 +169,86 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ],
                         ),
-                        child: buildRevenueTargetsChart(data: ctr.revenuesData),
-                      );
-                    }),
-                    // Obx(
-                    //   () => Container(
-                    //     margin: EdgeInsets.only(
-                    //       right: 4.w,
-                    //       left: 4.w,
-                    //       top: 3.h,
-                    //     ),
-                    //     decoration: BoxDecoration(
-                    //       color: white,
-                    //       borderRadius: BorderRadius.circular(10),
-                    //       boxShadow: [
-                    //         BoxShadow(
-                    //           color: black.withOpacity(0.05),
-                    //           offset: const Offset(0, 2),
-                    //           blurRadius: 4,
-                    //           spreadRadius: 0,
-                    //         ),
-                    //       ],
-                    //     ),
-                    //     child: Column(
-                    //       mainAxisAlignment: MainAxisAlignment.start,
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         buildChart(data: ctr.paginatedChartData),
-                    //         buildPaginationButtons(
-                    //           currentPage: ctr.chartPage.value,
-                    //           maxPage: ctr.maxChartPage,
-                    //           onBack: () => ctr.chartPage.value--,
-                    //           onForward: () => ctr.chartPage.value++,
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                    // Obx(
-                    //   () => Container(
-                    //     margin: EdgeInsets.only(
-                    //       right: 4.w,
-                    //       left: 4.w,
-                    //       top: 2.h,
-                    //     ),
-                    //     decoration: BoxDecoration(
-                    //       color: white,
-                    //       borderRadius: BorderRadius.circular(10),
-                    //       boxShadow: [
-                    //         BoxShadow(
-                    //           color: black.withOpacity(0.05),
-                    //           offset: const Offset(0, 2),
-                    //           blurRadius: 4,
-                    //           spreadRadius: 0,
-                    //         ),
-                    //       ],
-                    //     ),
-                    //     child: Column(
-                    //       mainAxisAlignment: MainAxisAlignment.start,
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         buildRevenueChart(ctr.paginatedRevenueData),
-                    //         buildPaginationButtons(
-                    //           currentPage: ctr.revenuePage.value,
-                    //           maxPage: ctr.maxRevenuePage,
-                    //           onBack: () => ctr.revenuePage.value--,
-                    //           onForward: () => ctr.revenuePage.value++,
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                    // Obx(
-                    //   () => Container(
-                    //     margin: EdgeInsets.only(
-                    //       right: 4.w,
-                    //       left: 4.w,
-                    //       top: 2.h,
-                    //     ),
-                    //     decoration: BoxDecoration(
-                    //       color: white,
-                    //       borderRadius: BorderRadius.circular(10),
-                    //       boxShadow: [
-                    //         BoxShadow(
-                    //           color: black.withOpacity(0.05),
-                    //           offset: const Offset(0, 2),
-                    //           blurRadius: 4,
-                    //           spreadRadius: 0,
-                    //         ),
-                    //       ],
-                    //     ),
-                    //     child: Column(
-                    //       mainAxisAlignment: MainAxisAlignment.start,
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         buildUnitChart(ctr.paginatedUnitData),
-                    //         buildPaginationButtons(
-                    //           currentPage: ctr.unitPage.value,
-                    //           maxPage: ctr.maxUnitPage,
-                    //           onBack: () => ctr.unitPage.value--,
-                    //           onForward: () => ctr.unitPage.value++,
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                    // Obx(
-                    //   () => Container(
-                    //     margin: EdgeInsets.only(
-                    //       right: 4.w,
-                    //       left: 4.w,
-                    //       top: 2.h,
-                    //     ),
-                    //     decoration: BoxDecoration(
-                    //       color: white,
-                    //       borderRadius: BorderRadius.circular(10),
-                    //       boxShadow: [
-                    //         BoxShadow(
-                    //           color: black.withOpacity(0.05),
-                    //           offset: const Offset(0, 2),
-                    //           blurRadius: 4,
-                    //           spreadRadius: 0,
-                    //         ),
-                    //       ],
-                    //     ),
-                    //     child: Column(
-                    //       mainAxisAlignment: MainAxisAlignment.start,
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       children: [
-                    //         buildKpiChart(ctr.paginatedKpiData),
-                    //         buildPaginationButtons(
-                    //           currentPage: ctr.kpiPage.value,
-                    //           maxPage: ctr.maxKpiPage,
-                    //           onBack: () => ctr.kpiPage.value--,
-                    //           onForward: () => ctr.kpiPage.value++,
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
+                        child: buildCircularChart(
+                          data: ctr.leadsStatusDistribution.value,
+                        ),
+                      ),
+                    ),
+                    Obx(
+                      () => Container(
+                        width: Device.width,
+                        margin: EdgeInsets.only(
+                          right: 4.w,
+                          left: 4.w,
+                          top: 3.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: black.withOpacity(0.05),
+                              offset: const Offset(0, 2),
+                              blurRadius: 4,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: buildLeadByClusterChart(
+                          data: ctr.leadsByClusterBreakdown.value,
+                        ),
+                      ),
+                    ),
+                    Obx(
+                      () => Container(
+                        width: Device.width,
+                        margin: EdgeInsets.only(
+                          right: 4.w,
+                          left: 4.w,
+                          top: 3.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: black.withOpacity(0.05),
+                              offset: const Offset(0, 2),
+                              blurRadius: 4,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: buildLeadsWonOverTimeChart(
+                          data: ctr.leadsWonProgress.value,
+                        ),
+                      ),
+                    ),
+                    Obx(
+                      () => Container(
+                        width: Device.width,
+                        margin: EdgeInsets.only(
+                          right: 4.w,
+                          left: 4.w,
+                          top: 3.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: black.withOpacity(0.05),
+                              offset: const Offset(0, 2),
+                              blurRadius: 4,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: buildRevenueTargetsChart(
+                          data: ctr.revenueVsTargets.value,
+                        ),
+                      ),
+                    ),
                     getDynamicSizedBox(height: 12.h),
                   ],
                 ),
