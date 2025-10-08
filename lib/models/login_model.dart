@@ -15,14 +15,13 @@ class LoginModel {
   factory LoginModel.fromJson(Map<String, dynamic> json) => LoginModel(
     status: json["status"],
     message: json["message"],
-    user: User.fromJson(json["user"]),
-    // user: User.fromJson(json["result"]),
+    user: User.fromJson(json["result"]), // ✅ fixed key
   );
 
   Map<String, dynamic> toJson() => {
     "status": status,
     "message": message,
-    "user": user.toJson(),
+    "result": user.toJson(), // ✅ match API key
   };
 }
 

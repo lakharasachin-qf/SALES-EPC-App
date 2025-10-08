@@ -10,6 +10,7 @@ import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/dashboard_controller/dashboard_controller.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sales_app/view/dashboard_screen/widgets/dashboard_widgets.dart';
+import 'package:sales_app/view/dashboard_screen/widgets/widgets.dart';
 import 'package:sizer/sizer.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -138,80 +139,80 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ),
-                    // Container(
-                    //   width: Device.width,
-                    //   margin: EdgeInsets.only(right: 4.w, left: 4.w, top: 3.h),
-                    //   decoration: BoxDecoration(
-                    //     color: white,
-                    //     borderRadius: BorderRadius.circular(10),
-                    //     boxShadow: [
-                    //       BoxShadow(
-                    //         color: black.withOpacity(0.05),
-                    //         offset: const Offset(0, 2),
-                    //         blurRadius: 4,
-                    //         spreadRadius: 0,
-                    //       ),
-                    //     ],
-                    //   ),
-                    //   child: buildCircularChart(data: ctr.leadData),
-                    // ),
-                    // Container(
-                    //   width: Device.width,
-                    //   margin: EdgeInsets.only(right: 4.w, left: 4.w, top: 3.h),
-                    //   decoration: BoxDecoration(
-                    //     color: white,
-                    //     borderRadius: BorderRadius.circular(10),
-                    //     boxShadow: [
-                    //       BoxShadow(
-                    //         color: black.withOpacity(0.05),
-                    //         offset: const Offset(0, 2),
-                    //         blurRadius: 4,
-                    //         spreadRadius: 0,
-                    //       ),
-                    //     ],
-                    //   ),
-                    //   child: buildLeadByClusterChart(data: ctr.clusterData),
-                    // ),
-                    // Container(
-                    //   width: Device.width,
-                    //   margin: EdgeInsets.only(right: 4.w, left: 4.w, top: 3.h),
-                    //   decoration: BoxDecoration(
-                    //     color: white,
-                    //     borderRadius: BorderRadius.circular(10),
-                    //     boxShadow: [
-                    //       BoxShadow(
-                    //         color: black.withOpacity(0.05),
-                    //         offset: const Offset(0, 2),
-                    //         blurRadius: 4,
-                    //         spreadRadius: 0,
-                    //       ),
-                    //     ],
-                    //   ),
-                    //   child: buildLeadsWonOverTimeChart(data: ctr.leadWonData),
-                    // ),
-                    // Obx(() {
-                    //   return Container(
-                    //     width: Device.width,
-                    //     margin: EdgeInsets.only(
-                    //       right: 4.w,
-                    //       left: 4.w,
-                    //       top: 3.h,
-                    //     ),
-                    //     decoration: BoxDecoration(
-                    //       color: white,
-                    //       borderRadius: BorderRadius.circular(10),
-                    //       boxShadow: [
-                    //         BoxShadow(
-                    //           color: black.withOpacity(0.05),
-                    //           offset: const Offset(0, 2),
-                    //           blurRadius: 4,
-                    //           spreadRadius: 0,
-                    //         ),
-                    //       ],
-                    //     ),
-                    //     child: buildRevenueTargetsChart(data: ctr.revenuesData),
-                    //   );
-                    // }),
+                    Container(
+                      width: Device.width,
+                      margin: EdgeInsets.only(right: 4.w, left: 4.w, top: 3.h),
+                      decoration: BoxDecoration(
+                        color: white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: black.withOpacity(0.05),
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: buildCircularChart(data: ctr.leadData),
+                    ),
+                    Container(
+                      width: Device.width,
+                      margin: EdgeInsets.only(right: 4.w, left: 4.w, top: 3.h),
+                      decoration: BoxDecoration(
+                        color: white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: black.withOpacity(0.05),
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: buildLeadByClusterChart(data: ctr.clusterData),
+                    ),
+                    Container(
+                      width: Device.width,
+                      margin: EdgeInsets.only(right: 4.w, left: 4.w, top: 3.h),
+                      decoration: BoxDecoration(
+                        color: white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: black.withOpacity(0.05),
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: buildLeadsWonOverTimeChart(data: ctr.leadWonData),
+                    ),
+                    Obx(() {
+                      return Container(
+                        width: Device.width,
+                        margin: EdgeInsets.only(
+                          right: 4.w,
+                          left: 4.w,
+                          top: 3.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: black.withOpacity(0.05),
+                              offset: const Offset(0, 2),
+                              blurRadius: 4,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: buildRevenueTargetsChart(data: ctr.revenuesData),
+                      );
+                    }),
                     // Obx(
                     //   () => Container(
                     //     margin: EdgeInsets.only(
