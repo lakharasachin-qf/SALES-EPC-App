@@ -37,18 +37,9 @@ class LeadScreenState extends State<LeadScreen> {
         page: 1,
         hideLoading: false,
       );
+      ctr.getFillterOptions(context);
     }, isOneSecond: false);
   }
-
-  final Map<String, double> columnWidths = {
-    "Sr No.": 7.w,
-    "Company": 20.w,
-    "Contact Person": 20.w,
-    "Mobile": 20.w,
-    "Category": 20.w,
-    "Lead Status": 20.w,
-    "Action": 20.w,
-  };
 
   @override
   Widget build(BuildContext context) {
@@ -70,10 +61,9 @@ class LeadScreenState extends State<LeadScreen> {
             context: context,
             isFilter: true,
             onFilterClick: () {
-              // ctr.openFilterBottomSheet(context: context);
+              ctr.openFilterBottomSheet(context: context);
             },
           ),
-
           getDynamicSizedBox(height: 2.h),
           Expanded(
             child: SmartRefresher(
@@ -117,15 +107,13 @@ class LeadScreenState extends State<LeadScreen> {
                           onChanged: (val) {
                             if (val!.isNotEmpty) {
                               ctr.isTextEmpty.value = true;
+                              ctr.filterLeads(val);
                             } else {
                               ctr.isTextEmpty.value = false;
                             }
-                            // ctr.filterData(val!);
                           },
                           inputType: TextInputType.text,
                           isBorderSideEnable: false,
-                          // wantSuffix: true,
-                          // isMick: true,
                           formType: FieldType.search,
                         );
                       }),
@@ -165,7 +153,7 @@ class LeadScreenState extends State<LeadScreen> {
                                           child:
                                               ctr.state.value ==
                                                       ScreenState.apiSuccess &&
-                                                  ctr.customerList.isEmpty
+                                                  ctr.filteredLeadList.isEmpty
                                               ? SizedBox(
                                                   width: MediaQuery.of(
                                                     context,
@@ -201,7 +189,7 @@ class LeadScreenState extends State<LeadScreen> {
                                                         return DataColumn(
                                                           label: SizedBox(
                                                             width:
-                                                                columnWidths[entry
+                                                                ctr.columnWidths[entry
                                                                     .value] ??
                                                                 16.w,
                                                             child: Text(
@@ -228,8 +216,7 @@ class LeadScreenState extends State<LeadScreen> {
                                                   rows: ctr.leadData.asMap().entries.map((
                                                     entry,
                                                   ) {
-                                                    final row = entry
-                                                        .value; // row data (list of cell values)
+                                                    final row = entry.value;
                                                     return DataRow(
                                                       cells: row.asMap().entries.map((
                                                         cell,
@@ -335,7 +322,7 @@ class LeadScreenState extends State<LeadScreen> {
                                                         return DataCell(
                                                           SizedBox(
                                                             width:
-                                                                columnWidths[columnName] ??
+                                                                ctr.columnWidths[columnName] ??
                                                                 16.w,
                                                             child: Text(
                                                               cell.value,
@@ -397,23 +384,13 @@ class LeadScreenState extends State<LeadScreen> {
                                   // Loader
                                   if (ctr.state.value == ScreenState.apiLoading)
                                     screnLoader(tableHeight),
-                                  // Container(
-                                  //   height: tableHeight,
-                                  //   width: double.infinity,
-                                  //   color: transparent,
-                                  //   child: const Center(
-                                  //     child: CircularProgressIndicator(),
-                                  //   ),
-                                  // ),
                                 ],
                               ),
                             );
                           }),
                         ),
                       ),
-
                       getDynamicSizedBox(height: 1.5.h),
-
                       Container(
                         decoration: BoxDecoration(
                           color: white,
@@ -421,21 +398,11 @@ class LeadScreenState extends State<LeadScreen> {
                         ),
                         padding: EdgeInsets.symmetric(horizontal: 0.w),
                         child: Obx(() {
-                          // if (ctr.totalItems.value == 0) {
-                          //   return const Text(
-                          //     "0–0 of 0",
-                          //     style: TextStyle(
-                          //       fontSize: 14,
-                          //       color: Colors.black,
-                          //     ),
-                          //   );
-                          // }
                           return Container(
                             decoration: BoxDecoration(
                               color: white,
                               borderRadius: BorderRadius.circular(12),
                             ),
-
                             padding: EdgeInsets.symmetric(
                               horizontal: 3.w,
                               vertical: 1.h,
@@ -443,7 +410,6 @@ class LeadScreenState extends State<LeadScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                // ==== UPDATED DESIGN ====
                                 Row(
                                   children: [
                                     const Icon(
@@ -470,7 +436,6 @@ class LeadScreenState extends State<LeadScreen> {
                                     ),
                                   ],
                                 ),
-                                // ==== PAGINATION BUTTONS ====
                                 Row(
                                   children: [
                                     ElevatedButton(
@@ -539,7 +504,7 @@ class LeadScreenState extends State<LeadScreen> {
                         }),
                       ),
 
-                      //                     Padding(
+                      //  Padding(
                       //   padding: EdgeInsets.symmetric(horizontal: 2.w),
                       //   child: Obx(() {
                       //     if (ctr.totalItems.value == 0) {

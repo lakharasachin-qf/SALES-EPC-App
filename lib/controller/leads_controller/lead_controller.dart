@@ -26,6 +26,7 @@ import 'package:sales_app/utils/log.dart';
 import 'package:sizer/sizer.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import '../../api_handle/Repository.dart';
+import '../../models/dashboard_fillter_model.dart';
 import '../../models/fillter_model.dart' hide Result;
 
 // New model for static customer data
@@ -58,16 +59,23 @@ class LeadController extends GetxController {
   RxBool isFormInvalidate = false.obs;
   RxBool isStatusSelected = false.obs;
   RxBool isCategorySelected = false.obs;
-  RxList<Category> districtList = <Category>[].obs;
-  RxList<Category> clustersList = <Category>[].obs;
-  RxList<Category> categoryList = <Category>[].obs;
+  RxList<Cluster> districtList = <Cluster>[].obs;
+  RxList<Cluster> clustersList = <Cluster>[].obs;
+  RxList<Cluster> categoryList = <Cluster>[].obs;
+
+  var currentFilterSource = [].obs;
+  var filteredData = [].obs;
+  RxString categoryId = "".obs;
+  RxList<CategoryModel> warrantyType = <CategoryModel>[
+    CategoryModel(id: "1", name: "Invoice"),
+    CategoryModel(id: "2", name: "Bills"),
+    CategoryModel(id: "3", name: "Reports"),
+    CategoryModel(id: "4", name: "Others"),
+  ].obs;
 
   @override
   void onInit() {
     super.onInit();
-
-    // Initialize static data
-    initializeStaticData();
 
     startTimeNode = FocusNode();
     endTimeNode = FocusNode();
@@ -96,92 +104,62 @@ class LeadController extends GetxController {
     searchCategoriesCtr = TextEditingController();
     searchClusterCtr = TextEditingController();
     searchCustomerCtr = TextEditingController();
+    // Add listener to searchCtr to filter leads
+    searchCtr.addListener(() {
+      filterLeads(searchCtr.text);
+    });
   }
 
-  // Initialize static customer data
-  void initializeStaticData() {
-    customerList.clear();
-    customerList.addAll([
-      CustomerData(
-        company: "Tech Corp",
-        contactPerson: "John Doe",
-        mobile: "123-456-7890",
-        category: "Premium",
-        leadStatus: "Active",
-      ),
-      CustomerData(
-        company: "Innovate Ltd",
-        contactPerson: "Jane Smith",
-        mobile: "234-567-8901",
-        category: "Standard",
-        leadStatus: "Inactive",
-      ),
-      CustomerData(
-        company: "Global Solutions",
-        contactPerson: "Alice Johnson",
-        mobile: "345-678-9012",
-        category: "Enterprise",
-        leadStatus: "Reschedule",
-      ),
-      CustomerData(
-        company: "Future Tech",
-        contactPerson: "Bob Wilson",
-        mobile: "456-789-0123",
-        category: "Premium",
-        leadStatus: "Active",
-      ),
-      CustomerData(
-        company: "Star Enterprises",
-        contactPerson: "Emma Brown",
-        mobile: "567-890-1234",
-        category: "Standard",
-        leadStatus: "Inactive",
-      ),
-      CustomerData(
-        company: "NextGen Systems",
-        contactPerson: "Michael Lee",
-        mobile: "678-901-2345",
-        category: "Enterprise",
-        leadStatus: "Active",
-      ),
-      CustomerData(
-        company: "Bright Future Ltd",
-        contactPerson: "Sophia Davis",
-        mobile: "789-012-3456",
-        category: "Premium",
-        leadStatus: "Reschedule",
-      ),
-      CustomerData(
-        company: "Visionary Labs",
-        contactPerson: "Daniel Martinez",
-        mobile: "890-123-4567",
-        category: "Standard",
-        leadStatus: "Inactive",
-      ),
-      CustomerData(
-        company: "GreenTech Innovations",
-        contactPerson: "Olivia Taylor",
-        mobile: "901-234-5678",
-        category: "Enterprise",
-        leadStatus: "Active",
-      ),
-      CustomerData(
-        company: "BlueSky Ventures",
-        contactPerson: "Ethan Anderson",
-        mobile: "012-345-6789",
-        category: "Premium",
-        leadStatus: "Reschedule",
-      ),
-    ]);
+  // // Filter leads based on search query
+  // void filterLeads(String query) {
+  //   if (query.isEmpty) {
+  //     filteredLeadList.assignAll(leadList);
+  //     isTextEmpty.value = false;
+  //   } else {
+  //     query = query.toLowerCase();
+  //     filteredLeadList.assignAll(
+  //       leadList.where((lead) {
+  //         return lead.companyName.toLowerCase().contains(query) ||
+  //             lead.contactPersonName.toLowerCase().contains(query) ||
+  //             lead.contactPersonMobile.toLowerCase().contains(query) ||
+  //             lead.leadCategory.toLowerCase().contains(query) ||
+  //             lead.leadStatus.toLowerCase().contains(query);
+  //       }).toList(),
+  //     );
+  //     isTextEmpty.value = true;
+  //   }
+  //   update();
+  // }
+  void filterLeads(String query) {
+    final lowerQuery = query.toLowerCase().trim();
 
-    // Set pagination details for static data
-    totalItems.value = customerList.length;
-    currentPage.value = 1;
-    lastPage.value = 1; // Static data fits in one page
-    fromItem.value = 1;
-    toItem.value = customerList.length;
-    nextPageURL.value = "";
-    state.value = ScreenState.apiSuccess;
+    if (lowerQuery.isEmpty) {
+      filteredLeadList.assignAll(leadList);
+      isTextEmpty.value = false;
+      return;
+    }
+
+    filteredLeadList.assignAll(
+      leadList.where((lead) {
+        final values = [
+          lead.companyName,
+          lead.contactPersonName,
+          lead.contactPersonMobile,
+          lead.leadCategory,
+          lead.leadStatus,
+        ];
+
+        return values.any((value) => value.toLowerCase().contains(lowerQuery));
+      }).toList(),
+    );
+    isTextEmpty.value = true;
+  }
+
+  // Clear search
+  void clearSearch() {
+    searchCtr.clear();
+    filteredLeadList.assignAll(leadList);
+    isTextEmpty.value = false;
     update();
   }
 
@@ -267,6 +245,7 @@ class LeadController extends GetxController {
 
   RxList<CustomerData> customerList = <CustomerData>[].obs;
   RxList<LeadData> leadList = <LeadData>[].obs;
+  RxList<LeadData> filteredLeadList = <LeadData>[].obs;
   RxString nextPageURL = "".obs;
   final RxInt currentPage = 1.obs;
   final RxInt lastPage = 1.obs;
@@ -405,9 +384,6 @@ class LeadController extends GetxController {
     isClusterSelected.value = selectedClusterId.value.isNotEmpty;
     isCategorySelected.value = selectedCategoryId.value.isNotEmpty;
     isStatusSelected.value = selectedStatus.value != 'Select Status';
-
-    getFillterOptions(context);
-
     openBottomtsheetDialog(
       context,
       title: "Filter",
@@ -463,9 +439,8 @@ class LeadController extends GetxController {
     var loadingIndicator = LoadingProgressDialog();
     commonGetApiCallFormate(
       context,
-      title: 'Lead Screen',
-      apiEndPoint:
-          "${ApiUrl.getfillter}/${userData?.userId ?? ''}/filter-options",
+      title: 'Dashboard Screen',
+      apiEndPoint: "${ApiUrl.getfillter}?user_id=${userData?.userId ?? ''}",
       allowHeader: true,
       state: state,
       message: message,
@@ -477,18 +452,55 @@ class LeadController extends GetxController {
         }
       },
       onResponse: (data) {
+        logcat('Filter Options Data', data.toString());
+
         districtList.clear();
         clustersList.clear();
-        categoryList.clear();
-        FiltterModel responseDetail = FiltterModel.fromJson(data);
-        districtList.addAll(responseDetail.result.groups);
-        clustersList.addAll(responseDetail.result.clusters);
-        categoryList.addAll(responseDetail.result.categories);
+        var innerData = data['data'];
+        FiltterData responseDetail = FiltterData.fromJson(innerData);
+
+        districtList.addAll(responseDetail.districts);
+        clustersList.addAll(responseDetail.clusters);
+
+        logcat('District List', districtList.length.toString());
+        logcat('Clusters List', clustersList.length.toString());
+
         update();
       },
       networkManager: networkManager,
     );
   }
+
+  // Future<void> getFillterOptions(context) async {
+  //   User? userData = await UserPreferences().getSignInInfo();
+  //   var loadingIndicator = LoadingProgressDialog();
+  //   commonGetApiCallFormate(
+  //     context,
+  //     title: 'Lead Screen',
+  //     apiEndPoint: "${ApiUrl.getfillter}/${userData?.userId ?? ''}",
+  //     allowHeader: true,
+  //     state: state,
+  //     message: message,
+  //     apisLoading: (isloaing) {
+  //       if (isloaing == true) {
+  //         loadingIndicator.show(context, '');
+  //       } else {
+  //         loadingIndicator.hide(context);
+  //       }
+  //     },
+  //     onResponse: (data) {
+  //       districtList.clear();
+  //       clustersList.clear();
+  //       categoryList.clear();
+  //       FiltterModel responseDetail = FiltterModel.fromJson(data);
+  //       districtList.addAll(responseDetail.result.groups);
+  //       clustersList.addAll(responseDetail.result.clusters);
+  //       categoryList.addAll(responseDetail.result.categories);
+  //       update();
+  //     },
+  //     networkManager: networkManager,
+  //   );
+  // }
 
   Future<void> getLeadList({
     required BuildContext context,
@@ -511,6 +523,7 @@ class LeadController extends GetxController {
           isCustomerLoading(false);
         }
         showDialogForScreen(
+          // ignore: use_build_context_synchronously
           context,
           'Lead Screen',
           Connection.noConnection,
@@ -519,7 +532,9 @@ class LeadController extends GetxController {
         return;
       }
 
-      final apiUrl = "${ApiUrl.leadList}?user_id=${1}&page=$page&per_page=1";
+      // final apiUrl = "${ApiUrl.leadList}?user_id=${1}&page=$page&per_page=1";
+      final apiUrl =
+          "${ApiUrl.leadList}?user_id=${userData?.userId ?? 1}&page=$page&per_page=10";
 
       final response = await Repository.get({}, apiUrl, allowHeader: true);
 
@@ -535,10 +550,12 @@ class LeadController extends GetxController {
           message.value = '';
           final model = LeadsModel.fromJson(responseData);
           leadList.clear();
+          filteredLeadList.clear();
           if (model.result.data.isNotEmpty) {
             leadList.addAll(model.result.data);
+            filteredLeadList.addAll(leadList);
             leadList.refresh();
-
+            filteredLeadList.refresh();
             // Update pagination info
             currentPage.value = model.result.meta.page;
             lastPage.value = model.result.meta.lastPage;
@@ -547,6 +564,7 @@ class LeadController extends GetxController {
         } else {
           message.value = responseData['message'];
           showDialogForScreen(
+            // ignore: use_build_context_synchronously
             context,
             'Lead Screen',
             responseData['message'],
@@ -557,6 +575,7 @@ class LeadController extends GetxController {
         state.value = ScreenState.apiError;
         message.value = APIResponseHandleText.serverError;
         showDialogForScreen(
+          // ignore: use_build_context_synchronously
           context,
           'Meter Screen',
           responseData['message'] ?? ServerError.servererror,
@@ -578,119 +597,6 @@ class LeadController extends GetxController {
     }
   }
 
-  // Future<void> getLeadLists(
-  //   BuildContext context,
-  //   int currentPage,
-  //   bool hideLoading, {
-  //   bool isFirstTime = false,
-  // }) async {
-  //   User? userData = await UserPreferences().getSignInInfo();
-
-  //   if (hideLoading == false) {
-  //     state.value = ScreenState.apiLoading;
-  //   }
-  //   if (isFirstTime == true) {
-  //     isCustomerLoading(true);
-  //   }
-
-  //   try {
-  //     if (networkManager.connectionType.value == 0) {
-  //       if (isFirstTime == true) {
-  //         isCustomerLoading(false);
-  //       }
-  //       showDialogForScreen(
-  //         context,
-  //         'Lead Screen',
-  //         Connection.noConnection,
-  //         callback: () {
-  //           Get.back();
-  //         },
-  //       );
-  //       return;
-  //     }
-
-  //     var pageURL =
-  //         "${ApiUrl.getcustomerbyIdwwithpagination}=${userData?.userId ?? ''}&page=$currentPage&per_page=10";
-  //     var response = await Repository.get({}, pageURL, allowHeader: true);
-
-  //     if (isFirstTime == true) {
-  //       isCustomerLoading(false);
-  //     }
-
-  //     logcat("RESPONSE::", response.body);
-  //     var responseData = jsonDecode(response.body);
-
-  //     if (response.statusCode == 200) {
-  //       if (responseData['status'] == true) {
-  //         state.value = ScreenState.apiSuccess;
-  //         message.value = '';
-
-  //         if (isFirstTime == true && customerList.isNotEmpty) {
-  //           currentPage = 1;
-  //           customerList.clear();
-  //         }
-
-  //         var customerListData = LeadsModel.fromJson(responseData);
-  //         if (customerListData.result.isNotEmpty) {
-  //           customerList.addAll(customerListData.result);
-  //           customerList.refresh();
-  //           update();
-  //         } else {
-  //           customerList.clear();
-  //         }
-
-  //         this.currentPage.value = customerListData.pagination.currentPage;
-  //         lastPage.value = customerListData.pagination.lastPage;
-  //         totalItems.value = customerListData.pagination.total;
-  //         fromItem.value = customerListData.pagination.from;
-  //         toItem.value = customerListData.pagination.to;
-
-  //         if (customerListData.pagination.currentPage <
-  //             customerListData.pagination.lastPage) {
-  //           nextPageURL.value =
-  //               "${ApiUrl.getcustomerbyIdwwithpagination}=${userData?.userId ?? ''}&page=${currentPage + 1}&per_page=10";
-  //           logcat("nextPageURL-1", nextPageURL.value.toString());
-  //           update();
-  //         } else {
-  //           nextPageURL.value = "";
-  //           logcat("nextPageURL-2", nextPageURL.value.toString());
-  //           update();
-  //         }
-  //         logcat("nextPageURL", nextPageURL.value.toString());
-  //       } else {
-  //         message.value = responseData['message'];
-  //         showDialogForScreen(
-  //           context,
-  //           'Meter Screen',
-  //           responseData['message'],
-  //           callback: () {},
-  //         );
-  //       }
-  //     } else {
-  //       state.value = ScreenState.apiError;
-  //       message.value = APIResponseHandleText.serverError;
-  //       showDialogForScreen(
-  //         context,
-  //         'Meter Screen',
-  //         responseData['message'] ?? ServerError.servererror,
-  //         callback: () {
-  //           getUnauthenticatedUser(
-  //             context,
-  //             responseData['message'],
-  //             "Unauthenticated user",
-  //           );
-  //         },
-  //       );
-  //     }
-  //   } catch (e) {
-  //     logcat("Exception", e);
-  //     if (isFirstTime == true) {
-  //       isCustomerLoading(false);
-  //     }
-  //     state.value = ScreenState.apiError;
-  //   }
-  // }
-
   final RxList<String> customerHeaders = <String>[
     "Sr No.",
     "Company",
@@ -701,10 +607,20 @@ class LeadController extends GetxController {
     "Action",
   ].obs;
 
-  List<List<String>> get leadData {
-    if (customerList.isEmpty) return [];
+  final Map<String, double> columnWidths = {
+    "Sr No.": 7.w,
+    "Company": 20.w,
+    "Contact Person": 20.w,
+    "Mobile": 20.w,
+    "Category": 20.w,
+    "Lead Status": 20.w,
+    "Action": 20.w,
+  };
 
-    return leadList.asMap().entries.map((entry) {
+  List<List<String>> get leadData {
+    if (filteredLeadList.isEmpty) return [];
+
+    return filteredLeadList.asMap().entries.map((entry) {
       final index = entry.key + 1 + ((currentPage.value - 1) * 10);
       final e = entry.value;
 
@@ -751,12 +667,6 @@ class LeadController extends GetxController {
   }
 
   RxBool isTextEmpty = false.obs;
-
-  void clearSearch() {
-    searchCtr.clear();
-    // filterData('');
-    unfocusAll();
-  }
 
   final List<String> status = [
     'Select Status',
@@ -872,21 +782,11 @@ class LeadController extends GetxController {
     );
   }
 
-  var currentFilterSource = [].obs;
-  var filteredData = [].obs;
-  RxString categoryId = "".obs;
-  RxList<CategoryModel> warrantyType = <CategoryModel>[
-    CategoryModel(id: "1", name: "Invoice"),
-    CategoryModel(id: "2", name: "Bills"),
-    CategoryModel(id: "3", name: "Reports"),
-    CategoryModel(id: "4", name: "Others"),
-  ].obs;
-
   void showDistrictSelectionPopups(BuildContext context) {
     currentFilterSource.value = List.from(districtList);
     searchDistrictCtr.clear();
 
-    showUpdatedMultpleSelectionPopup<Category>(
+    showUpdatedMultpleSelectionPopup<Cluster>(
       context,
       title: 'District',
       controller: district,
@@ -926,7 +826,7 @@ class LeadController extends GetxController {
     currentFilterSource.value = List.from(clustersList);
     searchClusterCtr.clear();
 
-    showUpdatedMultpleSelectionPopup<Category>(
+    showUpdatedMultpleSelectionPopup<Cluster>(
       context,
       title: 'Clusters',
       controller: clusterCtr,
@@ -996,7 +896,7 @@ Widget addFilterSheetWidget(
                       wantsuffix: true,
                       usegesture: true,
                       gestureFunction: () {
-                        // openDatePickerDash(context, isStart: true, ctr: ctr);
+                        openDatePickerDash(context, isStart: true, ctr: ctr);
                       },
                       hint: 'Select Date',
                       isRequired: false,
@@ -1018,16 +918,16 @@ Widget addFilterSheetWidget(
                       wantsuffix: true,
                       usegesture: true,
                       gestureFunction: () {
-                        // if (!ctr.isStartDateSelected.value) {
-                        //   showDialogForScreen(
-                        //     context,
-                        //     'Dashboard',
-                        //     'Please select the start date first.',
-                        //     callback: () {},
-                        //   );
-                        // } else {
-                        //   openDatePickerDash(context, isStart: false, ctr: ctr);
-                        // }
+                        if (!ctr.isStartDateSelected.value) {
+                          showDialogForScreen(
+                            context,
+                            'Dashboard',
+                            'Please select the start date first.',
+                            callback: () {},
+                          );
+                        } else {
+                          openDatePickerDash(context, isStart: false, ctr: ctr);
+                        }
                       },
                       hint: 'Select End Date',
                       isRequired: false,
@@ -1060,7 +960,7 @@ Widget addFilterSheetWidget(
                           !ctr.isDistrictSelected.value &&
                           (ctr.isClusterSelected.value),
                       gestureFunction: () {
-                        // ctr.showDistrictSelectionPopups(context);
+                        ctr.showDistrictSelectionPopups(context);
                       },
                       hint: 'Select District',
                     );
@@ -1086,7 +986,7 @@ Widget addFilterSheetWidget(
                           !ctr.isClusterSelected.value &&
                           (ctr.isDistrictSelected.value),
                       gestureFunction: () {
-                        // ctr.showClusterSelectionPopups(context);
+                        ctr.showClusterSelectionPopups(context);
                       },
                       hint: 'Select Clusters',
                     );
@@ -1112,7 +1012,7 @@ Widget addFilterSheetWidget(
                       wantsuffix: true,
                       usegesture: true,
                       gestureFunction: () {
-                        // ctr.showCategorySelectionPopups(context);
+                        ctr.showCategorySelectionPopups(context);
                       },
                       hint: 'Select Category',
                     );
@@ -1133,7 +1033,7 @@ Widget addFilterSheetWidget(
                       wantsuffix: true,
                       usegesture: true,
                       gestureFunction: () {
-                        // ctr.showStatusSelectionPopups(context);
+                        ctr.showStatusSelectionPopups(context);
                       },
                       hint: 'Select Status',
                     );
