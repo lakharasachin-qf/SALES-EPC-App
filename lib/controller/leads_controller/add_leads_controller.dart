@@ -39,8 +39,8 @@ class AddLeadsController extends GetxController {
   RxString message = "".obs;
 
   // Step-specific validation flags
-  RxBool isStep1Valid = false.obs;
-  RxBool isStep2Valid = false.obs;
+  RxBool isStep1Valid = true.obs;
+  RxBool isStep2Valid = true.obs;
   RxBool isStep3Valid = true.obs; // Load Element is optional
   RxBool isStep4Valid = true.obs; // Files are optional
 
@@ -2146,17 +2146,18 @@ class AddLeadsController extends GetxController {
                                       } else {
                                         updateLoad(index, newElement);
                                       }
-                                      Get.back();
                                     }
+                                    Get.back();
                                   },
                                   loadElementItem != null ? "Update" : 'Add',
-                                  validate:
-                                      deviceNameModel.value.isValidate &&
-                                      categoryModel.value.isValidate &&
-                                      powerModel.value.isValidate &&
-                                      usageHrsModel.value.isValidate &&
-                                      energyWhModel.value.isValidate &&
-                                      energyKWhModel.value.isValidate,
+                                  // // validate:
+                                  //     deviceNameModel.value.isValidate &&
+                                  //     categoryModel.value.isValidate &&
+                                  //     powerModel.value.isValidate &&
+                                  //     usageHrsModel.value.isValidate &&
+                                  //     energyWhModel.value.isValidate &&
+                                  //     energyKWhModel.value.isValidate,
+                                  validate: true,
                                 ),
                               ),
                             ],
@@ -2347,13 +2348,14 @@ class AddLeadsController extends GetxController {
                                       } else {
                                         updateFile(index, newFile);
                                       }
-                                      Get.back();
                                     }
+                                    Get.back();
                                   },
                                   fileItem != null ? "Update" : 'Add',
-                                  validate:
-                                      uploadFileModel.value.isValidate &&
-                                      uploadCategoryModel.value.isValidate,
+                                  // validate:
+                                  //     uploadFileModel.value.isValidate &&
+                                  //     uploadCategoryModel.value.isValidate,
+                                  validate: true,
                                 ),
                               ),
                             ],

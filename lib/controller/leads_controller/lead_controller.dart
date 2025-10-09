@@ -404,7 +404,7 @@ class LeadController extends GetxController {
     isCategorySelected.value = selectedCategoryId.value.isNotEmpty;
     isStatusSelected.value = selectedStatus.value != 'Select Status';
 
-    getFillterOptions(context);
+    // getFillterOptions(context);
 
     openBottomtsheetDialog(
       context,

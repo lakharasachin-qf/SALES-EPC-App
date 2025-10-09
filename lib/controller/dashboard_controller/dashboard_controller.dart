@@ -292,7 +292,7 @@ class DashboardController extends GetxController {
     isDistrictSelected.value = selectedDistrictId.value.isNotEmpty;
     isClusterSelected.value = selectedClusterId.value.isNotEmpty;
 
-    getFillterOptions(context);
+    // getFillterOptions(context);
 
     openBottomtsheetDialog(
       context,

@@ -65,7 +65,7 @@ class CustomerScreenState extends State<Customerscreen> {
             },
             isFilter: true,
             onFilterClick: () {
-              // ctr.openFilterBottomSheet(context: context);
+              ctr.openFilterBottomSheet(context: context);
             },
             context: context,
           ),
@@ -258,9 +258,9 @@ class CustomerScreenState extends State<Customerscreen> {
                                                                         //   context,
                                                                         //   rowIndex,
                                                                         // );
-                                                                        // Get.to(
-                                                                        //   ViewCustomerScreen(),
-                                                                        // );
+                                                                        Get.to(
+                                                                          ViewCustomerScreen(),
+                                                                        );
                                                                       },
                                                                     ),
                                                                   ),
@@ -281,9 +281,9 @@ class CustomerScreenState extends State<Customerscreen> {
                                                                             primaryColor,
                                                                       ),
                                                                       onPressed: () {
-                                                                        // ctr.updateCustomer(
-                                                                        //   context,
-                                                                        // );
+                                                                        ctr.updateCustomer(
+                                                                          context,
+                                                                        );
                                                                       },
                                                                     ),
                                                                   ),

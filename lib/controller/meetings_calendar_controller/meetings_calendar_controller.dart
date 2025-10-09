@@ -22,9 +22,31 @@ import 'package:sizer/sizer.dart';
 import '../../api_handle/Repository.dart';
 import '../../models/fillter_model.dart' hide Result;
 
+class MeetingData {
+  String? meetingId;
+  String? companyName;
+  String? contactPerson;
+  String? mobile;
+  String? status;
+  DateTime? meetingDate;
+  String? meetingType;
+  String? notes;
+
+  MeetingData({
+    this.meetingId,
+    this.companyName,
+    this.contactPerson,
+    this.mobile,
+    this.status,
+    this.meetingDate,
+    this.meetingType,
+    this.notes,
+  });
+}
+
 class MeetingsCalendarController extends GetxController {
   final InternetController networkManager = Get.find<InternetController>();
-  Rx<ScreenState> state = ScreenState.apiLoading.obs;
+  Rx<ScreenState> state = ScreenState.apiSuccess.obs;
   RxString message = ''.obs;
   RxBool isTextEmpty = false.obs;
 
@@ -57,7 +79,7 @@ class MeetingsCalendarController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
+    initializeStaticData();
     // 🔹 Initialize Controllers
     statusCtr = TextEditingController();
     dateCtr = TextEditingController();
@@ -101,7 +123,7 @@ class MeetingsCalendarController extends GetxController {
     update();
   }
 
-  RxList<Result> customerList = <Result>[].obs;
+  RxList<MeetingData> meetingList = <MeetingData>[].obs;
   RxString nextPageURL = "".obs;
   final RxInt currentPage = 1.obs;
   final RxInt lastPage = 1.obs;
@@ -109,151 +131,280 @@ class MeetingsCalendarController extends GetxController {
   final RxInt fromItem = 0.obs;
   final RxInt toItem = 0.obs;
 
-  var isCustomerLoading = false.obs;
+  var isMeetingLoading = false.obs;
 
-  Future<void> getCustomerbyID(
-    BuildContext context,
-    int currentPage,
-    bool hideLoading, {
-    bool isFirstTime = false,
-  }) async {
-    User? userData = await UserPreferences().getSignInInfo();
+  // Initialize static meeting data
+  void initializeStaticData() {
+    meetingList.clear();
+    meetingList.addAll([
+      MeetingData(
+        meetingId: "MTG001",
+        companyName: "Tech Corp",
+        contactPerson: "John Doe",
+        mobile: "123-456-7890",
+        status: "Scheduled",
+        meetingDate: DateTime(2025, 10, 15, 10, 0),
+        meetingType: "In-Person",
+        notes: "Discuss project roadmap",
+      ),
+      MeetingData(
+        meetingId: "MTG002",
+        companyName: "Innovate Ltd",
+        contactPerson: "Jane Smith",
+        mobile: "234-567-8901",
+        status: "Rescheduled",
+        meetingDate: DateTime(2025, 11, 10, 14, 0),
+        meetingType: "Virtual",
+        notes: "Follow-up on contract",
+      ),
+      MeetingData(
+        meetingId: "MTG003",
+        companyName: "Global Solutions",
+        contactPerson: "Alice Johnson",
+        mobile: "345-678-9012",
+        status: "Cancelled",
+        meetingDate: DateTime(2025, 12, 20, 11, 0),
+        meetingType: "In-Person",
+        notes: "Client unavailable",
+      ),
+      MeetingData(
+        meetingId: "MTG004",
+        companyName: "Future Tech",
+        contactPerson: "Bob Wilson",
+        mobile: "456-789-0123",
+        status: "Scheduled",
+        meetingDate: DateTime(2025, 10, 25, 15, 0),
+        meetingType: "Virtual",
+        notes: "Demo presentation",
+      ),
+      MeetingData(
+        meetingId: "MTG005",
+        companyName: "Star Enterprises",
+        contactPerson: "Emma Brown",
+        mobile: "567-890-1234",
+        status: "Completed",
+        meetingDate: DateTime(2025, 9, 30, 9, 0),
+        meetingType: "In-Person",
+        notes: "Signed agreement",
+      ),
+      MeetingData(
+        meetingId: "MTG006",
+        companyName: "NextGen Systems",
+        contactPerson: "Liam Davis",
+        mobile: "678-901-2345",
+        status: "Scheduled",
+        meetingDate: DateTime(2025, 11, 5, 13, 0),
+        meetingType: "Phone Call",
+        notes: "Initial consultation",
+      ),
+      MeetingData(
+        meetingId: "MTG007",
+        companyName: "Prime Innovations",
+        contactPerson: "Olivia Taylor",
+        mobile: "789-012-3456",
+        status: "Rescheduled",
+        meetingDate: DateTime(2025, 12, 15, 16, 0),
+        meetingType: "Virtual",
+        notes: "Review project milestones",
+      ),
+      MeetingData(
+        meetingId: "MTG008",
+        companyName: "Bright Solutions",
+        contactPerson: "Noah Anderson",
+        mobile: "890-123-4567",
+        status: "Completed",
+        meetingDate: DateTime(2025, 10, 10, 10, 30),
+        meetingType: "In-Person",
+        notes: "Finalized deal terms",
+      ),
+      MeetingData(
+        meetingId: "MTG009",
+        companyName: "Visionary Works",
+        contactPerson: "Sophia Martinez",
+        mobile: "901-234-5678",
+        status: "Scheduled",
+        meetingDate: DateTime(2025, 11, 25, 14, 30),
+        meetingType: "Virtual",
+        notes: "Product demo",
+      ),
+      MeetingData(
+        meetingId: "MTG010",
+        companyName: "Skyline Industries",
+        contactPerson: "Ethan Thomas",
+        mobile: "012-345-6789",
+        status: "Cancelled",
+        meetingDate: DateTime(2025, 12, 1, 12, 0),
+        meetingType: "Phone Call",
+        notes: "Client postponed",
+      ),
+    ]);
 
-    if (hideLoading == false) {
-      state.value = ScreenState.apiLoading;
-    }
-    if (isFirstTime == true) {
-      isCustomerLoading(
-        true,
-      ); // Assuming you have a loading state for customers
-    }
-
-    try {
-      if (networkManager.connectionType.value == 0) {
-        if (isFirstTime == true) {
-          isCustomerLoading(false);
-        }
-        showDialogForScreen(
-          context,
-          'Meter Screen',
-          Connection.noConnection,
-          callback: () {
-            Get.back();
-          },
-        );
-        return;
-      }
-
-      var pageURL =
-          "${ApiUrl.getcustomerbyIdwwithpagination}=${userData?.userId ?? ''}&page=$currentPage&per_page=10";
-      var response = await Repository.get({}, pageURL, allowHeader: true);
-
-      if (isFirstTime == true) {
-        isCustomerLoading(false);
-      }
-
-      logcat("RESPONSE::", response.body);
-      var responseData = jsonDecode(response.body);
-
-      if (response.statusCode == 200) {
-        if (responseData['status'] == true) {
-          state.value = ScreenState.apiSuccess;
-          message.value = '';
-
-          if (isFirstTime == true && customerList.isNotEmpty) {
-            currentPage = 1;
-            customerList.clear();
-          }
-
-          var customerListData = CustomerModel.fromJson(responseData);
-          if (customerListData.result.isNotEmpty) {
-            customerList.addAll(customerListData.result);
-            customerList.refresh();
-            update();
-          } else {
-            customerList.clear();
-          }
-
-          // ✅ Set pagination info
-          this.currentPage.value = customerListData.pagination.currentPage;
-          lastPage.value = customerListData.pagination.lastPage;
-          totalItems.value = customerListData.pagination.total;
-          fromItem.value = customerListData.pagination.from;
-          toItem.value = customerListData.pagination.to;
-          // Handle pagination
-          if (customerListData.pagination.currentPage <
-              customerListData.pagination.lastPage) {
-            nextPageURL.value =
-                "${ApiUrl.getcustomerbyIdwwithpagination}=${userData?.userId ?? ''}&page=${currentPage + 1}&per_page=10";
-            logcat("nextPageURL-1", nextPageURL.value.toString());
-            update();
-          } else {
-            nextPageURL.value = "";
-            logcat("nextPageURL-2", nextPageURL.value.toString());
-            update();
-          }
-          logcat("nextPageURL", nextPageURL.value.toString());
-        } else {
-          message.value = responseData['message'];
-          showDialogForScreen(
-            context,
-            'Meter Screen',
-            responseData['message'],
-            callback: () {},
-          );
-        }
-      } else {
-        state.value = ScreenState.apiError;
-        message.value = APIResponseHandleText.serverError;
-        showDialogForScreen(
-          context,
-          'Meter Screen',
-          responseData['message'] ?? ServerError.servererror,
-          callback: () {
-            getUnauthenticatedUser(
-              context,
-              responseData['message'],
-              "Unauthenticated user",
-            );
-          },
-        );
-      }
-    } catch (e) {
-      logcat("Exception", e);
-      if (isFirstTime == true) {
-        isCustomerLoading(false);
-      }
-      state.value = ScreenState.apiError;
-      // message.value = ServerError.servererror;
-      // showDialogForScreen(context, 'Meter Screen', ServerError.servererror, callback: () {});
-    }
+    // Set pagination details for static data
+    totalItems.value = meetingList.length;
+    currentPage.value = 1;
+    lastPage.value = 1; // Static data fits in one page
+    fromItem.value = 1;
+    toItem.value = meetingList.length;
+    nextPageURL.value = "";
+    state.value = ScreenState.apiSuccess;
+    update();
   }
 
-  final RxList<String> customerHeaders = <String>[
+  final Map<String, double> columnWidths = {
+    "Sr No.": 7.w,
+    "Meeting ID": 15.w,
+    "Company Name": 20.w,
+    "Contact Person": 20.w,
+    "Meeting Date": 20.w,
+    "Status": 15.w,
+    "Action": 15.w,
+  };
+
+  final RxList<String> meetingHeaders = <String>[
     "Sr No.",
-    "Lead Id",
+    "Meeting ID",
+    "Company Name",
     "Contact Person",
-    "Latest Appointment",
-    "Contacted",
+    "Meeting Date",
     "Status",
     "Action",
   ].obs;
+  RxList<Result> customerList = <Result>[].obs;
 
-  // Provide all customer data without pagination
+  var isCustomerLoading = false.obs;
+
+  // Future<void> getCustomerbyID(
+  //   BuildContext context,
+  //   int currentPage,
+  //   bool hideLoading, {
+  //   bool isFirstTime = false,
+  // }) async {
+  //   User? userData = await UserPreferences().getSignInInfo();
+
+  //   if (hideLoading == false) {
+  //     state.value = ScreenState.apiLoading;
+  //   }
+  //   if (isFirstTime == true) {
+  //     isCustomerLoading(
+  //       true,
+  //     ); // Assuming you have a loading state for customers
+  //   }
+
+  //   try {
+  //     if (networkManager.connectionType.value == 0) {
+  //       if (isFirstTime == true) {
+  //         isCustomerLoading(false);
+  //       }
+  //       showDialogForScreen(
+  //         context,
+  //         'Meter Screen',
+  //         Connection.noConnection,
+  //         callback: () {
+  //           Get.back();
+  //         },
+  //       );
+  //       return;
+  //     }
+
+  //     var pageURL =
+  //         "${ApiUrl.getcustomerbyIdwwithpagination}=${userData?.userId ?? ''}&page=$currentPage&per_page=10";
+  //     var response = await Repository.get({}, pageURL, allowHeader: true);
+
+  //     if (isFirstTime == true) {
+  //       isCustomerLoading(false);
+  //     }
+
+  //     logcat("RESPONSE::", response.body);
+  //     var responseData = jsonDecode(response.body);
+
+  //     if (response.statusCode == 200) {
+  //       if (responseData['status'] == true) {
+  //         state.value = ScreenState.apiSuccess;
+  //         message.value = '';
+
+  //         if (isFirstTime == true && customerList.isNotEmpty) {
+  //           currentPage = 1;
+  //           customerList.clear();
+  //         }
+
+  //         var customerListData = CustomerModel.fromJson(responseData);
+  //         if (customerListData.result.isNotEmpty) {
+  //           customerList.addAll(customerListData.result);
+  //           customerList.refresh();
+  //           update();
+  //         } else {
+  //           customerList.clear();
+  //         }
+
+  //         // ✅ Set pagination info
+  //         this.currentPage.value = customerListData.pagination.currentPage;
+  //         lastPage.value = customerListData.pagination.lastPage;
+  //         totalItems.value = customerListData.pagination.total;
+  //         fromItem.value = customerListData.pagination.from;
+  //         toItem.value = customerListData.pagination.to;
+  //         // Handle pagination
+  //         if (customerListData.pagination.currentPage <
+  //             customerListData.pagination.lastPage) {
+  //           nextPageURL.value =
+  //               "${ApiUrl.getcustomerbyIdwwithpagination}=${userData?.userId ?? ''}&page=${currentPage + 1}&per_page=10";
+  //           logcat("nextPageURL-1", nextPageURL.value.toString());
+  //           update();
+  //         } else {
+  //           nextPageURL.value = "";
+  //           logcat("nextPageURL-2", nextPageURL.value.toString());
+  //           update();
+  //         }
+  //         logcat("nextPageURL", nextPageURL.value.toString());
+  //       } else {
+  //         message.value = responseData['message'];
+  //         showDialogForScreen(
+  //           context,
+  //           'Meter Screen',
+  //           responseData['message'],
+  //           callback: () {},
+  //         );
+  //       }
+  //     } else {
+  //       state.value = ScreenState.apiError;
+  //       message.value = APIResponseHandleText.serverError;
+  //       showDialogForScreen(
+  //         context,
+  //         'Meter Screen',
+  //         responseData['message'] ?? ServerError.servererror,
+  //         callback: () {
+  //           getUnauthenticatedUser(
+  //             context,
+  //             responseData['message'],
+  //             "Unauthenticated user",
+  //           );
+  //         },
+  //       );
+  //     }
+  //   } catch (e) {
+  //     logcat("Exception", e);
+  //     if (isFirstTime == true) {
+  //       isCustomerLoading(false);
+  //     }
+  //     state.value = ScreenState.apiError;
+  //     // message.value = ServerError.servererror;
+  //     // showDialogForScreen(context, 'Meter Screen', ServerError.servererror, callback: () {});
+  //   }
+  // }
+  // Provide all meeting data without pagination
   List<List<String>> get meetingsData {
-    if (customerList.isEmpty) return [];
+    if (meetingList.isEmpty) return [];
 
-    return customerList.asMap().entries.map((entry) {
+    return meetingList.asMap().entries.map((entry) {
       final index = entry.key + 1 + ((currentPage.value - 1) * 10);
       final e = entry.value;
 
       return [
         index.toString(), // Sr No.
-        e.businessUnit ?? 'N/A',
-        e.cafNo ?? 'N/A',
-        e.customerName ?? 'N/A',
-        e.categoryName.toString().split('.').last,
-        e.customerStatus.toString().split('.').last ?? 'N/A',
+        e.meetingId ?? 'N/A',
+        e.companyName ?? 'N/A',
+        e.contactPerson ?? 'N/A',
+        dateTimeFormat.format(e.meetingDate ?? DateTime.now()),
+        e.status ?? 'N/A',
         "",
       ];
     }).toList();
@@ -333,13 +484,13 @@ class MeetingsCalendarController extends GetxController {
                     isdate: true,
                     wantsuffix: true,
                     gestureFunction: () async {
-                      openDatePicker(
-                        context: context,
-                        title: 'Select New Date',
-                        controller: dateCtr,
-                        dateRx: startDate,
-                        model: dateModel,
-                      );
+                      // openDatePicker(
+                      //   context: context,
+                      //   title: 'Select New Date',
+                      //   controller: dateCtr,
+                      //   dateRx: startDate,
+                      //   model: dateModel,
+                      // );
                     },
                     hint: 'Select Date',
                   ),
@@ -367,8 +518,8 @@ class MeetingsCalendarController extends GetxController {
               context: context,
               wantLabel: true,
               label: 'Notes',
-              ctr: notesCtr, // 🔹 use correct controller for Notes
-              node: notesNode, // 🔹 use correct node for Notes
+              ctr: notesCtr,
+              node: notesNode,
               model: notesModel.value,
               hint: 'Enter Notes',
               isMultipline: true,

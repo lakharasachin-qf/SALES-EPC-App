@@ -18,30 +18,29 @@ class MeetingsCalendarScreen extends StatefulWidget {
   const MeetingsCalendarScreen({super.key});
 
   @override
-  State<MeetingsCalendarScreen> createState() => CustomerScreenState();
+  State<MeetingsCalendarScreen> createState() => MeetingsCalendarScreenState();
 }
 
-class CustomerScreenState extends State<MeetingsCalendarScreen> {
+class MeetingsCalendarScreenState extends State<MeetingsCalendarScreen> {
   final MeetingsCalendarController ctr = Get.put(MeetingsCalendarController());
-
   final RefreshController _refreshController = RefreshController();
 
   @override
   void initState() {
     super.initState();
     futureDelay(() {
-      // ctr.getCustomerbyID(context, 1, false, isFirstTime: true);
+      // ctr.getMeetings(context, 1, false, isFirstTime: true);
     }, isOneSecond: true);
   }
 
   final Map<String, double> columnWidths = {
     "Sr No.": 7.w,
-    "Lead Id": 20.w,
+    "Meeting ID": 15.w,
+    "Company Name": 20.w,
     "Contact Person": 20.w,
-    "Latest Appointment": 20.w,
-    "Contacted": 20.w,
-    "Status": 20.w,
-    "Action": 20.w,
+    "Meeting Date": 20.w,
+    "Status": 15.w,
+    "Action": 15.w,
   };
 
   @override
@@ -75,7 +74,7 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
               onRefresh: () async {
                 await futureDelay(() {
                   ctr.currentPage.value = 1;
-                  // ctr.getCustomerbyID(context, 1, false, isFirstTime: true);
+                  // ctr.getMeetings(context, 1, false, isFirstTime: true);
                 }, isOneSecond: false);
                 _refreshController.refreshCompleted();
               },
@@ -105,12 +104,11 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                             } else {
                               ctr.isTextEmpty.value = false;
                             }
+                            // Implement search/filter logic if needed
                             // ctr.filterData(val!);
                           },
                           inputType: TextInputType.text,
                           isBorderSideEnable: false,
-                          // wantSuffix: true,
-                          // isMick: true,
                           formType: FieldType.search,
                         );
                       }),
@@ -150,14 +148,14 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                           child:
                                               ctr.state.value ==
                                                       ScreenState.apiSuccess &&
-                                                  ctr.customerList.isEmpty
+                                                  ctr.meetingList.isEmpty
                                               ? SizedBox(
                                                   width: MediaQuery.of(
                                                     context,
                                                   ).size.width,
                                                   child: Center(
                                                     child: Text(
-                                                      'No customers found',
+                                                      'No meetings found',
                                                       style: TextStyle(
                                                         fontSize: 16,
                                                       ),
@@ -179,7 +177,7 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                                   dataTextStyle: TextStyle(
                                                     fontSize: 12.sp,
                                                   ),
-                                                  columns: ctr.customerHeaders
+                                                  columns: ctr.meetingHeaders
                                                       .asMap()
                                                       .entries
                                                       .map((entry) {
@@ -188,7 +186,7 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                                             width:
                                                                 columnWidths[entry
                                                                     .value] ??
-                                                                16.w,
+                                                                15.w,
                                                             child: Text(
                                                               entry.value,
                                                               textAlign:
@@ -213,19 +211,17 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                                   rows: ctr.meetingsData.asMap().entries.map((
                                                     entry,
                                                   ) {
-                                                    final row = entry
-                                                        .value; // row data (list of cell values)
+                                                    final row = entry.value;
                                                     return DataRow(
                                                       cells: row.asMap().entries.map((
                                                         cell,
                                                       ) {
                                                         final columnName =
-                                                            ctr.customerHeaders[cell
+                                                            ctr.meetingHeaders[cell
                                                                 .key];
 
                                                         if (columnName ==
                                                             "Action") {
-                                                          // Custom UI for Action column
                                                           return DataCell(
                                                             Center(
                                                               child: Row(
@@ -233,29 +229,29 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                                                     MainAxisAlignment
                                                                         .center,
                                                                 children: [
-                                                                  SizedBox(
-                                                                    width: 4.h,
-                                                                    height: 4.h,
-                                                                    child: IconButton(
-                                                                      padding:
-                                                                          EdgeInsets
-                                                                              .zero,
-                                                                      icon: const Icon(
-                                                                        Icons
-                                                                            .schedule,
-                                                                        color:
-                                                                            primaryColor,
-                                                                      ),
-                                                                      onPressed: () {
-                                                                        Get.to(
-                                                                          MeetingsHistoryScreen(),
-                                                                        );
-                                                                      },
-                                                                    ),
-                                                                  ),
-                                                                  getDynamicSizedBox(
-                                                                    width: 1.w,
-                                                                  ),
+                                                                  // SizedBox(
+                                                                  //   width: 4.h,
+                                                                  //   height: 4.h,
+                                                                  //   child: IconButton(
+                                                                  //     padding:
+                                                                  //         EdgeInsets
+                                                                  //             .zero,
+                                                                  //     icon: const Icon(
+                                                                  //       Icons
+                                                                  //           .schedule,
+                                                                  //       color:
+                                                                  //           primaryColor,
+                                                                  //     ),
+                                                                  //     onPressed: () {
+                                                                  //       Get.to(
+                                                                  //         const MeetingsHistoryScreen(),
+                                                                  //       );
+                                                                  //     },
+                                                                  //   ),
+                                                                  // ),
+                                                                  // getDynamicSizedBox(
+                                                                  //   width: 1.w,
+                                                                  // ),
                                                                   SizedBox(
                                                                     width: 4.h,
                                                                     height: 4.h,
@@ -276,45 +272,17 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                                                       },
                                                                     ),
                                                                   ),
-                                                                  getDynamicSizedBox(
-                                                                    width: 1.w,
-                                                                  ),
-                                                                  // SizedBox(
-                                                                  //   width: 1.w,
-                                                                  // ),
-                                                                  // SizedBox(
-                                                                  //   width: 4.h,
-                                                                  //   height: 4.h,
-                                                                  //   child: IconButton(
-                                                                  //     padding:
-                                                                  //         EdgeInsets
-                                                                  //             .zero,
-                                                                  //     icon: const Icon(
-                                                                  //       Icons
-                                                                  //           .delete,
-                                                                  //       color: Colors
-                                                                  //           .red,
-                                                                  //     ),
-                                                                  //     onPressed: () {
-                                                                  //       // 🗑 Delete action
-                                                                  //       // ctr.deleteCustomer(
-                                                                  //       //   rowIndex,
-                                                                  //       // );
-                                                                  //     },
-                                                                  //   ),
-                                                                  // ),
                                                                 ],
                                                               ),
                                                             ),
                                                           );
                                                         }
 
-                                                        // Default case → render normal text cell
                                                         return DataCell(
                                                           SizedBox(
                                                             width:
                                                                 columnWidths[columnName] ??
-                                                                16.w,
+                                                                15.w,
                                                             child: Text(
                                                               cell.value,
                                                               style: TextStyle(
@@ -333,56 +301,13 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                                       }).toList(),
                                                     );
                                                   }).toList(),
-
-                                                  // rows: ctr.customerData.asMap().entries.map((
-                                                  //   entry,
-                                                  // ) {
-                                                  //   final row = entry.value;
-                                                  //   return DataRow(
-                                                  //     cells: row.asMap().entries.map((
-                                                  //       cell,
-                                                  //     ) {
-                                                  //       return DataCell(
-                                                  //         SizedBox(
-                                                  //           width:
-                                                  //               columnWidths[ctr
-                                                  //                   .customerHeaders[cell
-                                                  //                   .key]] ??
-                                                  //               16.w,
-                                                  //           child: Text(
-                                                  //             cell.value,
-                                                  //             style: TextStyle(
-                                                  //               fontSize: 14.sp,
-                                                  //             ),
-                                                  //             textAlign:
-                                                  //                 TextAlign
-                                                  //                     .center,
-                                                  //             overflow:
-                                                  //                 TextOverflow
-                                                  //                     .ellipsis,
-                                                  //             maxLines: 2,
-                                                  //           ),
-                                                  //         ),
-                                                  //       );
-                                                  //     }).toList(),
-                                                  //   );
-                                                  // }).toList(),
                                                 ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                  // Loader
                                   if (ctr.state.value == ScreenState.apiLoading)
                                     screnLoader(tableHeight),
-                                  // Container(
-                                  //   height: tableHeight,
-                                  //   width: double.infinity,
-                                  //   color: transparent,
-                                  //   child: const Center(
-                                  //     child: CircularProgressIndicator(),
-                                  //   ),
-                                  // ),
                                 ],
                               ),
                             );
@@ -390,132 +315,111 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                         ),
                       ),
 
-                      getDynamicSizedBox(height: 1.5.h),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: white,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsets.symmetric(horizontal: 0.w),
-                        child: Obx(() {
-                          // if (ctr.totalItems.value == 0) {
-                          //   return const Text(
-                          //     "0–0 of 0",
-                          //     style: TextStyle(
-                          //       fontSize: 14,
-                          //       color: Colors.black,
-                          //     ),
-                          //   );
-                          // }
-
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: white,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 3.w,
-                              vertical: 1.h,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                // ==== UPDATED DESIGN ====
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.list_alt_rounded,
-                                      size: 18,
-                                      color: primaryColor,
-                                    ),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      "Showing ${ctr.fromItem.value}–${ctr.toItem.value}",
-                                      style: TextStyle(
-                                        fontSize: 13.sp,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      "of ${ctr.totalItems.value}",
-                                      style: TextStyle(
-                                        fontSize: 13.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: primaryColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                // ==== PAGINATION BUTTONS ====
-                                Row(
-                                  children: [
-                                    ElevatedButton(
-                                      onPressed: ctr.currentPage.value > 1
-                                          ? () => ctr.getCustomerbyID(
-                                              context,
-                                              ctr.currentPage.value - 1,
-                                              false,
-                                              isFirstTime: true,
-                                            )
-                                          : null,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            ctr.currentPage.value > 1
-                                            ? primaryColor
-                                            : Colors.grey.shade300,
-                                        minimumSize: const Size(36, 36),
-                                        shape: const CircleBorder(),
-                                        padding: EdgeInsets.zero,
-                                      ),
-                                      child: const Icon(
-                                        Icons.chevron_left,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 2.w,
-                                      ),
-                                      child: Text(
-                                        "Page ${ctr.currentPage.value}/${ctr.lastPage.value}",
-                                        style: TextStyle(fontSize: 12.sp),
-                                      ),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed:
-                                          ctr.currentPage.value <
-                                              ctr.lastPage.value
-                                          ? () => ctr.getCustomerbyID(
-                                              context,
-                                              ctr.currentPage.value + 1,
-                                              false,
-                                              isFirstTime: true,
-                                            )
-                                          : null,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            ctr.currentPage.value <
-                                                ctr.lastPage.value
-                                            ? primaryColor
-                                            : Colors.grey.shade300,
-                                        minimumSize: const Size(36, 36),
-                                        shape: const CircleBorder(),
-                                        padding: EdgeInsets.zero,
-                                      ),
-                                      child: const Icon(
-                                        Icons.chevron_right,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                      ),
+                      // getDynamicSizedBox(height: 1.5.h),
+                      // Container(
+                      //   decoration: BoxDecoration(
+                      //     color: white,
+                      //     borderRadius: BorderRadius.circular(12),
+                      //   ),
+                      //   padding: EdgeInsets.symmetric(
+                      //     horizontal: 3.w,
+                      //     vertical: 1.h,
+                      //   ),
+                      //   child: Obx(() {
+                      //     return Row(
+                      //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //       children: [
+                      //         Row(
+                      //           children: [
+                      //             const Icon(
+                      //               Icons.list_alt_rounded,
+                      //               size: 18,
+                      //               color: primaryColor,
+                      //             ),
+                      //             SizedBox(width: 6),
+                      //             Text(
+                      //               "Showing ${ctr.fromItem.value}–${ctr.toItem.value}",
+                      //               style: TextStyle(
+                      //                 fontSize: 13.sp,
+                      //                 color: Colors.black87,
+                      //               ),
+                      //             ),
+                      //             SizedBox(width: 4),
+                      //             Text(
+                      //               "of ${ctr.totalItems.value}",
+                      //               style: TextStyle(
+                      //                 fontSize: 13.sp,
+                      //                 fontWeight: FontWeight.w600,
+                      //                 color: primaryColor,
+                      //               ),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //         Row(
+                      //           children: [
+                      //             ElevatedButton(
+                      //               onPressed: ctr.currentPage.value > 1
+                      //                   ? () => ctr.getMeetings(
+                      //                       context,
+                      //                       ctr.currentPage.value - 1,
+                      //                       false,
+                      //                       isFirstTime: true,
+                      //                     )
+                      //                   : null,
+                      //               style: ElevatedButton.styleFrom(
+                      //                 backgroundColor: ctr.currentPage.value > 1
+                      //                     ? primaryColor
+                      //                     : Colors.grey.shade300,
+                      //                 minimumSize: const Size(36, 36),
+                      //                 shape: const CircleBorder(),
+                      //                 padding: EdgeInsets.zero,
+                      //               ),
+                      //               child: const Icon(
+                      //                 Icons.chevron_left,
+                      //                 color: Colors.white,
+                      //               ),
+                      //             ),
+                      //             Padding(
+                      //               padding: EdgeInsets.symmetric(
+                      //                 horizontal: 2.w,
+                      //               ),
+                      //               child: Text(
+                      //                 "Page ${ctr.currentPage.value}/${ctr.lastPage.value}",
+                      //                 style: TextStyle(fontSize: 12.sp),
+                      //               ),
+                      //             ),
+                      //             ElevatedButton(
+                      //               onPressed:
+                      //                   ctr.currentPage.value <
+                      //                       ctr.lastPage.value
+                      //                   ? () => ctr.getMeetings(
+                      //                       context,
+                      //                       ctr.currentPage.value + 1,
+                      //                       false,
+                      //                       isFirstTime: true,
+                      //                     )
+                      //                   : null,
+                      //               style: ElevatedButton.styleFrom(
+                      //                 backgroundColor:
+                      //                     ctr.currentPage.value <
+                      //                         ctr.lastPage.value
+                      //                     ? primaryColor
+                      //                     : Colors.grey.shade300,
+                      //                 minimumSize: const Size(36, 36),
+                      //                 shape: const CircleBorder(),
+                      //                 padding: EdgeInsets.zero,
+                      //               ),
+                      //               child: const Icon(
+                      //                 Icons.chevron_right,
+                      //                 color: Colors.white,
+                      //               ),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //       ],
+                      //     );
+                      //   }),
+                      // ),
                       getDynamicSizedBox(height: 12.h),
                     ],
                   ),

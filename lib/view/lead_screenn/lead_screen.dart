@@ -65,7 +65,7 @@ class LeadScreenState extends State<LeadScreen> {
             context: context,
             isFilter: true,
             onFilterClick: () {
-              // ctr.openFilterBottomSheet(context: context);
+              ctr.openFilterBottomSheet(context: context);
             },
           ),
 
@@ -254,12 +254,12 @@ class LeadScreenState extends State<LeadScreen> {
                                                                             primaryColor,
                                                                       ),
                                                                       onPressed: () {
-                                                                        // Get.to(
-                                                                        //   AddLeadScreen(
-                                                                        //     isEdit:
-                                                                        //         true,
-                                                                        //   ),
-                                                                        // );
+                                                                        Get.to(
+                                                                          AddLeadScreen(
+                                                                            isEdit:
+                                                                                true,
+                                                                          ),
+                                                                        );
                                                                       },
                                                                     ),
                                                                   ),
@@ -741,10 +741,9 @@ class LeadScreenState extends State<LeadScreen> {
                       getFormButton(
                         context,
                         () async {
-                          // final result = await Get.to(
-                          //   AddLeadScreen(isEdit: false),
-                          // );
-
+                          final result = await Get.to(
+                            AddLeadScreen(isEdit: false),
+                          );
                           // if (result == true) {}
                         },
                         'Add Lead',

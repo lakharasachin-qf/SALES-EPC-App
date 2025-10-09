@@ -160,15 +160,15 @@ Widget getDashboardDrawer(
               })
             : SizedBox.shrink();
       }),
-      // getDynamicSizedBox(height: 1.h),
-      // buildDrawerItem(
-      //   Asset.meetingsCalendar,
-      //   HomeScreenConst.meetingsCalendar,
-      //   () {
-      //     ctr.scaffoldKey.currentState?.closeDrawer();
-      //     Get.to(MeetingsCalendarScreen());
-      //   },
-      // ),
+      getDynamicSizedBox(height: 1.h),
+      buildDrawerItem(
+        Asset.meetingsCalendar,
+        HomeScreenConst.meetingsCalendar,
+        () {
+          ctr.scaffoldKey.currentState?.closeDrawer();
+          Get.to(MeetingsCalendarScreen());
+        },
+      ),
       buildDrawerItem(Asset.logout, 'Logout', () async {
         ctr.scaffoldKey.currentState?.closeDrawer();
         getpopup(
@@ -474,9 +474,9 @@ Widget addFilterSheetWidget(
                   child: getFormButton(
                     context,
                     () {
-                      ctr.resetForm();
-                      ctr.isStartDateSelected = false.obs;
-                      ctr.getDashboardData(context, 1, isFirstTime: true);
+                      // ctr.resetForm();
+                      // ctr.isStartDateSelected = false.obs;
+                      // ctr.getDashboardData(context, 1, isFirstTime: true);
                       Get.back();
                     },
                     'Clear',
@@ -488,7 +488,7 @@ Widget addFilterSheetWidget(
                   child: getFormButton(
                     context,
                     () {
-                      ctr.makeApiCall(context);
+                      // ctr.makeApiCall(context);
                       Get.back();
                     },
                     'Search',

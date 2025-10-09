@@ -1001,7 +1001,8 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                         _currentStep == _steps.length - 1
                                             ? 'Submit'
                                             : 'Next',
-                                        validate: isNextEnabled,
+                                        // validate: isNextEnabled,
+                                        validate: true,
                                       );
                                     }),
                                   ),

@@ -10,6 +10,7 @@ import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/signin_controller/signin_controller.dart';
 import 'package:sales_app/utils/helper.dart';
+import 'package:sales_app/view/dashboard_screen/dashboardScreen.dart';
 import 'package:sizer/sizer.dart';
 import 'package:sizer/sizer.dart' as sizer;
 
@@ -129,18 +130,14 @@ class _SigninscreenState extends State<Signinscreen> {
                         );
                       }),
                       getDynamicSizedBox(height: 3.h),
-                      Obx(() {
-                        return getFormButton(
-                          context,
-                          () {
-                            if (ctr.isFormInvalidate.value == true) {
-                              ctr.loginAPI(context);
-                            }
-                          },
-                          Button.login,
-                          validate: ctr.isFormInvalidate.value,
-                        );
-                      }),
+                      getFormButton(
+                        context,
+                        () {
+                          Get.offAll(() => DashboardScreen());
+                        },
+                        Button.login,
+                        validate: true,
+                      ),
                       getDynamicSizedBox(height: 2.h),
                     ],
                   ),

@@ -15,19 +15,18 @@ class MeetingsHistoryScreen extends StatefulWidget {
   const MeetingsHistoryScreen({super.key});
 
   @override
-  State<MeetingsHistoryScreen> createState() => CustomerScreenState();
+  State<MeetingsHistoryScreen> createState() => MeetingsHistoryScreenState();
 }
 
-class CustomerScreenState extends State<MeetingsHistoryScreen> {
-  final ctr = Get.put(MeetingsHistoryController());
-
+class MeetingsHistoryScreenState extends State<MeetingsHistoryScreen> {
+  final MeetingsHistoryController ctr = Get.put(MeetingsHistoryController());
   final RefreshController _refreshController = RefreshController();
 
   @override
   void initState() {
     super.initState();
     futureDelay(() {
-      ctr.getCustomerbyID(context, 1, false, isFirstTime: true);
+      // ctr.getMeetingHistory(context, 1, false, isFirstTime: true);
     }, isOneSecond: true);
   }
 
@@ -35,7 +34,7 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
     "Sr No.": 7.w,
     "Contacted": 20.w,
     "Status": 20.w,
-    "From	": 20.w,
+    "From": 20.w,
     "To": 20.w,
     "Reason": 20.w,
     "Action By": 20.w,
@@ -72,7 +71,7 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
               onRefresh: () async {
                 await futureDelay(() {
                   ctr.currentPage.value = 1;
-                  ctr.getCustomerbyID(context, 1, false, isFirstTime: true);
+                  // ctr.getMeetingHistory(context, 1, false, isFirstTime: true);
                 }, isOneSecond: false);
                 _refreshController.refreshCompleted();
               },
@@ -118,7 +117,7 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                                           child:
                                               ctr.state.value ==
                                                       ScreenState.apiSuccess &&
-                                                  ctr.customerList.isEmpty
+                                                  ctr.meetingHistoryList.isEmpty
                                               ? SizedBox(
                                                   width: MediaQuery.of(
                                                     context,
@@ -147,7 +146,7 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                                                   dataTextStyle: TextStyle(
                                                     fontSize: 12.sp,
                                                   ),
-                                                  columns: ctr.customerHeaders
+                                                  columns: ctr.meetingHeaders
                                                       .asMap()
                                                       .entries
                                                       .map((entry) {
@@ -156,7 +155,7 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                                                             width:
                                                                 columnWidths[entry
                                                                     .value] ??
-                                                                16.w,
+                                                                20.w,
                                                             child: Text(
                                                               entry.value,
                                                               textAlign:
@@ -190,9 +189,9 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                                                           SizedBox(
                                                             width:
                                                                 columnWidths[ctr
-                                                                    .customerHeaders[cell
+                                                                    .meetingHeaders[cell
                                                                     .key]] ??
-                                                                16.w,
+                                                                20.w,
                                                             child: Text(
                                                               cell.value,
                                                               style: TextStyle(
@@ -216,23 +215,15 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                                       ),
                                     ),
                                   ),
-                                  // Loader
                                   if (ctr.state.value == ScreenState.apiLoading)
                                     screnLoader(tableHeight),
-                                  // Container(
-                                  //   height: tableHeight,
-                                  //   width: double.infinity,
-                                  //   color: transparent,
-                                  //   child: const Center(
-                                  //     child: CircularProgressIndicator(),
-                                  //   ),
-                                  // ),
                                 ],
                               ),
                             );
                           }),
                         ),
                       ),
+
                       // getDynamicSizedBox(height: 1.5.h),
                       // Padding(
                       //   padding: EdgeInsets.symmetric(horizontal: 2.w),
@@ -276,7 +267,7 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                       //               IconButton(
                       //                 onPressed: ctr.currentPage.value > 1
                       //                     ? () {
-                      //                         ctr.getCustomerbyID(
+                      //                         ctr.getMeetingHistory(
                       //                           context,
                       //                           ctr.currentPage.value - 1,
                       //                           false,
@@ -307,7 +298,7 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                       //                     ctr.currentPage.value <
                       //                         ctr.lastPage.value
                       //                     ? () {
-                      //                         ctr.getCustomerbyID(
+                      //                         ctr.getMeetingHistory(
                       //                           context,
                       //                           ctr.currentPage.value + 1,
                       //                           false,
