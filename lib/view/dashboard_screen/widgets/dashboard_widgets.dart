@@ -524,7 +524,8 @@ Widget addFilterSheetWidget(
                   child: getFormButton(
                     context,
                     () {
-                      ctr.makeApiCall(context);
+                      // ctr.makeApiCall(context);
+                      ctr.getDashboardData(context, isApplyFilter: true);
                       Get.back();
                     },
                     'Search',

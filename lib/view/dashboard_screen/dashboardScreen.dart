@@ -11,6 +11,7 @@ import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/dashboard_controller/dashboard_controller.dart';
 import 'package:sales_app/utils/helper.dart';
+import 'package:sales_app/utils/log.dart';
 import 'package:sales_app/view/dashboard_screen/widgets/dashboard_widgets.dart';
 import 'package:sales_app/view/dashboard_screen/widgets/widgets.dart';
 import 'package:sizer/sizer.dart';
@@ -56,7 +57,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ctr.openFilterBottomSheet(context: context);
             },
           ),
-
           Expanded(
             child: SmartRefresher(
               controller: _refreshController,
@@ -81,6 +81,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Obx(() {
                       final start = ctr.startDate.value;
                       final end = ctr.endDate.value;
+
+                      logcat("startDate::", ctr.startDate.value);
+                      logcat("endDate::", ctr.endDate.value);
 
                       String displayText = (start == end)
                           ? start

@@ -158,6 +158,7 @@ void commonGetApiCallFormate(
   Rx<ScreenState>? state,
   RxString? message,
   isShowDialog = true,
+  isStatus = false,
 }) async {
   try {
     if (apisLoading != null) apisLoading(true);
@@ -186,7 +187,18 @@ void commonGetApiCallFormate(
       state?.value = ScreenState.apiSuccess;
       message?.value = '';
 
-      if (responseData['status']?.toString().toLowerCase() == 'success') {
+      bool isResponseOk = false;
+
+      // 🔹 Flexible status checking logic
+      if (isStatus) {
+        // Case 1: Expecting boolean true
+        isResponseOk = responseData['status'] == true;
+      } else {
+        // Case 2: Expecting string "success"
+        isResponseOk =
+            responseData['status']?.toString().toLowerCase() == 'success';
+      }
+      if (isResponseOk) {
         onResponse(responseData);
         print('common get api if case');
       } else {

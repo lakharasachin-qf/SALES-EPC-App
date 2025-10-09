@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide ScreenType;
 import 'package:file_picker/file_picker.dart';
@@ -5,6 +7,7 @@ import 'package:sales_app/api_handle/apiCallingFormate.dart';
 import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/common_date_time_picker.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
+import 'package:sales_app/componant/dialogs/loading_indicator.dart';
 import 'package:sales_app/componant/input/custom_text_field.dart';
 import 'package:sales_app/componant/input/form_inputs.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
@@ -14,6 +17,7 @@ import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
 import 'package:sales_app/models/LoadElement.dart';
+import 'package:sales_app/models/LocationModel.dart';
 import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
 import 'package:sales_app/preference/UserPreference.dart';
@@ -52,6 +56,8 @@ class AddLeadsController extends GetxController {
   final ScrollController scrollController = ScrollController();
   RxBool isDesignationApiCallLoading = false.obs;
   RxBool isCountryApiCallLoading = false.obs;
+  RxBool isStateApiCallLoading = false.obs;
+  RxBool isDistrictApiCallLoading = false.obs;
   RxBool isAddOnApiCallLoading = false.obs;
   var isAboutUsApiCallLoading = false.obs;
   RxString designationId = ''.obs;
@@ -73,6 +79,8 @@ class AddLeadsController extends GetxController {
   var districtList = <String>['Usa', 'India'].obs;
   DateTime? selectedDateTime;
   final RxString startDate = ''.obs;
+
+  // RxList<Cluster> districtList = <Cluster>[].obs;
 
   late List<DataColumn> leadsColumns = [
     setColumn("Sr"),
@@ -360,6 +368,16 @@ class AddLeadsController extends GetxController {
     isValidate: false,
   ).obs;
 
+  // Observable lists
+  var countries = <CountryData>[].obs;
+  var states = <StateData>[].obs;
+  var districts = <District>[].obs;
+
+  // Selected IDs
+  var selectedCountryId = 0.obs;
+  var selectedStateId = 0.obs;
+  var selectedDistrictId = 0.obs;
+
   // Category List
   RxList<CategoryModel> categoryList = <CategoryModel>[
     CategoryModel(id: "1", name: "Invoice"),
@@ -585,50 +603,121 @@ class AddLeadsController extends GetxController {
   }
 
   // Dialog for State List
+  // Widget setStateListDialog() {
+  //   return Obx(() {
+  //     if (isCountryApiCallLoading.value == true) {
+  //       return setDropDownContent(
+  //         [].obs,
+  //         const Text(SearchScreenConstant.loading),
+  //         isApiIsLoading: isCountryApiCallLoading.value,
+  //       );
+  //     }
+  //     return setDropDownContent(
+  //       stateList,
+  //       controller: stateSearchCtr,
+  //       noDataLable: "No State",
+  //       ListView.builder(
+  //         shrinkWrap: true,
+  //         physics: const BouncingScrollPhysics(),
+  //         itemCount: stateList.length,
+  //         itemBuilder: (BuildContext context, int index) {
+  //           return Column(
+  //             children: [
+  //               ListTile(
+  //                 dense: true,
+  //                 visualDensity: const VisualDensity(
+  //                   horizontal: 0,
+  //                   vertical: -4,
+  //                 ),
+  //                 contentPadding: const EdgeInsets.only(
+  //                   left: 0.0,
+  //                   right: 0.0,
+  //                   top: 0.0,
+  //                 ),
+  //                 horizontalTitleGap: null,
+  //                 minLeadingWidth: 5,
+  //                 onTap: () async {
+  //                   stateCtr.text = stateList[index];
+  //                   validateState(stateCtr.text);
+  //                   Get.back();
+  //                 },
+  //                 title: Text(
+  //                   stateList[index],
+  //                   style: TextStyle(fontSize: 17.sp),
+  //                 ),
+  //               ),
+  //             ],
+  //           );
+  //         },
+  //       ),
+  //       searchcontent: getReactiveFormField(
+  //         node: stateSearchNode,
+  //         controller: stateSearchCtr,
+  //         hintLabel: SearchScreenConstant.hint,
+  //         onChanged: (val) {
+  //           applyFilterForState(val.toString());
+  //           update();
+  //         },
+  //         isSearch: true,
+  //         inputType: TextInputType.text,
+  //         errorText: stateSearchModel.value.error,
+  //       ),
+  //     );
+  //   });
+  // }
+
+  // void applyFilterForState(String keyword) {
+  //   stateList.clear();
+  //   if (keyword.isEmpty) {
+  //     stateList.addAll(['Usa', 'India']); // Mock data
+  //   } else {
+  //     stateList.addAll(
+  //       ['Usa', 'India']
+  //           .where(
+  //             (state) => state.toLowerCase().contains(keyword.toLowerCase()),
+  //           )
+  //           .toList(),
+  //     );
+  //   }
+  //   update();
+  // }
+
   Widget setStateListDialog() {
     return Obx(() {
-      if (isCountryApiCallLoading.value == true) {
+      if (isStateApiCallLoading.value) {
         return setDropDownContent(
           [].obs,
           const Text(SearchScreenConstant.loading),
-          isApiIsLoading: isCountryApiCallLoading.value,
+          isApiIsLoading: isStateApiCallLoading.value,
         );
       }
       return setDropDownContent(
-        stateList,
+        states,
         controller: stateSearchCtr,
         noDataLable: "No State",
         ListView.builder(
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          itemCount: stateList.length,
+          itemCount: states.length,
           itemBuilder: (BuildContext context, int index) {
-            return Column(
-              children: [
-                ListTile(
-                  dense: true,
-                  visualDensity: const VisualDensity(
-                    horizontal: 0,
-                    vertical: -4,
-                  ),
-                  contentPadding: const EdgeInsets.only(
-                    left: 0.0,
-                    right: 0.0,
-                    top: 0.0,
-                  ),
-                  horizontalTitleGap: null,
-                  minLeadingWidth: 5,
-                  onTap: () async {
-                    stateCtr.text = stateList[index];
-                    validateState(stateCtr.text);
-                    Get.back();
-                  },
-                  title: Text(
-                    stateList[index],
-                    style: TextStyle(fontSize: 17.sp),
-                  ),
-                ),
-              ],
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                selectState(states[index]);
+                Get.back();
+              },
+              title: buildSelectableRow(
+                states[index].stateName,
+                states[index].stateId == selectedStateId.value,
+              ),
             );
           },
         ),
@@ -638,7 +727,6 @@ class AddLeadsController extends GetxController {
           hintLabel: SearchScreenConstant.hint,
           onChanged: (val) {
             applyFilterForState(val.toString());
-            update();
           },
           isSearch: true,
           inputType: TextInputType.text,
@@ -649,14 +737,20 @@ class AddLeadsController extends GetxController {
   }
 
   void applyFilterForState(String keyword) {
-    stateList.clear();
+    states.clear();
     if (keyword.isEmpty) {
-      stateList.addAll(['Usa', 'India']); // Mock data
+      states.assignAll(
+        countries
+            .firstWhere((c) => c.countryId == selectedCountryId.value)
+            .states,
+      );
     } else {
-      stateList.addAll(
-        ['Usa', 'India']
+      states.assignAll(
+        countries
+            .firstWhere((c) => c.countryId == selectedCountryId.value)
+            .states
             .where(
-              (state) => state.toLowerCase().contains(keyword.toLowerCase()),
+              (s) => s.stateName.toLowerCase().contains(keyword.toLowerCase()),
             )
             .toList(),
       );
@@ -664,10 +758,10 @@ class AddLeadsController extends GetxController {
     update();
   }
 
-  // Dialog for District List
-  Widget setDistrictListDialog() {
+  // Update dialogs
+  Widget setCountryListDialog() {
     return Obx(() {
-      if (isCountryApiCallLoading.value == true) {
+      if (isCountryApiCallLoading.value) {
         return setDropDownContent(
           [].obs,
           const Text(SearchScreenConstant.loading),
@@ -675,40 +769,104 @@ class AddLeadsController extends GetxController {
         );
       }
       return setDropDownContent(
-        districtList,
+        countries,
+        controller: countrySearchCtr,
+        noDataLable: "No Country",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: countries.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                selectCountry(countries[index]);
+                Get.back();
+              },
+              title: buildSelectableRow(
+                countries[index].countryName,
+                countries[index].countryId == selectedCountryId.value,
+              ),
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: countrySearchNode,
+          controller: countrySearchCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterforCountry(val.toString());
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: countrySearchModel.value.error,
+        ),
+      );
+    });
+  }
+
+  // Filter methods
+  void applyFilterforCountry(String keyword) {
+    if (keyword.isEmpty) {
+      countryList.assignAll(countries.map((c) => c.countryName).toList());
+    } else {
+      countryList.assignAll(
+        countries
+            .where(
+              (c) =>
+                  c.countryName.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .map((c) => c.countryName)
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  Widget setDistrictListDialog() {
+    return Obx(() {
+      if (isDesignationApiCallLoading.value) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isDesignationApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        districts,
         controller: districtSearchCtr,
         noDataLable: "No District",
         ListView.builder(
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          itemCount: districtList.length,
+          itemCount: districts.length,
           itemBuilder: (BuildContext context, int index) {
-            return Column(
-              children: [
-                ListTile(
-                  dense: true,
-                  visualDensity: const VisualDensity(
-                    horizontal: 0,
-                    vertical: -4,
-                  ),
-                  contentPadding: const EdgeInsets.only(
-                    left: 0.0,
-                    right: 0.0,
-                    top: 0.0,
-                  ),
-                  horizontalTitleGap: null,
-                  minLeadingWidth: 5,
-                  onTap: () async {
-                    districtCtr.text = districtList[index];
-                    validateDistrict(districtCtr.text);
-                    Get.back();
-                  },
-                  title: Text(
-                    districtList[index],
-                    style: TextStyle(fontSize: 17.sp),
-                  ),
-                ),
-              ],
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                selectDistrict(districts[index]);
+                Get.back();
+              },
+              title: buildSelectableRow(
+                districts[index].districtName,
+                districts[index].districtId == selectedDistrictId.value,
+              ),
             );
           },
         ),
@@ -718,7 +876,6 @@ class AddLeadsController extends GetxController {
           hintLabel: SearchScreenConstant.hint,
           onChanged: (val) {
             applyFilterForDistrict(val.toString());
-            update();
           },
           isSearch: true,
           inputType: TextInputType.text,
@@ -729,15 +886,18 @@ class AddLeadsController extends GetxController {
   }
 
   void applyFilterForDistrict(String keyword) {
-    districtList.clear();
     if (keyword.isEmpty) {
-      districtList.addAll(['Usa', 'India']); // Mock data
+      districts.assignAll(
+        states.firstWhere((s) => s.stateId == selectedStateId.value).districts,
+      );
     } else {
-      districtList.addAll(
-        ['Usa', 'India']
+      districts.assignAll(
+        states
+            .firstWhere((s) => s.stateId == selectedStateId.value)
+            .districts
             .where(
-              (district) =>
-                  district.toLowerCase().contains(keyword.toLowerCase()),
+              (d) =>
+                  d.districtName.toLowerCase().contains(keyword.toLowerCase()),
             )
             .toList(),
       );
@@ -860,6 +1020,7 @@ class AddLeadsController extends GetxController {
                   ),
                   horizontalTitleGap: null,
                   minLeadingWidth: 5,
+
                   onTap: () async {
                     requiredSolutionCtr.text = solutuionList[index];
                     validateRequiredSolution(requiredSolutionCtr.text);
@@ -1152,86 +1313,86 @@ class AddLeadsController extends GetxController {
     update();
   }
 
-  Widget setCountryListDialog() {
-    return Obx(() {
-      if (isCountryApiCallLoading.value == true) {
-        return setDropDownContent(
-          [].obs,
-          const Text(SearchScreenConstant.loading),
-          isApiIsLoading: isCountryApiCallLoading.value,
-        );
-      }
-      return setDropDownContent(
-        countryList,
-        controller: countrySearchCtr,
-        noDataLable: "No Country",
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const BouncingScrollPhysics(),
-          itemCount: countryList.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Column(
-              children: [
-                ListTile(
-                  dense: true,
-                  visualDensity: const VisualDensity(
-                    horizontal: 0,
-                    vertical: -4,
-                  ),
-                  contentPadding: const EdgeInsets.only(
-                    left: 0.0,
-                    right: 0.0,
-                    top: 0.0,
-                  ),
-                  horizontalTitleGap: null,
-                  minLeadingWidth: 5,
-                  onTap: () async {
-                    countryId.value = countryList[index];
-                    countryCtr.text = countryList[index];
-                    validateCountry(countryCtr.text);
-                    Get.back();
-                  },
-                  title: Text(
-                    countryList[index],
-                    style: TextStyle(fontSize: 17.sp),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-        searchcontent: getReactiveFormField(
-          node: countrySearchNode,
-          controller: countrySearchCtr,
-          hintLabel: SearchScreenConstant.hint,
-          onChanged: (val) {
-            applyFilterforCountry(val.toString());
-            update();
-          },
-          isSearch: true,
-          inputType: TextInputType.text,
-          errorText: countrySearchModel.value.error,
-        ),
-      );
-    });
-  }
+  // Widget setCountryListDialog() {
+  //   return Obx(() {
+  //     if (isCountryApiCallLoading.value == true) {
+  //       return setDropDownContent(
+  //         [].obs,
+  //         const Text(SearchScreenConstant.loading),
+  //         isApiIsLoading: isCountryApiCallLoading.value,
+  //       );
+  //     }
+  //     return setDropDownContent(
+  //       countryList,
+  //       controller: countrySearchCtr,
+  //       noDataLable: "No Country",
+  //       ListView.builder(
+  //         shrinkWrap: true,
+  //         physics: const BouncingScrollPhysics(),
+  //         itemCount: countryList.length,
+  //         itemBuilder: (BuildContext context, int index) {
+  //           return Column(
+  //             children: [
+  //               ListTile(
+  //                 dense: true,
+  //                 visualDensity: const VisualDensity(
+  //                   horizontal: 0,
+  //                   vertical: -4,
+  //                 ),
+  //                 contentPadding: const EdgeInsets.only(
+  //                   left: 0.0,
+  //                   right: 0.0,
+  //                   top: 0.0,
+  //                 ),
+  //                 horizontalTitleGap: null,
+  //                 minLeadingWidth: 5,
+  //                 onTap: () async {
+  //                   countryId.value = countryList[index];
+  //                   countryCtr.text = countryList[index];
+  //                   validateCountry(countryCtr.text);
+  //                   Get.back();
+  //                 },
+  //                 title: Text(
+  //                   countryList[index],
+  //                   style: TextStyle(fontSize: 17.sp),
+  //                 ),
+  //               ),
+  //             ],
+  //           );
+  //         },
+  //       ),
+  //       searchcontent: getReactiveFormField(
+  //         node: countrySearchNode,
+  //         controller: countrySearchCtr,
+  //         hintLabel: SearchScreenConstant.hint,
+  //         onChanged: (val) {
+  //           applyFilterforCountry(val.toString());
+  //           update();
+  //         },
+  //         isSearch: true,
+  //         inputType: TextInputType.text,
+  //         errorText: countrySearchModel.value.error,
+  //       ),
+  //     );
+  //   });
+  // }
 
-  void applyFilterforCountry(String keyword) {
-    countryList.clear();
-    if (keyword.isEmpty) {
-      countryList.addAll(['USA', 'India', 'Canada']); // Mock data
-    } else {
-      countryList.addAll(
-        ['USA', 'India', 'Canada']
-            .where(
-              (country) =>
-                  country.toLowerCase().contains(keyword.toLowerCase()),
-            )
-            .toList(),
-      );
-    }
-    update();
-  }
+  // void applyFilterforCountry(String keyword) {
+  //   countryList.clear();
+  //   if (keyword.isEmpty) {
+  //     countryList.addAll(['USA', 'India', 'Canada']); // Mock data
+  //   } else {
+  //     countryList.addAll(
+  //       ['USA', 'India', 'Canada']
+  //           .where(
+  //             (country) =>
+  //                 country.toLowerCase().contains(keyword.toLowerCase()),
+  //           )
+  //           .toList(),
+  //     );
+  //   }
+  //   update();
+  // }
 
   // Validation Methods
   void validateCompanyName(String? val) {
@@ -2523,8 +2684,6 @@ class AddLeadsController extends GetxController {
       });
     }
 
-    
-
     // Step 4: API Call
     await commonPostApiCallFormate(
       context,
@@ -2545,5 +2704,230 @@ class AddLeadsController extends GetxController {
       networkManager: networkManager,
       isModelResponse: true,
     );
+  }
+
+  Future<void> getLocation(BuildContext context, bool isLoading) async {
+    var loadingIndicator = LoadingProgressDialog();
+
+    commonGetApiCallFormate(
+      context,
+      title: 'Add Lead Screen',
+      apiEndPoint: ApiUrl.getLocation,
+      allowHeader: true,
+      state: state,
+      message: message,
+      isStatus: true,
+      apisLoading: (isTrue) {
+        if (isLoading) {
+          if (isTrue) {
+            loadingIndicator.show(context, '');
+          } else {
+            loadingIndicator.hide(context);
+          }
+        }
+      },
+      onResponse: (data) {
+        var responseDetail = LocationModel.fromJson(data);
+
+        if (responseDetail.status) {
+          countries.assignAll(responseDetail.data);
+
+          // Select default country "India"
+          CountryData? defaultCountry;
+          if (countries.isNotEmpty) {
+            defaultCountry = countries.firstWhere(
+              (country) => country.countryName.trim().toLowerCase() == 'india',
+              orElse: () => countries.first,
+            );
+
+            selectCountry(defaultCountry);
+            countryCtr.text = defaultCountry.countryName;
+            selectedCountryId.value = defaultCountry.countryId;
+            states.assignAll(defaultCountry.states);
+            validateCountry(defaultCountry.countryName);
+          }
+
+          // Select default state "Uttar Pradesh"
+          if (states.isNotEmpty) {
+            final defaultState = states.firstWhere(
+              (state) =>
+                  state.stateName.trim().toLowerCase() == 'uttar pradesh',
+              orElse: () => states.first,
+            );
+
+            selectState(defaultState);
+            stateCtr.text = defaultState.stateName;
+            selectedStateId.value = defaultState.stateId;
+            districts.assignAll(defaultState.districts);
+            validateState(defaultState.stateName);
+          }
+
+          update();
+        }
+      },
+      networkManager: networkManager,
+    );
+  }
+
+  // Future<void> getLocation(BuildContext context, bool isLoading) async {
+  //   var loadingIndicator = LoadingProgressDialog();
+  //   commonGetApiCallFormate(
+  //     context,
+  //     title: 'Add Lead Screen',
+  //     apiEndPoint: ApiUrl.getLocation,
+  //     allowHeader: true,
+  //     state: state,
+  //     message: message,
+  //     isStatus: true,
+  //     apisLoading: (isTrue) {
+  //       if (isLoading) {
+  //         if (isTrue) {
+  //           loadingIndicator.show(context, '');
+  //         } else {
+  //           loadingIndicator.hide(context);
+  //         }
+  //       }
+  //     },
+  //     onResponse: (data) {
+  //       var responseDetail = LocationModel.fromJson(data);
+  //       if (responseDetail.status) {
+  //         countries.assignAll(responseDetail.data);
+
+  //         // Set default country to "India"
+  //         final defaultCountry = countries.firstWhere(
+  //           (country) => country.countryName.toLowerCase() == 'india',
+  //           orElse: () => countries.isNotEmpty
+  //               ? countries.first
+  //               : CountryData(countryId: 0, countryName: '', states: []),
+  //         );
+
+  //         if (defaultCountry.countryId != 0) {
+  //           selectCountry(defaultCountry); // Select India
+  //           countryCtr.text = defaultCountry.countryName;
+  //           selectedCountryId.value = defaultCountry.countryId;
+  //           states.assignAll(defaultCountry.states);
+
+  //           // Set default state to "Uttar Pradesh"
+  //           final defaultState = states.firstWhere(
+  //             (state) => state.stateName.toLowerCase() == 'uttar pradesh',
+  //             orElse: () => states.isNotEmpty
+  //                 ? states.first
+  //                 : StateData(stateId: 0, stateName: '', districts: []),
+  //           );
+
+  //           if (defaultState.stateId != 0) {
+  //             selectState(defaultState); // Select Uttar Pradesh
+  //             stateCtr.text = defaultState.stateName;
+  //             selectedStateId.value = defaultState.stateId;
+  //             districts.assignAll(defaultState.districts);
+  //             validateState(defaultState.stateName);
+  //           } else {
+  //             // Fallback if Uttar Pradesh is not found
+  //             if (states.isNotEmpty) {
+  //               selectState(states.first);
+  //               stateCtr.text = states.first.stateName;
+  //               selectedStateId.value = states.first.stateId;
+  //               districts.assignAll(states.first.districts);
+  //               validateState(states.first.stateName);
+  //             }
+  //           }
+  //           validateCountry(defaultCountry.countryName);
+  //         } else {
+  //           // Fallback if India is not found
+  //           if (countries.isNotEmpty) {
+  //             selectCountry(countries.first);
+  //             countryCtr.text = countries.first.countryName;
+  //             selectedCountryId.value = countries.first.countryId;
+  //             states.assignAll(countries.first.states);
+  //             validateCountry(countries.first.countryName);
+  //           }
+  //         }
+  //       }
+  //       update();
+  //     },
+  //     networkManager: networkManager,
+  //   );
+  // }
+
+  // Future<void> getLocation(context, bool isLoading) async {
+  //   var loadingIndicator = LoadingProgressDialog();
+  //   // User? userData = await UserPreferences().getSignInInfo();
+  //   commonGetApiCallFormate(
+  //     context,
+  //     title: 'Add Lead Screen',
+  //     apiEndPoint: ApiUrl.getLocation,
+  //     allowHeader: true,
+  //     state: state,
+  //     message: message,
+  //     isStatus: true,
+  //     apisLoading: (isTrue) {
+  //       if (isLoading == true) {
+  //         if (isTrue) {
+  //           loadingIndicator.show(context, '');
+  //         } else {
+  //           loadingIndicator.hide(context);
+  //         }
+  //       }
+  //     },
+  //     onResponse: (data) {
+  //       // personNameCtr.clear();
+  //       var responseDetail = LocationModel.fromJson(data);
+  //       if (responseDetail.status == true) {
+  //         countries.assignAll(responseDetail.data);
+  //         // Optionally, set default country and load states
+  //         if (countries.isNotEmpty) {
+  //           countryCtr.text = countries.first.countryName;
+  //           selectedCountryId.value = countries.first.countryId;
+  //           states.assignAll(countries.first.states);
+  //           validateCountry(countryCtr.text);
+  //         }
+  //       }
+  //       update();
+  //       logcat("location::", jsonEncode(responseDetail));
+  //       update();
+  //     },
+  //     networkManager: networkManager,
+  //   );
+  // }
+
+  // Update country selection
+  void selectCountry(CountryData country) {
+    selectedCountryId.value = country.countryId;
+    countryCtr.text = country.countryName;
+    validateCountry(countryCtr.text);
+    // Update states based on selected country
+    states.assignAll(country.states);
+    stateCtr.clear();
+    districtCtr.clear();
+    selectedStateId.value = 0;
+    selectedDistrictId.value = 0;
+    districts.clear();
+    // validateState('');
+    // validateDistrict('');
+    applyFilterforCountry('');
+    update();
+  }
+
+  // Update state selection
+  void selectState(StateData state) {
+    selectedStateId.value = state.stateId;
+    stateCtr.text = state.stateName;
+    validateState(stateCtr.text);
+    // Update districts based on selected state
+    districts.assignAll(state.districts);
+    districtCtr.clear();
+    selectedDistrictId.value = 0;
+    // validateDistrict('');
+    applyFilterForState('');
+    update();
+  }
+
+  // Update district selection
+  void selectDistrict(District district) {
+    selectedDistrictId.value = district.districtId;
+    districtCtr.text = district.districtName;
+    validateDistrict(districtCtr.text);
+    applyFilterForDistrict('');
+    update();
   }
 }

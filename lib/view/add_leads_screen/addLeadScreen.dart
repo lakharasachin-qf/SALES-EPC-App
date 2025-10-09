@@ -40,6 +40,14 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
     });
   }
 
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.getLocation(context, true);
+    });
+    super.initState();
+  }
+
   void _onStepContinue() {
     if (_currentStep < _steps.length - 1) {
       setState(() {

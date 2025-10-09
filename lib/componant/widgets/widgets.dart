@@ -251,6 +251,9 @@ openBottomtsheetDialog(
                         bottom: 0,
                         child: InkWell(
                           onTap: () {
+                            if (onClosing != null) {
+                              onClosing(); // 👈 Trigger onClosing when bottom sheet is dismissed
+                            }
                             Navigator.pop(context);
                           },
                           child: Container(
@@ -282,7 +285,7 @@ openBottomtsheetDialog(
     },
   ).whenComplete(() {
     if (onClosing != null) {
-      onClosing(); // 👈 Trigger onClosing when bottom sheet is dismissed
+      // onClosing(); // 👈 Trigger onClosing when bottom sheet is dismissed
     }
   });
 }
@@ -838,5 +841,22 @@ Widget getImageAsset(imageUrl, height, width, {Color? color}) {
     width: width,
     color: color,
     fit: BoxFit.cover,
+  );
+}
+
+Widget buildSelectableRow(String title, bool isSelected) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        title,
+        style: TextStyle(
+          fontSize: 17.sp,
+          color: isSelected ? primaryColor : black,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        ),
+      ),
+      if (isSelected) Icon(Icons.check, color: primaryColor, size: 20.sp),
+    ],
   );
 }

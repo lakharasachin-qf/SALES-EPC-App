@@ -189,7 +189,7 @@ class DashboardController extends GetxController {
     districtListInt.clear();
     clusterListInt.clear();
 
-    // Set current year and month as default on reset
+    // // Set current year and month as default on reset
     final now = DateTime.now();
     final displayFormatted = dateFormat.format(now);
     final apiFormatted = apiDateFormat.format(now);
@@ -213,7 +213,6 @@ class DashboardController extends GetxController {
     );
 
     isStartDateSelected.value = true;
-
     startTimeModel.value = ValidationModel(null, null, isValidate: false);
     endTimeModel.value = ValidationModel(null, null, isValidate: false);
     districtModel.value = ValidationModel(null, null, isValidate: false);
@@ -318,7 +317,6 @@ class DashboardController extends GetxController {
         },
       ),
     );
-
     enableSubmitButton();
   }
 
@@ -534,6 +532,7 @@ class DashboardController extends GetxController {
   Future<void> getDashboardData(
     BuildContext context, {
     bool isFirstTime = false,
+    bool isApplyFilter = false,
     bool issearch = false,
     bool hideLoading = false,
   }) async {
@@ -549,7 +548,8 @@ class DashboardController extends GetxController {
       revenueVsTargets.value = null;
     }
 
-    if (isFirstTime) {
+    if (isFirstTime && !isApplyFilter) {
+      logcat("init", "Done");
       resetForm();
     }
 
