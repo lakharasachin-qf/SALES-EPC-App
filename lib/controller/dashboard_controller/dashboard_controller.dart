@@ -180,11 +180,6 @@ class DashboardController extends GetxController {
     clusterCtr.clear();
     searchDistrictCtr.clear();
     searchClusterCtr.clear();
-    startDate.value = '';
-    endDate.value = '';
-    startDateApi.value = '';
-    endDateApi.value = '';
-    selectedTarget.value = '';
     selectedDistrictId.value = '';
     selectedClusterId.value = '';
     isDistrictSelected.value = false;
@@ -194,11 +189,38 @@ class DashboardController extends GetxController {
     districtListInt.clear();
     clusterListInt.clear();
 
+    // Set current year and month as default on reset
+    final now = DateTime.now();
+    final displayFormatted = dateFormat.format(now);
+    final apiFormatted = apiDateFormat.format(now);
+
+    startDate.value = displayFormatted;
+    startDateApi.value = apiFormatted;
+    startTimeCtr.text = displayFormatted;
+    startTimeModel.value = ValidationModel(
+      displayFormatted,
+      null,
+      isValidate: true,
+    );
+
+    endDate.value = displayFormatted;
+    endDateApi.value = apiFormatted;
+    endTimeCtr.text = displayFormatted;
+    endTimeModel.value = ValidationModel(
+      displayFormatted,
+      null,
+      isValidate: true,
+    );
+
+    isStartDateSelected.value = true;
+
     startTimeModel.value = ValidationModel(null, null, isValidate: false);
     endTimeModel.value = ValidationModel(null, null, isValidate: false);
     districtModel.value = ValidationModel(null, null, isValidate: false);
     clusterModel.value = ValidationModel(null, null, isValidate: false);
     isFormInvalidate.value = false;
+
+    enableSubmitButton();
     update();
   }
 
@@ -282,11 +304,12 @@ class DashboardController extends GetxController {
     isClusterSelected.value = selectedClusterId.value.isNotEmpty;
     isStartDateSelected.value = startDate.value.isNotEmpty;
 
-    getFillterOptions(context);
-
     openBottomtsheetDialog(
       context,
       title: "Filter",
+      onClosing: () {
+        resetForm();
+      },
       widget: addFilterSheetWidget(
         context,
         ctr: this,
