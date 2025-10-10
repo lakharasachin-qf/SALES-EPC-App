@@ -442,11 +442,23 @@ class AddLeadsController extends GetxController {
   var filteredData = [].obs;
   RxString categoryId = "".obs;
   late bool locationFetched = true;
-
-  RxString selectedDgSyncValue =
-      ''.obs; // Stores the value (e.g., "1" or "0") for API
-  RxString selectedDgSyncLabel =
-      ''.obs; // Stores the label (e.g., "Yes" or "No") for display
+  // Add reactive variables for selection
+  RxString selectedRequiredSolutionTypeValue = ''.obs;
+  RxString selectedRequiredSolutionTypeLabel = ''.obs;
+  RxString selectedRequiredSolutionValue = ''.obs;
+  RxString selectedRequiredSolutionLabel = ''.obs;
+  RxString selectedLeadCategoryValue = ''.obs;
+  RxString selectedLeadCategoryLabel = ''.obs;
+  RxString selectedDgSyncValue = ''.obs; // Already present
+  RxString selectedDgSyncLabel = ''.obs; // Already present
+  RxString selectedVfdValue = ''.obs; // Already present
+  RxString selectedVfdLabel = ''.obs; // Already present
+  RxString selectedRoofNatureValue = ''.obs;
+  RxString selectedRoofNatureLabel = ''.obs;
+  RxString selectedFinancingTypeValue = ''.obs;
+  RxString selectedFinancingTypeLabel = ''.obs;
+  RxString selectedPurposeOfSolarisationValue = ''.obs;
+  RxString selectedPurposeOfSolarisationLabel = ''.obs;
 
   @override
   void onInit() {
@@ -1036,9 +1048,11 @@ class AddLeadsController extends GetxController {
               horizontalTitleGap: null,
               minLeadingWidth: 5,
               onTap: () {
-                requiredSolutionTypeCtr.text =
-                    filterRequiredSolutionTypeList[index].label;
-                validateRequiredSolutionType(requiredSolutionTypeCtr.text);
+                final selectedItem = filterRequiredSolutionTypeList[index];
+                requiredSolutionTypeCtr.text = selectedItem.label;
+                selectedRequiredSolutionTypeLabel.value = selectedItem.label;
+                selectedRequiredSolutionTypeValue.value = selectedItem.value;
+                validateRequiredSolutionType(selectedItem.value);
                 if (requiredSolutionTypeCtr.text.toString().isNotEmpty) {
                   filterRequiredSolutionTypeList.clear();
                   filterRequiredSolutionTypeList.addAll(
@@ -1115,9 +1129,11 @@ class AddLeadsController extends GetxController {
               horizontalTitleGap: null,
               minLeadingWidth: 5,
               onTap: () {
-                requiredSolutionCtr.text =
-                    filterRequiredSolutionList[index].label;
-                validateRequiredSolution(requiredSolutionCtr.text);
+                final selectedItem = filterRequiredSolutionList[index];
+                requiredSolutionCtr.text = selectedItem.label;
+                selectedRequiredSolutionLabel.value = selectedItem.label;
+                selectedRequiredSolutionValue.value = selectedItem.value;
+                validateRequiredSolution(selectedItem.value);
                 if (requiredSolutionCtr.text.toString().isNotEmpty) {
                   filterRequiredSolutionList.clear();
                   filterRequiredSolutionList.addAll(requiredSolutionList);
@@ -1192,8 +1208,11 @@ class AddLeadsController extends GetxController {
               horizontalTitleGap: null,
               minLeadingWidth: 5,
               onTap: () {
-                leadCategoryCtr.text = filterLeadCategoryList[index].label;
-                validateLeadCategory(leadCategoryCtr.text);
+                final selectedItem = filterLeadCategoryList[index];
+                leadCategoryCtr.text = selectedItem.label;
+                selectedLeadCategoryLabel.value = selectedItem.label;
+                selectedLeadCategoryValue.value = selectedItem.value;
+                validateLeadCategory(selectedItem.value);
                 if (leadCategoryCtr.text.toString().isNotEmpty) {
                   filterLeadCategoryList.clear();
                   filterLeadCategoryList.addAll(leadCategoryList);
@@ -1268,9 +1287,11 @@ class AddLeadsController extends GetxController {
               horizontalTitleGap: null,
               minLeadingWidth: 5,
               onTap: () {
-                purposeOfSolarizationCtr.text =
-                    filterPurposeOfSolarisationList[index].label;
-                validatePurposeOfSolarization(purposeOfSolarizationCtr.text);
+                final selectedItem = filterPurposeOfSolarisationList[index];
+                purposeOfSolarizationCtr.text = selectedItem.label;
+                selectedPurposeOfSolarisationLabel.value = selectedItem.label;
+                selectedPurposeOfSolarisationValue.value = selectedItem.value;
+                validatePurposeOfSolarization(selectedItem.value);
                 if (purposeOfSolarizationCtr.text.toString().isNotEmpty) {
                   filterPurposeOfSolarisationList.clear();
                   filterPurposeOfSolarisationList.addAll(
@@ -1348,8 +1369,11 @@ class AddLeadsController extends GetxController {
               horizontalTitleGap: null,
               minLeadingWidth: 5,
               onTap: () {
-                roofNatureCtr.text = filterRoofNatureList[index].label;
-                validateRoofNature(roofNatureCtr.text);
+                final selectedItem = filterRoofNatureList[index];
+                roofNatureCtr.text = selectedItem.label;
+                selectedRoofNatureLabel.value = selectedItem.label;
+                selectedRoofNatureValue.value = selectedItem.value;
+                validateRoofNature(selectedItem.value);
                 if (roofNatureCtr.text.toString().isNotEmpty) {
                   filterRoofNatureList.clear();
                   filterRoofNatureList.addAll(roofNatureList);
@@ -2707,43 +2731,77 @@ class AddLeadsController extends GetxController {
   Future<void> addLeadApi(BuildContext context) async {
     User? user = await UserPreferences().getSignInInfo();
     final body = <String, dynamic>{
+      // 'company_name': companyNameCtr.text.trim(),
+      // 'address': addressCtr.text.trim(),
+      // 'country': countryCtr.text.trim(),
+      // 'state': stateCtr.text.trim(),
+      // 'district': districtCtr.text.trim(),
+      // 'contact_person_name': personNameCtr.text.trim(),
+      // 'contact_person_mobile': personMobileCtr.text.trim(),
+      // 'latitude': latitudeCtr.text.trim(),
+      // 'longitude': longitudeCtr.text.trim(),
+      // 'required_solution_type': selectedRequiredSolutionTypeValue.value,
+      // 'required_solution': selectedRequiredSolutionValue.value,
+      // // 'lead_category': leadCategoryCtr.text.trim(),
+      // 'lead_category': selectedLeadCategoryValue.value,
+      // 'dg_capacity_kva': dgCapacityCtr.text.trim(),
+      // 'dg_sync_required': selectedDgSyncValue.value,
+      // 'curr_inst_solar_cap_kwp': installedSolarCapCtr.text.trim(),
+      // 'sanctioned_load_kva': sanctionedLoadCtr.text.trim(),
+      // 'vfd_required': selectedVfdValue.value,
+      // 'grid_availability_hrs': gridAvailabilityCtr.text.trim(),
+      // 'peak_monthly_energy_cons_kwh': peakMonthlyEnergyCtr.text.trim(),
+      // 'required_solar_cap_kwp': requiredSolarCapCtr.text.trim(),
+      // 'dist_to_nearest_transformer': distanceToTransformerCtr.text.trim(),
+      // 'rating_of_nearest_transformer_kva': ratingOfTransformerCtr.text.trim(),
+      // 'purpose_of_solarisation': purposeOfSolarizationCtr.text.trim(),
+      // 'dist_btw_inverter_acdb_panel_mtrs': distInverterACDBCtr.text.trim(),
+      // 'dist_btw_solar_acdb_panel_mtrs': distSolarACDBCtr.text.trim(),
+      // 'building_height': buildingHeightCtr.text.trim(),
+      // 'roof_size_length_ft': roofSizeLengthCtr.text.trim(),
+      // 'roof_size_breadth_ft': roofSizeBreadthCtr.text.trim(),
+      // 'roof_nature': roofNatureCtr.text.trim(),
+      // 'age_of_metal_sheet': ageOfMetalSheetCtr.text.trim(),
+      // 'ground_size_length_ft': groundSizeLengthCtr.text.trim(),
+      // 'ground_size_breadth_ft': groundSizeBreadthCtr.text.trim(),
+      // 'other_remarks': otherRemarksCtr.text.trim(),
+      // 'schedule_meeting': scheduleMeetingCtr.text.trim(),
+      // 'user_id': user != null ? user.userId : '',
       'company_name': companyNameCtr.text.trim(),
       'address': addressCtr.text.trim(),
-      'country': countryCtr.text.trim(),
-      'state': stateCtr.text.trim(),
-      'district': districtCtr.text.trim(),
+      'country': selectedCountryId.value,
+      'state': selectedStateId.value,
+      'district': selectedDistrictId.value,
       'contact_person_name': personNameCtr.text.trim(),
       'contact_person_mobile': personMobileCtr.text.trim(),
       'latitude': latitudeCtr.text.trim(),
       'longitude': longitudeCtr.text.trim(),
-      'required_solution_type': requiredSolutionTypeCtr.text
-          .toString()
-          .toLowerCase()
-          .trim(),
-      'required_solution': requiredSolutionCtr.text.trim(),
-      'lead_category': leadCategoryCtr.text.trim(),
+      'required_solution_type': selectedRequiredSolutionTypeValue.value,
+      'required_solution': selectedRequiredSolutionValue.value,
+      'lead_category': selectedLeadCategoryValue.value,
       'dg_capacity_kva': dgCapacityCtr.text.trim(),
-      'dg_sync_required': dgSyncCtr.text.trim(),
+      'dg_sync_required': selectedDgSyncValue.value,
       'curr_inst_solar_cap_kwp': installedSolarCapCtr.text.trim(),
       'sanctioned_load_kva': sanctionedLoadCtr.text.trim(),
-      'vfd_required': vfdCtr.text.trim(),
+      'vfd_required': selectedVfdValue.value,
       'grid_availability_hrs': gridAvailabilityCtr.text.trim(),
       'peak_monthly_energy_cons_kwh': peakMonthlyEnergyCtr.text.trim(),
       'required_solar_cap_kwp': requiredSolarCapCtr.text.trim(),
       'dist_to_nearest_transformer': distanceToTransformerCtr.text.trim(),
       'rating_of_nearest_transformer_kva': ratingOfTransformerCtr.text.trim(),
-      'purpose_of_solarisation': purposeOfSolarizationCtr.text.trim(),
+      'purpose_of_solarisation': selectedPurposeOfSolarisationValue.value,
       'dist_btw_inverter_acdb_panel_mtrs': distInverterACDBCtr.text.trim(),
       'dist_btw_solar_acdb_panel_mtrs': distSolarACDBCtr.text.trim(),
       'building_height': buildingHeightCtr.text.trim(),
       'roof_size_length_ft': roofSizeLengthCtr.text.trim(),
       'roof_size_breadth_ft': roofSizeBreadthCtr.text.trim(),
-      'roof_nature': roofNatureCtr.text.trim(),
+      'roof_nature': selectedRoofNatureValue.value,
       'age_of_metal_sheet': ageOfMetalSheetCtr.text.trim(),
       'ground_size_length_ft': groundSizeLengthCtr.text.trim(),
       'ground_size_breadth_ft': groundSizeBreadthCtr.text.trim(),
       'other_remarks': otherRemarksCtr.text.trim(),
-      'schedule_meeting': scheduleMeetingCtr.text.trim(),
+      // 'schedule_meeting': scheduleMeetingCtr.text.trim(),
+      'schedule_meeting': formatScheduleDate(scheduleMeetingCtr.text.trim()),
       'user_id': user != null ? user.userId : '',
     };
 
@@ -2777,6 +2835,7 @@ class AddLeadsController extends GetxController {
       apiEndPoint: ApiUrl.addLead,
       onResponse: (data) async {
         logcat('AddLeadApi', 'Response: $data');
+
         Get.snackbar(
           "Success",
           "Lead added successfully",
@@ -2786,7 +2845,7 @@ class AddLeadsController extends GetxController {
       state: state,
       message: message,
       networkManager: networkManager,
-      isModelResponse: true,
+      isModelResponse: false,
     );
   }
 

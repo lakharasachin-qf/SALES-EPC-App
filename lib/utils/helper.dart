@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:sales_app/componant/CustomSnakbar.dart';
 import 'package:sales_app/componant/dialogs/customDialog.dart';
 import 'package:sales_app/componant/dialogs/fullscreen.dart';
@@ -54,6 +55,15 @@ futureDelay(
         : Duration.zero,
     () => onPerform(),
   );
+}
+
+String formatScheduleDate(String dateStr) {
+  try {
+    final dateTime = DateTime.parse(dateStr);
+    return DateFormat("yyyy-MM-dd'T'HH:mm").format(dateTime);
+  } catch (e) {
+    return ""; // or handle invalid date
+  }
 }
 
 futureOrderDelay(Function onPerform) async {
