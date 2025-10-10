@@ -14,6 +14,7 @@ import 'package:sales_app/controller/leads_controller/add_leads_controller.dart'
 import 'package:sales_app/utils/buildDynamicTable.dart';
 import 'package:sales_app/utils/custom_stepper_widget.dart';
 import 'package:sales_app/utils/helper.dart';
+import 'package:sales_app/utils/log.dart';
 import 'package:sizer/sizer.dart';
 
 // Assuming CustomLinearStepper is in a separate file or included here
@@ -500,6 +501,10 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       controller.selectedDgSyncValue.value =
                                           selectedItem
                                               .value; // Update API value
+                                      logcat(
+                                        "dg_sync_required",
+                                        controller.selectedDgSyncValue.value,
+                                      );
                                     });
                                   }
                                 },
@@ -548,12 +553,37 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                               getLable("VFD Required"),
                               getReactiveDropdown(
                                 hint: "Select VFD",
-                                items: controller.vfd,
-                                selectedValue: controller.selectVfd,
+                                items: controller.filterVfdRequiredList
+                                    .map((item) => item.label)
+                                    .toList(), // Display labels
+                                selectedValue:
+                                    controller.selectedVfdLabel.value.isNotEmpty
+                                    ? controller.selectedVfdLabel.value
+                                    : null,
                                 onChanged: (value) {
-                                  setState(() {
-                                    controller.selectVfd = value!;
-                                  });
+                                  if (value != null) {
+                                    setState(() {
+                                      controller.selectedVfdLabel.value =
+                                          value; // Update displayed label
+                                      // Find the corresponding value based on the selected label
+                                      final selectedItem = controller
+                                          .vfdRequiredList
+                                          .firstWhere(
+                                            (item) => item.label == value,
+                                            orElse: () => controller
+                                                .vfdRequiredList
+                                                .first,
+                                          );
+                                      controller.selectedVfdValue.value =
+                                          selectedItem
+                                              .value; // Update API value
+                                      controller.vfdCtr.text =
+                                          value; // Update text controller
+                                      controller.validateVFD(
+                                        selectedItem.value,
+                                      ); // Validate with value
+                                    });
+                                  }
                                 },
                               ),
                               getDynamicSizedBox(height: 2.h),

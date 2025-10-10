@@ -523,7 +523,6 @@ class LeadController extends GetxController {
           isCustomerLoading(false);
         }
         showDialogForScreen(
-          // ignore: use_build_context_synchronously
           context,
           'Lead Screen',
           Connection.noConnection,
@@ -532,7 +531,6 @@ class LeadController extends GetxController {
         return;
       }
 
-      // final apiUrl = "${ApiUrl.leadList}?user_id=${1}&page=$page&per_page=1";
       final apiUrl =
           "${ApiUrl.leadList}?user_id=${userData?.userId ?? 1}&page=$page&per_page=10";
 
@@ -560,11 +558,22 @@ class LeadController extends GetxController {
             currentPage.value = model.result.meta.page;
             lastPage.value = model.result.meta.lastPage;
             totalItems.value = model.result.meta.total;
+            const int perPage = 10;
+            fromItem.value = (currentPage.value - 1) * perPage + 1;
+            toItem.value = currentPage.value * perPage > totalItems.value
+                ? totalItems.value
+                : currentPage.value * perPage;
+          } else {
+            // Handle empty data case
+            currentPage.value = 1;
+            lastPage.value = 1;
+            totalItems.value = 0;
+            fromItem.value = 0;
+            toItem.value = 0;
           }
         } else {
           message.value = responseData['message'];
           showDialogForScreen(
-            // ignore: use_build_context_synchronously
             context,
             'Lead Screen',
             responseData['message'],
@@ -575,7 +584,6 @@ class LeadController extends GetxController {
         state.value = ScreenState.apiError;
         message.value = APIResponseHandleText.serverError;
         showDialogForScreen(
-          // ignore: use_build_context_synchronously
           context,
           'Meter Screen',
           responseData['message'] ?? ServerError.servererror,
