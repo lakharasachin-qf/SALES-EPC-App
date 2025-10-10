@@ -2145,6 +2145,40 @@ class AddLeadsController extends GetxController {
                           bottom: 0,
                           child: InkWell(
                             onTap: () {
+                              // Clear all controllers
+                              deviceNameCtr.clear();
+                              categoryCtr.clear();
+                              powerCtr.clear();
+                              usageHrsCtr.clear();
+                              energyWhCtr.clear();
+                              energyKWhCtr.clear();
+
+                              // Reset validation models
+                              deviceNameModel.update((m) {
+                                m!.error = null;
+                                m.isValidate = true;
+                              });
+                              categoryModel.update((m) {
+                                m!.error = null;
+                                m.isValidate = true;
+                              });
+                              powerModel.update((m) {
+                                m!.error = null;
+                                m.isValidate = true;
+                              });
+                              usageHrsModel.update((m) {
+                                m!.error = null;
+                                m.isValidate = true;
+                              });
+                              energyWhModel.update((m) {
+                                m!.error = null;
+                                m.isValidate = true;
+                              });
+                              energyKWhModel.update((m) {
+                                m!.error = null;
+                                m.isValidate = true;
+                              });
+
                               Navigator.pop(context);
                             },
                             child: Container(
@@ -2248,6 +2282,9 @@ class AddLeadsController extends GetxController {
                                     } else if (double.tryParse(val) == null) {
                                       model!.error = "Enter valid power";
                                       model.isValidate = false;
+                                    } else if (double.parse(val) < 0) {
+                                      model!.error = "Power cannot be negative";
+                                      model.isValidate = false;
                                     } else {
                                       model!.error = null;
                                       model.isValidate = true;
@@ -2277,6 +2314,10 @@ class AddLeadsController extends GetxController {
                                       model.isValidate = false;
                                     } else if (double.tryParse(val) == null) {
                                       model!.error = "Enter valid usage hours";
+                                      model.isValidate = false;
+                                    } else if (double.parse(val) < 0) {
+                                      model!.error =
+                                          "Usage hours cannot be negative";
                                       model.isValidate = false;
                                     } else {
                                       model!.error = null;
