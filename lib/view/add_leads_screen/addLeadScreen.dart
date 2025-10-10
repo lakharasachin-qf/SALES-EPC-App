@@ -1083,7 +1083,11 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       }
                                       return getFormButton(
                                         context,
-                                        _onStepContinue,
+                                        () {
+                                          if (isNextEnabled == true) {
+                                            _onStepContinue();
+                                          }
+                                        },
                                         _currentStep == _steps.length - 1
                                             ? 'Submit'
                                             : 'Next',
