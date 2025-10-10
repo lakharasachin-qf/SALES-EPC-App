@@ -1661,8 +1661,8 @@ class AddLeadsController extends GetxController {
 
   void validateDGCapacity(String? val) {
     dgCapacityModel.update((model) {
-      if (val != null && val.isNotEmpty && double.tryParse(val) == null) {
-        model!.error = "Enter valid DG Capacity";
+      if (val != null && double.parse(val) < 0) {
+        model!.error = "DG Capacity cannot be negative";
         model.isValidate = false;
       } else {
         model!.error = null;
@@ -1687,10 +1687,16 @@ class AddLeadsController extends GetxController {
 
   void validateInstalledSolarCap(String? val) {
     installedSolarCapModel.update((model) {
-      if (val != null && val.isNotEmpty && double.tryParse(val) == null) {
-        model!.error = "Enter valid Installed Solar Capacity";
-        model.isValidate = false;
+      if (val != null && val.isNotEmpty) {
+        if (double.parse(val) < 0) {
+          model!.error = "Installed Solar Capacity cannot be negative";
+          model.isValidate = false;
+        } else {
+          model!.error = null;
+          model.isValidate = true;
+        }
       } else {
+        // Empty is allowed
         model!.error = null;
         model.isValidate = true;
       }
@@ -1700,8 +1706,10 @@ class AddLeadsController extends GetxController {
 
   void validateSanctionedLoad(String? val) {
     sanctionedLoadModel.update((model) {
-      if (val != null && val.isNotEmpty && double.tryParse(val) == null) {
-        model!.error = "Enter valid Sanctioned Load";
+      if (val != null &&
+          double.tryParse(val) != null &&
+          double.parse(val) < 0) {
+        model!.error = "Sanctioned Load cannot be negative";
         model.isValidate = false;
       } else {
         model!.error = null;
@@ -1726,9 +1734,15 @@ class AddLeadsController extends GetxController {
 
   void validateGridAvailability(String? val) {
     gridAvailabilityModel.update((model) {
-      if (val != null && val.isNotEmpty && double.tryParse(val) == null) {
-        model!.error = "Enter valid Grid Availability (hours)";
-        model.isValidate = false;
+      if (val != null && double.tryParse(val) != null) {
+        double value = double.parse(val);
+        if (value < 0 || value > 24) {
+          model!.error = "Grid Availability must be between 0 and 24";
+          model.isValidate = false;
+        } else {
+          model!.error = null;
+          model.isValidate = true;
+        }
       } else {
         model!.error = null;
         model.isValidate = true;
@@ -1739,11 +1753,10 @@ class AddLeadsController extends GetxController {
 
   void validatePeakMonthlyEnergy(String? val) {
     peakMonthlyEnergyModel.update((model) {
-      if (val == null || val.trim().isEmpty) {
-        model!.error = "Enter Peak Monthly Energy";
-        model.isValidate = false;
-      } else if (double.tryParse(val) == null) {
-        model!.error = "Enter valid Peak Monthly Energy (kWh)";
+      if (val != null &&
+          double.tryParse(val) != null &&
+          double.parse(val) < 0) {
+        model!.error = "Peak Monthly Energy cannot be negative";
         model.isValidate = false;
       } else {
         model!.error = null;
@@ -1755,11 +1768,10 @@ class AddLeadsController extends GetxController {
 
   void validateRequiredSolarCap(String? val) {
     requiredSolarCapModel.update((model) {
-      if (val == null || val.trim().isEmpty) {
-        model!.error = "Enter Required Solar Cap";
-        model.isValidate = false;
-      } else if (double.tryParse(val) == null) {
-        model!.error = "Enter valid Required Solar Cap (kWp)";
+      if (val != null &&
+          double.tryParse(val) != null &&
+          double.parse(val) < 0) {
+        model!.error = "Required Solar Capacity cannot be negative";
         model.isValidate = false;
       } else {
         model!.error = null;
@@ -1771,11 +1783,10 @@ class AddLeadsController extends GetxController {
 
   void validateDistanceToTransformer(String? val) {
     distanceToTransformerModel.update((model) {
-      if (val == null || val.trim().isEmpty) {
-        model!.error = "Enter Distance to Nearest Transformer";
-        model.isValidate = false;
-      } else if (double.tryParse(val) == null) {
-        model!.error = "Enter valid distance (Mtrs)";
+      if (val != null &&
+          double.tryParse(val) != null &&
+          double.parse(val) < 0) {
+        model!.error = "Distance cannot be negative";
         model.isValidate = false;
       } else {
         model!.error = null;
@@ -1787,11 +1798,10 @@ class AddLeadsController extends GetxController {
 
   void validateRatingOfTransformer(String? val) {
     ratingOfTransformerModel.update((model) {
-      if (val == null || val.trim().isEmpty) {
-        model!.error = "Enter Rating of Nearest Transformer";
-        model.isValidate = false;
-      } else if (double.tryParse(val) == null) {
-        model!.error = "Enter valid rating (kVA)";
+      if (val != null &&
+          double.tryParse(val) != null &&
+          double.parse(val) < 0) {
+        model!.error = "Rating cannot be negative";
         model.isValidate = false;
       } else {
         model!.error = null;
@@ -1816,11 +1826,10 @@ class AddLeadsController extends GetxController {
 
   void validateDistInverterACDB(String? val) {
     distInverterACDBModel.update((model) {
-      if (val == null || val.trim().isEmpty) {
-        model!.error = "Enter Distance Inverter & ACDB Panel";
-        model.isValidate = false;
-      } else if (double.tryParse(val) == null) {
-        model!.error = "Enter valid distance (Mtrs)";
+      if (val != null &&
+          double.tryParse(val) != null &&
+          double.parse(val) < 0) {
+        model!.error = "Distance cannot be negative";
         model.isValidate = false;
       } else {
         model!.error = null;
@@ -1832,11 +1841,10 @@ class AddLeadsController extends GetxController {
 
   void validateDistSolarACDB(String? val) {
     distSolarACDBModel.update((model) {
-      if (val == null || val.trim().isEmpty) {
-        model!.error = "Enter Distance Solar & ACDB Panel";
-        model.isValidate = false;
-      } else if (double.tryParse(val) == null) {
-        model!.error = "Enter valid distance (Mtrs)";
+      if (val != null &&
+          double.tryParse(val) != null &&
+          double.parse(val) < 0) {
+        model!.error = "Distance cannot be negative";
         model.isValidate = false;
       } else {
         model!.error = null;
@@ -1848,12 +1856,15 @@ class AddLeadsController extends GetxController {
 
   void validateBuildingHeight(String? val) {
     buildingHeightModel.update((model) {
-      if (val == null || val.trim().isEmpty) {
-        model!.error = "Enter Building Height";
-        model.isValidate = false;
-      } else if (int.tryParse(val) == null) {
-        model!.error = "Enter valid number of floors";
-        model.isValidate = false;
+      if (val != null && int.tryParse(val) != null) {
+        int value = int.parse(val);
+        if (value < 1) {
+          model!.error = "Building height must be at least 1 floor";
+          model.isValidate = false;
+        } else {
+          model!.error = null;
+          model.isValidate = true;
+        }
       } else {
         model!.error = null;
         model.isValidate = true;
@@ -1864,11 +1875,10 @@ class AddLeadsController extends GetxController {
 
   void validateRoofSizeLength(String? val) {
     roofSizeLengthModel.update((model) {
-      if (val == null || val.trim().isEmpty) {
-        model!.error = "Enter Roof Size Length";
-        model.isValidate = false;
-      } else if (double.tryParse(val) == null) {
-        model!.error = "Enter valid length (ft)";
+      if (val != null &&
+          double.tryParse(val) != null &&
+          double.parse(val) < 0) {
+        model!.error = "Roof size length cannot be negative";
         model.isValidate = false;
       } else {
         model!.error = null;
@@ -1880,11 +1890,10 @@ class AddLeadsController extends GetxController {
 
   void validateRoofSizeBreadth(String? val) {
     roofSizeBreadthModel.update((model) {
-      if (val == null || val.trim().isEmpty) {
-        model!.error = "Enter Roof Size Breadth";
-        model.isValidate = false;
-      } else if (double.tryParse(val) == null) {
-        model!.error = "Enter valid breadth (ft)";
+      if (val != null &&
+          double.tryParse(val) != null &&
+          double.parse(val) < 0) {
+        model!.error = "Roof size breadth cannot be negative";
         model.isValidate = false;
       } else {
         model!.error = null;
@@ -1909,11 +1918,10 @@ class AddLeadsController extends GetxController {
 
   void validateAgeOfMetalSheet(String? val) {
     ageOfMetalSheetModel.update((model) {
-      if (val == null || val.trim().isEmpty) {
-        model!.error = "Enter Age of Metal Sheet";
-        model.isValidate = false;
-      } else if (double.tryParse(val) == null) {
-        model!.error = "Enter valid age (years)";
+      if (val != null &&
+          double.tryParse(val) != null &&
+          double.parse(val) < 0) {
+        model!.error = "Age of metal sheet cannot be negative";
         model.isValidate = false;
       } else {
         model!.error = null;
@@ -1925,11 +1933,10 @@ class AddLeadsController extends GetxController {
 
   void validateGroundSizeLength(String? val) {
     groundSizeLengthModel.update((model) {
-      if (val == null || val.trim().isEmpty) {
-        model!.error = "Enter Ground Size Length";
-        model.isValidate = false;
-      } else if (double.tryParse(val) == null) {
-        model!.error = "Enter valid length (ft)";
+      if (val != null &&
+          double.tryParse(val) != null &&
+          double.parse(val) < 0) {
+        model!.error = "Ground size length cannot be negative";
         model.isValidate = false;
       } else {
         model!.error = null;
@@ -1941,11 +1948,10 @@ class AddLeadsController extends GetxController {
 
   void validateGroundSizeBreadth(String? val) {
     groundSizeBreadthModel.update((model) {
-      if (val == null || val.trim().isEmpty) {
-        model!.error = "Enter Ground Size Breadth";
-        model.isValidate = false;
-      } else if (double.tryParse(val) == null) {
-        model!.error = "Enter valid breadth (ft)";
+      if (val != null &&
+          double.tryParse(val) != null &&
+          double.parse(val) < 0) {
+        model!.error = "Ground size breadth cannot be negative";
         model.isValidate = false;
       } else {
         model!.error = null;

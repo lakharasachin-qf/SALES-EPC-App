@@ -15,7 +15,7 @@ import 'package:sales_app/utils/log.dart';
 import 'package:sales_app/view/dashboard_screen/widgets/dashboard_widgets.dart';
 import 'package:sales_app/view/dashboard_screen/widgets/widgets.dart';
 import 'package:sizer/sizer.dart';
- 
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart' hide ScreenType;
 import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
@@ -299,6 +300,10 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   },
                                   inputType: TextInputType.phone,
                                   formType: FieldType.mobile,
+                                  inputFormatters: [
+                                    LengthLimitingTextInputFormatter(10),
+                                  ],
+
                                   wantSuffix: false,
                                   errorText:
                                       controller.personMobileModel.value.error,
@@ -598,6 +603,10 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.mobile,
+                                  inputFormatters: [
+                                    LengthLimitingTextInputFormatter(2),
+                                  ],
+
                                   wantSuffix: false,
                                   errorText: controller
                                       .gridAvailabilityModel
@@ -615,7 +624,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.peakMonthlyEnergyCtr,
                                   hintLabel: "Enter Peak Monthly Energy Cons",
                                   onChanged: (val) {
-                                    // controller.validatePeakMonthlyEnergy(val);
+                                    controller.validatePeakMonthlyEnergy(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -634,7 +643,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.requiredSolarCapCtr,
                                   hintLabel: "Enter Required Solar Cap",
                                   onChanged: (val) {
-                                    // controller.validateRequiredSolarCap(val);
+                                    controller.validateRequiredSolarCap(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -657,9 +666,9 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   hintLabel:
                                       "Enter Distance to Nearest Transformer",
                                   onChanged: (val) {
-                                    // controller.validateDistanceToTransformer(
-                                    //   val,
-                                    // );
+                                    controller.validateDistanceToTransformer(
+                                      val,
+                                    );
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -679,7 +688,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   hintLabel:
                                       "Enter Rating of Nearest Transformer",
                                   onChanged: (val) {
-                                    // controller.validateRatingOfTransformer(val);
+                                    controller.validateRatingOfTransformer(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -739,7 +748,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   hintLabel:
                                       "Enter Dist. Inverter & ACDB Panel",
                                   onChanged: (val) {
-                                    // controller.validateDistInverterACDB(val);
+                                    controller.validateDistInverterACDB(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -759,7 +768,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   hintLabel:
                                       "Enter Dist. Solar & ACDB Panel (Mtrs)",
                                   onChanged: (val) {
-                                    // controller.validateDistSolarACDB(val);
+                                    controller.validateDistSolarACDB(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -776,7 +785,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.buildingHeightCtr,
                                   hintLabel: "Enter Building Height (Floors)",
                                   onChanged: (val) {
-                                    // controller.validateBuildingHeight(val);
+                                    controller.validateBuildingHeight(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -795,7 +804,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.roofSizeLengthCtr,
                                   hintLabel: "Enter Roof Size Length",
                                   onChanged: (val) {
-                                    // controller.validateRoofSizeLength(val);
+                                    controller.validateRoofSizeLength(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -814,7 +823,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.roofSizeBreadthCtr,
                                   hintLabel: "Enter Roof Size Breadth",
                                   onChanged: (val) {
-                                    // controller.validateRoofSizeBreadth(val);
+                                    controller.validateRoofSizeBreadth(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -864,7 +873,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.ageOfMetalSheetCtr,
                                   hintLabel: "Enter Age of Metal Sheet",
                                   onChanged: (val) {
-                                    // controller.validateAgeOfMetalSheet(val);
+                                    controller.validateAgeOfMetalSheet(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -883,7 +892,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.groundSizeLengthCtr,
                                   hintLabel: "Enter Ground Size Length",
                                   onChanged: (val) {
-                                    // controller.validateGroundSizeLength(val);
+                                    controller.validateGroundSizeLength(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -902,7 +911,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.groundSizeBreadthCtr,
                                   hintLabel: "Enter Ground Size Breadth",
                                   onChanged: (val) {
-                                    // controller.validateGroundSizeBreadth(val);
+                                    controller.validateGroundSizeBreadth(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
