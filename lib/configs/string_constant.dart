@@ -153,9 +153,17 @@ class ServerError {
 
 class Button {
   static const continues = 'Continue';
-
+  static const cancel = 'Cancel';
   static const login = 'Login';
   static const register = 'Register';
+}
+
+class LocationsDialog {
+  static const servicesDisabled = 'Location Services Disabled';
+  static const permissionRequired = 'Location Permission Required';
+  static const enableLocation =
+      'Location services are disabled on your device. Please enable them to access your current location.';
+  static const grantLocation = 'Please grant location permission to continue.';
 }
 
 class BottomConstant {

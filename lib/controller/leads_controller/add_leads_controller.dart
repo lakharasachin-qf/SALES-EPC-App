@@ -16,12 +16,14 @@ import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
+import 'package:sales_app/models/LeadDropDownListModel.dart';
 import 'package:sales_app/models/LoadElement.dart';
 import 'package:sales_app/models/LocationModel.dart';
 import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
 import 'package:sales_app/preference/UserPreference.dart';
 import 'package:sales_app/utils/enum.dart';
+import 'package:sales_app/utils/helper.dart';
 import 'package:sales_app/utils/log.dart';
 import 'package:sizer/sizer.dart';
 
@@ -56,6 +58,7 @@ class AddLeadsController extends GetxController {
   final ScrollController scrollController = ScrollController();
   RxBool isDesignationApiCallLoading = false.obs;
   RxBool isCountryApiCallLoading = false.obs;
+  RxBool isResoltuinSolutonTypeApiCallLoading = false.obs;
   RxBool isStateApiCallLoading = false.obs;
   RxBool isDistrictApiCallLoading = false.obs;
   RxBool isAddOnApiCallLoading = false.obs;
@@ -70,15 +73,54 @@ class AddLeadsController extends GetxController {
   RxBool isDynamicDesignationApiCallLoading = false.obs;
   var productDetailList = <LoadElement>[].obs;
   var fileList = <UploadFile>[].obs;
-  var roofNature = <String>['Usa', 'India'].obs;
+  var roofNature = <String>[
+    'Concrete',
+    'Metal',
+    'Tile',
+    'Asbestos',
+    'Flat',
+    'Sloped',
+  ].obs;
   var countryList = <String>['Usa', 'India'].obs;
-  var requiredSolutuionList = <String>['Usa', 'India'].obs;
-  var solutuionList = <String>['Usa', 'India'].obs;
-  var leadCategoryList = <String>['Usa', 'India'].obs;
+  var requiredSolutuionList = <String>['Ongrid', 'Offgrid'].obs;
+  var solutuionList = <String>[
+    'Solar Power',
+    'Wind Power',
+    'Battery Storage',
+    'Grid-Tied Inverter',
+    'Microgrid',
+  ].obs;
+
+  // var leadCategoryList = <String>[
+  //   'Residential',
+  //   'Commercial',
+  //   'Industrial',
+  //   'Agricultural',
+  //   'Institutional',
+  // ].obs;
   var stateList = <String>['Usa', 'India'].obs;
   var districtList = <String>['Usa', 'India'].obs;
   DateTime? selectedDateTime;
   final RxString startDate = ''.obs;
+
+  // Observable lists for dynamic dropdowns
+  var requiredSolutionTypeList = <DgSyncRequired>[].obs;
+  var requiredSolutionList = <DgSyncRequired>[].obs;
+  var leadCategoryList = <DgSyncRequired>[].obs;
+  var dgSyncRequiredList = <DgSyncRequired>[].obs;
+  var vfdRequiredList = <DgSyncRequired>[].obs;
+  var roofNatureList = <DgSyncRequired>[].obs;
+  var financingTypeList = <DgSyncRequired>[].obs;
+  var filterPurposeOfSolarisationList = <DgSyncRequired>[].obs;
+  var purposeOfSolarisationList = <DgSyncRequired>[].obs;
+
+  var filterRequiredSolutionTypeList = <DgSyncRequired>[].obs;
+  var filterRequiredSolutionList = <DgSyncRequired>[].obs;
+  var filterLeadCategoryList = <DgSyncRequired>[].obs;
+  var filterDgSyncRequiredList = <DgSyncRequired>[].obs;
+  var filterVfdRequiredList = <DgSyncRequired>[].obs;
+  var filterRoofNatureList = <DgSyncRequired>[].obs;
+  var filterFinancingTypeList = <DgSyncRequired>[].obs;
 
   // RxList<Cluster> districtList = <Cluster>[].obs;
 
@@ -172,6 +214,7 @@ class AddLeadsController extends GetxController {
       distanceToTransformerCtr,
       ratingOfTransformerCtr,
       purposeOfSolarizationCtr,
+      searchPurposeOfSolarizationCtr,
       distInverterACDBCtr,
       distSolarACDBCtr,
       buildingHeightCtr,
@@ -182,7 +225,11 @@ class AddLeadsController extends GetxController {
       groundSizeLengthCtr,
       groundSizeBreadthCtr,
       otherRemarksCtr,
-      scheduleMeetingCtr;
+      scheduleMeetingCtr,
+      searchLeadCategoryCtr,
+      searchRequiredSolutionTypeCtr,
+      searchRequiredSolutionCtr,
+      searchRoofNatureCtr;
 
   // FocusNodes
   late FocusNode companyNameNode,
@@ -211,6 +258,7 @@ class AddLeadsController extends GetxController {
       distanceToTransformerNode,
       ratingOfTransformerNode,
       purposeOfSolarizationNode,
+      searchPurposeOfSolarizationNode,
       distInverterACDBNode,
       distSolarACDBNode,
       buildHeightNode,
@@ -221,7 +269,11 @@ class AddLeadsController extends GetxController {
       groundSizeLengthNode,
       groundSizeBreadthNode,
       otherRemarksNode,
-      scheduleMeetingNode;
+      scheduleMeetingNode,
+      searchLeadCategoryNode,
+      searchRequiredSolutionTypeNode,
+      searchRequiredSolutionNode,
+      searchRoofNatureNode;
 
   // Validation Models
   var companyNameModel = ValidationModel(null, null, isValidate: false).obs;
@@ -389,6 +441,12 @@ class AddLeadsController extends GetxController {
   var currentFilterSource = [].obs;
   var filteredData = [].obs;
   RxString categoryId = "".obs;
+  late bool locationFetched = true;
+
+  RxString selectedDgSyncValue =
+      ''.obs; // Stores the value (e.g., "1" or "0") for API
+  RxString selectedDgSyncLabel =
+      ''.obs; // Stores the label (e.g., "Yes" or "No") for display
 
   @override
   void onInit() {
@@ -419,6 +477,7 @@ class AddLeadsController extends GetxController {
     distanceToTransformerCtr = TextEditingController();
     ratingOfTransformerCtr = TextEditingController();
     purposeOfSolarizationCtr = TextEditingController();
+    searchPurposeOfSolarizationCtr = TextEditingController();
     distInverterACDBCtr = TextEditingController();
     distSolarACDBCtr = TextEditingController();
     buildingHeightCtr = TextEditingController();
@@ -430,6 +489,16 @@ class AddLeadsController extends GetxController {
     groundSizeBreadthCtr = TextEditingController();
     otherRemarksCtr = TextEditingController();
     scheduleMeetingCtr = TextEditingController();
+
+    searchLeadCategoryCtr = TextEditingController();
+    searchRequiredSolutionTypeCtr = TextEditingController();
+    searchRequiredSolutionCtr = TextEditingController();
+    searchRoofNatureCtr = TextEditingController();
+
+    searchLeadCategoryNode = FocusNode();
+    searchRequiredSolutionTypeNode = FocusNode();
+    searchRequiredSolutionNode = FocusNode();
+    searchRoofNatureNode = FocusNode();
 
     // Dynamic
     deviceNameCtr = TextEditingController();
@@ -471,6 +540,7 @@ class AddLeadsController extends GetxController {
     distanceToTransformerNode = FocusNode();
     ratingOfTransformerNode = FocusNode();
     purposeOfSolarizationNode = FocusNode();
+    searchPurposeOfSolarizationNode = FocusNode();
     distInverterACDBNode = FocusNode();
     distSolarACDBNode = FocusNode();
     buildHeightNode = FocusNode();
@@ -578,6 +648,7 @@ class AddLeadsController extends GetxController {
     distanceToTransformerNode.dispose();
     ratingOfTransformerNode.dispose();
     purposeOfSolarizationNode.dispose();
+    searchPurposeOfSolarizationNode.dispose();
     distInverterACDBNode.dispose();
     distSolarACDBNode.dispose();
     buildHeightNode.dispose();
@@ -599,7 +670,38 @@ class AddLeadsController extends GetxController {
     uploadCategoryNode.dispose();
     searchUploadCategoryNode.dispose();
 
+    searchLeadCategoryCtr.dispose();
+    searchRequiredSolutionTypeCtr.dispose();
+    searchRequiredSolutionCtr.dispose();
+    searchRoofNatureCtr.dispose();
+
+    searchLeadCategoryNode.dispose();
+    searchRequiredSolutionTypeNode.dispose();
+    searchRequiredSolutionNode.dispose();
+    searchRoofNatureNode.dispose();
+
     super.dispose();
+  }
+
+  getLatLongData(BuildContext context, bool locationFetched) {
+    fetchLocationTracking(
+      context,
+      (isFromLocation) {
+        if (locationFetched == true) {
+          this.locationFetched = isFromLocation;
+        }
+        logcat("locationFetched::", locationFetched.toString());
+      },
+      getLatLongData: (lat, long, location) {
+        logcat("Latitude", lat.toString());
+        logcat("Longitude", long.toString());
+        latitudeCtr.text = lat;
+        longitudeCtr.text = long;
+        validateLatitude(latitudeCtr.text);
+        validateLongitude(longitudeCtr.text);
+        update();
+      },
+    );
   }
 
   // Dialog for State List
@@ -905,61 +1007,60 @@ class AddLeadsController extends GetxController {
     update();
   }
 
-  // Dialog for Required Solution Type
   Widget setRequiredSolutionTypeListDialog() {
     return Obx(() {
-      if (isCountryApiCallLoading.value == true) {
+      if (isResoltuinSolutonTypeApiCallLoading.value) {
         return setDropDownContent(
           [].obs,
           const Text(SearchScreenConstant.loading),
-          isApiIsLoading: isCountryApiCallLoading.value,
+          isApiIsLoading: isResoltuinSolutonTypeApiCallLoading.value,
         );
       }
       return setDropDownContent(
-        requiredSolutuionList,
+        filterRequiredSolutionTypeList,
         controller: requiredSolutionTypeCtr,
         noDataLable: "No Solution Type",
         ListView.builder(
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          itemCount: requiredSolutuionList.length,
+          itemCount: filterRequiredSolutionTypeList.length,
           itemBuilder: (BuildContext context, int index) {
-            return Column(
-              children: [
-                ListTile(
-                  dense: true,
-                  visualDensity: const VisualDensity(
-                    horizontal: 0,
-                    vertical: -4,
-                  ),
-                  contentPadding: const EdgeInsets.only(
-                    left: 0.0,
-                    right: 0.0,
-                    top: 0.0,
-                  ),
-                  horizontalTitleGap: null,
-                  minLeadingWidth: 5,
-                  onTap: () async {
-                    requiredSolutionTypeCtr.text = requiredSolutuionList[index];
-                    validateRequiredSolutionType(requiredSolutionTypeCtr.text);
-                    Get.back();
-                  },
-                  title: Text(
-                    requiredSolutuionList[index],
-                    style: TextStyle(fontSize: 17.sp),
-                  ),
-                ),
-              ],
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                requiredSolutionTypeCtr.text =
+                    filterRequiredSolutionTypeList[index].label;
+                validateRequiredSolutionType(requiredSolutionTypeCtr.text);
+                if (requiredSolutionTypeCtr.text.toString().isNotEmpty) {
+                  filterRequiredSolutionTypeList.clear();
+                  filterRequiredSolutionTypeList.addAll(
+                    requiredSolutionTypeList,
+                  );
+                }
+                Get.back();
+              },
+              title: buildSelectableRow(
+                filterRequiredSolutionTypeList[index].label,
+                filterRequiredSolutionTypeList[index].label.trim() ==
+                    requiredSolutionTypeCtr.text.trim(),
+              ),
             );
           },
         ),
         searchcontent: getReactiveFormField(
           node: requiredSolutionTypeNode,
-          controller: requiredSolutionTypeCtr,
+          controller: searchRequiredSolutionTypeCtr, // New search controller
           hintLabel: SearchScreenConstant.hint,
           onChanged: (val) {
             applyFilterForRequiredSolutionType(val.toString());
-            update();
           },
           isSearch: true,
           inputType: TextInputType.text,
@@ -970,15 +1071,14 @@ class AddLeadsController extends GetxController {
   }
 
   void applyFilterForRequiredSolutionType(String keyword) {
-    requiredSolutuionList.clear();
     if (keyword.isEmpty) {
-      requiredSolutuionList.addAll(['Usa', 'India']); // Mock data
+      filterRequiredSolutionTypeList.assignAll(requiredSolutionTypeList);
     } else {
-      requiredSolutuionList.addAll(
-        ['Usa', 'India']
+      filterRequiredSolutionTypeList.assignAll(
+        requiredSolutionTypeList
             .where(
-              (solution) =>
-                  solution.toLowerCase().contains(keyword.toLowerCase()),
+              (item) =>
+                  item.label.toLowerCase().contains(keyword.toLowerCase()),
             )
             .toList(),
       );
@@ -986,10 +1086,9 @@ class AddLeadsController extends GetxController {
     update();
   }
 
-  // Dialog for Required Solution
   Widget setRequiredSolutionListDialog() {
     return Obx(() {
-      if (isCountryApiCallLoading.value == true) {
+      if (isCountryApiCallLoading.value) {
         return setDropDownContent(
           [].obs,
           const Text(SearchScreenConstant.loading),
@@ -997,51 +1096,48 @@ class AddLeadsController extends GetxController {
         );
       }
       return setDropDownContent(
-        solutuionList,
+        filterRequiredSolutionList,
         controller: requiredSolutionCtr,
         noDataLable: "No Solution",
         ListView.builder(
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          itemCount: solutuionList.length,
+          itemCount: filterRequiredSolutionList.length,
           itemBuilder: (BuildContext context, int index) {
-            return Column(
-              children: [
-                ListTile(
-                  dense: true,
-                  visualDensity: const VisualDensity(
-                    horizontal: 0,
-                    vertical: -4,
-                  ),
-                  contentPadding: const EdgeInsets.only(
-                    left: 0.0,
-                    right: 0.0,
-                    top: 0.0,
-                  ),
-                  horizontalTitleGap: null,
-                  minLeadingWidth: 5,
-
-                  onTap: () async {
-                    requiredSolutionCtr.text = solutuionList[index];
-                    validateRequiredSolution(requiredSolutionCtr.text);
-                    Get.back();
-                  },
-                  title: Text(
-                    solutuionList[index],
-                    style: TextStyle(fontSize: 17.sp),
-                  ),
-                ),
-              ],
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                requiredSolutionCtr.text =
+                    filterRequiredSolutionList[index].label;
+                validateRequiredSolution(requiredSolutionCtr.text);
+                if (requiredSolutionCtr.text.toString().isNotEmpty) {
+                  filterRequiredSolutionList.clear();
+                  filterRequiredSolutionList.addAll(requiredSolutionList);
+                }
+                Get.back();
+              },
+              title: buildSelectableRow(
+                filterRequiredSolutionList[index].label,
+                filterRequiredSolutionList[index].label.trim() ==
+                    requiredSolutionCtr.text.trim(),
+              ),
             );
           },
         ),
         searchcontent: getReactiveFormField(
           node: requiredSolutionNode,
-          controller: requiredSolutionCtr,
+          controller: searchRequiredSolutionCtr, // New search controller
           hintLabel: SearchScreenConstant.hint,
           onChanged: (val) {
             applyFilterForRequiredSolution(val.toString());
-            update();
           },
           isSearch: true,
           inputType: TextInputType.text,
@@ -1052,15 +1148,14 @@ class AddLeadsController extends GetxController {
   }
 
   void applyFilterForRequiredSolution(String keyword) {
-    solutuionList.clear();
     if (keyword.isEmpty) {
-      solutuionList.addAll(['Usa', 'India']); // Mock data
+      filterRequiredSolutionList.assignAll(requiredSolutionList);
     } else {
-      solutuionList.addAll(
-        ['Usa', 'India']
+      filterRequiredSolutionList.assignAll(
+        requiredSolutionList
             .where(
-              (solution) =>
-                  solution.toLowerCase().contains(keyword.toLowerCase()),
+              (item) =>
+                  item.label.toLowerCase().contains(keyword.toLowerCase()),
             )
             .toList(),
       );
@@ -1068,10 +1163,9 @@ class AddLeadsController extends GetxController {
     update();
   }
 
-  // Dialog for Lead Category
   Widget setLeadCategoryListDialog() {
     return Obx(() {
-      if (isCountryApiCallLoading.value == true) {
+      if (isCountryApiCallLoading.value) {
         return setDropDownContent(
           [].obs,
           const Text(SearchScreenConstant.loading),
@@ -1079,50 +1173,47 @@ class AddLeadsController extends GetxController {
         );
       }
       return setDropDownContent(
-        leadCategoryList,
+        filterLeadCategoryList,
         controller: leadCategoryCtr,
         noDataLable: "No Lead Category",
         ListView.builder(
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          itemCount: leadCategoryList.length,
+          itemCount: filterLeadCategoryList.length,
           itemBuilder: (BuildContext context, int index) {
-            return Column(
-              children: [
-                ListTile(
-                  dense: true,
-                  visualDensity: const VisualDensity(
-                    horizontal: 0,
-                    vertical: -4,
-                  ),
-                  contentPadding: const EdgeInsets.only(
-                    left: 0.0,
-                    right: 0.0,
-                    top: 0.0,
-                  ),
-                  horizontalTitleGap: null,
-                  minLeadingWidth: 5,
-                  onTap: () async {
-                    leadCategoryCtr.text = leadCategoryList[index];
-                    validateLeadCategory(leadCategoryCtr.text);
-                    Get.back();
-                  },
-                  title: Text(
-                    leadCategoryList[index],
-                    style: TextStyle(fontSize: 17.sp),
-                  ),
-                ),
-              ],
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                leadCategoryCtr.text = filterLeadCategoryList[index].label;
+                validateLeadCategory(leadCategoryCtr.text);
+                if (leadCategoryCtr.text.toString().isNotEmpty) {
+                  filterLeadCategoryList.clear();
+                  filterLeadCategoryList.addAll(leadCategoryList);
+                }
+                Get.back();
+              },
+              title: buildSelectableRow(
+                filterLeadCategoryList[index].label,
+                filterLeadCategoryList[index].label.trim() ==
+                    leadCategoryCtr.text.trim(),
+              ),
             );
           },
         ),
         searchcontent: getReactiveFormField(
           node: leadCategoryNode,
-          controller: leadCategoryCtr,
+          controller: searchLeadCategoryCtr,
           hintLabel: SearchScreenConstant.hint,
           onChanged: (val) {
             applyFilterForLeadCategory(val.toString());
-            update();
           },
           isSearch: true,
           inputType: TextInputType.text,
@@ -1133,15 +1224,14 @@ class AddLeadsController extends GetxController {
   }
 
   void applyFilterForLeadCategory(String keyword) {
-    leadCategoryList.clear();
     if (keyword.isEmpty) {
-      leadCategoryList.addAll(['Usa', 'India']); // Mock data
+      filterLeadCategoryList.assignAll(leadCategoryList);
     } else {
-      leadCategoryList.addAll(
-        ['Usa', 'India']
+      filterLeadCategoryList.assignAll(
+        leadCategoryList
             .where(
-              (category) =>
-                  category.toLowerCase().contains(keyword.toLowerCase()),
+              (item) =>
+                  item.label.toLowerCase().contains(keyword.toLowerCase()),
             )
             .toList(),
       );
@@ -1149,10 +1239,9 @@ class AddLeadsController extends GetxController {
     update();
   }
 
-  // Dialog for Purpose of Solarization
-  Widget setPurposeOfSolarizationListDialog() {
+  Widget setPurposeOfSolarisationListDialog() {
     return Obx(() {
-      if (isCountryApiCallLoading.value == true) {
+      if (isCountryApiCallLoading.value) {
         return setDropDownContent(
           [].obs,
           const Text(SearchScreenConstant.loading),
@@ -1160,52 +1249,50 @@ class AddLeadsController extends GetxController {
         );
       }
       return setDropDownContent(
-        roofNature, // Assuming this list is used for Purpose of Solarization
+        filterPurposeOfSolarisationList,
         controller: purposeOfSolarizationCtr,
-        noDataLable: "No Purpose",
+        noDataLable: "No Purpose of Solarisation",
         ListView.builder(
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          itemCount: roofNature.length,
+          itemCount: filterPurposeOfSolarisationList.length,
           itemBuilder: (BuildContext context, int index) {
-            return Column(
-              children: [
-                ListTile(
-                  dense: true,
-                  visualDensity: const VisualDensity(
-                    horizontal: 0,
-                    vertical: -4,
-                  ),
-                  contentPadding: const EdgeInsets.only(
-                    left: 0.0,
-                    right: 0.0,
-                    top: 0.0,
-                  ),
-                  horizontalTitleGap: null,
-                  minLeadingWidth: 5,
-                  onTap: () async {
-                    purposeOfSolarizationCtr.text = roofNature[index];
-                    validatePurposeOfSolarization(
-                      purposeOfSolarizationCtr.text,
-                    );
-                    Get.back();
-                  },
-                  title: Text(
-                    roofNature[index],
-                    style: TextStyle(fontSize: 17.sp),
-                  ),
-                ),
-              ],
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                purposeOfSolarizationCtr.text =
+                    filterPurposeOfSolarisationList[index].label;
+                validatePurposeOfSolarization(purposeOfSolarizationCtr.text);
+                if (purposeOfSolarizationCtr.text.toString().isNotEmpty) {
+                  filterPurposeOfSolarisationList.clear();
+                  filterPurposeOfSolarisationList.addAll(
+                    purposeOfSolarisationList,
+                  );
+                }
+                Get.back();
+              },
+              title: buildSelectableRow(
+                filterPurposeOfSolarisationList[index].label,
+                filterPurposeOfSolarisationList[index].label.trim() ==
+                    purposeOfSolarizationCtr.text.trim(),
+              ),
             );
           },
         ),
         searchcontent: getReactiveFormField(
-          node: purposeOfSolarizationNode,
-          controller: purposeOfSolarizationCtr,
+          node: searchPurposeOfSolarizationNode,
+          controller: searchPurposeOfSolarizationCtr,
           hintLabel: SearchScreenConstant.hint,
           onChanged: (val) {
-            applyFilterForPurposeOfSolarization(val.toString());
-            update();
+            applyFilterForPurposeOfSolarisation(val.toString());
           },
           isSearch: true,
           inputType: TextInputType.text,
@@ -1215,16 +1302,16 @@ class AddLeadsController extends GetxController {
     });
   }
 
-  void applyFilterForPurposeOfSolarization(String keyword) {
-    roofNature.clear();
+  // Updated filter method to use the original list for reset
+  void applyFilterForPurposeOfSolarisation(String keyword) {
     if (keyword.isEmpty) {
-      roofNature.addAll(['Usa', 'India']); // Mock data
+      filterPurposeOfSolarisationList.assignAll(purposeOfSolarisationList);
     } else {
-      roofNature.addAll(
-        ['Usa', 'India']
+      filterPurposeOfSolarisationList.assignAll(
+        purposeOfSolarisationList
             .where(
-              (purpose) =>
-                  purpose.toLowerCase().contains(keyword.toLowerCase()),
+              (item) =>
+                  item.label.toLowerCase().contains(keyword.toLowerCase()),
             )
             .toList(),
       );
@@ -1232,10 +1319,9 @@ class AddLeadsController extends GetxController {
     update();
   }
 
-  // Dialog for Roof Nature
   Widget setRoofNatureListDialog() {
     return Obx(() {
-      if (isCountryApiCallLoading.value == true) {
+      if (isCountryApiCallLoading.value) {
         return setDropDownContent(
           [].obs,
           const Text(SearchScreenConstant.loading),
@@ -1243,50 +1329,47 @@ class AddLeadsController extends GetxController {
         );
       }
       return setDropDownContent(
-        roofNature, // Assuming this list is used for Roof Nature
+        filterRoofNatureList,
         controller: roofNatureCtr,
         noDataLable: "No Roof Nature",
         ListView.builder(
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          itemCount: roofNature.length,
+          itemCount: filterRoofNatureList.length,
           itemBuilder: (BuildContext context, int index) {
-            return Column(
-              children: [
-                ListTile(
-                  dense: true,
-                  visualDensity: const VisualDensity(
-                    horizontal: 0,
-                    vertical: -4,
-                  ),
-                  contentPadding: const EdgeInsets.only(
-                    left: 0.0,
-                    right: 0.0,
-                    top: 0.0,
-                  ),
-                  horizontalTitleGap: null,
-                  minLeadingWidth: 5,
-                  onTap: () async {
-                    roofNatureCtr.text = roofNature[index];
-                    validateRoofNature(roofNatureCtr.text);
-                    Get.back();
-                  },
-                  title: Text(
-                    roofNature[index],
-                    style: TextStyle(fontSize: 17.sp),
-                  ),
-                ),
-              ],
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                roofNatureCtr.text = filterRoofNatureList[index].label;
+                validateRoofNature(roofNatureCtr.text);
+                if (roofNatureCtr.text.toString().isNotEmpty) {
+                  filterRoofNatureList.clear();
+                  filterRoofNatureList.addAll(roofNatureList);
+                }
+                Get.back();
+              },
+              title: buildSelectableRow(
+                filterRoofNatureList[index].label,
+                filterRoofNatureList[index].label.trim() ==
+                    roofNatureCtr.text.trim(),
+              ),
             );
           },
         ),
         searchcontent: getReactiveFormField(
           node: roofNatureNode,
-          controller: roofNatureCtr,
+          controller: searchRoofNatureCtr, // New search controller
           hintLabel: SearchScreenConstant.hint,
           onChanged: (val) {
             applyFilterForRoofNature(val.toString());
-            update();
           },
           isSearch: true,
           inputType: TextInputType.text,
@@ -1297,22 +1380,20 @@ class AddLeadsController extends GetxController {
   }
 
   void applyFilterForRoofNature(String keyword) {
-    roofNature.clear();
     if (keyword.isEmpty) {
-      roofNature.addAll(['Usa', 'India']); // Mock data
+      filterRoofNatureList.assignAll(roofNatureList);
     } else {
-      roofNature.addAll(
-        ['Usa', 'India']
+      filterRoofNatureList.assignAll(
+        roofNatureList
             .where(
-              (roofNature) =>
-                  roofNature.toLowerCase().contains(keyword.toLowerCase()),
+              (item) =>
+                  item.label.toLowerCase().contains(keyword.toLowerCase()),
             )
             .toList(),
       );
     }
     update();
   }
-
   // Widget setCountryListDialog() {
   //   return Obx(() {
   //     if (isCountryApiCallLoading.value == true) {
@@ -2624,7 +2705,6 @@ class AddLeadsController extends GetxController {
   }
 
   Future<void> addLeadApi(BuildContext context) async {
-    // Step 1: Base lead data
     User? user = await UserPreferences().getSignInInfo();
     final body = <String, dynamic>{
       'company_name': companyNameCtr.text.trim(),
@@ -2636,7 +2716,10 @@ class AddLeadsController extends GetxController {
       'contact_person_mobile': personMobileCtr.text.trim(),
       'latitude': latitudeCtr.text.trim(),
       'longitude': longitudeCtr.text.trim(),
-      'required_solution_type': requiredSolutionTypeCtr.text.trim(),
+      'required_solution_type': requiredSolutionTypeCtr.text
+          .toString()
+          .toLowerCase()
+          .trim(),
       'required_solution': requiredSolutionCtr.text.trim(),
       'lead_category': leadCategoryCtr.text.trim(),
       'dg_capacity_kva': dgCapacityCtr.text.trim(),
@@ -2684,6 +2767,7 @@ class AddLeadsController extends GetxController {
       });
     }
 
+    logcat("addLeadApi::", jsonEncode(body));
     // Step 4: API Call
     await commonPostApiCallFormate(
       context,
@@ -2764,6 +2848,67 @@ class AddLeadsController extends GetxController {
 
           update();
         }
+      },
+      networkManager: networkManager,
+    );
+  }
+
+  Future<void> getDropDownList(BuildContext context, bool isLoading) async {
+    var loadingIndicator = LoadingProgressDialog();
+    commonGetApiCallFormate(
+      context,
+      title: 'Add Lead Screen',
+      apiEndPoint: ApiUrl.getDropdownList,
+      allowHeader: true,
+      state: state,
+      message: message,
+      isStatus: false,
+      apisLoading: (isTrue) {
+        if (isLoading) {
+          if (isTrue) {
+            loadingIndicator.show(context, '');
+          } else {
+            loadingIndicator.hide(context);
+          }
+        }
+      },
+      onResponse: (data) {
+        var responseDetail = LeadDropDownListModel.fromJson(data);
+        var dropdowns = responseDetail.data.dropdowns;
+        // Populate dynamic lists from API response
+        requiredSolutionTypeList.assignAll(dropdowns.requiredSolutionType);
+        filterRequiredSolutionTypeList.assignAll(
+          dropdowns.requiredSolutionType,
+        ); // New filtered list
+        requiredSolutionList.assignAll(dropdowns.requiredSolution);
+        filterRequiredSolutionList.assignAll(
+          dropdowns.requiredSolution,
+        ); // New filtered list
+        leadCategoryList.assignAll(dropdowns.leadCategory);
+        filterLeadCategoryList.assignAll(
+          dropdowns.leadCategory,
+        ); // New filtered list
+        dgSyncRequiredList.assignAll(dropdowns.dgSyncRequired);
+        filterDgSyncRequiredList.assignAll(
+          dropdowns.dgSyncRequired,
+        ); // New filtered list
+        vfdRequiredList.assignAll(dropdowns.vfdRequired);
+        filterVfdRequiredList.assignAll(
+          dropdowns.vfdRequired,
+        ); // New filtered list
+        roofNatureList.assignAll(dropdowns.roofNature);
+        filterRoofNatureList.assignAll(
+          dropdowns.roofNature,
+        ); // New filtered list
+        financingTypeList.assignAll(dropdowns.financingType);
+        filterFinancingTypeList.assignAll(
+          dropdowns.financingType,
+        ); // New filtered list
+        purposeOfSolarisationList.assignAll(dropdowns.purposeOfSolarisation);
+        filterPurposeOfSolarisationList.assignAll(
+          dropdowns.purposeOfSolarisation,
+        );
+        update();
       },
       networkManager: networkManager,
     );

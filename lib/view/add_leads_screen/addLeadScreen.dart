@@ -25,7 +25,8 @@ class AddLeadScreen extends StatefulWidget {
   State<AddLeadScreen> createState() => _AddLeadScreenState();
 }
 
-class _AddLeadScreenState extends State<AddLeadScreen> {
+class _AddLeadScreenState extends State<AddLeadScreen>
+    with WidgetsBindingObserver {
   final AddLeadsController controller = Get.isRegistered<AddLeadsController>()
       ? Get.find<AddLeadsController>()
       : Get.put(AddLeadsController());
@@ -44,8 +45,17 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.getLocation(context, true);
+      controller.getDropDownList(context, true);
+      controller.getLatLongData(context, true);
     });
     super.initState();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && !controller.locationFetched) {
+      controller.getLatLongData(context, false);
+    }
   }
 
   void _onStepContinue() {
@@ -56,15 +66,16 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
     } else {
       // Submit logic
       if (controller.isFormValid()) {
+        controller.addLeadApi(context);
         // Implement submit logic here
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Lead ${widget.isEdit ? "Updated" : "Added"} Successfully',
-            ),
-          ),
-        );
-        Get.back();
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text(
+        //       'Lead ${widget.isEdit ? "Updated" : "Added"} Successfully',
+        //     ),
+        //   ),
+        // );
+        // Get.back();
       }
     }
   }
@@ -343,7 +354,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                     );
                                   },
                                   onTap: () {
-                                    controller.requiredSolutionTypeCtr.text =
+                                    controller
+                                            .searchRequiredSolutionTypeCtr
+                                            .text =
                                         "";
                                     commonDropDownDialog(
                                       context,
@@ -380,7 +393,8 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                     controller.validateRequiredSolution(val);
                                   },
                                   onTap: () {
-                                    controller.requiredSolutionCtr.text = "";
+                                    controller.searchRequiredSolutionCtr.text =
+                                        "";
                                     commonDropDownDialog(
                                       context,
                                       content: controller
@@ -414,7 +428,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                     controller.validateLeadCategory(val);
                                   },
                                   onTap: () {
-                                    controller.leadCategoryCtr.text = "";
+                                    controller.searchLeadCategoryCtr.text = "";
                                     commonDropDownDialog(
                                       context,
                                       content: controller
@@ -457,12 +471,37 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                               getLable("DG Sync Required"),
                               getReactiveDropdown(
                                 hint: "Select DG Sync",
-                                items: controller.dgSync,
-                                selectedValue: controller.selectDgSync,
+                                // items: controller.dgSync,
+                                // selectedValue: controller.selectDgSync,
+                                items: controller.filterDgSyncRequiredList
+                                    .map((item) => item.label)
+                                    .toList(), // Display labels
+                                selectedValue:
+                                    controller
+                                        .selectedDgSyncLabel
+                                        .value
+                                        .isNotEmpty
+                                    ? controller.selectedDgSyncLabel.value
+                                    : null,
                                 onChanged: (value) {
-                                  setState(() {
-                                    controller.selectDgSync = value!;
-                                  });
+                                  if (value != null) {
+                                    setState(() {
+                                      controller.selectedDgSyncLabel.value =
+                                          value; // Update displayed label
+                                      // Find the corresponding value based on the selected label
+                                      final selectedItem = controller
+                                          .dgSyncRequiredList
+                                          .firstWhere(
+                                            (item) => item.label == value,
+                                            orElse: () => controller
+                                                .dgSyncRequiredList
+                                                .first,
+                                          );
+                                      controller.selectedDgSyncValue.value =
+                                          selectedItem
+                                              .value; // Update API value
+                                    });
+                                  }
                                 },
                               ),
                               getDynamicSizedBox(height: 2.h),
@@ -635,16 +674,16 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                     // );
                                   },
                                   onTap: () {
-                                    controller.purposeOfSolarizationCtr.text =
-                                        "";
+                                    controller.searchPurposeOfSolarizationCtr
+                                        .clear();
                                     commonDropDownDialog(
                                       context,
                                       content: controller
-                                          .setPurposeOfSolarizationListDialog(),
+                                          .setPurposeOfSolarisationListDialog(),
                                       title: "Purpose of Solarization",
                                       onCloseClick: () {
                                         controller
-                                            .applyFilterForPurposeOfSolarization(
+                                            .applyFilterForPurposeOfSolarisation(
                                               '',
                                             );
                                       },
@@ -767,7 +806,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                                     controller.validateRoofNature(val);
                                   },
                                   onTap: () {
-                                    controller.roofNatureCtr.text = "";
+                                    controller.searchRoofNatureCtr.text = "";
                                     commonDropDownDialog(
                                       context,
                                       content: controller

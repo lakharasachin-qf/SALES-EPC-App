@@ -503,7 +503,6 @@ class LeadScreenState extends State<LeadScreen> {
                           );
                         }),
                       ),
-
                       //  Padding(
                       //   padding: EdgeInsets.symmetric(horizontal: 2.w),
                       //   child: Obx(() {
@@ -511,7 +510,6 @@ class LeadScreenState extends State<LeadScreen> {
                       //       return const Text("0–0 of 0",
                       //           style: TextStyle(fontSize: 14, color: Colors.black));
                       //     }
-
                       //     return Card(
                       //       elevation: 4,
                       //       shape: RoundedRectangleBorder(

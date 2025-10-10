@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:sales_app/componant/CustomSnakbar.dart';
+import 'package:sales_app/componant/dialogs/customDialog.dart';
 import 'package:sales_app/componant/dialogs/fullscreen.dart';
 import 'package:sales_app/componant/dialogs/pdfviewer_screen.dart';
+import 'package:sales_app/configs/string_constant.dart';
+import 'package:sales_app/utils/log.dart';
 import 'package:sales_app/view/signin_screen/signin_screen.dart';
 
 void navigateToDashboardByRights(List<String> rights) {
@@ -107,4 +112,93 @@ void viewNetworkFile(BuildContext context, String imageUrl) {
   } else {
     CustomSnackBar().showErrorSnackbar('Error', 'No file found');
   }
+}
+
+Future<void> fetchLocationTracking(
+  context,
+  Function onClick, {
+  Function? getLatLongData,
+}) async {
+  bool serviceEnabled;
+  LocationPermission permission;
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    await popupDialogs(
+      context,
+      LocationsDialog.servicesDisabled,
+      LocationsDialog.enableLocation,
+      () {
+        onClick(false);
+        Geolocator.openLocationSettings();
+      },
+    );
+    return;
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    LocationPermission permission = await Geolocator.requestPermission();
+    if (permission != LocationPermission.whileInUse &&
+        permission != LocationPermission.always) {
+      // showErrorSnackbar("Permissions", 'Location permissions are denied');
+      return;
+    }
+  }
+
+  // Position position = await Geolocator.getCurrentPosition(
+  //   desiredAccuracy: LocationAccuracy.high,
+  // );
+  // Fetch location safely
+  Position? position;
+  try {
+    position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+  } catch (e) {
+    logcat("Location fetch failed", e.toString());
+    // You can also show a toast instead of crashing
+    // showCustomToast(context, "Failed to get location");
+    return;
+  }
+
+  // UserPreferences().setLat(position.latitude.toString());
+  // UserPreferences().setLong(position.longitude.toString());
+  String? fullAddress = "";
+  // ✅ Reverse geocoding
+  try {
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
+
+    if (placemarks.isNotEmpty) {
+      Placemark place = placemarks.first;
+
+      fullAddress =
+          "${place.name ?? ''}, "
+                  "${place.street ?? ''}, "
+                  "${place.subLocality ?? ''}, "
+                  "${place.locality ?? ''}, "
+                  "${place.administrativeArea ?? ''}, "
+                  "${place.postalCode ?? ''}, "
+                  "${place.country ?? ''}"
+              .replaceAll(', ,', ',')
+              .trim();
+
+      logcat("FullLocation:", fullAddress);
+    }
+  } catch (e) {
+    logcat("Reverse geocoding failed", e.toString());
+  }
+
+  if (getLatLongData != null) {
+    getLatLongData(
+      position.latitude.toString(),
+      position.longitude.toString(),
+      fullAddress, // Pass the fullAddress
+    );
+  }
+
+  logcat("Latitude:", position.latitude);
+  logcat("Longitude:", position.longitude);
 }

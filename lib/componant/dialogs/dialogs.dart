@@ -149,6 +149,86 @@ void showUpdatedMultpleSelectionPopup<T>(
   );
 }
 
+Future<Object?> popupDialogs(
+  BuildContext context,
+  title,
+  subString,
+  Function onClick,
+) {
+  return showGeneralDialog(
+    barrierColor: black.withOpacity(0.6),
+    transitionBuilder: (context, a1, a2, widget) {
+      final curvedValue = Curves.easeInOut.transform(a1.value);
+      return Transform.translate(
+        offset: Offset(0, (1 - curvedValue) * 400),
+        child: Opacity(
+          opacity: a1.value,
+          child: CupertinoAlertDialog(
+            title: Text(
+              title,
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: black,
+                fontFamily: plusJakartaSansBold,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: Text(
+              subString,
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: black,
+                fontFamily: plusJakartaSansBold,
+              ),
+            ),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                isDefaultAction: true,
+                isDestructiveAction: true,
+                child: Text(
+                  Button.cancel,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontFamily: plusJakartaSansBold,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              CupertinoDialogAction(
+                onPressed: () {
+                  onClick();
+                  Navigator.pop(context);
+                },
+                isDefaultAction: true,
+                isDestructiveAction: true,
+                child: Text(
+                  Logout.yes,
+                  // Button.settings,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontFamily: plusJakartaSansBold,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 200),
+    barrierDismissible: true,
+    barrierLabel: '',
+    context: context,
+    pageBuilder: (context, animation1, animation2) {
+      return Container();
+    },
+  );
+}
+
 fetchSelectionPopup<T>(
   BuildContext context, {
   required list,

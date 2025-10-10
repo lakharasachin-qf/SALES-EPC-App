@@ -22,6 +22,7 @@ class ApiUrl {
   static const addLead = 'leads';
   static const leadList = 'leads';
   static const getLocation = 'get-locations';
+  static const getDropdownList = 'get-dropdown-options';
 
   //below are not using
   static const getbillingMonth = 'get-billing-month-year';
