@@ -308,6 +308,8 @@ class DashboardController extends GetxController {
       title: "Filter",
       onClosing: () {
         resetForm();
+        getFillterOptions(context, showLoader: false);
+        getDashboardData(context, isFirstTime: true);
       },
       widget: addFilterSheetWidget(
         context,
@@ -471,7 +473,7 @@ class DashboardController extends GetxController {
     );
   }
 
-  Future<void> getFillterOptions(context) async {
+  Future<void> getFillterOptions(context, {showLoader = true}) async {
     User? userData = await UserPreferences().getSignInInfo();
     var loadingIndicator = LoadingProgressDialog();
     commonGetApiCallFormate(
@@ -482,10 +484,12 @@ class DashboardController extends GetxController {
       state: state,
       message: message,
       apisLoading: (isloaing) {
-        if (isloaing == true) {
-          loadingIndicator.show(context, '');
-        } else {
-          loadingIndicator.hide(context);
+        if (showLoader == true) {
+          if (isloaing == true) {
+            loadingIndicator.show(context, '');
+          } else {
+            loadingIndicator.hide(context);
+          }
         }
       },
       onResponse: (data) {
