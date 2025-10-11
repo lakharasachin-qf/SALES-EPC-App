@@ -20,7 +20,8 @@ import 'package:sizer/sizer.dart';
 // Assuming CustomLinearStepper is in a separate file or included here
 class AddLeadScreen extends StatefulWidget {
   final bool isEdit;
-  const AddLeadScreen({super.key, required this.isEdit});
+  String? leadId;
+  AddLeadScreen({super.key, required this.isEdit, this.leadId});
 
   @override
   State<AddLeadScreen> createState() => _AddLeadScreenState();
@@ -45,6 +46,10 @@ class _AddLeadScreenState extends State<AddLeadScreen>
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      logcat("IsEdit::", widget.isEdit.toString());
+      if (widget.isEdit == true) {
+        controller.getLeadDataByIdList(context, true, widget.leadId.toString());
+      } else {}
       controller.getLocation(context, true);
       controller.getDropDownList(context, true);
       controller.getLatLongData(context, true);
@@ -1023,8 +1028,12 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                     data: controller.fileList,
                                     columns: controller.uploadColumns,
                                     getValues: (file) => [
-                                      file.uploadFile.toString(),
+                                      file.path.toString(),
                                       file.category.toString(),
+                                      // controller.formatCategory(
+                                      //   file.category,
+                                      //   file.uploadFile,
+                                      // ),
                                     ],
                                     onEdit: (i, file) {
                                       controller.addUploadFile(
