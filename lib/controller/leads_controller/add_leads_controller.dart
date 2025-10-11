@@ -4,6 +4,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide ScreenType;
 import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:sales_app/api_handle/Repository.dart';
 import 'package:sales_app/api_handle/apiCallingFormate.dart';
 import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/common_date_time_picker.dart';
@@ -34,8 +37,16 @@ import '../../configs/apicall_constant.dart';
 class CategoryModel {
   final String id;
   final String name;
+  final String value;
 
-  CategoryModel({required this.id, required this.name});
+  CategoryModel({required this.id, required this.name, this.value = ''});
+}
+
+class StatusItem {
+  final String label;
+  final String value;
+
+  const StatusItem({required this.label, required this.value});
 }
 
 class StatusItem {
@@ -425,16 +436,24 @@ class AddLeadsController extends GetxController {
   var selectedDistrictId = 0.obs;
 
   // Category List
+  // Category List
   RxList<CategoryModel> categoryList = <CategoryModel>[
-    CategoryModel(id: "1", name: "Invoice"),
-    CategoryModel(id: "2", name: "Bills"),
-    CategoryModel(id: "3", name: "Reports"),
-    CategoryModel(id: "4", name: "Others"),
+    CategoryModel(id: "1", name: "Equipment Photo", value: "equipment_photo"),
+    CategoryModel(
+      id: "2",
+      name: "Map Marked Screenshot",
+      value: "map_marked_screenshot",
+    ),
+    CategoryModel(
+      id: "3",
+      name: "Hand Sketch Installation Area",
+      value: "hand_sketch_installation_area",
+    ),
   ].obs;
 
   var currentFilterSource = [].obs;
   var filteredData = [].obs;
-  RxString categoryId = "".obs;
+  RxString categoryValue = "".obs;
   late bool locationFetched = true;
   // Add reactive variables for selection
   RxString selectedRequiredSolutionTypeValue = ''.obs;
@@ -1097,6 +1116,7 @@ class AddLeadsController extends GetxController {
                 selectedRequiredSolutionTypeLabel.value = selectedItem.label;
                 selectedRequiredSolutionTypeValue.value = selectedItem.value;
                 validateRequiredSolutionType(selectedItem.value);
+                update();
                 if (requiredSolutionTypeCtr.text.toString().isNotEmpty) {
                   filterRequiredSolutionTypeList.clear();
                   filterRequiredSolutionTypeList.addAll(
@@ -1109,14 +1129,14 @@ class AddLeadsController extends GetxController {
               title: buildSelectableRow(
                 filterRequiredSolutionTypeList[index].label,
                 filterRequiredSolutionTypeList[index].value.trim() ==
-                    selectedRequiredSolutionTypeValue.value.trim(),
+                    selectedRequiredSolutionTypeValue.value,
               ),
             );
           },
         ),
         searchcontent: getReactiveFormField(
           node: requiredSolutionTypeNode,
-          controller: searchRequiredSolutionTypeCtr, // New search controller
+          controller: searchRequiredSolutionTypeCtr,
           hintLabel: SearchScreenConstant.hint,
           onChanged: (val) {
             applyFilterForRequiredSolutionType(val.toString());
@@ -2680,8 +2700,8 @@ class AddLeadsController extends GetxController {
                               isdropdown: true,
                               wantsuffix: false,
                               usegesture: true,
-                              gestureFunction: () {
-                                pickAnyFile();
+                              gestureFunction: () async {
+                                await pickAnyFile();
                               },
                               hint: 'Select File',
                               isRequired: true,
@@ -2728,9 +2748,14 @@ class AddLeadsController extends GetxController {
                                   () {
                                     if (uploadFileModel.value.isValidate &&
                                         uploadCategoryModel.value.isValidate) {
+                                      logcat(
+                                        "selectedFilePath::",
+                                        selectedFilePath.value,
+                                      );
                                       final newFile = UploadedFile(
-                                        path: uploadFileCtr.text,
-                                        category: uploadCategoryCtr.text,
+                                        path: selectedFilePath.value,
+                                        // category: uploadCategoryCtr.text,
+                                        category: categoryValue.value,
                                       );
                                       if (index == null) {
                                         addFile(newFile);
@@ -2768,22 +2793,31 @@ class AddLeadsController extends GetxController {
     }
   }
 
+  RxString selectedFilePath = ''.obs;
+
   Future<void> pickAnyFile() async {
     final result = await FilePicker.platform.pickFiles(type: FileType.any);
     if (result != null && result.files.isNotEmpty) {
-      final fileName = result.files.single.name;
-      uploadFileCtr.text = fileName;
-      uploadFileModel.update((model) {
-        if (fileName.isEmpty) {
-          model!.error = "File is required";
-          model.isValidate = false;
-        } else {
-          model!.error = null;
-          model.isValidate = true;
-        }
-      });
-      validateStep4();
-      update();
+      final file = result.files.single;
+      final fileName = file.name;
+      final filePath = file.path;
+
+      if (filePath != null) {
+        uploadFileCtr.text = fileName.split('.').first;
+        selectedFilePath.value = filePath;
+
+        uploadFileModel.update((model) {
+          if (filePath.isEmpty) {
+            model!.error = "File is required";
+            model.isValidate = false;
+          } else {
+            model!.error = null;
+            model.isValidate = true;
+          }
+        });
+        validateStep4();
+        update();
+      }
     }
   }
 
@@ -2808,7 +2842,7 @@ class AddLeadsController extends GetxController {
       getTitle: (value) => value.name,
       onSelected: (data) {
         uploadCategoryCtr.text = data.name;
-        categoryId.value = data.id.toString();
+        categoryValue.value = data.value.toString();
         validateUploadCategory(uploadCategoryCtr.text);
         update();
       },
@@ -2848,49 +2882,40 @@ class AddLeadsController extends GetxController {
   }
 
   Future<void> addLeadApi(BuildContext context) async {
+    var loadingIndicator = LoadingProgressDialog();
     User? user = await UserPreferences().getSignInInfo();
-    final body = <String, dynamic>{
-      // 'company_name': companyNameCtr.text.trim(),
-      // 'address': addressCtr.text.trim(),
-      // 'country': countryCtr.text.trim(),
-      // 'state': stateCtr.text.trim(),
-      // 'district': districtCtr.text.trim(),
-      // 'contact_person_name': personNameCtr.text.trim(),
-      // 'contact_person_mobile': personMobileCtr.text.trim(),
-      // 'latitude': latitudeCtr.text.trim(),
-      // 'longitude': longitudeCtr.text.trim(),
-      // 'required_solution_type': selectedRequiredSolutionTypeValue.value,
-      // 'required_solution': selectedRequiredSolutionValue.value,
-      // // 'lead_category': leadCategoryCtr.text.trim(),
-      // 'lead_category': selectedLeadCategoryValue.value,
-      // 'dg_capacity_kva': dgCapacityCtr.text.trim(),
-      // 'dg_sync_required': selectedDgSyncValue.value,
-      // 'curr_inst_solar_cap_kwp': installedSolarCapCtr.text.trim(),
-      // 'sanctioned_load_kva': sanctionedLoadCtr.text.trim(),
-      // 'vfd_required': selectedVfdValue.value,
-      // 'grid_availability_hrs': gridAvailabilityCtr.text.trim(),
-      // 'peak_monthly_energy_cons_kwh': peakMonthlyEnergyCtr.text.trim(),
-      // 'required_solar_cap_kwp': requiredSolarCapCtr.text.trim(),
-      // 'dist_to_nearest_transformer': distanceToTransformerCtr.text.trim(),
-      // 'rating_of_nearest_transformer_kva': ratingOfTransformerCtr.text.trim(),
-      // 'purpose_of_solarisation': purposeOfSolarizationCtr.text.trim(),
-      // 'dist_btw_inverter_acdb_panel_mtrs': distInverterACDBCtr.text.trim(),
-      // 'dist_btw_solar_acdb_panel_mtrs': distSolarACDBCtr.text.trim(),
-      // 'building_height': buildingHeightCtr.text.trim(),
-      // 'roof_size_length_ft': roofSizeLengthCtr.text.trim(),
-      // 'roof_size_breadth_ft': roofSizeBreadthCtr.text.trim(),
-      // 'roof_nature': roofNatureCtr.text.trim(),
-      // 'age_of_metal_sheet': ageOfMetalSheetCtr.text.trim(),
-      // 'ground_size_length_ft': groundSizeLengthCtr.text.trim(),
-      // 'ground_size_breadth_ft': groundSizeBreadthCtr.text.trim(),
-      // 'other_remarks': otherRemarksCtr.text.trim(),
-      // 'schedule_meeting': scheduleMeetingCtr.text.trim(),
-      // 'user_id': user != null ? user.userId : '',
+    String? password = await UserPreferences().getPassword();
+
+    if (networkManager.connectionType.value == 0) {
+      loadingIndicator.hide(context);
+      showDialogForScreen(
+        context,
+        "Add Lead",
+        Connection.noConnection,
+        callback: () {
+          Get.back();
+        },
+      );
+      return;
+    }
+
+    var request = http.MultipartRequest(
+      'POST',
+      Repository.buildUrl(ApiUrl.addLead),
+    );
+
+    request.headers.addAll({
+      'X-USER-EMAIL': user?.email ?? '',
+      'X-USER-PASSWORD': password,
+    });
+
+    // ✅ Add form fields
+    request.fields.addAll({
       'company_name': companyNameCtr.text.trim(),
       'address': addressCtr.text.trim(),
-      'country': selectedCountryId.value,
-      'state': selectedStateId.value,
-      'district': selectedDistrictId.value,
+      'country': selectedCountryId.value.toString(),
+      'state': selectedStateId.value.toString(),
+      'district': selectedDistrictId.value.toString(),
       'contact_person_name': personNameCtr.text.trim(),
       'contact_person_mobile': personMobileCtr.text.trim(),
       'latitude': latitudeCtr.text.trim(),
@@ -2899,10 +2924,10 @@ class AddLeadsController extends GetxController {
       'required_solution': selectedRequiredSolutionValue.value,
       'lead_category': selectedLeadCategoryValue.value,
       'dg_capacity_kva': dgCapacityCtr.text.trim(),
-      'dg_sync_required': selectedDgSyncValue.value,
+      'dg_sync_required': selectedDgSyncValue.value == 'Yes' ? '1' : '0',
       'curr_inst_solar_cap_kwp': installedSolarCapCtr.text.trim(),
       'sanctioned_load_kva': sanctionedLoadCtr.text.trim(),
-      'vfd_required': selectedVfdValue.value,
+      'vfd_required': selectedVfdValue.value == 'Yes' ? '1' : '0',
       'grid_availability_hrs': gridAvailabilityCtr.text.trim(),
       'peak_monthly_energy_cons_kwh': peakMonthlyEnergyCtr.text.trim(),
       'required_solar_cap_kwp': requiredSolarCapCtr.text.trim(),
@@ -2919,15 +2944,14 @@ class AddLeadsController extends GetxController {
       'ground_size_length_ft': groundSizeLengthCtr.text.trim(),
       'ground_size_breadth_ft': groundSizeBreadthCtr.text.trim(),
       'other_remarks': otherRemarksCtr.text.trim(),
-      // 'schedule_meeting': scheduleMeetingCtr.text.trim(),
       'schedule_meeting': formatScheduleDate(scheduleMeetingCtr.text.trim()),
-      'user_id': user != null ? user.userId : '',
-    };
+      'user_id': user != null ? user.userId.toString() : '',
+    });
 
-    // Step 2: Add load elements
+    // ✅ Add load elements
     for (int i = 0; i < productDetailList.length; i++) {
       final product = productDetailList[i];
-      body.addAll({
+      request.fields.addAll({
         'load_elements[$i][device_name]': product.deviceName,
         'load_elements[$i][category]': product.category,
         'load_elements[$i][power_rating_w]': product.power,
@@ -2935,44 +2959,122 @@ class AddLeadsController extends GetxController {
       });
     }
 
-    // Step 3: Add uploaded files
+    // ✅ Add uploaded files
+    logcat("fileList::", jsonEncode(fileList));
+
+    // final directory = await getApplicationDocumentsDirectory();
+
+    // for (int i = 0; i < fileList.length; i++) {
+    //   final file = fileList[i];
+
+    //   if (file.path != null && file.path!.isNotEmpty) {
+    //     final fileToUpload = File(file.path!);
+    //     logcat("fileToUpload", "Step-1 => ${file.path}");
+
+    //     if (await fileToUpload.exists()) {
+    //       // Copy file to persistent storage
+    //       final fileName =
+    //           'uploaded_${DateTime.now().millisecondsSinceEpoch}_${file.path!.split('/').last}';
+    //       final newPath = '${directory.path}/$fileName';
+    //       await fileToUpload.copy(newPath);
+    //       final copiedFile = File(newPath);
+
+    //       if (await copiedFile.exists()) {
+    //         logcat("Copied file path:", newPath);
+
+    //         // Attach the copied file
+    //         final multipartFile = await http.MultipartFile.fromPath(
+    //           'uploaded_files[$i][file]',
+    //           copiedFile.path,
+    //         );
+    //         request.files.add(multipartFile);
+
+    //         // Attach category for this file
+    //         request.fields['uploaded_files[$i][category]'] =
+    //             file.category ?? '';
+
+    //         logcat(
+    //           "✅ File Added",
+    //           "uploaded_files[$i][file] => ${copiedFile.path}",
+    //         );
+    //       } else {
+    //         logcat("⚠️ Copied file not found:", newPath);
+    //       }
+    //     } else {
+    //       logcat("⚠️ File not found:", fileToUpload.path);
+    //     }
+    //   }
+    // }
+
+    // ✅ Add uploaded files (main fix here)
+    logcat("filepAth:::", jsonEncode(fileList));
     for (int i = 0; i < fileList.length; i++) {
       final file = fileList[i];
-      body.addAll({
-        'uploaded_files[$i][category]': file.category,
-        'uploaded_files[$i][file]': file.path,
-      });
+      if (file.path != null && file.path!.isNotEmpty) {
+        final fileToUpload = File(file.path!);
+        if (await fileToUpload.exists()) {
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'uploaded_files[$i][file]',
+              fileToUpload.path,
+            ),
+          );
+          logcat("fileToUpload", "Step-");
+          // Attach category for this file
+          request.fields['uploaded_files[$i][category]'] = file.category ?? '';
+          // request.fields['uploaded_files[$i][category]'] = "equipment_photo";
+        } else {
+          logcat("File not found:", fileToUpload.path);
+        }
+      }
     }
-    debugPrint('my body: Starting individual field logging');
-    body.forEach((key, value) {
-      debugPrint('my body: $key = $value');
-    });
-    debugPrint('my body: Finished individual field logging');
-    // logcat("addLeadApi::", jsonEncode(body));
-    // Step 4: API Call
-    // return;
-    await commonPostApiCallFormate(
-      context,
-      title: 'Add Lead Screen',
-      body: body,
-      allowHeader: true,
-      apiEndPoint: ApiUrl.addLead,
-      onResponse: (data) async {
-        logcat('AddLeadApi', 'Response: $data');
+    // ✅ Log all fields
+    logcat("Form Fields:", jsonEncode(request.fields));
 
-        Get.back();
+    try {
+      loadingIndicator.show(context, '');
+      state.value = ScreenState.apiLoading;
 
-        Get.snackbar(
-          "Success",
-          "Lead added successfully",
-          snackPosition: SnackPosition.BOTTOM,
+      // ✅ Send the request
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      loadingIndicator.hide(context);
+
+      state.value = ScreenState.apiSuccess;
+      var data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        logcat('AddLeadApi Response', data.toString());
+        if (data['status']?.toString().toLowerCase() == 'success') {
+          showDialogForScreen(
+            context,
+            "Add Lead",
+            data['message'],
+            callback: () {
+              Get.back();
+            },
+          );
+        }
+      } else {
+        logcat('❌ AddLeadApi Error', response.body);
+        showDialogForScreen(
+          context,
+          'Error',
+          data['message']?.toString() ??
+              data['errors']?.values.first[0]?.toString() ??
+              'Server error',
+          callback: () {
+            return;
+          },
         );
-      },
-      state: state,
-      message: message,
-      networkManager: networkManager,
-      isModelResponse: false,
-    );
+        message.value = "Failed to add lead (${response.statusCode})";
+      }
+    } catch (e) {
+      loadingIndicator.hide(context);
+      state.value = ScreenState.apiError;
+      message.value = "Error: $e";
+      logcat("❌ Exception", e.toString());
+    }
   }
 
   // Future<void> getLocation(BuildContext context, bool isLoading) async {
@@ -3624,7 +3726,7 @@ class AddLeadsController extends GetxController {
                 [],
           );
 
-        // 🔹 Uploaded Files
+        //  Uploaded Files
         fileList
           ..clear()
           ..assignAll(
