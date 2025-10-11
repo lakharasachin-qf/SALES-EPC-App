@@ -46,13 +46,13 @@ class _AddLeadScreenState extends State<AddLeadScreen>
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      logcat("IsEdit::", widget.isEdit.toString());
-      if (widget.isEdit == true) {
-        controller.getLeadDataByIdList(context, true, widget.leadId.toString());
-      } else {}
       controller.getLocation(context, true);
       controller.getDropDownList(context, true);
       controller.getLatLongData(context, true);
+      logcat("IsEdit::", widget.isEdit.toString());
+      if (widget.isEdit == true) {
+        controller.getLeadDataByIdList(context, true, widget.leadId.toString());
+      }
     });
     super.initState();
   }
