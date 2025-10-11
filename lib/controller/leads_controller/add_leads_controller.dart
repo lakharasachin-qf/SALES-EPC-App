@@ -2006,6 +2006,21 @@ class AddLeadsController extends GetxController {
 
   RxBool isvalidateAddLoadElement = false.obs;
 
+  resetFileUpload() {
+    uploadFileCtr.clear();
+    uploadCategoryCtr.clear();
+
+    uploadFileModel.update((m) {
+      m!.error = null;
+      m.isValidate = false;
+    });
+    uploadCategoryModel.update((m) {
+      m!.error = null;
+      m.isValidate = false;
+    });
+    update();
+  }
+
   resetvalidationOfAddLoadElement() {
     isvalidateAddLoadElement.value = false;
     deviceNameCtr.clear();
@@ -2498,6 +2513,7 @@ class AddLeadsController extends GetxController {
       uploadFileCtr.text = fileItem.uploadFile;
       uploadCategoryCtr.text = fileItem.category;
     } else {
+      resetFileUpload();
       uploadFileCtr.clear();
       uploadCategoryCtr.clear();
     }
@@ -2557,6 +2573,7 @@ class AddLeadsController extends GetxController {
                           bottom: 0,
                           child: InkWell(
                             onTap: () {
+                              resetFileUpload();
                               Navigator.pop(context);
                             },
                             child: Container(
