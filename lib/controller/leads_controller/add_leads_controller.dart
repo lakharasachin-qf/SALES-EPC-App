@@ -239,9 +239,7 @@ class AddLeadsController extends GetxController {
       searchRequiredSolutionTypeCtr,
       searchRequiredSolutionCtr,
       searchRoofNatureCtr,
-      leadStatusCtr,
-      firstTechnicalProposal1Ctr,
-      finalTechnicalProposal2Ctr;
+      leadStatusCtr;
 
   // FocusNodes
   late FocusNode companyNameNode,
@@ -286,9 +284,7 @@ class AddLeadsController extends GetxController {
       searchRequiredSolutionTypeNode,
       searchRequiredSolutionNode,
       searchRoofNatureNode,
-      leadStatusNode,
-      firstTechnicalProposal1Node,
-      finalTechnicalProposal2Node;
+      leadStatusNode;
 
   // Validation Models
   var companyNameModel = ValidationModel(null, null, isValidate: false).obs;
@@ -375,17 +371,6 @@ class AddLeadsController extends GetxController {
 
   //edit
   var leadStatusModel = ValidationModel(null, null, isValidate: false).obs;
-
-  var firstTechnicalProposal1Model = ValidationModel(
-    null,
-    null,
-    isValidate: false,
-  ).obs;
-  var finalTechnicalProposal2Model = ValidationModel(
-    null,
-    null,
-    isValidate: false,
-  ).obs;
 
   final List<String> dgSync = ['Yes', 'No'];
   String? selectDgSync;
@@ -538,6 +523,8 @@ class AddLeadsController extends GetxController {
     leadStatusCtr = TextEditingController();
     firstTechnicalProposal1Ctr = TextEditingController();
     finalTechnicalProposal2Ctr = TextEditingController();
+    firstCommercialProposal1Ctr = TextEditingController();
+    finalCommercialProposal2Ctr = TextEditingController();
 
     // FocusNodes
     companyNameNode = FocusNode();
@@ -596,6 +583,8 @@ class AddLeadsController extends GetxController {
     leadStatusNode = FocusNode();
     firstTechnicalProposal1Node = FocusNode();
     finalTechnicalProposal2Node = FocusNode();
+    firstCommercialProposal1Node = FocusNode();
+    finalCommercialProposal2Node = FocusNode();
 
     update();
     super.onInit();
@@ -656,6 +645,8 @@ class AddLeadsController extends GetxController {
 
     firstTechnicalProposal1Ctr.dispose();
     finalTechnicalProposal2Ctr.dispose();
+    firstCommercialProposal1Ctr.dispose();
+    finalCommercialProposal2Ctr.dispose();
 
     // Dispose focus nodes
     companyNameNode.dispose();
@@ -719,6 +710,8 @@ class AddLeadsController extends GetxController {
     leadStatusNode.dispose();
     firstTechnicalProposal1Node.dispose();
     finalTechnicalProposal2Node.dispose();
+    firstCommercialProposal1Node.dispose();
+    finalCommercialProposal2Node.dispose();
 
     super.dispose();
   }
@@ -3208,11 +3201,26 @@ class AddLeadsController extends GetxController {
   RxBool isEditMode = false.obs;
 
   //technical proposal
+  RxBool isTechnicalProposalMode = false.obs;
+  late TextEditingController firstTechnicalProposal1Ctr,
+      finalTechnicalProposal2Ctr;
+
+  late FocusNode firstTechnicalProposal1Node, finalTechnicalProposal2Node;
+  var firstTechnicalProposal1Model = ValidationModel(
+    null,
+    null,
+    isValidate: false,
+  ).obs;
+  var finalTechnicalProposal2Model = ValidationModel(
+    null,
+    null,
+    isValidate: false,
+  ).obs;
   List<StatusItem> leadStatusTechnical = [
     StatusItem(label: "New Lead", value: "new_lead"),
     StatusItem(label: "Technical Proposal", value: "technical_proposal"),
   ];
-  RxBool isTechnicalProposalMode = false.obs;
+
   final Rx<File?> firstTechnicalProposalFile = Rx<File?>(null);
 
   final Rx<File?> finalTechnicalProposalFile = Rx<File?>(null);
@@ -3231,8 +3239,77 @@ class AddLeadsController extends GetxController {
     isTechnicalProposalMode.value = false;
     firstTechnicalProposal1Ctr.clear();
     finalTechnicalProposal2Ctr.clear();
+    firstTechnicalProposal1Model.value = ValidationModel(
+      null,
+      null,
+      isValidate: false,
+    );
+    finalTechnicalProposal2Model.value = ValidationModel(
+      null,
+      null,
+      isValidate: false,
+    );
+
     firstTechnicalProposalFile.value = null;
     finalTechnicalProposalFile.value = null;
+    leadStatusCtr.clear();
+    selectedLeadStatusvalue.value = '';
+    leadStatusList.clear();
+    update();
+  }
+
+  //commerical proposal
+  RxBool isCommercialProposalMode = false.obs;
+  late TextEditingController firstCommercialProposal1Ctr,
+      finalCommercialProposal2Ctr;
+
+  late FocusNode firstCommercialProposal1Node, finalCommercialProposal2Node;
+  var firstCommercialProposal1Model = ValidationModel(
+    null,
+    null,
+    isValidate: false,
+  ).obs;
+  var finalCommercialProposal2Model = ValidationModel(
+    null,
+    null,
+    isValidate: false,
+  ).obs;
+  List<StatusItem> leadStatusCommercial = [
+    StatusItem(label: "Technical Proposal", value: "technical_proposal"),
+    StatusItem(label: "Commercial proposal", value: "commercial_proposal"),
+  ];
+
+  final Rx<File?> firstCommercialProposalFile = Rx<File?>(null);
+
+  final Rx<File?> finalCommercialProposalFile = Rx<File?>(null);
+
+  void setCommercialProposalFile(File file) {
+    firstCommercialProposalFile.value = file;
+    update();
+  }
+
+  void setfinalCommercialProposalFile(File file) {
+    finalCommercialProposalFile.value = file;
+    update();
+  }
+
+  resetCommercialProposal() {
+    isCommercialProposalMode.value = false;
+    firstCommercialProposal1Ctr.clear();
+    finalCommercialProposal2Ctr.clear();
+    firstCommercialProposal1Model.value = ValidationModel(
+      null,
+      null,
+      isValidate: false,
+    );
+    finalCommercialProposal2Model.value = ValidationModel(
+      null,
+      null,
+      isValidate: false,
+    );
+
+    firstCommercialProposalFile.value = null;
+    finalCommercialProposalFile.value = null;
     leadStatusCtr.clear();
     selectedLeadStatusvalue.value = '';
     leadStatusList.clear();
@@ -3290,14 +3367,43 @@ class AddLeadsController extends GetxController {
 
                 validateLeadStatus(leadStatusCtr.text);
                 if (selectedLeadStatusvalue.value == "technical_proposal") {
+                  // Enable technical proposal mode
                   isTechnicalProposalMode.value = true;
-                } else {
+
+                  // Reset commercial proposal fields
+                  firstCommercialProposalFile.value = null;
+                  finalCommercialProposalFile.value = null;
+                  firstCommercialProposal1Ctr.clear();
+                  finalCommercialProposal2Ctr.clear();
+                  isCommercialProposalMode.value = false;
+                } else if (selectedLeadStatusvalue.value ==
+                    "commercial_proposal") {
+                  // Enable commercial proposal mode
+                  isCommercialProposalMode.value = true;
+
+                  // Reset technical proposal fields
                   firstTechnicalProposalFile.value = null;
                   finalTechnicalProposalFile.value = null;
                   firstTechnicalProposal1Ctr.clear();
                   finalTechnicalProposal2Ctr.clear();
                   isTechnicalProposalMode.value = false;
+                } else {
+                  // Neither technical nor commercial
+                  isTechnicalProposalMode.value = false;
+                  isCommercialProposalMode.value = false;
+
+                  // Reset all fields
+                  firstTechnicalProposalFile.value = null;
+                  finalTechnicalProposalFile.value = null;
+                  firstTechnicalProposal1Ctr.clear();
+                  finalTechnicalProposal2Ctr.clear();
+
+                  firstCommercialProposalFile.value = null;
+                  finalCommercialProposalFile.value = null;
+                  firstCommercialProposal1Ctr.clear();
+                  finalCommercialProposal2Ctr.clear();
                 }
+
                 Get.back();
               },
               title: buildSelectableRow(
@@ -3340,11 +3446,18 @@ class AddLeadsController extends GetxController {
         logcat("onResponse::", jsonEncode(result));
 
         if (result.availableNextStatuses != null) {
+          leadStatusList.clear();
           for (var status in result.availableNextStatuses!) {
             switch (status) {
               case 'technical_proposal':
                 // isTechnicalProposalMode.value = true;
                 leadStatusList.assignAll(leadStatusTechnical);
+                leadStatusCtr.text = leadStatusList.first.label;
+
+                break;
+              case 'commercial_proposal':
+                // isTechnicalProposalMode.value = true;
+                leadStatusList.assignAll(leadStatusCommercial);
                 leadStatusCtr.text = leadStatusList.first.label;
                 break;
             }

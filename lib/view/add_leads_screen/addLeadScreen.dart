@@ -1104,9 +1104,14 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                             .error,
                                       );
                                     }),
-                              controller.isTechnicalProposalMode.value == true
-                                  ? getDynamicSizedBox(height: 2.h)
-                                  : SizedBox.shrink(),
+                              Obx(() {
+                                return controller
+                                            .isTechnicalProposalMode
+                                            .value ==
+                                        true
+                                    ? getDynamicSizedBox(height: 2.h)
+                                    : SizedBox.shrink();
+                              }),
 
                               Obx(() {
                                 return controller
@@ -1158,9 +1163,14 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       )
                                     : SizedBox.shrink();
                               }),
-                              controller.isTechnicalProposalMode.value == true
-                                  ? getDynamicSizedBox(height: 2.h)
-                                  : SizedBox.shrink(),
+                              Obx(() {
+                                return controller
+                                            .isTechnicalProposalMode
+                                            .value ==
+                                        true
+                                    ? getDynamicSizedBox(height: 2.h)
+                                    : SizedBox.shrink();
+                              }),
                               Obx(() {
                                 return controller
                                             .isTechnicalProposalMode
@@ -1192,6 +1202,119 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                                   );
                                               controller
                                                       .finalTechnicalProposal2Ctr
+                                                      .text =
+                                                  fileName;
+
+                                              print('File path: $filePath');
+                                              print('File name: $fileName');
+                                            },
+                                          );
+                                        },
+
+                                        hint: 'Select File',
+                                        isRequired: false,
+                                      )
+                                    : SizedBox.shrink();
+                              }),
+
+                              Obx(() {
+                                return controller
+                                            .isCommercialProposalMode
+                                            .value ==
+                                        true
+                                    ? getDynamicSizedBox(height: 2.h)
+                                    : SizedBox.shrink();
+                              }),
+
+                              Obx(() {
+                                return controller
+                                            .isCommercialProposalMode
+                                            .value ==
+                                        true
+                                    ? getTextField(
+                                        context: context,
+                                        wantLabel: true,
+                                        isBorderSideEnable: true,
+                                        label: 'First Commercial Proposal',
+                                        ctr: controller
+                                            .firstCommercialProposal1Ctr,
+                                        node: controller
+                                            .firstCommercialProposal1Node,
+                                        model: controller
+                                            .firstCommercialProposal1Model
+                                            .value,
+                                        isenable: false,
+                                        isdropdown: true,
+                                        wantsuffix: false,
+                                        usegesture: true,
+                                        gestureFunction: () {
+                                          SimplePdfPicker.pickPdf(
+                                            onFileSelected: (filePath, fileName) {
+                                              // Convert path to File
+                                              final file = File(filePath);
+
+                                              // Store in your controller Rx variable
+                                              controller
+                                                  .setCommercialProposalFile(
+                                                    file,
+                                                  );
+
+                                              // Optional: update the TextEditingController to display file name
+                                              controller
+                                                      .firstCommercialProposal1Ctr
+                                                      .text =
+                                                  fileName;
+
+                                              print('File path: $filePath');
+                                              print('File name: $fileName');
+                                            },
+                                          );
+                                        },
+
+                                        hint: 'Select File',
+                                        isRequired: false,
+                                      )
+                                    : SizedBox.shrink();
+                              }),
+                              Obx(() {
+                                return controller
+                                            .isCommercialProposalMode
+                                            .value ==
+                                        true
+                                    ? getDynamicSizedBox(height: 2.h)
+                                    : SizedBox.shrink();
+                              }),
+                              Obx(() {
+                                return controller
+                                            .isCommercialProposalMode
+                                            .value ==
+                                        true
+                                    ? getTextField(
+                                        context: context,
+                                        wantLabel: true,
+                                        isBorderSideEnable: true,
+                                        label: 'Final Commercial  Proposal',
+                                        ctr: controller
+                                            .finalCommercialProposal2Ctr,
+                                        node: controller
+                                            .finalCommercialProposal2Node,
+                                        model: controller
+                                            .finalCommercialProposal2Model
+                                            .value,
+                                        isenable: false,
+                                        isdropdown: true,
+                                        wantsuffix: false,
+                                        usegesture: true,
+                                        gestureFunction: () {
+                                          SimplePdfPicker.pickPdf(
+                                            onFileSelected: (filePath, fileName) {
+                                              final file = File(filePath);
+                                              controller
+                                                  .setfinalCommercialProposalFile(
+                                                    file,
+                                                  );
+                                              controller
+                                                      .finalCommercialProposal2Ctr
                                                       .text =
                                                   fileName;
 
