@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide ScreenType;
@@ -35,6 +36,13 @@ class CategoryModel {
   final String name;
 
   CategoryModel({required this.id, required this.name});
+}
+
+class StatusItem {
+  final String label;
+  final String value;
+
+  const StatusItem({required this.label, required this.value});
 }
 
 class UploadFile {
@@ -230,7 +238,10 @@ class AddLeadsController extends GetxController {
       searchLeadCategoryCtr,
       searchRequiredSolutionTypeCtr,
       searchRequiredSolutionCtr,
-      searchRoofNatureCtr;
+      searchRoofNatureCtr,
+      leadStatusCtr,
+      firstTechnicalProposal1Ctr,
+      finalTechnicalProposal2Ctr;
 
   // FocusNodes
   late FocusNode companyNameNode,
@@ -274,7 +285,10 @@ class AddLeadsController extends GetxController {
       searchLeadCategoryNode,
       searchRequiredSolutionTypeNode,
       searchRequiredSolutionNode,
-      searchRoofNatureNode;
+      searchRoofNatureNode,
+      leadStatusNode,
+      firstTechnicalProposal1Node,
+      finalTechnicalProposal2Node;
 
   // Validation Models
   var companyNameModel = ValidationModel(null, null, isValidate: false).obs;
@@ -358,6 +372,20 @@ class AddLeadsController extends GetxController {
   ).obs;
   var otherRemarksModel = ValidationModel(null, null, isValidate: false).obs;
   var scheduleMeeeingModel = ValidationModel(null, null, isValidate: false).obs;
+
+  //edit
+  var leadStatusModel = ValidationModel(null, null, isValidate: false).obs;
+
+  var firstTechnicalProposal1Model = ValidationModel(
+    null,
+    null,
+    isValidate: false,
+  ).obs;
+  var finalTechnicalProposal2Model = ValidationModel(
+    null,
+    null,
+    isValidate: false,
+  ).obs;
 
   final List<String> dgSync = ['Yes', 'No'];
   String? selectDgSync;
@@ -506,6 +534,11 @@ class AddLeadsController extends GetxController {
     uploadCategoryCtr = TextEditingController();
     searchUploadCategoryCtr = TextEditingController();
 
+    //edit lead status
+    leadStatusCtr = TextEditingController();
+    firstTechnicalProposal1Ctr = TextEditingController();
+    finalTechnicalProposal2Ctr = TextEditingController();
+
     // FocusNodes
     companyNameNode = FocusNode();
     addressNode = FocusNode();
@@ -558,6 +591,11 @@ class AddLeadsController extends GetxController {
     uploadFileNode = FocusNode();
     uploadCategoryNode = FocusNode();
     searchUploadCategoryNode = FocusNode();
+
+    //edit lead status
+    leadStatusNode = FocusNode();
+    firstTechnicalProposal1Node = FocusNode();
+    finalTechnicalProposal2Node = FocusNode();
 
     update();
     super.onInit();
@@ -613,6 +651,11 @@ class AddLeadsController extends GetxController {
     uploadFileCtr.dispose();
     uploadCategoryCtr.dispose();
     searchUploadCategoryCtr.dispose();
+    //edit lead status
+    leadStatusCtr.dispose();
+
+    firstTechnicalProposal1Ctr.dispose();
+    finalTechnicalProposal2Ctr.dispose();
 
     // Dispose focus nodes
     companyNameNode.dispose();
@@ -672,6 +715,10 @@ class AddLeadsController extends GetxController {
     searchRequiredSolutionTypeNode.dispose();
     searchRequiredSolutionNode.dispose();
     searchRoofNatureNode.dispose();
+    //edit lead status
+    leadStatusNode.dispose();
+    firstTechnicalProposal1Node.dispose();
+    finalTechnicalProposal2Node.dispose();
 
     super.dispose();
   }
@@ -2100,7 +2147,12 @@ class AddLeadsController extends GetxController {
     // if (!groundSizeLengthModel.value.isValidate) isValid = false;
     // if (!groundSizeBreadthModel.value.isValidate) isValid = false;
     // if (!otherRemarksModel.value.isValidate) isValid = false;
-    if (!scheduleMeeeingModel.value.isValidate) isValid = false;
+
+    if (isEditMode.value == false) {
+      if (!scheduleMeeeingModel.value.isValidate) isValid = false;
+    } else {
+      if (!leadStatusModel.value.isValidate) isValid = false;
+    }
     isStep2Valid.value = isValid;
     update();
   }
@@ -3152,6 +3204,113 @@ class AddLeadsController extends GetxController {
     }
   }
 
+  //dropdown
+  RxBool isEditMode = false.obs;
+
+  //technical proposal
+  List<StatusItem> leadStatusTechnical = [
+    StatusItem(label: "New Lead", value: "new_lead"),
+    StatusItem(label: "Technical Proposal", value: "technical_proposal"),
+  ];
+  RxBool isTechnicalProposalMode = false.obs;
+  final Rx<File?> firstTechnicalProposalFile = Rx<File?>(null);
+
+  final Rx<File?> finalTechnicalProposalFile = Rx<File?>(null);
+
+  void setTechnicalProposalFile(File file) {
+    firstTechnicalProposalFile.value = file;
+    update();
+  }
+
+  void setfinalTechnicalProposalFile(File file) {
+    finalTechnicalProposalFile.value = file;
+    update();
+  }
+
+  resetTechincalProposal() {
+    isTechnicalProposalMode.value = false;
+    firstTechnicalProposal1Ctr.clear();
+    finalTechnicalProposal2Ctr.clear();
+    firstTechnicalProposalFile.value = null;
+    finalTechnicalProposalFile.value = null;
+    leadStatusCtr.clear();
+    selectedLeadStatusvalue.value = '';
+    leadStatusList.clear();
+    update();
+  }
+
+  RxString selectedLeadStatusvalue = ''.obs;
+  RxList<StatusItem> leadStatusList = <StatusItem>[].obs;
+
+  void validateLeadStatus(String? val) {
+    leadStatusModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Select Lead Status";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  Widget setLeadStatusstDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        leadStatusList,
+        controller: leadStatusCtr,
+        noDataLable: "No Roof Nature",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: leadStatusList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                final selectedItem = leadStatusList[index];
+                leadStatusCtr.text = selectedItem.label;
+                selectedLeadStatusvalue.value = selectedItem.value;
+
+                validateLeadStatus(leadStatusCtr.text);
+                if (selectedLeadStatusvalue.value == "technical_proposal") {
+                  isTechnicalProposalMode.value = true;
+                } else {
+                  firstTechnicalProposalFile.value = null;
+                  finalTechnicalProposalFile.value = null;
+                  firstTechnicalProposal1Ctr.clear();
+                  finalTechnicalProposal2Ctr.clear();
+                  isTechnicalProposalMode.value = false;
+                }
+                Get.back();
+              },
+              title: buildSelectableRow(
+                leadStatusList[index].label,
+                leadStatusList[index].label.trim() == leadStatusCtr.text.trim(),
+              ),
+            );
+          },
+        ),
+      );
+    });
+  }
+
   Future<void> getLeadDataByIdList(
     BuildContext context,
     bool isLoading,
@@ -3179,6 +3338,18 @@ class AddLeadsController extends GetxController {
         if (result == null) return;
 
         logcat("onResponse::", jsonEncode(result));
+
+        if (result.availableNextStatuses != null) {
+          for (var status in result.availableNextStatuses!) {
+            switch (status) {
+              case 'technical_proposal':
+                // isTechnicalProposalMode.value = true;
+                leadStatusList.assignAll(leadStatusTechnical);
+                leadStatusCtr.text = leadStatusList.first.label;
+                break;
+            }
+          }
+        }
 
         // 🔹 Helper: safely set text controller values
         void setText(TextEditingController ctr, dynamic value) =>

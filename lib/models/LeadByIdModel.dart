@@ -68,7 +68,7 @@ class LeadData {
   List<UploadedFile>? uploadedFiles;
   Payment? payment;
   Meeting? meeting;
-  List<dynamic>? availableNextStatuses;
+  List<String>? availableNextStatuses; // ✅ changed to List<String>
   String? scheduledAt;
   String? rescheduleReason;
   String? countryName;
@@ -179,7 +179,9 @@ class LeadData {
           ),
     payment: json["payment"] != null ? Payment.fromJson(json["payment"]) : null,
     meeting: json["meeting"] != null ? Meeting.fromJson(json["meeting"]) : null,
-    availableNextStatuses: json["available_next_statuses"] ?? [],
+    availableNextStatuses: json["available_next_statuses"] == null
+        ? []
+        : List<String>.from(json["available_next_statuses"].map((x) => x)),
     scheduledAt: json["scheduled_at"],
     rescheduleReason: json["reschedule_reason"],
     countryName: json["country_name"],
@@ -230,7 +232,7 @@ class LeadData {
     "uploaded_files": uploadedFiles?.map((x) => x.toJson()).toList(),
     "payment": payment?.toJson(),
     "meeting": meeting?.toJson(),
-    "available_next_statuses": availableNextStatuses,
+    "available_next_statuses": availableNextStatuses ?? [],
     "scheduled_at": scheduledAt,
     "reschedule_reason": rescheduleReason,
     "country_name": countryName,

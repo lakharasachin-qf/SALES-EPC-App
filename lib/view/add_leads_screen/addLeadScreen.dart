@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart' hide ScreenType;
@@ -9,6 +11,7 @@ import 'package:sales_app/componant/input/form_inputs.dart';
 import 'package:sales_app/componant/input/getReactiveDropdown.dart';
 import 'package:sales_app/componant/parentWidgets/CustomeParentBackground.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
+import 'package:sales_app/componant/widgets/file_picker_util.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
@@ -64,6 +67,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
 
       // After that, if editing, fetch lead data
       if (widget.isEdit == true) {
+        controller.isEditMode.value = true;
         await controller.getLeadDataByIdList(
           context,
           false,
@@ -84,7 +88,6 @@ class _AddLeadScreenState extends State<AddLeadScreen>
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       logcat("IsEdit::", widget.isEdit.toString());
-
       initAllData();
     });
   }
@@ -1067,35 +1070,184 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable("Schedule Meeting", isRequired: true),
+
+                              widget.isEdit == false
+                                  ? const SizedBox.shrink()
+                                  : getLable("Lead Status", isRequired: true),
+                              widget.isEdit == false
+                                  ? const SizedBox.shrink()
+                                  : Obx(() {
+                                      return getReactiveFormField(
+                                        node: controller.leadStatusNode,
+                                        controller: controller.leadStatusCtr,
+                                        hintLabel: "Select Lead Status",
+                                        onChanged: (val) {
+                                          controller.validateRoofNature(val);
+                                        },
+                                        onTap: () {
+                                          commonDropDownDialog(
+                                            context,
+                                            content: controller
+                                                .setLeadStatusstDialog(),
+                                            title: "Lead Status",
+                                            onCloseClick: () {},
+                                          ).then((_) {});
+                                        },
+                                        formType: FieldType.text,
+                                        wantSuffix: true,
+                                        isdown: true,
+                                        isReadOnly: true,
+                                        inputType: TextInputType.none,
+                                        errorText: controller
+                                            .roofNatureModel
+                                            .value
+                                            .error,
+                                      );
+                                    }),
+                              controller.isTechnicalProposalMode.value == true
+                                  ? getDynamicSizedBox(height: 2.h)
+                                  : SizedBox.shrink(),
+
                               Obx(() {
-                                return getReactiveFormField(
-                                  node: controller.scheduleMeetingNode,
-                                  controller: controller.scheduleMeetingCtr,
-                                  hintLabel: "Select Schedule Meeting",
-                                  onChanged: (val) {
-                                    controller.validateScheduleMeeting(val);
-                                  },
-                                  onTap: () {
-                                    controller.openDatePicker(
-                                      context: context,
-                                      title: 'Select Start Date',
-                                      controller: controller.scheduleMeetingCtr,
-                                      dateRx: controller.startDate,
-                                      model: controller.scheduleMeeeingModel,
-                                    );
-                                  },
-                                  formType: FieldType.text,
-                                  wantSuffix: true,
-                                  isdown: true,
-                                  isReadOnly: true,
-                                  inputType: TextInputType.none,
-                                  errorText: controller
-                                      .scheduleMeeeingModel
-                                      .value
-                                      .error,
-                                );
+                                return controller
+                                            .isTechnicalProposalMode
+                                            .value ==
+                                        true
+                                    ? getTextField(
+                                        context: context,
+                                        wantLabel: true,
+                                        isBorderSideEnable: true,
+                                        label: 'First Technical Proposal',
+                                        ctr: controller
+                                            .firstTechnicalProposal1Ctr,
+                                        node: controller
+                                            .firstTechnicalProposal1Node,
+                                        model: controller
+                                            .firstTechnicalProposal1Model
+                                            .value,
+                                        isenable: false,
+                                        isdropdown: true,
+                                        wantsuffix: false,
+                                        usegesture: true,
+                                        gestureFunction: () {
+                                          SimplePdfPicker.pickPdf(
+                                            onFileSelected: (filePath, fileName) {
+                                              // Convert path to File
+                                              final file = File(filePath);
+
+                                              // Store in your controller Rx variable
+                                              controller
+                                                  .setTechnicalProposalFile(
+                                                    file,
+                                                  );
+
+                                              // Optional: update the TextEditingController to display file name
+                                              controller
+                                                      .firstTechnicalProposal1Ctr
+                                                      .text =
+                                                  fileName;
+
+                                              print('File path: $filePath');
+                                              print('File name: $fileName');
+                                            },
+                                          );
+                                        },
+
+                                        hint: 'Select File',
+                                        isRequired: false,
+                                      )
+                                    : SizedBox.shrink();
                               }),
+                              controller.isTechnicalProposalMode.value == true
+                                  ? getDynamicSizedBox(height: 2.h)
+                                  : SizedBox.shrink(),
+                              Obx(() {
+                                return controller
+                                            .isTechnicalProposalMode
+                                            .value ==
+                                        true
+                                    ? getTextField(
+                                        context: context,
+                                        wantLabel: true,
+                                        isBorderSideEnable: true,
+                                        label: 'Final Technical Proposal',
+                                        ctr: controller
+                                            .finalTechnicalProposal2Ctr,
+                                        node: controller
+                                            .finalTechnicalProposal2Node,
+                                        model: controller
+                                            .finalTechnicalProposal2Model
+                                            .value,
+                                        isenable: false,
+                                        isdropdown: true,
+                                        wantsuffix: false,
+                                        usegesture: true,
+                                        gestureFunction: () {
+                                          SimplePdfPicker.pickPdf(
+                                            onFileSelected: (filePath, fileName) {
+                                              final file = File(filePath);
+                                              controller
+                                                  .setfinalTechnicalProposalFile(
+                                                    file,
+                                                  );
+                                              controller
+                                                      .finalTechnicalProposal2Ctr
+                                                      .text =
+                                                  fileName;
+
+                                              print('File path: $filePath');
+                                              print('File name: $fileName');
+                                            },
+                                          );
+                                        },
+
+                                        hint: 'Select File',
+                                        isRequired: false,
+                                      )
+                                    : SizedBox.shrink();
+                              }),
+
+                              widget.isEdit
+                                  ? const SizedBox.shrink()
+                                  : getLable(
+                                      "Schedule Meeting",
+                                      isRequired: true,
+                                    ),
+                              widget.isEdit
+                                  ? const SizedBox.shrink()
+                                  : Obx(() {
+                                      return getReactiveFormField(
+                                        node: controller.scheduleMeetingNode,
+                                        controller:
+                                            controller.scheduleMeetingCtr,
+                                        hintLabel: "Select Schedule Meeting",
+                                        onChanged: (val) {
+                                          controller.validateScheduleMeeting(
+                                            val,
+                                          );
+                                        },
+                                        onTap: () {
+                                          controller.openDatePicker(
+                                            context: context,
+                                            title: 'Select Start Date',
+                                            controller:
+                                                controller.scheduleMeetingCtr,
+                                            dateRx: controller.startDate,
+                                            model:
+                                                controller.scheduleMeeeingModel,
+                                          );
+                                        },
+                                        formType: FieldType.text,
+                                        wantSuffix: true,
+                                        isdown: true,
+                                        isReadOnly: true,
+                                        inputType: TextInputType.none,
+                                        errorText: controller
+                                            .scheduleMeeeingModel
+                                            .value
+                                            .error,
+                                      );
+                                    }),
                               getDynamicSizedBox(height: 2.h),
                             ],
                             // Step 3: Location Details
