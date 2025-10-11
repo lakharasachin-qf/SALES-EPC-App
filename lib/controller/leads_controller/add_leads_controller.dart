@@ -2004,6 +2004,54 @@ class AddLeadsController extends GetxController {
     update();
   }
 
+  RxBool isvalidateAddLoadElement = false.obs;
+
+  resetvalidationOfAddLoadElement() {
+    isvalidateAddLoadElement.value = false;
+    deviceNameCtr.clear();
+    categoryCtr.clear();
+    powerCtr.clear();
+    usageHrsCtr.clear();
+    energyWhCtr.clear();
+    energyKWhCtr.clear();
+
+    // Reset validation models
+    deviceNameModel.update((m) {
+      m!.error = null;
+      m.isValidate = false;
+    });
+    categoryModel.update((m) {
+      m!.error = null;
+      m.isValidate = false;
+    });
+    powerModel.update((m) {
+      m!.error = null;
+      m.isValidate = false;
+    });
+    usageHrsModel.update((m) {
+      m!.error = null;
+      m.isValidate = false;
+    });
+    energyWhModel.update((m) {
+      m!.error = null;
+      m.isValidate = false;
+    });
+    energyKWhModel.update((m) {
+      m!.error = null;
+      m.isValidate = false;
+    });
+  }
+
+  void validateAddLoadElement() {
+    final isValid =
+        deviceNameModel.value.isValidate &&
+        categoryModel.value.isValidate &&
+        powerModel.value.isValidate &&
+        usageHrsModel.value.isValidate;
+
+    isvalidateAddLoadElement.value = isValid;
+  }
+
   void validateStep2() {
     bool isValid = true;
     // if (!peakMonthlyEnergyModel.value.isValidate) isValid = false;
@@ -2081,7 +2129,9 @@ class AddLeadsController extends GetxController {
       usageHrsCtr.text = loadElementItem.usageHrs;
       energyWhCtr.text = loadElementItem.energyWh;
       energyKWhCtr.text = loadElementItem.energyKWh;
+      validateAddLoadElement();
     } else {
+      resetvalidationOfAddLoadElement();
       deviceNameCtr.clear();
       categoryCtr.clear();
       powerCtr.clear();
@@ -2146,38 +2196,7 @@ class AddLeadsController extends GetxController {
                           child: InkWell(
                             onTap: () {
                               // Clear all controllers
-                              deviceNameCtr.clear();
-                              categoryCtr.clear();
-                              powerCtr.clear();
-                              usageHrsCtr.clear();
-                              energyWhCtr.clear();
-                              energyKWhCtr.clear();
-
-                              // Reset validation models
-                              deviceNameModel.update((m) {
-                                m!.error = null;
-                                m.isValidate = true;
-                              });
-                              categoryModel.update((m) {
-                                m!.error = null;
-                                m.isValidate = true;
-                              });
-                              powerModel.update((m) {
-                                m!.error = null;
-                                m.isValidate = true;
-                              });
-                              usageHrsModel.update((m) {
-                                m!.error = null;
-                                m.isValidate = true;
-                              });
-                              energyWhModel.update((m) {
-                                m!.error = null;
-                                m.isValidate = true;
-                              });
-                              energyKWhModel.update((m) {
-                                m!.error = null;
-                                m.isValidate = true;
-                              });
+                              resetvalidationOfAddLoadElement();
 
                               Navigator.pop(context);
                             },
@@ -2212,7 +2231,7 @@ class AddLeadsController extends GetxController {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          getLable("Device Name"),
+                          getLable("Device Name", isRequired: true),
                           AnimatedSize(
                             duration: const Duration(milliseconds: 300),
                             child: Obx(() {
@@ -2230,6 +2249,7 @@ class AddLeadsController extends GetxController {
                                       model.isValidate = true;
                                     }
                                   });
+                                  validateAddLoadElement();
                                 },
                                 inputType: TextInputType.text,
                                 formType: FieldType.text,
@@ -2239,7 +2259,7 @@ class AddLeadsController extends GetxController {
                             }),
                           ),
                           getDynamicSizedBox(height: 1.h),
-                          getLable("Category"),
+                          getLable("Category", isRequired: true),
                           AnimatedSize(
                             duration: const Duration(milliseconds: 300),
                             child: Obx(() {
@@ -2257,6 +2277,7 @@ class AddLeadsController extends GetxController {
                                       model.isValidate = true;
                                     }
                                   });
+                                  validateAddLoadElement();
                                 },
                                 inputType: TextInputType.text,
                                 formType: FieldType.text,
@@ -2266,13 +2287,14 @@ class AddLeadsController extends GetxController {
                             }),
                           ),
                           getDynamicSizedBox(height: 1.h),
-                          getLable("Power (W)"),
+                          getLable("Power (W)", isRequired: true),
                           AnimatedSize(
                             duration: const Duration(milliseconds: 300),
                             child: Obx(() {
                               return getReactiveFormField(
                                 node: powerNode,
                                 controller: powerCtr,
+
                                 hintLabel: "Enter Power (W)",
                                 onChanged: (val) {
                                   powerModel.update((model) {
@@ -2290,6 +2312,10 @@ class AddLeadsController extends GetxController {
                                       model.isValidate = true;
                                     }
                                   });
+                                  validateAddLoadElement();
+
+                                  /// 🔹 Recalculate Energy automatically
+                                  calculateEnergy();
                                 },
                                 inputType: TextInputType.number,
                                 formType: FieldType.text,
@@ -2299,7 +2325,7 @@ class AddLeadsController extends GetxController {
                             }),
                           ),
                           getDynamicSizedBox(height: 1.h),
-                          getLable("Usage (hrs)"),
+                          getLable("Usage (hrs)", isRequired: true),
                           AnimatedSize(
                             duration: const Duration(milliseconds: 300),
                             child: Obx(() {
@@ -2324,6 +2350,10 @@ class AddLeadsController extends GetxController {
                                       model.isValidate = true;
                                     }
                                   });
+                                  validateAddLoadElement();
+
+                                  /// 🔹 Recalculate Energy automatically
+                                  calculateEnergy();
                                 },
                                 inputType: TextInputType.number,
                                 formType: FieldType.text,
@@ -2332,6 +2362,7 @@ class AddLeadsController extends GetxController {
                               );
                             }),
                           ),
+
                           getDynamicSizedBox(height: 1.h),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -2340,9 +2371,8 @@ class AddLeadsController extends GetxController {
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    getLable("Energy (Wh)"),
+                                    getLable("Energy (Wh)", isVerified: true),
                                     AnimatedSize(
                                       duration: const Duration(
                                         milliseconds: 300,
@@ -2352,28 +2382,12 @@ class AddLeadsController extends GetxController {
                                           node: energyWhNode,
                                           controller: energyWhCtr,
                                           hintLabel: "Energy (Wh)",
-                                          onChanged: (val) {
-                                            energyWhModel.update((model) {
-                                              if (val == null ||
-                                                  val.trim().isEmpty) {
-                                                model!.error =
-                                                    "Energy (Wh) is required";
-                                                model.isValidate = false;
-                                              } else if (double.tryParse(val) ==
-                                                  null) {
-                                                model!.error =
-                                                    "Enter valid energy (Wh)";
-                                                model.isValidate = false;
-                                              } else {
-                                                model!.error = null;
-                                                model.isValidate = true;
-                                              }
-                                            });
-                                          },
+                                          isEnable: false,
                                           inputType: TextInputType.number,
                                           formType: FieldType.text,
                                           wantSuffix: false,
                                           errorText: energyWhModel.value.error,
+                                          onChanged: (String? val) {},
                                         );
                                       }),
                                     ),
@@ -2384,9 +2398,8 @@ class AddLeadsController extends GetxController {
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    getLable("Energy (KWh)"),
+                                    getLable("Energy (KWh)", isVerified: true),
                                     AnimatedSize(
                                       duration: const Duration(
                                         milliseconds: 300,
@@ -2396,28 +2409,12 @@ class AddLeadsController extends GetxController {
                                           node: energyKWhNode,
                                           controller: energyKWhCtr,
                                           hintLabel: "Energy (KWh)",
-                                          onChanged: (val) {
-                                            energyKWhModel.update((model) {
-                                              if (val == null ||
-                                                  val.trim().isEmpty) {
-                                                model!.error =
-                                                    "Energy (KWh) is required";
-                                                model.isValidate = false;
-                                              } else if (double.tryParse(val) ==
-                                                  null) {
-                                                model!.error =
-                                                    "Enter valid energy (KWh)";
-                                                model.isValidate = false;
-                                              } else {
-                                                model!.error = null;
-                                                model.isValidate = true;
-                                              }
-                                            });
-                                          },
+                                          isEnable: false,
                                           inputType: TextInputType.number,
                                           formType: FieldType.text,
                                           wantSuffix: false,
                                           errorText: energyKWhModel.value.error,
+                                          onChanged: (String? val) {},
                                         );
                                       }),
                                     ),
@@ -2434,6 +2431,7 @@ class AddLeadsController extends GetxController {
                                 child: getFormButton(
                                   context,
                                   () {
+                                    resetvalidationOfAddLoadElement();
                                     Get.back();
                                   },
                                   'Cancel',
@@ -2442,40 +2440,36 @@ class AddLeadsController extends GetxController {
                               ),
                               getDynamicSizedBox(width: 3.w),
                               Expanded(
-                                child: getFormButton(
-                                  context,
-                                  () {
-                                    if (deviceNameModel.value.isValidate &&
-                                        categoryModel.value.isValidate &&
-                                        powerModel.value.isValidate &&
-                                        usageHrsModel.value.isValidate &&
-                                        energyWhModel.value.isValidate &&
-                                        energyKWhModel.value.isValidate) {
-                                      final newElement = LoadElement(
-                                        deviceName: deviceNameCtr.text,
-                                        category: categoryCtr.text,
-                                        power: powerCtr.text,
-                                        usageHrs: usageHrsCtr.text,
-                                        energyWh: energyWhCtr.text,
-                                        energyKWh: energyKWhCtr.text,
-                                      );
-                                      if (index == null) {
-                                        addLoad(newElement);
-                                      } else {
-                                        updateLoad(index, newElement);
+                                child: Obx(() {
+                                  return getFormButton(
+                                    context,
+                                    () {
+                                      if (deviceNameModel.value.isValidate &&
+                                          categoryModel.value.isValidate &&
+                                          powerModel.value.isValidate &&
+                                          usageHrsModel.value.isValidate &&
+                                          energyWhModel.value.isValidate &&
+                                          energyKWhModel.value.isValidate) {
+                                        final newElement = LoadElement(
+                                          deviceName: deviceNameCtr.text,
+                                          category: categoryCtr.text,
+                                          power: powerCtr.text,
+                                          usageHrs: usageHrsCtr.text,
+                                          energyWh: energyWhCtr.text,
+                                          energyKWh: energyKWhCtr.text,
+                                        );
+                                        if (index == null) {
+                                          addLoad(newElement);
+                                        } else {
+                                          updateLoad(index, newElement);
+                                        }
+                                        Get.back();
                                       }
-                                      Get.back();
-                                    }
-                                  },
-                                  loadElementItem != null ? "Update" : 'Add',
-                                  validate:
-                                      deviceNameModel.value.isValidate &&
-                                      categoryModel.value.isValidate &&
-                                      powerModel.value.isValidate &&
-                                      usageHrsModel.value.isValidate &&
-                                      energyWhModel.value.isValidate &&
-                                      energyKWhModel.value.isValidate,
-                                ),
+                                    },
+                                    loadElementItem != null ? "Update" : 'Add',
+                                    validate: isvalidateAddLoadElement.value,
+                                  );
+                                }),
                               ),
                             ],
                           ),
@@ -3180,5 +3174,30 @@ class AddLeadsController extends GetxController {
     validateDistrict(districtCtr.text);
     applyFilterForDistrict('');
     update();
+  }
+
+  void calculateEnergy() {
+    final power = double.tryParse(powerCtr.text.trim());
+    final usage = double.tryParse(usageHrsCtr.text.trim());
+
+    if (power != null && usage != null && power >= 0 && usage >= 0) {
+      final energyWh = power * usage;
+      final energyKWh = energyWh / 1000;
+
+      energyWhCtr.text = energyWh.toStringAsFixed(2);
+      energyKWhCtr.text = energyKWh.toStringAsFixed(3);
+
+      energyWhModel.update((model) {
+        model!.error = null;
+        model.isValidate = true;
+      });
+      energyKWhModel.update((model) {
+        model!.error = null;
+        model.isValidate = true;
+      });
+    } else {
+      energyWhCtr.text = '';
+      energyKWhCtr.text = '';
+    }
   }
 }
