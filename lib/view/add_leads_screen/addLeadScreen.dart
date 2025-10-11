@@ -701,44 +701,128 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                               }),
                               getDynamicSizedBox(height: 2.h),
                               getLable("Purpose of Solarization"),
-                              Obx(() {
-                                return getReactiveFormField(
-                                  node: controller.purposeOfSolarizationNode,
-                                  controller:
-                                      controller.purposeOfSolarizationCtr,
-                                  hintLabel: "Select Purpose of Solarization",
-                                  onChanged: (val) {
-                                    // controller.validatePurposeOfSolarization(
-                                    //   val,
-                                    // );
-                                  },
-                                  onTap: () {
-                                    controller.searchPurposeOfSolarizationCtr
-                                        .clear();
-                                    commonDropDownDialog(
-                                      context,
-                                      content: controller
-                                          .setPurposeOfSolarisationListDialog(),
-                                      title: "Purpose of Solarization",
-                                      onCloseClick: () {
-                                        controller
-                                            .applyFilterForPurposeOfSolarisation(
-                                              '',
-                                            );
-                                      },
-                                    ).then((_) {});
-                                  },
-                                  formType: FieldType.text,
-                                  wantSuffix: true,
-                                  isdown: true,
-                                  isReadOnly: true,
-                                  inputType: TextInputType.none,
-                                  errorText: controller
-                                      .purposeOfSolarizationModel
-                                      .value
-                                      .error,
-                                );
-                              }),
+                              Row(
+                                children: [
+                                  Obx(() {
+                                    return Expanded(
+                                      child: getReactiveFormField(
+                                        node: controller
+                                            .purposeOfSolarizationNode,
+                                        controller:
+                                            controller.purposeOfSolarizationCtr,
+                                        hintLabel:
+                                            "Select Purpose of Solarization",
+                                        onChanged: (val) {
+                                          if (controller
+                                                  .isOtherPurposeOfSolarisationVisible
+                                                  .value ==
+                                              true) {
+                                            controller
+                                                    .selectedPurposeOfSolarisationValue
+                                                    .value =
+                                                val ?? '';
+                                          }
+                                          // controller.validatePurposeOfSolarization(
+                                          //   val,
+                                          // );
+                                        },
+                                        onTap: () {
+                                          if (controller
+                                                  .isOtherPurposeOfSolarisationVisible
+                                                  .value ==
+                                              false) {
+                                            controller
+                                                .searchPurposeOfSolarizationCtr
+                                                .clear();
+                                            commonDropDownDialog(
+                                              context,
+                                              content: controller
+                                                  .setPurposeOfSolarisationListDialog(),
+                                              title: "Purpose of Solarization",
+                                              onCloseClick: () {
+                                                controller
+                                                    .applyFilterForPurposeOfSolarisation(
+                                                      '',
+                                                    );
+                                              },
+                                            ).then((_) {});
+                                          }
+                                        },
+                                        isdown:
+                                            controller
+                                                    .isOtherPurposeOfSolarisationVisible
+                                                    .value ==
+                                                false
+                                            ? true
+                                            : false,
+                                        formType: FieldType.text,
+
+                                        wantSuffix:
+                                            controller
+                                                    .isOtherPurposeOfSolarisationVisible
+                                                    .value ==
+                                                false
+                                            ? true
+                                            : false,
+
+                                        isReadOnly:
+                                            controller
+                                                .isOtherPurposeOfSolarisationVisible
+                                                .value
+                                            ? false
+                                            : true,
+                                        inputType:
+                                            controller
+                                                .isOtherPurposeOfSolarisationVisible
+                                                .value
+                                            ? TextInputType.text
+                                            : TextInputType.none,
+                                        errorText: controller
+                                            .purposeOfSolarizationModel
+                                            .value
+                                            .error,
+                                      ),
+                                    );
+                                  }),
+                                  getDynamicSizedBox(width: 1.w),
+                                  if (controller
+                                          .isOtherPurposeOfSolarisationVisible
+                                          .value ==
+                                      true)
+                                    Material(
+                                      color: Colors
+                                          .transparent, // needed if you want no background
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(
+                                          8,
+                                        ), // optional for rounded ripple
+                                        onTap: () {
+                                          controller.purposeOfSolarizationCtr
+                                              .clear();
+                                          controller
+                                                  .selectedPurposeOfSolarisationLabel
+                                                  .value =
+                                              '';
+                                          controller
+                                                  .isOtherPurposeOfSolarisationVisible
+                                                  .value =
+                                              false;
+                                          // Your tap logic here
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 1.5.w,
+                                            vertical: 1.h,
+                                          ),
+                                          child: Icon(
+                                            Icons.restore,
+                                            size: 2.5.h,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
                               getDynamicSizedBox(height: 2.h),
                               getLable("Dist. Inverter & ACDB Panel (Mtrs)"),
                               Obx(() {

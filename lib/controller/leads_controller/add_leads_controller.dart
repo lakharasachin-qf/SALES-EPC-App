@@ -1258,6 +1258,7 @@ class AddLeadsController extends GetxController {
     update();
   }
 
+  RxBool isOtherPurposeOfSolarisationVisible = false.obs;
   Widget setPurposeOfSolarisationListDialog() {
     return Obx(() {
       if (isCountryApiCallLoading.value) {
@@ -1291,6 +1292,16 @@ class AddLeadsController extends GetxController {
                 purposeOfSolarizationCtr.text = selectedItem.label;
                 selectedPurposeOfSolarisationLabel.value = selectedItem.label;
                 selectedPurposeOfSolarisationValue.value = selectedItem.value;
+
+                if (selectedPurposeOfSolarisationValue.value == 'Other') {
+                  isOtherPurposeOfSolarisationVisible.value = true;
+                  purposeOfSolarizationCtr.text = '';
+                  selectedPurposeOfSolarisationValue.value =
+                      purposeOfSolarizationCtr.text;
+                } else {
+                  isOtherPurposeOfSolarisationVisible.value = false;
+                  purposeOfSolarizationCtr.text = selectedItem.label;
+                }
                 validatePurposeOfSolarization(selectedItem.value);
                 if (purposeOfSolarizationCtr.text.toString().isNotEmpty) {
                   filterPurposeOfSolarisationList.clear();
@@ -2882,9 +2893,14 @@ class AddLeadsController extends GetxController {
         'uploaded_files[$i][file]': file.uploadFile,
       });
     }
-
-    logcat("addLeadApi::", jsonEncode(body));
+    debugPrint('my body: Starting individual field logging');
+    body.forEach((key, value) {
+      debugPrint('my body: $key = $value');
+    });
+    debugPrint('my body: Finished individual field logging');
+    // logcat("addLeadApi::", jsonEncode(body));
     // Step 4: API Call
+    return;
     await commonPostApiCallFormate(
       context,
       title: 'Add Lead Screen',
