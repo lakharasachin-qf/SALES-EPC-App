@@ -3261,7 +3261,7 @@ class AddLeadsController extends GetxController {
           result.vfdRequired,
         );
 
-        // 🔹 Product List
+        // Product List
         productDetailList
           ..clear()
           ..assignAll(
@@ -3293,7 +3293,7 @@ class AddLeadsController extends GetxController {
                 [],
           );
 
-        // 🔹 Validations (can be extracted into one helper call)
+        // Validations (can be extracted into one helper call)
         validateAll();
         update();
       },
