@@ -1,12 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart' hide ScreenType;
 import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
+import 'package:sales_app/componant/dialogs/loading_indicator.dart';
 import 'package:sales_app/componant/input/custom_text_field.dart';
 import 'package:sales_app/componant/input/form_inputs.dart';
 import 'package:sales_app/componant/input/getReactiveDropdown.dart';
 import 'package:sales_app/componant/parentWidgets/CustomeParentBackground.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
+import 'package:sales_app/componant/widgets/file_picker_util.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
@@ -18,6 +23,7 @@ import 'package:sales_app/utils/log.dart';
 import 'package:sizer/sizer.dart';
 
 // Assuming CustomLinearStepper is in a separate file or included here
+// ignore: must_be_immutable
 class AddLeadScreen extends StatefulWidget {
   final bool isEdit;
   String? leadId;
@@ -43,18 +49,47 @@ class _AddLeadScreenState extends State<AddLeadScreen>
     });
   }
 
+  Future<void> initAllData() async {
+    final loadingIndicator = LoadingProgressDialog();
+
+    try {
+      // Show loader before starting all
+      loadingIndicator.show(context, '');
+
+      // Run all API calls in parallel
+      await Future.wait<void>([
+        controller.getDropDownList(
+          context,
+          false,
+        ), // pass false to avoid inner loader
+        controller.getLatLongData(context, false),
+      ]);
+
+      // After that, if editing, fetch lead data
+      if (widget.isEdit == true) {
+        controller.isEditMode.value = true;
+        await controller.getLeadDataByIdList(
+          context,
+          false,
+          widget.leadId.toString(),
+        );
+      }
+    } catch (e) {
+      logcat("Error in initAllData: $e", '');
+    } finally {
+      // Hide loader at the very end
+      loadingIndicator.hide(context);
+    }
+  }
+
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.getLocation(context, true);
-      controller.getDropDownList(context, true);
-      controller.getLatLongData(context, true);
-      logcat("IsEdit::", widget.isEdit.toString());
-      if (widget.isEdit == true) {
-        controller.getLeadDataByIdList(context, true, widget.leadId.toString());
-      }
-    });
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      logcat("IsEdit::", widget.isEdit.toString());
+      initAllData();
+    });
   }
 
   @override
@@ -304,6 +339,10 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   },
                                   inputType: TextInputType.phone,
                                   formType: FieldType.mobile,
+                                  inputFormatters: [
+                                    LengthLimitingTextInputFormatter(10),
+                                  ],
+
                                   wantSuffix: false,
                                   errorText:
                                       controller.personMobileModel.value.error,
@@ -475,26 +514,24 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                               }),
                               getDynamicSizedBox(height: 2.h),
                               getLable("DG Sync Required"),
-                              getReactiveDropdown(
-                                hint: "Select DG Sync",
-                                // items: controller.dgSync,
-                                // selectedValue: controller.selectDgSync,
-                                items: controller.filterDgSyncRequiredList
-                                    .map((item) => item.label)
-                                    .toList(), // Display labels
-                                selectedValue:
-                                    controller
-                                        .selectedDgSyncLabel
-                                        .value
-                                        .isNotEmpty
-                                    ? controller.selectedDgSyncLabel.value
-                                    : null,
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() {
+                              Obx(
+                                () => getReactiveDropdown(
+                                  hint: "Select DG Sync",
+                                  items: controller.filterDgSyncRequiredList
+                                      .map((item) => item.label)
+                                      .toList(),
+                                  selectedValue:
+                                      controller
+                                          .selectedDgSyncLabel
+                                          .value
+                                          .isNotEmpty
+                                      ? controller.selectedDgSyncLabel.value
+                                      : null,
+                                  onChanged: (value) {
+                                    if (value != null) {
                                       controller.selectedDgSyncLabel.value =
-                                          value; // Update displayed label
-                                      // Find the corresponding value based on the selected label
+                                          value;
+
                                       final selectedItem = controller
                                           .dgSyncRequiredList
                                           .firstWhere(
@@ -503,17 +540,19 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                                 .dgSyncRequiredList
                                                 .first,
                                           );
+
                                       controller.selectedDgSyncValue.value =
-                                          selectedItem
-                                              .value; // Update API value
+                                          selectedItem.value;
+
                                       logcat(
                                         "dg_sync_required",
                                         controller.selectedDgSyncValue.value,
                                       );
-                                    });
-                                  }
-                                },
+                                    }
+                                  },
+                                ),
                               ),
+
                               getDynamicSizedBox(height: 2.h),
                               getLable(
                                 "Current Installed Solar Capacity (KWp)",
@@ -556,21 +595,23 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                               }),
                               getDynamicSizedBox(height: 2.h),
                               getLable("VFD Required"),
-                              getReactiveDropdown(
-                                hint: "Select VFD",
-                                items: controller.filterVfdRequiredList
-                                    .map((item) => item.label)
-                                    .toList(), // Display labels
-                                selectedValue:
-                                    controller.selectedVfdLabel.value.isNotEmpty
-                                    ? controller.selectedVfdLabel.value
-                                    : null,
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() {
-                                      controller.selectedVfdLabel.value =
-                                          value; // Update displayed label
-                                      // Find the corresponding value based on the selected label
+                              Obx(
+                                () => getReactiveDropdown(
+                                  hint: "Select VFD",
+                                  items: controller.filterVfdRequiredList
+                                      .map((item) => item.label)
+                                      .toList(), // Display labels
+                                  selectedValue:
+                                      controller
+                                          .selectedVfdLabel
+                                          .value
+                                          .isNotEmpty
+                                      ? controller.selectedVfdLabel.value
+                                      : null,
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      controller.selectedVfdLabel.value = value;
+
                                       final selectedItem = controller
                                           .vfdRequiredList
                                           .firstWhere(
@@ -579,18 +620,23 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                                 .vfdRequiredList
                                                 .first,
                                           );
+
                                       controller.selectedVfdValue.value =
-                                          selectedItem
-                                              .value; // Update API value
-                                      controller.vfdCtr.text =
-                                          value; // Update text controller
+                                          selectedItem.value;
+                                      controller.vfdCtr.text = value;
                                       controller.validateVFD(
                                         selectedItem.value,
-                                      ); // Validate with value
-                                    });
-                                  }
-                                },
+                                      );
+
+                                      logcat(
+                                        "vfd_required",
+                                        controller.selectedVfdValue.value,
+                                      );
+                                    }
+                                  },
+                                ),
                               ),
+
                               getDynamicSizedBox(height: 2.h),
                               getLable("Grid Availability (Hours)"),
                               Obx(() {
@@ -603,6 +649,10 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.mobile,
+                                  inputFormatters: [
+                                    LengthLimitingTextInputFormatter(2),
+                                  ],
+
                                   wantSuffix: false,
                                   errorText: controller
                                       .gridAvailabilityModel
@@ -620,7 +670,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.peakMonthlyEnergyCtr,
                                   hintLabel: "Enter Peak Monthly Energy Cons",
                                   onChanged: (val) {
-                                    // controller.validatePeakMonthlyEnergy(val);
+                                    controller.validatePeakMonthlyEnergy(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -639,7 +689,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.requiredSolarCapCtr,
                                   hintLabel: "Enter Required Solar Cap",
                                   onChanged: (val) {
-                                    // controller.validateRequiredSolarCap(val);
+                                    controller.validateRequiredSolarCap(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -662,9 +712,9 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   hintLabel:
                                       "Enter Distance to Nearest Transformer",
                                   onChanged: (val) {
-                                    // controller.validateDistanceToTransformer(
-                                    //   val,
-                                    // );
+                                    controller.validateDistanceToTransformer(
+                                      val,
+                                    );
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -684,7 +734,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   hintLabel:
                                       "Enter Rating of Nearest Transformer",
                                   onChanged: (val) {
-                                    // controller.validateRatingOfTransformer(val);
+                                    controller.validateRatingOfTransformer(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -697,44 +747,128 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                               }),
                               getDynamicSizedBox(height: 2.h),
                               getLable("Purpose of Solarization"),
-                              Obx(() {
-                                return getReactiveFormField(
-                                  node: controller.purposeOfSolarizationNode,
-                                  controller:
-                                      controller.purposeOfSolarizationCtr,
-                                  hintLabel: "Select Purpose of Solarization",
-                                  onChanged: (val) {
-                                    // controller.validatePurposeOfSolarization(
-                                    //   val,
-                                    // );
-                                  },
-                                  onTap: () {
-                                    controller.searchPurposeOfSolarizationCtr
-                                        .clear();
-                                    commonDropDownDialog(
-                                      context,
-                                      content: controller
-                                          .setPurposeOfSolarisationListDialog(),
-                                      title: "Purpose of Solarization",
-                                      onCloseClick: () {
-                                        controller
-                                            .applyFilterForPurposeOfSolarisation(
-                                              '',
-                                            );
-                                      },
-                                    ).then((_) {});
-                                  },
-                                  formType: FieldType.text,
-                                  wantSuffix: true,
-                                  isdown: true,
-                                  isReadOnly: true,
-                                  inputType: TextInputType.none,
-                                  errorText: controller
-                                      .purposeOfSolarizationModel
-                                      .value
-                                      .error,
-                                );
-                              }),
+                              Row(
+                                children: [
+                                  Obx(() {
+                                    return Expanded(
+                                      child: getReactiveFormField(
+                                        node: controller
+                                            .purposeOfSolarizationNode,
+                                        controller:
+                                            controller.purposeOfSolarizationCtr,
+                                        hintLabel:
+                                            "Select Purpose of Solarization",
+                                        onChanged: (val) {
+                                          if (controller
+                                                  .isOtherPurposeOfSolarisationVisible
+                                                  .value ==
+                                              true) {
+                                            controller
+                                                    .selectedPurposeOfSolarisationValue
+                                                    .value =
+                                                val ?? '';
+                                          }
+                                          // controller.validatePurposeOfSolarization(
+                                          //   val,
+                                          // );
+                                        },
+                                        onTap: () {
+                                          if (controller
+                                                  .isOtherPurposeOfSolarisationVisible
+                                                  .value ==
+                                              false) {
+                                            controller
+                                                .searchPurposeOfSolarizationCtr
+                                                .clear();
+                                            commonDropDownDialog(
+                                              context,
+                                              content: controller
+                                                  .setPurposeOfSolarisationListDialog(),
+                                              title: "Purpose of Solarization",
+                                              onCloseClick: () {
+                                                controller
+                                                    .applyFilterForPurposeOfSolarisation(
+                                                      '',
+                                                    );
+                                              },
+                                            ).then((_) {});
+                                          }
+                                        },
+                                        isdown:
+                                            controller
+                                                    .isOtherPurposeOfSolarisationVisible
+                                                    .value ==
+                                                false
+                                            ? true
+                                            : false,
+                                        formType: FieldType.text,
+
+                                        wantSuffix:
+                                            controller
+                                                    .isOtherPurposeOfSolarisationVisible
+                                                    .value ==
+                                                false
+                                            ? true
+                                            : false,
+
+                                        isReadOnly:
+                                            controller
+                                                .isOtherPurposeOfSolarisationVisible
+                                                .value
+                                            ? false
+                                            : true,
+                                        inputType:
+                                            controller
+                                                .isOtherPurposeOfSolarisationVisible
+                                                .value
+                                            ? TextInputType.text
+                                            : TextInputType.none,
+                                        errorText: controller
+                                            .purposeOfSolarizationModel
+                                            .value
+                                            .error,
+                                      ),
+                                    );
+                                  }),
+                                  getDynamicSizedBox(width: 1.w),
+                                  if (controller
+                                          .isOtherPurposeOfSolarisationVisible
+                                          .value ==
+                                      true)
+                                    Material(
+                                      color: Colors
+                                          .transparent, // needed if you want no background
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(
+                                          8,
+                                        ), // optional for rounded ripple
+                                        onTap: () {
+                                          controller.purposeOfSolarizationCtr
+                                              .clear();
+                                          controller
+                                                  .selectedPurposeOfSolarisationLabel
+                                                  .value =
+                                              '';
+                                          controller
+                                                  .isOtherPurposeOfSolarisationVisible
+                                                  .value =
+                                              false;
+                                          // Your tap logic here
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 1.5.w,
+                                            vertical: 1.h,
+                                          ),
+                                          child: Icon(
+                                            Icons.restore,
+                                            size: 2.5.h,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
                               getDynamicSizedBox(height: 2.h),
                               getLable("Dist. Inverter & ACDB Panel (Mtrs)"),
                               Obx(() {
@@ -744,7 +878,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   hintLabel:
                                       "Enter Dist. Inverter & ACDB Panel",
                                   onChanged: (val) {
-                                    // controller.validateDistInverterACDB(val);
+                                    controller.validateDistInverterACDB(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -764,7 +898,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   hintLabel:
                                       "Enter Dist. Solar & ACDB Panel (Mtrs)",
                                   onChanged: (val) {
-                                    // controller.validateDistSolarACDB(val);
+                                    controller.validateDistSolarACDB(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -781,7 +915,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.buildingHeightCtr,
                                   hintLabel: "Enter Building Height (Floors)",
                                   onChanged: (val) {
-                                    // controller.validateBuildingHeight(val);
+                                    controller.validateBuildingHeight(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -800,7 +934,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.roofSizeLengthCtr,
                                   hintLabel: "Enter Roof Size Length",
                                   onChanged: (val) {
-                                    // controller.validateRoofSizeLength(val);
+                                    controller.validateRoofSizeLength(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -819,7 +953,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.roofSizeBreadthCtr,
                                   hintLabel: "Enter Roof Size Breadth",
                                   onChanged: (val) {
-                                    // controller.validateRoofSizeBreadth(val);
+                                    controller.validateRoofSizeBreadth(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -869,7 +1003,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.ageOfMetalSheetCtr,
                                   hintLabel: "Enter Age of Metal Sheet",
                                   onChanged: (val) {
-                                    // controller.validateAgeOfMetalSheet(val);
+                                    controller.validateAgeOfMetalSheet(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -888,7 +1022,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.groundSizeLengthCtr,
                                   hintLabel: "Enter Ground Size Length",
                                   onChanged: (val) {
-                                    // controller.validateGroundSizeLength(val);
+                                    controller.validateGroundSizeLength(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -907,7 +1041,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller: controller.groundSizeBreadthCtr,
                                   hintLabel: "Enter Ground Size Breadth",
                                   onChanged: (val) {
-                                    // controller.validateGroundSizeBreadth(val);
+                                    controller.validateGroundSizeBreadth(val);
                                   },
                                   inputType: TextInputType.number,
                                   formType: FieldType.text,
@@ -936,35 +1070,307 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable("Schedule Meeting", isRequired: true),
+
+                              widget.isEdit == false
+                                  ? const SizedBox.shrink()
+                                  : getLable("Lead Status", isRequired: true),
+                              widget.isEdit == false
+                                  ? const SizedBox.shrink()
+                                  : Obx(() {
+                                      return getReactiveFormField(
+                                        node: controller.leadStatusNode,
+                                        controller: controller.leadStatusCtr,
+                                        hintLabel: "Select Lead Status",
+                                        onChanged: (val) {
+                                          controller.validateRoofNature(val);
+                                        },
+                                        onTap: () {
+                                          commonDropDownDialog(
+                                            context,
+                                            content: controller
+                                                .setLeadStatusstDialog(),
+                                            title: "Lead Status",
+                                            onCloseClick: () {},
+                                          ).then((_) {});
+                                        },
+                                        formType: FieldType.text,
+                                        wantSuffix: true,
+                                        isdown: true,
+                                        isReadOnly: true,
+                                        inputType: TextInputType.none,
+                                        errorText: controller
+                                            .roofNatureModel
+                                            .value
+                                            .error,
+                                      );
+                                    }),
                               Obx(() {
-                                return getReactiveFormField(
-                                  node: controller.scheduleMeetingNode,
-                                  controller: controller.scheduleMeetingCtr,
-                                  hintLabel: "Select Schedule Meeting",
-                                  onChanged: (val) {
-                                    controller.validateScheduleMeeting(val);
-                                  },
-                                  onTap: () {
-                                    controller.openDatePicker(
-                                      context: context,
-                                      title: 'Select Start Date',
-                                      controller: controller.scheduleMeetingCtr,
-                                      dateRx: controller.startDate,
-                                      model: controller.scheduleMeeeingModel,
-                                    );
-                                  },
-                                  formType: FieldType.text,
-                                  wantSuffix: true,
-                                  isdown: true,
-                                  isReadOnly: true,
-                                  inputType: TextInputType.none,
-                                  errorText: controller
-                                      .scheduleMeeeingModel
-                                      .value
-                                      .error,
-                                );
+                                return controller
+                                            .isTechnicalProposalMode
+                                            .value ==
+                                        true
+                                    ? getDynamicSizedBox(height: 2.h)
+                                    : SizedBox.shrink();
                               }),
+
+                              Obx(() {
+                                return controller
+                                            .isTechnicalProposalMode
+                                            .value ==
+                                        true
+                                    ? getTextField(
+                                        context: context,
+                                        wantLabel: true,
+                                        isBorderSideEnable: true,
+                                        label: 'First Technical Proposal',
+                                        ctr: controller
+                                            .firstTechnicalProposal1Ctr,
+                                        node: controller
+                                            .firstTechnicalProposal1Node,
+                                        model: controller
+                                            .firstTechnicalProposal1Model
+                                            .value,
+                                        isenable: false,
+                                        isdropdown: true,
+                                        wantsuffix: false,
+                                        usegesture: true,
+                                        gestureFunction: () {
+                                          SimplePdfPicker.pickPdf(
+                                            onFileSelected: (filePath, fileName) {
+                                              // Convert path to File
+                                              final file = File(filePath);
+
+                                              // Store in your controller Rx variable
+                                              controller
+                                                  .setTechnicalProposalFile(
+                                                    file,
+                                                  );
+
+                                              // Optional: update the TextEditingController to display file name
+                                              controller
+                                                      .firstTechnicalProposal1Ctr
+                                                      .text =
+                                                  fileName;
+
+                                              print('File path: $filePath');
+                                              print('File name: $fileName');
+                                            },
+                                          );
+                                        },
+
+                                        hint: 'Select File',
+                                        isRequired: false,
+                                      )
+                                    : SizedBox.shrink();
+                              }),
+                              Obx(() {
+                                return controller
+                                            .isTechnicalProposalMode
+                                            .value ==
+                                        true
+                                    ? getDynamicSizedBox(height: 2.h)
+                                    : SizedBox.shrink();
+                              }),
+                              Obx(() {
+                                return controller
+                                            .isTechnicalProposalMode
+                                            .value ==
+                                        true
+                                    ? getTextField(
+                                        context: context,
+                                        wantLabel: true,
+                                        isBorderSideEnable: true,
+                                        label: 'Final Technical Proposal',
+                                        ctr: controller
+                                            .finalTechnicalProposal2Ctr,
+                                        node: controller
+                                            .finalTechnicalProposal2Node,
+                                        model: controller
+                                            .finalTechnicalProposal2Model
+                                            .value,
+                                        isenable: false,
+                                        isdropdown: true,
+                                        wantsuffix: false,
+                                        usegesture: true,
+                                        gestureFunction: () {
+                                          SimplePdfPicker.pickPdf(
+                                            onFileSelected: (filePath, fileName) {
+                                              final file = File(filePath);
+                                              controller
+                                                  .setfinalTechnicalProposalFile(
+                                                    file,
+                                                  );
+                                              controller
+                                                      .finalTechnicalProposal2Ctr
+                                                      .text =
+                                                  fileName;
+
+                                              print('File path: $filePath');
+                                              print('File name: $fileName');
+                                            },
+                                          );
+                                        },
+
+                                        hint: 'Select File',
+                                        isRequired: false,
+                                      )
+                                    : SizedBox.shrink();
+                              }),
+
+                              Obx(() {
+                                return controller
+                                            .isCommercialProposalMode
+                                            .value ==
+                                        true
+                                    ? getDynamicSizedBox(height: 2.h)
+                                    : SizedBox.shrink();
+                              }),
+
+                              Obx(() {
+                                return controller
+                                            .isCommercialProposalMode
+                                            .value ==
+                                        true
+                                    ? getTextField(
+                                        context: context,
+                                        wantLabel: true,
+                                        isBorderSideEnable: true,
+                                        label: 'First Commercial Proposal',
+                                        ctr: controller
+                                            .firstCommercialProposal1Ctr,
+                                        node: controller
+                                            .firstCommercialProposal1Node,
+                                        model: controller
+                                            .firstCommercialProposal1Model
+                                            .value,
+                                        isenable: false,
+                                        isdropdown: true,
+                                        wantsuffix: false,
+                                        usegesture: true,
+                                        gestureFunction: () {
+                                          SimplePdfPicker.pickPdf(
+                                            onFileSelected: (filePath, fileName) {
+                                              // Convert path to File
+                                              final file = File(filePath);
+
+                                              // Store in your controller Rx variable
+                                              controller
+                                                  .setCommercialProposalFile(
+                                                    file,
+                                                  );
+
+                                              // Optional: update the TextEditingController to display file name
+                                              controller
+                                                      .firstCommercialProposal1Ctr
+                                                      .text =
+                                                  fileName;
+
+                                              print('File path: $filePath');
+                                              print('File name: $fileName');
+                                            },
+                                          );
+                                        },
+
+                                        hint: 'Select File',
+                                        isRequired: false,
+                                      )
+                                    : SizedBox.shrink();
+                              }),
+                              Obx(() {
+                                return controller
+                                            .isCommercialProposalMode
+                                            .value ==
+                                        true
+                                    ? getDynamicSizedBox(height: 2.h)
+                                    : SizedBox.shrink();
+                              }),
+                              Obx(() {
+                                return controller
+                                            .isCommercialProposalMode
+                                            .value ==
+                                        true
+                                    ? getTextField(
+                                        context: context,
+                                        wantLabel: true,
+                                        isBorderSideEnable: true,
+                                        label: 'Final Commercial  Proposal',
+                                        ctr: controller
+                                            .finalCommercialProposal2Ctr,
+                                        node: controller
+                                            .finalCommercialProposal2Node,
+                                        model: controller
+                                            .finalCommercialProposal2Model
+                                            .value,
+                                        isenable: false,
+                                        isdropdown: true,
+                                        wantsuffix: false,
+                                        usegesture: true,
+                                        gestureFunction: () {
+                                          SimplePdfPicker.pickPdf(
+                                            onFileSelected: (filePath, fileName) {
+                                              final file = File(filePath);
+                                              controller
+                                                  .setfinalCommercialProposalFile(
+                                                    file,
+                                                  );
+                                              controller
+                                                      .finalCommercialProposal2Ctr
+                                                      .text =
+                                                  fileName;
+
+                                              print('File path: $filePath');
+                                              print('File name: $fileName');
+                                            },
+                                          );
+                                        },
+
+                                        hint: 'Select File',
+                                        isRequired: false,
+                                      )
+                                    : SizedBox.shrink();
+                              }),
+
+                              widget.isEdit
+                                  ? const SizedBox.shrink()
+                                  : getLable(
+                                      "Schedule Meeting",
+                                      isRequired: true,
+                                    ),
+                              widget.isEdit
+                                  ? const SizedBox.shrink()
+                                  : Obx(() {
+                                      return getReactiveFormField(
+                                        node: controller.scheduleMeetingNode,
+                                        controller:
+                                            controller.scheduleMeetingCtr,
+                                        hintLabel: "Select Schedule Meeting",
+                                        onChanged: (val) {
+                                          controller.validateScheduleMeeting(
+                                            val,
+                                          );
+                                        },
+                                        onTap: () {
+                                          controller.openDatePicker(
+                                            context: context,
+                                            title: 'Select Start Date',
+                                            controller:
+                                                controller.scheduleMeetingCtr,
+                                            dateRx: controller.startDate,
+                                            model:
+                                                controller.scheduleMeeeingModel,
+                                          );
+                                        },
+                                        formType: FieldType.text,
+                                        wantSuffix: true,
+                                        isdown: true,
+                                        isReadOnly: true,
+                                        inputType: TextInputType.none,
+                                        errorText: controller
+                                            .scheduleMeeeingModel
+                                            .value
+                                            .error,
+                                      );
+                                    }),
                               getDynamicSizedBox(height: 2.h),
                             ],
                             // Step 3: Location Details
@@ -1083,7 +1489,11 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       }
                                       return getFormButton(
                                         context,
-                                        _onStepContinue,
+                                        () {
+                                          if (isNextEnabled == true) {
+                                            _onStepContinue();
+                                          }
+                                        },
                                         _currentStep == _steps.length - 1
                                             ? 'Submit'
                                             : 'Next',

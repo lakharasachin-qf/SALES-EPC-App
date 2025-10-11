@@ -23,13 +23,22 @@ class LeadDropDownListModel {
 
 class LeadDropDownListData {
   Dropdowns dropdowns;
+  List<CountryData> locations; // rename
 
-  LeadDropDownListData({required this.dropdowns});
+  LeadDropDownListData({required this.dropdowns, required this.locations});
 
   factory LeadDropDownListData.fromJson(Map<String, dynamic> json) =>
-      LeadDropDownListData(dropdowns: Dropdowns.fromJson(json["dropdowns"]));
+      LeadDropDownListData(
+        dropdowns: Dropdowns.fromJson(json["dropdowns"]),
+        locations: (json["locations"] ?? [])
+            .map<CountryData>((x) => CountryData.fromJson(x))
+            .toList(),
+      );
 
-  Map<String, dynamic> toJson() => {"dropdowns": dropdowns.toJson()};
+  Map<String, dynamic> toJson() => {
+    "dropdowns": dropdowns.toJson(),
+    "locations": List<dynamic>.from(locations.map((x) => x.toJson())),
+  };
 }
 
 class Dropdowns {
@@ -110,4 +119,73 @@ class DgSyncRequired {
       DgSyncRequired(label: json["label"] ?? '', value: json["value"] ?? '');
 
   Map<String, dynamic> toJson() => {"label": label, "value": value};
+}
+
+class CountryData {
+  int countryId;
+  String countryName;
+  List<StateData> states;
+
+  CountryData({
+    required this.countryId,
+    required this.countryName,
+    required this.states,
+  });
+
+  factory CountryData.fromJson(Map<String, dynamic> json) => CountryData(
+    countryId: json["country_id"] ?? 0,
+    countryName: json["country_name"] ?? '',
+    states: (json["states"] ?? [])
+        .map<StateData>((x) => StateData.fromJson(x))
+        .toList(),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "country_id": countryId,
+    "country_name": countryName,
+    "states": List<dynamic>.from(states.map((x) => x.toJson())),
+  };
+}
+
+class StateData {
+  int stateId;
+  String stateName;
+  List<District> districts;
+
+  StateData({
+    required this.stateId,
+    required this.stateName,
+    required this.districts,
+  });
+
+  factory StateData.fromJson(Map<String, dynamic> json) => StateData(
+    stateId: json["state_id"] ?? 0,
+    stateName: json["state_name"] ?? '',
+    districts: (json["districts"] ?? [])
+        .map<District>((x) => District.fromJson(x))
+        .toList(),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "state_id": stateId,
+    "state_name": stateName,
+    "districts": List<dynamic>.from(districts.map((x) => x.toJson())),
+  };
+}
+
+class District {
+  int districtId;
+  String districtName;
+
+  District({required this.districtId, required this.districtName});
+
+  factory District.fromJson(Map<String, dynamic> json) => District(
+    districtId: json["district_id"],
+    districtName: json["district_name"] ?? '',
+  );
+
+  Map<String, dynamic> toJson() => {
+    "district_id": districtId,
+    "district_name": districtName,
+  };
 }

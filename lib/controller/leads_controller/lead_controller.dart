@@ -15,7 +15,6 @@ import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
 import 'package:sales_app/controller/master_controller/Master_Controller.dart';
 import 'package:sales_app/models/LeadModel.dart';
-import 'package:sales_app/models/customer_model.dart';
 import 'package:sales_app/models/customer_model_wo_p.dart';
 import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
@@ -27,7 +26,6 @@ import 'package:sizer/sizer.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import '../../api_handle/Repository.dart';
 import '../../models/dashboard_fillter_model.dart';
-import '../../models/fillter_model.dart' hide Result;
 
 // New model for static customer data
 class CustomerData {
