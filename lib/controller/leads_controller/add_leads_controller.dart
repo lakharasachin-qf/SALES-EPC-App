@@ -676,8 +676,11 @@ class AddLeadsController extends GetxController {
     super.dispose();
   }
 
-  getLatLongData(BuildContext context, bool locationFetched) {
-    fetchLocationTracking(
+  Future<void> getLatLongData(
+    BuildContext context,
+    bool locationFetched,
+  ) async {
+    await fetchLocationTracking(
       context,
       (isFromLocation) {
         if (locationFetched == true) {
@@ -696,6 +699,26 @@ class AddLeadsController extends GetxController {
       },
     );
   }
+  // getLatLongData(BuildContext context, bool locationFetched) {
+  //   fetchLocationTracking(
+  //     context,
+  //     (isFromLocation) {
+  //       if (locationFetched == true) {
+  //         this.locationFetched = isFromLocation;
+  //       }
+  //       logcat("locationFetched::", locationFetched.toString());
+  //     },
+  //     getLatLongData: (lat, long, location) {
+  //       logcat("Latitude", lat.toString());
+  //       logcat("Longitude", long.toString());
+  //       latitudeCtr.text = lat;
+  //       longitudeCtr.text = long;
+  //       validateLatitude(latitudeCtr.text);
+  //       validateLongitude(longitudeCtr.text);
+  //       update();
+  //     },
+  //   );
+  // }
 
   // Dialog for State List
   // Widget setStateListDialog() {
@@ -1042,8 +1065,9 @@ class AddLeadsController extends GetxController {
                 }
                 Get.back();
               },
+              // selectedRequiredSolutionTypeLabel.value
               title: buildSelectableRow(
-                selectedRequiredSolutionTypeLabel.value,
+                filterRequiredSolutionTypeList[index].label,
                 filterRequiredSolutionTypeList[index].value.trim() ==
                     selectedRequiredSolutionTypeValue.value.trim(),
               ),
@@ -3198,6 +3222,15 @@ class AddLeadsController extends GetxController {
 
         selectedRequiredSolutionTypeValue.value = result.requiredSolutionType!;
         selectedRequiredSolutionTypeLabel.value = matchedLabel;
+
+        if (filterRequiredSolutionTypeList.any(
+          (element) => element.label == selectedRequiredSolutionTypeLabel.value,
+        )) {
+          logcat("matchedLabel", "matchedLabel");
+        } else {
+          logcat("not matchedLabel", "not matchedLabel");
+        }
+
         requiredSolutionTypeCtr.text = matchedLabel;
 
         final requiredSolutionLabel = getLabelFromValue(
@@ -3476,37 +3509,18 @@ class AddLeadsController extends GetxController {
     validateDistrict(districtCtr.text);
     validatePersonName(personNameCtr.text);
     validatePersonMobile(personMobileCtr.text);
-    validateLatitude(latitudeCtr.text);
-    validateLongitude(longitudeCtr.text);
+
     validateRequiredSolutionType(selectedRequiredSolutionTypeValue.value);
     validateRequiredSolution(selectedRequiredSolutionValue.value);
     validateLeadCategory(selectedLeadCategoryValue.value);
-    validateDGCapacity(dgCapacityCtr.text);
-    validateDGSync(selectedDgSyncValue.value);
-    validateInstalledSolarCap(installedSolarCapCtr.text);
-    validateSanctionedLoad(sanctionedLoadCtr.text);
-    validateVFD(selectedVfdValue.value);
-    validateGridAvailability(gridAvailabilityCtr.text);
-    validatePeakMonthlyEnergy(peakMonthlyEnergyCtr.text);
-    validateRequiredSolarCap(requiredSolarCapCtr.text);
-    validateDistanceToTransformer(distanceToTransformerCtr.text);
-    validateRatingOfTransformer(ratingOfTransformerCtr.text);
-    validatePurposeOfSolarization(selectedPurposeOfSolarisationValue.value);
-    validateDistInverterACDB(distInverterACDBCtr.text);
-    validateDistSolarACDB(distSolarACDBCtr.text);
-    validateBuildingHeight(buildingHeightCtr.text);
-    validateRoofSizeLength(roofSizeLengthCtr.text);
-    validateRoofSizeBreadth(roofSizeBreadthCtr.text);
+
     validateRoofNature(selectedRoofNatureValue.value);
-    validateAgeOfMetalSheet(ageOfMetalSheetCtr.text);
-    validateGroundSizeLength(groundSizeLengthCtr.text);
-    validateGroundSizeBreadth(groundSizeBreadthCtr.text);
-    validateOtherRemarks(otherRemarksCtr.text);
+
     validateScheduleMeeting(scheduleMeetingCtr.text);
 
     validateStep1();
     validateStep2();
-    validateStep3();
-    validateStep4();
+    // validateStep3();
+    // validateStep4();
   }
 }

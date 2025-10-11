@@ -47,16 +47,27 @@ class _AddLeadScreenState extends State<AddLeadScreen>
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      logcat("IsEdit::", widget.isEdit.toString());
-      if (widget.isEdit == true) {
-        controller.getLeadDataByIdList(context, true, widget.leadId.toString());
-      } else {}
-      controller.getLocation(context, true);
-      controller.getDropDownList(context, true);
-      controller.getLatLongData(context, true);
-    });
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      logcat("IsEdit::", widget.isEdit.toString());
+
+      // ✅ Run all 3 APIs in parallel and wait for all to finish
+      await Future.wait<void>([
+        controller.getLocation(context, true),
+        controller.getDropDownList(context, true),
+        controller.getLatLongData(context, true),
+      ]);
+
+      // ✅ After all finish, call lead data API (if edit mode)
+      if (widget.isEdit == true) {
+        await controller.getLeadDataByIdList(
+          context,
+          true,
+          widget.leadId.toString(),
+        );
+      }
+    });
   }
 
   @override
@@ -481,26 +492,24 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                               }),
                               getDynamicSizedBox(height: 2.h),
                               getLable("DG Sync Required"),
-                              getReactiveDropdown(
-                                hint: "Select DG Sync",
-                                // items: controller.dgSync,
-                                // selectedValue: controller.selectDgSync,
-                                items: controller.filterDgSyncRequiredList
-                                    .map((item) => item.label)
-                                    .toList(), // Display labels
-                                selectedValue:
-                                    controller
-                                        .selectedDgSyncLabel
-                                        .value
-                                        .isNotEmpty
-                                    ? controller.selectedDgSyncLabel.value
-                                    : null,
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() {
+                              Obx(
+                                () => getReactiveDropdown(
+                                  hint: "Select DG Sync",
+                                  items: controller.filterDgSyncRequiredList
+                                      .map((item) => item.label)
+                                      .toList(),
+                                  selectedValue:
+                                      controller
+                                          .selectedDgSyncLabel
+                                          .value
+                                          .isNotEmpty
+                                      ? controller.selectedDgSyncLabel.value
+                                      : null,
+                                  onChanged: (value) {
+                                    if (value != null) {
                                       controller.selectedDgSyncLabel.value =
-                                          value; // Update displayed label
-                                      // Find the corresponding value based on the selected label
+                                          value;
+
                                       final selectedItem = controller
                                           .dgSyncRequiredList
                                           .firstWhere(
@@ -509,17 +518,19 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                                 .dgSyncRequiredList
                                                 .first,
                                           );
+
                                       controller.selectedDgSyncValue.value =
-                                          selectedItem
-                                              .value; // Update API value
+                                          selectedItem.value;
+
                                       logcat(
                                         "dg_sync_required",
                                         controller.selectedDgSyncValue.value,
                                       );
-                                    });
-                                  }
-                                },
+                                    }
+                                  },
+                                ),
                               ),
+
                               getDynamicSizedBox(height: 2.h),
                               getLable(
                                 "Current Installed Solar Capacity (KWp)",
@@ -562,21 +573,23 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                               }),
                               getDynamicSizedBox(height: 2.h),
                               getLable("VFD Required"),
-                              getReactiveDropdown(
-                                hint: "Select VFD",
-                                items: controller.filterVfdRequiredList
-                                    .map((item) => item.label)
-                                    .toList(), // Display labels
-                                selectedValue:
-                                    controller.selectedVfdLabel.value.isNotEmpty
-                                    ? controller.selectedVfdLabel.value
-                                    : null,
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() {
-                                      controller.selectedVfdLabel.value =
-                                          value; // Update displayed label
-                                      // Find the corresponding value based on the selected label
+                              Obx(
+                                () => getReactiveDropdown(
+                                  hint: "Select VFD",
+                                  items: controller.filterVfdRequiredList
+                                      .map((item) => item.label)
+                                      .toList(), // Display labels
+                                  selectedValue:
+                                      controller
+                                          .selectedVfdLabel
+                                          .value
+                                          .isNotEmpty
+                                      ? controller.selectedVfdLabel.value
+                                      : null,
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      controller.selectedVfdLabel.value = value;
+
                                       final selectedItem = controller
                                           .vfdRequiredList
                                           .firstWhere(
@@ -585,18 +598,23 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                                 .vfdRequiredList
                                                 .first,
                                           );
+
                                       controller.selectedVfdValue.value =
-                                          selectedItem
-                                              .value; // Update API value
-                                      controller.vfdCtr.text =
-                                          value; // Update text controller
+                                          selectedItem.value;
+                                      controller.vfdCtr.text = value;
                                       controller.validateVFD(
                                         selectedItem.value,
-                                      ); // Validate with value
-                                    });
-                                  }
-                                },
+                                      );
+
+                                      logcat(
+                                        "vfd_required",
+                                        controller.selectedVfdValue.value,
+                                      );
+                                    }
+                                  },
+                                ),
                               ),
+
                               getDynamicSizedBox(height: 2.h),
                               getLable("Grid Availability (Hours)"),
                               Obx(() {
