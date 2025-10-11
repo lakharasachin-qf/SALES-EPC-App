@@ -19,6 +19,7 @@ import 'package:sales_app/utils/log.dart';
 import 'package:sizer/sizer.dart';
 
 // Assuming CustomLinearStepper is in a separate file or included here
+// ignore: must_be_immutable
 class AddLeadScreen extends StatefulWidget {
   final bool isEdit;
   String? leadId;

@@ -2881,7 +2881,7 @@ class AddLeadsController extends GetxController {
     debugPrint('my body: Finished individual field logging');
     // logcat("addLeadApi::", jsonEncode(body));
     // Step 4: API Call
-    return;
+    // return;
     await commonPostApiCallFormate(
       context,
       title: 'Add Lead Screen',
@@ -2890,6 +2890,8 @@ class AddLeadsController extends GetxController {
       apiEndPoint: ApiUrl.addLead,
       onResponse: (data) async {
         logcat('AddLeadApi', 'Response: $data');
+
+        Get.back();
 
         Get.snackbar(
           "Success",
