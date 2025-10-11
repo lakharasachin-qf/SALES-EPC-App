@@ -2930,68 +2930,68 @@ class AddLeadsController extends GetxController {
     );
   }
 
-  Future<void> getLocation(BuildContext context, bool isLoading) async {
-    var loadingIndicator = LoadingProgressDialog();
+  // Future<void> getLocation(BuildContext context, bool isLoading) async {
+  //   var loadingIndicator = LoadingProgressDialog();
 
-    commonGetApiCallFormate(
-      context,
-      title: 'Add Lead Screen',
-      apiEndPoint: ApiUrl.getLocation,
-      allowHeader: true,
-      state: state,
-      message: message,
-      isStatus: true,
-      apisLoading: (isTrue) {
-        if (isLoading) {
-          if (isTrue) {
-            loadingIndicator.show(context, '');
-          } else {
-            loadingIndicator.hide(context);
-          }
-        }
-      },
-      onResponse: (data) {
-        var responseDetail = LocationModel.fromJson(data);
+  //   commonGetApiCallFormate(
+  //     context,
+  //     title: 'Add Lead Screen',
+  //     apiEndPoint: ApiUrl.getLocation,
+  //     allowHeader: true,
+  //     state: state,
+  //     message: message,
+  //     isStatus: true,
+  //     apisLoading: (isTrue) {
+  //       if (isLoading) {
+  //         if (isTrue) {
+  //           loadingIndicator.show(context, '');
+  //         } else {
+  //           loadingIndicator.hide(context);
+  //         }
+  //       }
+  //     },
+  //     onResponse: (data) {
+  //       var responseDetail = LocationModel.fromJson(data);
 
-        if (responseDetail.status) {
-          countries.assignAll(responseDetail.data);
+  //       if (responseDetail.status) {
+  //         countries.assignAll(responseDetail.data);
 
-          // Select default country "India"
-          CountryData? defaultCountry;
-          if (countries.isNotEmpty) {
-            defaultCountry = countries.firstWhere(
-              (country) => country.countryName.trim().toLowerCase() == 'india',
-              orElse: () => countries.first,
-            );
+  //         // Select default country "India"
+  //         CountryData? defaultCountry;
+  //         if (countries.isNotEmpty) {
+  //           defaultCountry = countries.firstWhere(
+  //             (country) => country.countryName.trim().toLowerCase() == 'india',
+  //             orElse: () => countries.first,
+  //           );
 
-            selectCountry(defaultCountry);
-            countryCtr.text = defaultCountry.countryName;
-            selectedCountryId.value = defaultCountry.countryId;
-            states.assignAll(defaultCountry.states);
-            validateCountry(defaultCountry.countryName);
-          }
+  //           selectCountry(defaultCountry);
+  //           countryCtr.text = defaultCountry.countryName;
+  //           selectedCountryId.value = defaultCountry.countryId;
+  //           states.assignAll(defaultCountry.states);
+  //           validateCountry(defaultCountry.countryName);
+  //         }
 
-          // Select default state "Uttar Pradesh"
-          if (states.isNotEmpty) {
-            final defaultState = states.firstWhere(
-              (state) =>
-                  state.stateName.trim().toLowerCase() == 'uttar pradesh',
-              orElse: () => states.first,
-            );
+  //         // Select default state "Uttar Pradesh"
+  //         if (states.isNotEmpty) {
+  //           final defaultState = states.firstWhere(
+  //             (state) =>
+  //                 state.stateName.trim().toLowerCase() == 'uttar pradesh',
+  //             orElse: () => states.first,
+  //           );
 
-            selectState(defaultState);
-            stateCtr.text = defaultState.stateName;
-            selectedStateId.value = defaultState.stateId;
-            districts.assignAll(defaultState.districts);
-            validateState(defaultState.stateName);
-          }
+  //           selectState(defaultState);
+  //           stateCtr.text = defaultState.stateName;
+  //           selectedStateId.value = defaultState.stateId;
+  //           districts.assignAll(defaultState.districts);
+  //           validateState(defaultState.stateName);
+  //         }
 
-          update();
-        }
-      },
-      networkManager: networkManager,
-    );
-  }
+  //         update();
+  //       }
+  //     },
+  //     networkManager: networkManager,
+  //   );
+  // }
 
   Future<void> getDropDownList(BuildContext context, bool isLoading) async {
     var loadingIndicator = LoadingProgressDialog();
@@ -3015,6 +3015,38 @@ class AddLeadsController extends GetxController {
       onResponse: (data) {
         var responseDetail = LeadDropDownListModel.fromJson(data);
         var dropdowns = responseDetail.data.dropdowns;
+
+        countries.assignAll(responseDetail.data.locations);
+
+        // Select default country "India"
+        CountryData? defaultCountry;
+        if (countries.isNotEmpty) {
+          defaultCountry = countries.firstWhere(
+            (country) => country.countryName.trim().toLowerCase() == 'india',
+            orElse: () => countries.first,
+          );
+
+          selectCountry(defaultCountry);
+          countryCtr.text = defaultCountry.countryName;
+          selectedCountryId.value = defaultCountry.countryId;
+          states.assignAll(defaultCountry.states);
+          validateCountry(defaultCountry.countryName);
+        }
+
+        // Select default state "Uttar Pradesh"
+        if (states.isNotEmpty) {
+          final defaultState = states.firstWhere(
+            (state) => state.stateName.trim().toLowerCase() == 'uttar pradesh',
+            orElse: () => states.first,
+          );
+
+          selectState(defaultState);
+          stateCtr.text = defaultState.stateName;
+          selectedStateId.value = defaultState.stateId;
+          districts.assignAll(defaultState.districts);
+          validateState(defaultState.stateName);
+        }
+
         // Populate dynamic lists from API response
         requiredSolutionTypeList.assignAll(dropdowns.requiredSolutionType);
         filterRequiredSolutionTypeList.assignAll(

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart' hide ScreenType;
 import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
+import 'package:sales_app/componant/dialogs/loading_indicator.dart';
 import 'package:sales_app/componant/input/custom_text_field.dart';
 import 'package:sales_app/componant/input/form_inputs.dart';
 import 'package:sales_app/componant/input/getReactiveDropdown.dart';
@@ -45,6 +46,38 @@ class _AddLeadScreenState extends State<AddLeadScreen>
     });
   }
 
+  Future<void> initAllData() async {
+    final loadingIndicator = LoadingProgressDialog();
+
+    try {
+      // Show loader before starting all
+      loadingIndicator.show(context, '');
+
+      // Run all API calls in parallel
+      await Future.wait<void>([
+        controller.getDropDownList(
+          context,
+          false,
+        ), // pass false to avoid inner loader
+        controller.getLatLongData(context, false),
+      ]);
+
+      // After that, if editing, fetch lead data
+      if (widget.isEdit == true) {
+        await controller.getLeadDataByIdList(
+          context,
+          false,
+          widget.leadId.toString(),
+        );
+      }
+    } catch (e) {
+      logcat("Error in initAllData: $e", '');
+    } finally {
+      // Hide loader at the very end
+      loadingIndicator.hide(context);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -52,21 +85,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       logcat("IsEdit::", widget.isEdit.toString());
 
-      // ✅ Run all 3 APIs in parallel and wait for all to finish
-      await Future.wait<void>([
-        controller.getLocation(context, true),
-        controller.getDropDownList(context, true),
-        controller.getLatLongData(context, true),
-      ]);
-
-      // ✅ After all finish, call lead data API (if edit mode)
-      if (widget.isEdit == true) {
-        await controller.getLeadDataByIdList(
-          context,
-          true,
-          widget.leadId.toString(),
-        );
-      }
+      initAllData();
     });
   }
 
