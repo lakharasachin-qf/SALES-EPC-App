@@ -16,6 +16,7 @@ import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
+import 'package:sales_app/models/LeadByIdModel.dart';
 import 'package:sales_app/models/LeadDropDownListModel.dart';
 import 'package:sales_app/models/LoadElement.dart';
 import 'package:sales_app/models/LocationModel.dart';
@@ -72,7 +73,7 @@ class AddLeadsController extends GetxController {
   RxList designationDynamicList = [].obs;
   RxBool isDynamicDesignationApiCallLoading = false.obs;
   var productDetailList = <LoadElement>[].obs;
-  var fileList = <UploadFile>[].obs;
+  var fileList = <UploadedFile>[].obs;
   var roofNature = <String>[
     'Concrete',
     'Metal',
@@ -169,13 +170,13 @@ class AddLeadsController extends GetxController {
     update();
   }
 
-  void addFile(UploadFile file) {
+  void addFile(UploadedFile file) {
     fileList.add(file);
     validateStep4();
     update();
   }
 
-  void updateFile(int index, UploadFile file) {
+  void updateFile(int index, UploadedFile file) {
     fileList[index] = file;
     validateStep4();
     update();
@@ -286,16 +287,8 @@ class AddLeadsController extends GetxController {
   var districtSearchModel = ValidationModel(null, null, isValidate: false).obs;
   var personNameModel = ValidationModel(null, null, isValidate: false).obs;
   var personMobileModel = ValidationModel(null, null, isValidate: false).obs;
-  var latitudeModel = ValidationModel(
-    null,
-    null,
-    isValidate: true,
-  ).obs; // Optional
-  var longitudeModel = ValidationModel(
-    null,
-    null,
-    isValidate: true,
-  ).obs; // Optional
+  var latitudeModel = ValidationModel(null, null, isValidate: true).obs;
+  var longitudeModel = ValidationModel(null, null, isValidate: true).obs;
   var requiredSolutionTypeModel = ValidationModel(
     null,
     null,
@@ -307,28 +300,16 @@ class AddLeadsController extends GetxController {
     isValidate: false,
   ).obs;
   var leadCategoryModel = ValidationModel(null, null, isValidate: false).obs;
-  var dgCapacityModel = ValidationModel(
-    null,
-    null,
-    isValidate: true,
-  ).obs; // Optional
+  var dgCapacityModel = ValidationModel(null, null, isValidate: true).obs;
   var dgSyncModel = ValidationModel(null, null, isValidate: false).obs;
   var installedSolarCapModel = ValidationModel(
     null,
     null,
     isValidate: true,
-  ).obs; // Optional
-  var sanctionedLoadModel = ValidationModel(
-    null,
-    null,
-    isValidate: true,
-  ).obs; // Optional
+  ).obs;
+  var sanctionedLoadModel = ValidationModel(null, null, isValidate: true).obs;
   var vfdModel = ValidationModel(null, null, isValidate: false).obs;
-  var gridAvailabilityModel = ValidationModel(
-    null,
-    null,
-    isValidate: true,
-  ).obs; // Optional
+  var gridAvailabilityModel = ValidationModel(null, null, isValidate: true).obs;
   var peakMonthlyEnergyModel = ValidationModel(
     null,
     null,
@@ -1062,9 +1043,9 @@ class AddLeadsController extends GetxController {
                 Get.back();
               },
               title: buildSelectableRow(
-                filterRequiredSolutionTypeList[index].label,
-                filterRequiredSolutionTypeList[index].label.trim() ==
-                    requiredSolutionTypeCtr.text.trim(),
+                selectedRequiredSolutionTypeLabel.value,
+                filterRequiredSolutionTypeList[index].value.trim() ==
+                    selectedRequiredSolutionTypeValue.value.trim(),
               ),
             );
           },
@@ -2519,10 +2500,10 @@ class AddLeadsController extends GetxController {
     }
   }
 
-  addUploadFile(context, {UploadFile? fileItem, int? index}) async {
+  addUploadFile(context, {UploadedFile? fileItem, int? index}) async {
     if (fileItem != null) {
-      uploadFileCtr.text = fileItem.uploadFile;
-      uploadCategoryCtr.text = fileItem.category;
+      uploadFileCtr.text = fileItem.path ?? '';
+      uploadCategoryCtr.text = fileItem.category ?? '';
     } else {
       resetFileUpload();
       uploadFileCtr.clear();
@@ -2678,8 +2659,8 @@ class AddLeadsController extends GetxController {
                                   () {
                                     if (uploadFileModel.value.isValidate &&
                                         uploadCategoryModel.value.isValidate) {
-                                      final newFile = UploadFile(
-                                        uploadFile: uploadFileCtr.text,
+                                      final newFile = UploadedFile(
+                                        path: uploadFileCtr.text,
                                         category: uploadCategoryCtr.text,
                                       );
                                       if (index == null) {
@@ -2890,7 +2871,7 @@ class AddLeadsController extends GetxController {
       final file = fileList[i];
       body.addAll({
         'uploaded_files[$i][category]': file.category,
-        'uploaded_files[$i][file]': file.uploadFile,
+        'uploaded_files[$i][file]': file.path,
       });
     }
     debugPrint('my body: Starting individual field logging');
@@ -3047,127 +3028,6 @@ class AddLeadsController extends GetxController {
     );
   }
 
-  // Future<void> getLocation(BuildContext context, bool isLoading) async {
-  //   var loadingIndicator = LoadingProgressDialog();
-  //   commonGetApiCallFormate(
-  //     context,
-  //     title: 'Add Lead Screen',
-  //     apiEndPoint: ApiUrl.getLocation,
-  //     allowHeader: true,
-  //     state: state,
-  //     message: message,
-  //     isStatus: true,
-  //     apisLoading: (isTrue) {
-  //       if (isLoading) {
-  //         if (isTrue) {
-  //           loadingIndicator.show(context, '');
-  //         } else {
-  //           loadingIndicator.hide(context);
-  //         }
-  //       }
-  //     },
-  //     onResponse: (data) {
-  //       var responseDetail = LocationModel.fromJson(data);
-  //       if (responseDetail.status) {
-  //         countries.assignAll(responseDetail.data);
-
-  //         // Set default country to "India"
-  //         final defaultCountry = countries.firstWhere(
-  //           (country) => country.countryName.toLowerCase() == 'india',
-  //           orElse: () => countries.isNotEmpty
-  //               ? countries.first
-  //               : CountryData(countryId: 0, countryName: '', states: []),
-  //         );
-
-  //         if (defaultCountry.countryId != 0) {
-  //           selectCountry(defaultCountry); // Select India
-  //           countryCtr.text = defaultCountry.countryName;
-  //           selectedCountryId.value = defaultCountry.countryId;
-  //           states.assignAll(defaultCountry.states);
-
-  //           // Set default state to "Uttar Pradesh"
-  //           final defaultState = states.firstWhere(
-  //             (state) => state.stateName.toLowerCase() == 'uttar pradesh',
-  //             orElse: () => states.isNotEmpty
-  //                 ? states.first
-  //                 : StateData(stateId: 0, stateName: '', districts: []),
-  //           );
-
-  //           if (defaultState.stateId != 0) {
-  //             selectState(defaultState); // Select Uttar Pradesh
-  //             stateCtr.text = defaultState.stateName;
-  //             selectedStateId.value = defaultState.stateId;
-  //             districts.assignAll(defaultState.districts);
-  //             validateState(defaultState.stateName);
-  //           } else {
-  //             // Fallback if Uttar Pradesh is not found
-  //             if (states.isNotEmpty) {
-  //               selectState(states.first);
-  //               stateCtr.text = states.first.stateName;
-  //               selectedStateId.value = states.first.stateId;
-  //               districts.assignAll(states.first.districts);
-  //               validateState(states.first.stateName);
-  //             }
-  //           }
-  //           validateCountry(defaultCountry.countryName);
-  //         } else {
-  //           // Fallback if India is not found
-  //           if (countries.isNotEmpty) {
-  //             selectCountry(countries.first);
-  //             countryCtr.text = countries.first.countryName;
-  //             selectedCountryId.value = countries.first.countryId;
-  //             states.assignAll(countries.first.states);
-  //             validateCountry(countries.first.countryName);
-  //           }
-  //         }
-  //       }
-  //       update();
-  //     },
-  //     networkManager: networkManager,
-  //   );
-  // }
-
-  // Future<void> getLocation(context, bool isLoading) async {
-  //   var loadingIndicator = LoadingProgressDialog();
-  //   // User? userData = await UserPreferences().getSignInInfo();
-  //   commonGetApiCallFormate(
-  //     context,
-  //     title: 'Add Lead Screen',
-  //     apiEndPoint: ApiUrl.getLocation,
-  //     allowHeader: true,
-  //     state: state,
-  //     message: message,
-  //     isStatus: true,
-  //     apisLoading: (isTrue) {
-  //       if (isLoading == true) {
-  //         if (isTrue) {
-  //           loadingIndicator.show(context, '');
-  //         } else {
-  //           loadingIndicator.hide(context);
-  //         }
-  //       }
-  //     },
-  //     onResponse: (data) {
-  //       // personNameCtr.clear();
-  //       var responseDetail = LocationModel.fromJson(data);
-  //       if (responseDetail.status == true) {
-  //         countries.assignAll(responseDetail.data);
-  //         // Optionally, set default country and load states
-  //         if (countries.isNotEmpty) {
-  //           countryCtr.text = countries.first.countryName;
-  //           selectedCountryId.value = countries.first.countryId;
-  //           states.assignAll(countries.first.states);
-  //           validateCountry(countryCtr.text);
-  //         }
-  //       }
-  //       update();
-  //       logcat("location::", jsonEncode(responseDetail));
-  //       update();
-  //     },
-  //     networkManager: networkManager,
-  //   );
-  // }
-
   // Update country selection
   void selectCountry(CountryData country) {
     selectedCountryId.value = country.countryId;
@@ -3232,5 +3092,419 @@ class AddLeadsController extends GetxController {
       energyWhCtr.text = '';
       energyKWhCtr.text = '';
     }
+  }
+
+  Future<void> getLeadDataByIdList(
+    BuildContext context,
+    bool isLoading,
+    String leadId,
+  ) async {
+    final loadingIndicator = LoadingProgressDialog();
+    commonGetApiCallFormate(
+      context,
+      title: 'Update Lead Screen',
+      apiEndPoint: '${ApiUrl.leadList}/$leadId',
+      allowHeader: true,
+      state: state,
+      message: message,
+      isStatus: false,
+      apisLoading: (isTrue) {
+        if (isLoading) {
+          isTrue
+              ? loadingIndicator.show(context, '')
+              : loadingIndicator.hide(context);
+        }
+      },
+      onResponse: (data) {
+        final response = LeadByIdModel.fromJson(data);
+        final result = response.result;
+        if (result == null) return;
+
+        logcat("onResponse::", jsonEncode(result));
+
+        // 🔹 Helper: safely set text controller values
+        void setText(TextEditingController ctr, dynamic value) =>
+            ctr.text = (value ?? '').toString();
+
+        // 🔹 Basic Info
+        setText(companyNameCtr, result.companyName);
+        setText(addressCtr, result.address);
+        setText(countryCtr, result.countryName);
+        selectedCountryId.value = result.country ?? 0;
+
+        setText(stateCtr, result.stateName);
+        selectedStateId.value = result.state ?? 0;
+
+        setText(districtCtr, result.districtName);
+        selectedDistrictId.value = result.district ?? 0;
+
+        setText(personNameCtr, result.contactPersonName);
+        setText(personMobileCtr, result.contactPersonMobile);
+        setText(latitudeCtr, result.latitude);
+        setText(longitudeCtr, result.longitude);
+
+        // 🔹 Power & Energy
+        setText(dgCapacityCtr, result.dgCapacityKva);
+        setText(installedSolarCapCtr, result.currInstSolarCapKwp);
+        setText(sanctionedLoadCtr, result.sanctionedLoadKva);
+        setText(gridAvailabilityCtr, result.gridAvailabilityHrs);
+        setText(peakMonthlyEnergyCtr, result.peakMonthlyEnergyConsKwh);
+        setText(requiredSolarCapCtr, result.requiredSolarCapKwp);
+        setText(distanceToTransformerCtr, result.distToNearestTransformer);
+        setText(ratingOfTransformerCtr, result.ratingOfNearestTransformerKva);
+        setText(distInverterACDBCtr, result.distBtwInverterAcdbPanelMtrs);
+        setText(distSolarACDBCtr, result.distBtwSolarAcdbPanelMtrs);
+
+        // 🔹 Physical Site
+        setText(buildingHeightCtr, result.buildingHeight);
+        setText(roofSizeLengthCtr, result.roofSizeLengthFt);
+        setText(roofSizeBreadthCtr, result.roofSizeBreadthFt);
+        setText(ageOfMetalSheetCtr, result.ageOfMetalSheet);
+        setText(groundSizeLengthCtr, result.groundSizeLengthFt);
+        setText(groundSizeBreadthCtr, result.groundSizeBreadthFt);
+        setText(otherRemarksCtr, result.otherRemarks);
+        setText(scheduleMeetingCtr, result.meeting?.scheduledAt);
+
+        // 🔹 Dropdowns
+        void setDropdown(
+          RxString value,
+          RxString label,
+          TextEditingController ctr,
+          dynamic data,
+        ) {
+          value.value = (data ?? '').toString();
+          label.value = (data ?? '').toString();
+          ctr.text = (data ?? '').toString();
+        }
+
+        logcat(
+          "selectedRequiredSolutionTypeValue",
+          selectedRequiredSolutionTypeValue.toString(),
+        );
+        logcat("requiredSolutionType", result.requiredSolutionType.toString());
+        // setDropdown(
+        //   selectedRequiredSolutionTypeValue,
+        //   selectedRequiredSolutionTypeLabel,
+        //   requiredSolutionTypeCtr,
+        //   result.requiredSolutionType,
+        // );
+
+        final matchedLabel = getLabelFromValue(
+          requiredSolutionTypeList,
+          result.requiredSolutionType!,
+        );
+
+        selectedRequiredSolutionTypeValue.value = result.requiredSolutionType!;
+        selectedRequiredSolutionTypeLabel.value = matchedLabel;
+        requiredSolutionTypeCtr.text = matchedLabel;
+
+        final requiredSolutionLabel = getLabelFromValue(
+          filterRequiredSolutionList,
+          result.requiredSolution!,
+        );
+
+        selectedRequiredSolutionValue.value = result.requiredSolution!;
+        selectedRequiredSolutionLabel.value = requiredSolutionLabel;
+        requiredSolutionCtr.text = requiredSolutionLabel;
+        // setDropdown(
+        //   selectedRequiredSolutionValue,
+        //   selectedRequiredSolutionLabel,
+        //   requiredSolutionCtr,
+        //   result.requiredSolution,
+        // );
+        setDropdown(
+          selectedLeadCategoryValue,
+          selectedLeadCategoryLabel,
+          leadCategoryCtr,
+          result.leadCategory,
+        );
+        setDropdown(
+          selectedPurposeOfSolarisationValue,
+          selectedPurposeOfSolarisationLabel,
+          purposeOfSolarizationCtr,
+          result.purposeOfSolarisation,
+        );
+        setDropdown(
+          selectedRoofNatureValue,
+          selectedRoofNatureLabel,
+          roofNatureCtr,
+          result.roofNature,
+        );
+
+        // 🔹 Boolean dropdowns (Yes/No)
+        void setBoolDropdown(
+          RxString value,
+          RxString label,
+          TextEditingController ctr,
+          bool? condition,
+        ) {
+          final text = (condition ?? false) ? 'Yes' : 'No';
+          value.value = condition.toString();
+          label.value = text;
+          ctr.text = text;
+        }
+
+        setBoolDropdown(
+          selectedDgSyncValue,
+          selectedDgSyncLabel,
+          dgSyncCtr,
+          result.dgSyncRequired,
+        );
+        setBoolDropdown(
+          selectedVfdValue,
+          selectedVfdLabel,
+          vfdCtr,
+          result.vfdRequired,
+        );
+
+        // 🔹 Product List
+        productDetailList
+          ..clear()
+          ..assignAll(
+            result.loadElementDetails?.map(
+                  (e) => LoadElement(
+                    deviceName: e.deviceName ?? '',
+                    category: e.category ?? '',
+                    power: e.powerRatingWatts?.toString() ?? '',
+                    usageHrs: e.dailyUsageHours?.toString() ?? '',
+                    energyWh: e.dailyEnergyWh?.toString() ?? '',
+                    energyKWh: e.dailyEnergyKwh?.toString() ?? '',
+                  ),
+                ) ??
+                [],
+          );
+
+        // 🔹 Uploaded Files
+        fileList
+          ..clear()
+          ..assignAll(
+            result.uploadedFiles?.map(
+                  (f) => UploadedFile(
+                    path: f.category?.split('/').last ?? '',
+                    category: f.tag != null && f.tag!.isNotEmpty
+                        ? "${f.tag}_${f.category}"
+                        : f.category,
+                  ),
+                ) ??
+                [],
+          );
+
+        // 🔹 Validations (can be extracted into one helper call)
+        validateAll();
+        update();
+      },
+      networkManager: networkManager,
+    );
+  }
+
+  String getLabelFromValue(List<DgSyncRequired> list, String value) {
+    final match = list.firstWhere(
+      (item) =>
+          item.value.toString().trim().toLowerCase() ==
+          value.trim().toLowerCase(),
+      orElse: () => DgSyncRequired(label: "", value: ""),
+    );
+    return match?.label ?? value;
+  }
+
+  String formatCategory(String category, String? tag) {
+    switch (category) {
+      case 'technical_proposal':
+        if (tag == 'first') return 'First Technical Proposal';
+        if (tag == 'final') return 'Final Technical Proposal';
+        return 'Technical Proposal';
+
+      case 'commercial_proposal':
+        if (tag == 'first') return 'First Commercial Proposal';
+        if (tag == 'final') return 'Final Commercial Proposal';
+        return 'Commercial Proposal';
+
+      case 'finance_document':
+        return 'Finance Document';
+
+      default:
+        return category.replaceAll('_', ' ').capitalizeFirst ?? category;
+    }
+  }
+
+  // Future<void> getLeadDataByIdList(
+  //   BuildContext context,
+  //   bool isLoading,
+  //   String leadId,
+  // ) async {
+  //   var loadingIndicator = LoadingProgressDialog();
+  //   commonGetApiCallFormate(
+  //     context,
+  //     title: 'Update Lead Screen',
+  //     apiEndPoint: '${ApiUrl.leadList}/$leadId',
+  //     allowHeader: true,
+  //     state: state,
+  //     message: message,
+  //     isStatus: false,
+  //     apisLoading: (isTrue) {
+  //       if (isLoading) {
+  //         if (isTrue) {
+  //           loadingIndicator.show(context, '');
+  //         } else {
+  //           loadingIndicator.hide(context);
+  //         }
+  //       }
+  //     },
+  //     onResponse: (data) {
+  //       var responseDetail = LeadByIdModel.fromJson(data);
+  //       logcat("onResponse::", jsonEncode(responseDetail.result));
+
+  //       // Populate text fields and reactive variables
+  //       final result = responseDetail.result;
+  //       companyNameCtr.text = result?.companyName ?? '';
+  //       addressCtr.text = result?.address ?? '';
+  //       countryCtr.text = result?.countryName ?? '';
+  //       selectedCountryId.value = result?.country ?? 0;
+  //       stateCtr.text = result?.stateName ?? '';
+  //       selectedStateId.value = result?.state ?? 0;
+  //       districtCtr.text = result?.districtName ?? '';
+  //       selectedDistrictId.value = result!.district ?? 0;
+  //       personNameCtr.text = result.contactPersonName ?? '';
+  //       personMobileCtr.text = result.contactPersonMobile ?? '';
+  //       latitudeCtr.text = result.latitude?.toString() ?? '';
+  //       longitudeCtr.text = result.longitude?.toString() ?? '';
+  //       dgCapacityCtr.text = result.dgCapacityKva?.toString() ?? '';
+  //       installedSolarCapCtr.text =
+  //           result.currInstSolarCapKwp?.toString() ?? '';
+  //       sanctionedLoadCtr.text = result.sanctionedLoadKva?.toString() ?? '';
+  //       gridAvailabilityCtr.text = result.gridAvailabilityHrs?.toString() ?? '';
+  //       peakMonthlyEnergyCtr.text =
+  //           result.peakMonthlyEnergyConsKwh?.toString() ?? '';
+  //       requiredSolarCapCtr.text = result.requiredSolarCapKwp?.toString() ?? '';
+  //       distanceToTransformerCtr.text =
+  //           result.distToNearestTransformer?.toString() ?? '';
+  //       ratingOfTransformerCtr.text =
+  //           result.ratingOfNearestTransformerKva?.toString() ?? '';
+  //       distInverterACDBCtr.text =
+  //           result.distBtwInverterAcdbPanelMtrs?.toString() ?? '';
+  //       distSolarACDBCtr.text =
+  //           result.distBtwSolarAcdbPanelMtrs?.toString() ?? '';
+  //       buildingHeightCtr.text = result.buildingHeight?.toString() ?? '';
+  //       roofSizeLengthCtr.text = result.roofSizeLengthFt?.toString() ?? '';
+  //       roofSizeBreadthCtr.text = result.roofSizeBreadthFt?.toString() ?? '';
+  //       ageOfMetalSheetCtr.text = result.ageOfMetalSheet?.toString() ?? '';
+  //       groundSizeLengthCtr.text = result.groundSizeLengthFt?.toString() ?? '';
+  //       groundSizeBreadthCtr.text =
+  //           result.groundSizeBreadthFt?.toString() ?? '';
+  //       otherRemarksCtr.text = result.otherRemarks ?? '';
+  //       scheduleMeetingCtr.text = result.meeting?.scheduledAt ?? '';
+
+  //       // Set dropdown values
+  //       selectedRequiredSolutionTypeValue.value =
+  //           result.requiredSolutionType ?? '';
+  //       selectedRequiredSolutionTypeLabel.value =
+  //           result.requiredSolutionType ?? '';
+  //       requiredSolutionTypeCtr.text = result.requiredSolutionType ?? '';
+
+  //       selectedRequiredSolutionValue.value = result.requiredSolution ?? '';
+  //       selectedRequiredSolutionLabel.value = result.requiredSolution ?? '';
+  //       requiredSolutionCtr.text = result.requiredSolution ?? '';
+
+  //       selectedLeadCategoryValue.value = result.leadCategory ?? '';
+  //       selectedLeadCategoryLabel.value = result.leadCategory ?? '';
+  //       leadCategoryCtr.text = result.leadCategory ?? '';
+
+  //       selectedDgSyncValue.value = result.dgSyncRequired.toString() ?? '';
+  //       selectedDgSyncLabel.value = result?.dgSyncRequired ? 'Yes' : 'No';
+  //       dgSyncCtr.text = result.dgSyncRequired ? 'Yes' : 'No';
+
+  //       selectedVfdValue.value = result.vfdRequired.toString() ?? '';
+  //       selectedVfdLabel.value = result.vfdRequired ? 'Yes' : 'No';
+  //       vfdCtr.text = result.vfdRequired ? 'Yes' : 'No';
+
+  //       selectedPurposeOfSolarisationValue.value =
+  //           result.purposeOfSolarisation ?? '';
+  //       selectedPurposeOfSolarisationLabel.value =
+  //           result.purposeOfSolarisation ?? '';
+  //       purposeOfSolarizationCtr.text = result.purposeOfSolarisation ?? '';
+
+  //       selectedRoofNatureValue.value = result.roofNature ?? '';
+  //       selectedRoofNatureLabel.value = result.roofNature ?? '';
+  //       roofNatureCtr.text = result.roofNature ?? '';
+
+  //       // Populate load elements (if any)
+  //       productDetailList.clear();
+  //       if (result.loadElementDetails != null &&
+  //           result.loadElementDetails!.isNotEmpty) {
+  //         productDetailList.assignAll(
+  //           result.loadElementDetails!.map((element) {
+  //             return LoadElement(
+  //               deviceName: element.deviceName ?? '',
+  //               category: element.category ?? '',
+  //               power: element.powerRatingW?.toString() ?? '',
+  //               usageHrs: element.dailyUsageHrs?.toString() ?? '',
+  //               energyWh: element.energyWh?.toString() ?? '',
+  //               energyKWh: element.energyKWh?.toString() ?? '',
+  //             );
+  //           }).toList(),
+  //         );
+  //       }
+
+  //       // Populate uploaded files
+  //       fileList.clear();
+  //       if (result.uploadedFiles != null && result.uploadedFiles!.isNotEmpty) {
+  //         fileList.assignAll(
+  //           result.uploadedFiles!.map((file) {
+  //             return UploadFile(
+  //               uploadFile:
+  //                   file.path?.split('/').last ?? '', // Use file name from path
+  //               category: file.category ?? '',
+  //             );
+  //           }).toList(),
+  //         );
+  //       }
+
+  //       validateAll();
+  //       update();
+  //     },
+  //     networkManager: networkManager,
+  //   );
+  // }
+
+  void validateAll() {
+    validateCompanyName(companyNameCtr.text);
+    validateAddress(addressCtr.text);
+    validateCountry(countryCtr.text);
+    validateState(stateCtr.text);
+    validateDistrict(districtCtr.text);
+    validatePersonName(personNameCtr.text);
+    validatePersonMobile(personMobileCtr.text);
+    validateLatitude(latitudeCtr.text);
+    validateLongitude(longitudeCtr.text);
+    validateRequiredSolutionType(selectedRequiredSolutionTypeValue.value);
+    validateRequiredSolution(selectedRequiredSolutionValue.value);
+    validateLeadCategory(selectedLeadCategoryValue.value);
+    validateDGCapacity(dgCapacityCtr.text);
+    validateDGSync(selectedDgSyncValue.value);
+    validateInstalledSolarCap(installedSolarCapCtr.text);
+    validateSanctionedLoad(sanctionedLoadCtr.text);
+    validateVFD(selectedVfdValue.value);
+    validateGridAvailability(gridAvailabilityCtr.text);
+    validatePeakMonthlyEnergy(peakMonthlyEnergyCtr.text);
+    validateRequiredSolarCap(requiredSolarCapCtr.text);
+    validateDistanceToTransformer(distanceToTransformerCtr.text);
+    validateRatingOfTransformer(ratingOfTransformerCtr.text);
+    validatePurposeOfSolarization(selectedPurposeOfSolarisationValue.value);
+    validateDistInverterACDB(distInverterACDBCtr.text);
+    validateDistSolarACDB(distSolarACDBCtr.text);
+    validateBuildingHeight(buildingHeightCtr.text);
+    validateRoofSizeLength(roofSizeLengthCtr.text);
+    validateRoofSizeBreadth(roofSizeBreadthCtr.text);
+    validateRoofNature(selectedRoofNatureValue.value);
+    validateAgeOfMetalSheet(ageOfMetalSheetCtr.text);
+    validateGroundSizeLength(groundSizeLengthCtr.text);
+    validateGroundSizeBreadth(groundSizeBreadthCtr.text);
+    validateOtherRemarks(otherRemarksCtr.text);
+    validateScheduleMeeting(scheduleMeetingCtr.text);
+
+    validateStep1();
+    validateStep2();
+    validateStep3();
+    validateStep4();
   }
 }

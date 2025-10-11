@@ -249,10 +249,14 @@ class LeadScreenState extends State<LeadScreen> {
                                                                             primaryColor,
                                                                       ),
                                                                       onPressed: () {
+                                                                        final lead =
+                                                                            ctr.filteredLeadList[entry.key];
                                                                         Get.to(
                                                                           AddLeadScreen(
                                                                             isEdit:
                                                                                 true,
+                                                                            leadId:
+                                                                                lead.id.toString(),
                                                                           ),
                                                                         );
                                                                       },
