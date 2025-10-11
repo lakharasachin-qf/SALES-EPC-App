@@ -3275,7 +3275,6 @@ class AddLeadsController extends GetxController {
     isValidate: false,
   ).obs;
   List<StatusItem> leadStatusCommercial = [
-    StatusItem(label: "Technical Proposal", value: "technical_proposal"),
     StatusItem(label: "Commercial proposal", value: "commercial_proposal"),
   ];
 
@@ -3362,7 +3361,7 @@ class AddLeadsController extends GetxController {
               minLeadingWidth: 5,
               onTap: () {
                 final selectedItem = leadStatusList[index];
-                leadStatusCtr.text = selectedItem.label;
+
                 selectedLeadStatusvalue.value = selectedItem.value;
 
                 validateLeadStatus(leadStatusCtr.text);
@@ -3456,7 +3455,7 @@ class AddLeadsController extends GetxController {
 
                 break;
               case 'commercial_proposal':
-                // isTechnicalProposalMode.value = true;
+                isCommercialProposalMode.value = true;
                 leadStatusList.assignAll(leadStatusCommercial);
                 leadStatusCtr.text = leadStatusList.first.label;
                 break;
