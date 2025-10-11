@@ -49,13 +49,6 @@ class StatusItem {
   const StatusItem({required this.label, required this.value});
 }
 
-class StatusItem {
-  final String label;
-  final String value;
-
-  const StatusItem({required this.label, required this.value});
-}
-
 class UploadFile {
   final String uploadFile;
   final String category;
