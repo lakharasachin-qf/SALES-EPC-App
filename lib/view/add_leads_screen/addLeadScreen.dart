@@ -1354,20 +1354,17 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         isRequired: true,
                                       ),
                                       getReactiveFormField(
-                                        node: controller.groundSizeLengthNode,
-                                        controller:
-                                            controller.groundSizeLengthCtr,
+                                        node: controller.tokenAmountNode,
+                                        controller: controller.tokenAmountCtr,
                                         hintLabel: "Enter Token Amount",
                                         onChanged: (val) {
-                                          controller.validateGroundSizeLength(
-                                            val,
-                                          );
+                                          controller.validateTokenAmountt(val);
                                         },
                                         inputType: TextInputType.number,
                                         formType: FieldType.text,
                                         wantSuffix: false,
                                         errorText: controller
-                                            .groundSizeLengthModel
+                                            .tokenAmountModel
                                             .value
                                             .error,
                                       ),
@@ -1380,20 +1377,18 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         isRequired: true,
                                       ),
                                       getReactiveFormField(
-                                        node: controller.groundSizeLengthNode,
+                                        node: controller.totalProjectCostNode,
                                         controller:
-                                            controller.groundSizeLengthCtr,
+                                            controller.totalProjectCostCtr,
                                         hintLabel: "Enter Total Project Cost",
                                         onChanged: (val) {
-                                          controller.validateGroundSizeLength(
-                                            val,
-                                          );
+                                          controller.validateTotalProject(val);
                                         },
                                         inputType: TextInputType.number,
                                         formType: FieldType.text,
                                         wantSuffix: false,
                                         errorText: controller
-                                            .groundSizeLengthModel
+                                            .totalProjectCostModel
                                             .value
                                             .error,
                                       ),
@@ -1408,20 +1403,19 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       getReactiveFormField(
                                         isEnable: false,
                                         isVerified: true,
-                                        node: controller.groundSizeLengthNode,
-                                        controller:
-                                            controller.groundSizeLengthCtr,
+                                        node: controller.balanceAmonutNode,
+                                        controller: controller.balanceAmonutCtr,
                                         hintLabel: "Enter Balance Amount",
                                         onChanged: (val) {
-                                          controller.validateGroundSizeLength(
-                                            val,
-                                          );
+                                          // controller.validateGroundSizeLength(
+                                          //   val,
+                                          // );
                                         },
                                         inputType: TextInputType.number,
                                         formType: FieldType.text,
                                         wantSuffix: false,
                                         errorText: controller
-                                            .groundSizeLengthModel
+                                            .balanceAmonutModel
                                             .value
                                             .error,
                                       ),

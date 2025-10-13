@@ -540,6 +540,10 @@ class AddLeadsController extends GetxController {
     firstCommercialProposal1Ctr = TextEditingController();
     finalCommercialProposal2Ctr = TextEditingController();
 
+    tokenAmountCtr = TextEditingController();
+    totalProjectCostCtr = TextEditingController();
+    balanceAmonutCtr = TextEditingController();
+
     // FocusNodes
     companyNameNode = FocusNode();
     addressNode = FocusNode();
@@ -599,6 +603,9 @@ class AddLeadsController extends GetxController {
     finalTechnicalProposal2Node = FocusNode();
     firstCommercialProposal1Node = FocusNode();
     finalCommercialProposal2Node = FocusNode();
+    tokenAmountNode = FocusNode();
+    totalProjectCostNode = FocusNode();
+    balanceAmonutNode = FocusNode();
 
     update();
     super.onInit();
@@ -726,6 +733,9 @@ class AddLeadsController extends GetxController {
     finalTechnicalProposal2Node.dispose();
     firstCommercialProposal1Node.dispose();
     finalCommercialProposal2Node.dispose();
+    tokenAmountNode.dispose();
+    totalProjectCostNode.dispose();
+    balanceAmonutNode.dispose();
 
     super.dispose();
   }
@@ -2141,21 +2151,8 @@ class AddLeadsController extends GetxController {
 
   void validateStep2() {
     bool isValid = true;
-    // if (!peakMonthlyEnergyModel.value.isValidate) isValid = false;
-    // if (!requiredSolarCapModel.value.isValidate) isValid = false;
-    // if (!distanceToTransformerModel.value.isValidate) isValid = false;
-    // if (!ratingOfTransformerModel.value.isValidate) isValid = false;
-    // if (!purposeOfSolarizationModel.value.isValidate) isValid = false;
-    // if (!distInverterACDBModel.value.isValidate) isValid = false;
-    // if (!distSolarACDBModel.value.isValidate) isValid = false;
-    // if (!buildingHeightModel.value.isValidate) isValid = false;
-    // if (!roofSizeLengthModel.value.isValidate) isValid = false;
-    // if (!roofSizeBreadthModel.value.isValidate) isValid = false;
+
     if (!roofNatureModel.value.isValidate) isValid = false;
-    // if (!ageOfMetalSheetModel.value.isValidate) isValid = false;
-    // if (!groundSizeLengthModel.value.isValidate) isValid = false;
-    // if (!groundSizeBreadthModel.value.isValidate) isValid = false;
-    // if (!otherRemarksModel.value.isValidate) isValid = false;
 
     if (isEditMode.value == false) {
       if (!scheduleMeeeingModel.value.isValidate) isValid = false;
@@ -2164,10 +2161,13 @@ class AddLeadsController extends GetxController {
 
       if (isLeadPaymentMode.value == true) {
         //payment model condition
+        if (!tokenAmountModel.value.isValidate) isValid = false;
+        if (!totalProjectCostModel.value.isValidate) isValid = false;
         // if (!paymentReceivedModel.value.isValidate) isValid = false;
       }
     }
     isStep2Valid.value = isValid;
+    logcat('validateStep2 result: isStep2Valid = $isValid', '');
     update();
   }
 
@@ -3446,10 +3446,101 @@ class AddLeadsController extends GetxController {
 
   //payment mode
   RxBool isLeadPaymentMode = false.obs;
+  late TextEditingController tokenAmountCtr,
+      totalProjectCostCtr,
+      balanceAmonutCtr;
+
+  late FocusNode tokenAmountNode, totalProjectCostNode, balanceAmonutNode;
+
+  var tokenAmountModel = ValidationModel(null, null, isValidate: false).obs;
+  var totalProjectCostModel = ValidationModel(
+    null,
+    null,
+    isValidate: false,
+  ).obs;
+  var balanceAmonutModel = ValidationModel(null, null, isValidate: false).obs;
+
   List<StatusItem> leadStatusPayment = [
     StatusItem(label: "Approve", value: "approved"),
     StatusItem(label: "Payments", value: "payments"),
   ];
+
+  resetPaymentModeData() {
+    isLeadPaymentMode.value = false;
+    tokenAmountCtr.clear();
+    totalProjectCostCtr.clear();
+    balanceAmonutCtr.clear();
+    tokenAmountModel.value = ValidationModel(null, null, isValidate: false);
+    totalProjectCostModel.value = ValidationModel(
+      null,
+      null,
+      isValidate: false,
+    );
+    balanceAmonutModel.value = ValidationModel(null, null, isValidate: false);
+
+    update();
+  }
+
+  void validateTokenAmountt(String? val) {
+    tokenAmountModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Token amount is required";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter a valid number";
+        model.isValidate = false;
+      } else if (double.parse(val) < 0) {
+        model!.error = "Token amount cannot be negative";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    calculateBalanceAmount();
+    validateStep2();
+  }
+
+  void validateTotalProject(String? val) {
+    totalProjectCostModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Total project cost is required";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter a valid number";
+        model.isValidate = false;
+      } else if (double.parse(val) < 0) {
+        model!.error = "Total project cost cannot be negative";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    calculateBalanceAmount();
+    validateStep2();
+  }
+
+  void calculateBalanceAmount() {
+    final tokenText = tokenAmountCtr.text.trim();
+    final totalText = totalProjectCostCtr.text.trim();
+
+    final token = double.tryParse(tokenText) ?? 0;
+    final total = double.tryParse(totalText) ?? 0;
+
+    double balance = total - token;
+
+    // Avoid negative or invalid balance
+    if (balance < 0) balance = 0;
+
+    balanceAmonutCtr.text = balance.toStringAsFixed(2);
+
+    // Optionally validate or mark as verified
+    balanceAmonutModel.update((model) {
+      model!.error = null;
+      model.isValidate = true;
+    });
+  }
 
   //commerical proposal
   RxBool isAppproveMode = false.obs;
@@ -3534,6 +3625,7 @@ class AddLeadsController extends GetxController {
                   );
                   if (isLeadPaymentMode.value == true) {
                     isLeadPaymentMode.value = false;
+                    resetPaymentModeData();
                   }
                 } else if (selectedLeadStatusvalue.value == "rejected") {
                   leadStatusCtr.text = selectedItem.label;
@@ -3550,7 +3642,7 @@ class AddLeadsController extends GetxController {
                     'selectedLeadStatusvalue',
                     selectedLeadStatusvalue.value,
                   );
-                  isTechnicalProposalMode.value = false;
+                  isCommercialProposalMode.value = false;
                   isTechnicalProposalMode.value = false;
                 } else {
                   // Neither technical nor commercial
