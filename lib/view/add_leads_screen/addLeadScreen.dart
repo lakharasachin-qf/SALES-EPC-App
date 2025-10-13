@@ -1542,15 +1542,17 @@ class _AddLeadScreenState extends State<AddLeadScreen>
 
                                       Obx(() {
                                         return controller
-                                                .isFullPaymentAmountMode
-                                                .value
+                                                    .isFullPaymentAmountMode
+                                                    .value ||
+                                                controller.iswonShow.value
                                             ? getDynamicSizedBox(height: 2.h)
                                             : SizedBox.shrink();
                                       }),
                                       Obx(() {
                                         return controller
-                                                .isFullPaymentAmountMode
-                                                .value
+                                                    .isFullPaymentAmountMode
+                                                    .value ||
+                                                controller.iswonShow.value
                                             ? getLable(
                                                 "Full Payment Amount",
                                                 isVerified: true,
@@ -1560,8 +1562,9 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       }),
                                       Obx(() {
                                         return controller
-                                                .isFullPaymentAmountMode
-                                                .value
+                                                    .isFullPaymentAmountMode
+                                                    .value ||
+                                                controller.iswonShow.value
                                             ? getReactiveFormField(
                                                 isEnable: false,
                                                 isVerified: true,

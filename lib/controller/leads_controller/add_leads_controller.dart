@@ -3631,6 +3631,11 @@ class AddLeadsController extends GetxController {
   List<StatusItem> financialTypePaymentLeadStatus = [
     StatusItem(label: "Payments", value: "payments"),
   ];
+
+  List<StatusItem> isWonData = [
+    StatusItem(label: "Payments", value: "payments"),
+    StatusItem(label: "Won", value: "won"),
+  ];
   List<StatusItem> financialTypePayment = [
     StatusItem(label: "Select Financing Type", value: "select_financing_type"),
     StatusItem(label: "Self Funding", value: "self_funding"),
@@ -3810,6 +3815,11 @@ class AddLeadsController extends GetxController {
     StatusItem(label: "Payment Received", value: "payment_received"),
   ];
 
+  //isWon
+  List<StatusItem> iswonShowdata = [
+    StatusItem(label: "Payment Received", value: "payment_received"),
+  ];
+  RxBool iswonShow = false.obs;
   Widget setLeadStatusstDialog() {
     return Obx(() {
       if (isCountryApiCallLoading.value) {
@@ -3885,6 +3895,16 @@ class AddLeadsController extends GetxController {
                     selectedLeadStatusvalue.value,
                   );
                 } else if (selectedLeadStatusvalue.value == "payments") {
+                  isLeadPaymentMode.value = true;
+                  // leadStatusCtr.text = selectedItem.label;
+                  validateLeadStatus(leadStatusCtr.text);
+                  logcat(
+                    'selectedLeadStatusvalue',
+                    selectedLeadStatusvalue.value,
+                  );
+                  isCommercialProposalMode.value = false;
+                  isTechnicalProposalMode.value = false;
+                } else if (selectedLeadStatusvalue.value == "won") {
                   isLeadPaymentMode.value = true;
                   // leadStatusCtr.text = selectedItem.label;
                   validateLeadStatus(leadStatusCtr.text);
@@ -4137,6 +4157,12 @@ class AddLeadsController extends GetxController {
                 leadStatusList.assignAll(leadStatusPayment);
                 leadStatusCtr.text = leadStatusList.first.label;
                 break;
+
+              case 'won':
+                iswonShow.value = true;
+                validateFullPaymentProject(balanceAmonutCtr.text);
+                //last case
+                break;
             }
           }
         }
@@ -4155,9 +4181,16 @@ class AddLeadsController extends GetxController {
             isFinancialType.value = true;
             isLeadPaymentMode.value = true;
 
-            leadStatusList.assignAll(financialTypePaymentLeadStatus);
+            if (iswonShow.value == true) {
+              leadStatusList.assignAll(isWonData);
+              selectedLeadStatusvalue.value = 'won';
+            } else {
+              leadStatusList.assignAll(financialTypePaymentLeadStatus);
+              selectedLeadStatusvalue.value = 'payments';
+            }
+
             leadStatusCtr.text = leadStatusList.first.label;
-            selectedLeadStatusvalue.value = 'payments';
+
             tokenAmountCtr.text = result.payment?.tokenAmount ?? '';
             totalProjectCostCtr.text = result.payment?.totalProjectCost ?? '';
             validateLeadStatus(leadStatusCtr.text);
@@ -4208,9 +4241,17 @@ class AddLeadsController extends GetxController {
                 //     true;
               } else {
                 ispaymentReceivedShow.value = false;
-                omcParternerListDropdown.assignAll(
-                  financingProgressStatuToPartnersMode,
-                );
+
+                if (iswonShow.value == true) {
+                  omcParternerListDropdown.assignAll(iswonShowdata);
+                } else {
+                  omcParternerListDropdown.assignAll(
+                    financingProgressStatuToPartnersMode,
+                  );
+                }
+
+                validateOMCProgressStatus(financialOMCPartnerCtr.text);
+
                 // financingProgressStatuToPartnersPaymentReceiveedMode.value =
                 //     false;
               }
