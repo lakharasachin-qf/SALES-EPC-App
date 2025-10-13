@@ -609,6 +609,7 @@ class AddLeadsController extends GetxController {
     balanceAmonutNode = FocusNode();
     financialNode = FocusNode();
 
+    //
     update();
     super.onInit();
   }
@@ -2169,14 +2170,34 @@ class AddLeadsController extends GetxController {
 
       if (isLeadPaymentMode.value == true) {
         //payment model condition
+        if (isFinancialType.value == true) {
+          if (!financialModel.value.isValidate) isValid = false;
+
+          if (isFullPaymentAmountMode.value == true) {
+            if (!balanceAmonutModel.value.isValidate) isValid = false;
+          }
+        }
         if (!tokenAmountModel.value.isValidate) isValid = false;
         if (!totalProjectCostModel.value.isValidate) isValid = false;
+
         // if (!paymentReceivedModel.value.isValidate) isValid = false;
       }
     }
     isStep2Valid.value = isValid;
-    logcat('validateStep2 result: isStep2Valid = $isValid', '');
-    update();
+    logcat('validateStep2 result: isStep2Valid = $isStep2Valid', '');
+
+    // ✅ Single combined logcat at the end
+    logcat('validateStep2 result:', '');
+    logcat('isStep2Valid', isStep2Valid.value);
+    logcat('roofNatureModel', roofNatureModel.value.isValidate);
+    logcat('scheduleMeeeingModel', scheduleMeeeingModel.value.isValidate);
+    logcat('leadStatusModel', leadStatusModel.value.isValidate);
+    logcat('isLeadPaymentMode', isLeadPaymentMode.value);
+    logcat('isFinancialType', isFinancialType.value);
+    logcat('financialModel', financialModel.value.isValidate);
+    logcat('tokenAmountModel', tokenAmountModel.value.isValidate);
+    logcat('totalProjectCostModel', totalProjectCostModel.value.isValidate);
+    // logcat('paymentReceivedModel', paymentReceivedModel.value.isValidate);    update();
   }
 
   void validateStep3() {
@@ -3529,6 +3550,26 @@ class AddLeadsController extends GetxController {
     validateStep2();
   }
 
+  void validateFullPaymentProject(String? val) {
+    balanceAmonutModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Total project cost is required";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter a valid number";
+        model.isValidate = false;
+      } else if (double.parse(val) < 0) {
+        model!.error = "Total project cost cannot be negative";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    calculateBalanceAmount();
+    validateStep2();
+  }
+
   void calculateBalanceAmount() {
     final tokenText = tokenAmountCtr.text.trim();
     final totalText = totalProjectCostCtr.text.trim();
@@ -3574,6 +3615,10 @@ class AddLeadsController extends GetxController {
     StatusItem(label: "Self Bank Financing", value: "self_bank_Financing"),
   ];
 
+  //self funding
+
+  RxBool isFullPaymentAmountMode = false.obs;
+
   //commerical proposal
   RxBool isAppproveMode = false.obs;
 
@@ -3584,6 +3629,19 @@ class AddLeadsController extends GetxController {
 
   void validateLeadStatus(String? val) {
     leadStatusModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Select Lead Status";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateFinancialStatus(String? val) {
+    financialModel.update((model) {
       if (val == null || val.trim().isEmpty) {
         model!.error = "Select Lead Status";
         model.isValidate = false;
@@ -3627,6 +3685,7 @@ class AddLeadsController extends GetxController {
                 final selectedItem = leadStatusList[index];
 
                 selectedLeadStatusvalue.value = selectedItem.value;
+                leadStatusCtr.text = selectedItem.label;
 
                 validateLeadStatus(leadStatusCtr.text);
                 if (selectedLeadStatusvalue.value == "technical_proposal") {
@@ -3651,7 +3710,7 @@ class AddLeadsController extends GetxController {
                   finalTechnicalProposal2Ctr.clear();
                   isTechnicalProposalMode.value = false;
                 } else if (selectedLeadStatusvalue.value == "approved") {
-                  leadStatusCtr.text = selectedItem.label;
+                  // leadStatusCtr.text = selectedItem.label;
                   validateLeadStatus(leadStatusCtr.text);
                   logcat(
                     'selectedLeadStatusvalue',
@@ -3662,7 +3721,7 @@ class AddLeadsController extends GetxController {
                     resetPaymentModeData();
                   }
                 } else if (selectedLeadStatusvalue.value == "rejected") {
-                  leadStatusCtr.text = selectedItem.label;
+                  // leadStatusCtr.text = selectedItem.label;
                   validateLeadStatus(leadStatusCtr.text);
                   logcat(
                     'selectedLeadStatusvalue',
@@ -3670,7 +3729,7 @@ class AddLeadsController extends GetxController {
                   );
                 } else if (selectedLeadStatusvalue.value == "payments") {
                   isLeadPaymentMode.value = true;
-                  leadStatusCtr.text = selectedItem.label;
+                  // leadStatusCtr.text = selectedItem.label;
                   validateLeadStatus(leadStatusCtr.text);
                   logcat(
                     'selectedLeadStatusvalue',
@@ -3742,20 +3801,24 @@ class AddLeadsController extends GetxController {
                 final selectedItem = financialTypePaymentListDropdown[index];
 
                 selectedfinanicalStatusvalue.value = selectedItem.value;
-
+                financialTypeCtr.text = selectedItem.label;
                 // validateLeadStatus(leadStatusCtr.text);
                 if (selectedfinanicalStatusvalue.value == "self_funding") {
+                  isFullPaymentAmountMode.value = true;
+                  validateFullPaymentProject(balanceAmonutCtr.text);
                   // Enable technical proposal mode
                 } else if (selectedfinanicalStatusvalue.value ==
                     "finance_through_omc_Partner") {
+                  isFullPaymentAmountMode.value = false;
+                  validateFullPaymentProject(balanceAmonutCtr.text);
                 } else if (selectedfinanicalStatusvalue.value ==
                     "self_bank_Financing") {
+                  isFullPaymentAmountMode.value = true;
+                  validateFullPaymentProject(balanceAmonutCtr.text);
                 } else {
                   // Neither technical nor commercial
-                  isTechnicalProposalMode.value = false;
-                  isCommercialProposalMode.value = false;
-                  isLeadPaymentMode.value = false;
-                  isAppproveMode.value = false;
+                  isFullPaymentAmountMode.value = false;
+                  validateFullPaymentProject(balanceAmonutCtr.text);
 
                   // // Reset all fields
                   // firstTechnicalProposalFile.value = null;
@@ -3862,6 +3925,9 @@ class AddLeadsController extends GetxController {
             selectedLeadStatusvalue.value = 'payments';
             tokenAmountCtr.text = result.payment?.tokenAmount ?? '';
             totalProjectCostCtr.text = result.payment?.totalProjectCost ?? '';
+            validateLeadStatus(leadStatusCtr.text);
+            validateTokenAmountt(tokenAmountCtr.text);
+            validateTotalProject(totalProjectCostCtr.text);
             calculateBalanceAmount();
 
             financialTypePaymentListDropdown.assignAll(financialTypePayment);
@@ -3869,6 +3935,8 @@ class AddLeadsController extends GetxController {
                 financialTypePaymentListDropdown.first.label;
             selectedfinanicalStatusvalue.value =
                 financialTypePaymentListDropdown.first.value;
+
+            validateFinancialStatus(financialTypeCtr.text);
 
             // selectedLeadStatusvalue.value = 'Select Financing Type';
             // validateLeadStatus(leadStatusCtr.text);

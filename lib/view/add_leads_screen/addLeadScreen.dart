@@ -1421,6 +1421,12 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       ),
 
                                       Obx(() {
+                                        return controller.isFinancialType.value
+                                            ? getDynamicSizedBox(height: 2.h)
+                                            : SizedBox.shrink();
+                                      }),
+
+                                      Obx(() {
                                         final financialType =
                                             controller.isFinancialType.value;
 
@@ -1440,9 +1446,10 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                                 hintLabel:
                                                     "Select Financing Type",
                                                 onChanged: (val) {
-                                                  // controller.validateRoofNature(
-                                                  //   val,
-                                                  // );
+                                                  controller
+                                                      .validateFinancialStatus(
+                                                        val,
+                                                      );
                                                 },
                                                 onTap: () {
                                                   commonDropDownDialog(
@@ -1468,6 +1475,53 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         } else {
                                           return const SizedBox.shrink();
                                         }
+                                      }),
+
+                                      Obx(() {
+                                        return controller
+                                                .isFullPaymentAmountMode
+                                                .value
+                                            ? getDynamicSizedBox(height: 2.h)
+                                            : SizedBox.shrink();
+                                      }),
+                                      Obx(() {
+                                        return controller
+                                                .isFullPaymentAmountMode
+                                                .value
+                                            ? getLable(
+                                                "Full Payment Amount",
+                                                isVerified: true,
+                                                isRequired: true,
+                                              )
+                                            : SizedBox.shrink();
+                                      }),
+                                      Obx(() {
+                                        return controller
+                                                .isFullPaymentAmountMode
+                                                .value
+                                            ? getReactiveFormField(
+                                                isEnable: false,
+                                                isVerified: true,
+                                                node: controller
+                                                    .balanceAmonutNode,
+                                                controller:
+                                                    controller.balanceAmonutCtr,
+                                                hintLabel:
+                                                    "Enter Full Payment Amount",
+                                                onChanged: (val) {
+                                                  // controller.validateGroundSizeLength(
+                                                  //   val,
+                                                  // );
+                                                },
+                                                inputType: TextInputType.number,
+                                                formType: FieldType.text,
+                                                wantSuffix: false,
+                                                errorText: controller
+                                                    .balanceAmonutModel
+                                                    .value
+                                                    .error,
+                                              )
+                                            : SizedBox.shrink();
                                       }),
                                     ],
                                   );
