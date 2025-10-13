@@ -2161,6 +2161,11 @@ class AddLeadsController extends GetxController {
       if (!scheduleMeeeingModel.value.isValidate) isValid = false;
     } else {
       if (!leadStatusModel.value.isValidate) isValid = false;
+
+      if (isLeadPaymentMode.value == true) {
+        //payment model condition
+        // if (!paymentReceivedModel.value.isValidate) isValid = false;
+      }
     }
     isStep2Valid.value = isValid;
     update();
@@ -3439,6 +3444,13 @@ class AddLeadsController extends GetxController {
     StatusItem(label: "Reject", value: "rejected"),
   ];
 
+  //payment mode
+  RxBool isLeadPaymentMode = false.obs;
+  List<StatusItem> leadStatusPayment = [
+    StatusItem(label: "Approve", value: "approved"),
+    StatusItem(label: "Payments", value: "payments"),
+  ];
+
   //commerical proposal
   RxBool isAppproveMode = false.obs;
 
@@ -3527,10 +3539,21 @@ class AddLeadsController extends GetxController {
                     'selectedLeadStatusvalue',
                     selectedLeadStatusvalue.value,
                   );
+                } else if (selectedLeadStatusvalue.value == "payments") {
+                  isLeadPaymentMode.value = true;
+                  leadStatusCtr.text = selectedItem.label;
+                  validateLeadStatus(leadStatusCtr.text);
+                  logcat(
+                    'selectedLeadStatusvalue',
+                    selectedLeadStatusvalue.value,
+                  );
+                  isTechnicalProposalMode.value = false;
+                  isTechnicalProposalMode.value = false;
                 } else {
                   // Neither technical nor commercial
                   isTechnicalProposalMode.value = false;
                   isCommercialProposalMode.value = false;
+                  isLeadPaymentMode.value = false;
                   isAppproveMode.value = false;
 
                   // Reset all fields
@@ -3610,6 +3633,11 @@ class AddLeadsController extends GetxController {
                   logcat('isAppproveMode.value', 'isAppproveMode.value');
                 }
                 // Add your handling for these statuses
+                break;
+
+              case 'payments':
+                leadStatusList.assignAll(leadStatusPayment);
+                leadStatusCtr.text = leadStatusList.first.label;
                 break;
             }
           }
