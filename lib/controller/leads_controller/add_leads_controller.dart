@@ -3525,14 +3525,17 @@ class AddLeadsController extends GetxController {
                   firstTechnicalProposal1Ctr.clear();
                   finalTechnicalProposal2Ctr.clear();
                   isTechnicalProposalMode.value = false;
-                } else if (selectedLeadStatusvalue.value == "approve") {
+                } else if (selectedLeadStatusvalue.value == "approved") {
                   leadStatusCtr.text = selectedItem.label;
                   validateLeadStatus(leadStatusCtr.text);
                   logcat(
                     'selectedLeadStatusvalue',
                     selectedLeadStatusvalue.value,
                   );
-                } else if (selectedLeadStatusvalue.value == "reject") {
+                  if (isLeadPaymentMode.value == true) {
+                    isLeadPaymentMode.value = false;
+                  }
+                } else if (selectedLeadStatusvalue.value == "rejected") {
                   leadStatusCtr.text = selectedItem.label;
                   validateLeadStatus(leadStatusCtr.text);
                   logcat(

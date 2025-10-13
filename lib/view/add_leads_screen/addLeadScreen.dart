@@ -1237,8 +1237,6 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                     : SizedBox.shrink();
                               }),
 
-                              
-
                               Obx(() {
                                 return controller
                                             .isCommercialProposalMode
@@ -1341,6 +1339,97 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         isRequired: false,
                                       )
                                     : SizedBox.shrink();
+                              }),
+                              Obx(() {
+                                if (controller.isLeadPaymentMode.value) {
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      getDynamicSizedBox(height: 2.h),
+
+                                      // Token Amount
+                                      getLable(
+                                        "Token Amount",
+                                        isRequired: true,
+                                      ),
+                                      getReactiveFormField(
+                                        node: controller.groundSizeLengthNode,
+                                        controller:
+                                            controller.groundSizeLengthCtr,
+                                        hintLabel: "Enter Token Amount",
+                                        onChanged: (val) {
+                                          controller.validateGroundSizeLength(
+                                            val,
+                                          );
+                                        },
+                                        inputType: TextInputType.number,
+                                        formType: FieldType.text,
+                                        wantSuffix: false,
+                                        errorText: controller
+                                            .groundSizeLengthModel
+                                            .value
+                                            .error,
+                                      ),
+
+                                      getDynamicSizedBox(height: 2.h),
+
+                                      // Total Project Cost
+                                      getLable(
+                                        "Total Project Cost",
+                                        isRequired: true,
+                                      ),
+                                      getReactiveFormField(
+                                        node: controller.groundSizeLengthNode,
+                                        controller:
+                                            controller.groundSizeLengthCtr,
+                                        hintLabel: "Enter Total Project Cost",
+                                        onChanged: (val) {
+                                          controller.validateGroundSizeLength(
+                                            val,
+                                          );
+                                        },
+                                        inputType: TextInputType.number,
+                                        formType: FieldType.text,
+                                        wantSuffix: false,
+                                        errorText: controller
+                                            .groundSizeLengthModel
+                                            .value
+                                            .error,
+                                      ),
+
+                                      getDynamicSizedBox(height: 2.h),
+
+                                      // Balance Amount
+                                      getLable(
+                                        "Balance Amount",
+                                        isVerified: true,
+                                      ),
+                                      getReactiveFormField(
+                                        isEnable: false,
+                                        isVerified: true,
+                                        node: controller.groundSizeLengthNode,
+                                        controller:
+                                            controller.groundSizeLengthCtr,
+                                        hintLabel: "Enter Balance Amount",
+                                        onChanged: (val) {
+                                          controller.validateGroundSizeLength(
+                                            val,
+                                          );
+                                        },
+                                        inputType: TextInputType.number,
+                                        formType: FieldType.text,
+                                        wantSuffix: false,
+                                        errorText: controller
+                                            .groundSizeLengthModel
+                                            .value
+                                            .error,
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  return const SizedBox.shrink();
+                                }
                               }),
 
                               widget.isEdit
