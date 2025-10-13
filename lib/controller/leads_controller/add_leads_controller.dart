@@ -546,6 +546,7 @@ class AddLeadsController extends GetxController {
     financialTypeCtr = TextEditingController();
 
     financialOMCPartnerCtr = TextEditingController();
+    financeDocumentCtr = TextEditingController();
 
     // FocusNodes
     companyNameNode = FocusNode();
@@ -612,6 +613,7 @@ class AddLeadsController extends GetxController {
     financialNode = FocusNode();
 
     financialOMCPartnerNode = FocusNode();
+    financeDocumentNode = FocusNode();
 
     //
     update();
@@ -682,6 +684,7 @@ class AddLeadsController extends GetxController {
     financialTypeCtr.dispose();
 
     financialOMCPartnerCtr.dispose();
+    financeDocumentCtr.dispose();
 
     // Dispose focus nodes
     companyNameNode.dispose();
@@ -753,6 +756,7 @@ class AddLeadsController extends GetxController {
     financialNode.dispose();
 
     financialOMCPartnerNode.dispose();
+    financeDocumentNode.dispose();
     super.dispose();
   }
 
@@ -3721,6 +3725,64 @@ class AddLeadsController extends GetxController {
 
   RxString selectedfinancingProgressStatusMode = ''.obs;
 
+  //Finance Documents
+
+  late TextEditingController financeDocumentCtr;
+  late FocusNode financeDocumentNode;
+
+  var financeDocumentModel = ValidationModel(null, null, isValidate: false).obs;
+
+  RxBool isOMCFinanceDocumentShown = false.obs;
+  RxList<String> selectedPdfPaths = <String>[].obs;
+
+  /// Reset the PDF upload data
+  void resetOMCuploadFileData() {
+    financeDocumentCtr.clear();
+    financeDocumentModel.value = ValidationModel(null, null, isValidate: false);
+    selectedPdfPaths.clear();
+    update();
+  }
+
+  /// Pick multiple PDF files
+  Future<void> pickMultiplePdfFiles() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+      allowMultiple: true,
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      // Clear old selections
+      selectedPdfPaths.clear();
+
+      // Add all selected PDF paths
+      for (var file in result.files) {
+        if (file.path != null) {
+          selectedPdfPaths.add(file.path!);
+        }
+      }
+
+      // Show count of selected files in the text field
+      financeDocumentCtr.text =
+          "${selectedPdfPaths.length} PDF file${selectedPdfPaths.length > 1 ? 's' : ''} selected";
+
+      // Update validation
+      if (selectedPdfPaths.isEmpty) {
+        financeDocumentModel.update((model) {
+          model!.error = "At least one PDF file is required";
+          model.isValidate = false;
+        });
+      } else {
+        financeDocumentModel.update((model) {
+          model!.error = null;
+          model.isValidate = true;
+        });
+      }
+
+      update();
+    }
+  }
+
   Widget setLeadStatusstDialog() {
     return Obx(() {
       if (isCountryApiCallLoading.value) {
@@ -3874,6 +3936,7 @@ class AddLeadsController extends GetxController {
                 if (selectedfinanicalStatusvalue.value == "self_funding") {
                   isFullPaymentAmountMode.value = true;
                   isOMCPartnerMode.value = false;
+                  isOMCFinanceDocumentShown.value = false;
 
                   validateFullPaymentProject(balanceAmonutCtr.text);
                   // Enable technical proposal mode
@@ -3891,16 +3954,19 @@ class AddLeadsController extends GetxController {
                   isFullPaymentAmountMode.value = false;
                   validateOMCProgressStatus(financialOMCPartnerCtr.text);
                   validateFullPaymentProject(balanceAmonutCtr.text);
+                  isOMCFinanceDocumentShown.value = true;
                 } else if (selectedfinanicalStatusvalue.value ==
                     "self_bank_Financing") {
                   isFullPaymentAmountMode.value = true;
                   isOMCPartnerMode.value = false;
+                  isOMCFinanceDocumentShown.value = false;
 
                   validateFullPaymentProject(balanceAmonutCtr.text);
                 } else {
                   // Neither technical nor commercial
                   isFullPaymentAmountMode.value = false;
                   isOMCPartnerMode.value = false;
+                  isOMCFinanceDocumentShown.value = false;
                   validateFullPaymentProject(balanceAmonutCtr.text);
 
                   // // Reset all fields

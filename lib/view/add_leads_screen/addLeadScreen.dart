@@ -1586,6 +1586,71 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                               )
                                             : SizedBox.shrink();
                                       }),
+                                      Obx(() {
+                                        return controller
+                                                .isOMCFinanceDocumentShown
+                                                .value
+                                            ? getDynamicSizedBox(height: 2.h)
+                                            : SizedBox.shrink();
+                                      }),
+
+                                      // Obx(() {
+                                      //   return controller
+                                      //           .isOMCFinanceDocumentShown
+                                      //           .value
+                                      //       ? getLable(
+                                      //           "Finance Documents (PDF only)",
+                                      //         )
+                                      //       : SizedBox.shrink();
+                                      // }),
+                                      Obx(() {
+                                        return controller
+                                                .isOMCFinanceDocumentShown
+                                                .value
+                                            ? getTextField(
+                                                context: context,
+                                                wantLabel: true,
+                                                label:
+                                                    'Finance Documents (PDF only)',
+                                                ctr: controller
+                                                    .financeDocumentCtr,
+                                                node: controller
+                                                    .financeDocumentNode,
+                                                model: controller
+                                                    .financeDocumentModel
+                                                    .value,
+                                                isenable: false,
+                                                isdropdown: true,
+                                                wantsuffix: false,
+                                                usegesture: true,
+                                                gestureFunction: () async {
+                                                  await controller
+                                                      .pickMultiplePdfFiles();
+                                                },
+                                                hint: 'Select File',
+                                                isRequired: true,
+                                              )
+                                            : SizedBox.shrink();
+                                      }),
+
+                                      Obx(() {
+                                        return controller
+                                                .isOMCFinanceDocumentShown
+                                                .value
+                                            ? Container(
+                                                padding: EdgeInsets.only(
+                                                  top: 0.5.h,
+                                                ),
+                                                child: Text(
+                                                  'You can select multiple PDF files.',
+                                                  style: TextStyle(
+                                                    fontSize: 14.sp,
+                                                    color: grey,
+                                                  ),
+                                                ),
+                                              )
+                                            : SizedBox.shrink();
+                                      }),
                                     ],
                                   );
                                 } else {
