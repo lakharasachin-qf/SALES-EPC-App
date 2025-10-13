@@ -51,11 +51,11 @@ class LeadData {
   String? distBtwInverterAcdbPanelMtrs;
   String? distBtwSolarAcdbPanelMtrs;
   String? requiredSolution;
-  dynamic buildingHeight;
+  int? buildingHeight; // ✅ Changed from dynamic to int?
   String? roofSizeLengthFt;
   String? roofSizeBreadthFt;
   String? roofNature;
-  dynamic ageOfMetalSheet;
+  int? ageOfMetalSheet; // ✅ Changed from dynamic to int?
   String? groundSizeLengthFt;
   String? groundSizeBreadthFt;
   String? leadCategory;
@@ -68,7 +68,7 @@ class LeadData {
   List<UploadedFile>? uploadedFiles;
   Payment? payment;
   Meeting? meeting;
-  List<String>? availableNextStatuses; // ✅ changed to List<String>
+  List<String>? availableNextStatuses;
   String? scheduledAt;
   String? rescheduleReason;
   String? countryName;
@@ -152,11 +152,12 @@ class LeadData {
     distBtwInverterAcdbPanelMtrs: json["dist_btw_inverter_acdb_panel_mtrs"],
     distBtwSolarAcdbPanelMtrs: json["dist_btw_solar_acdb_panel_mtrs"],
     requiredSolution: json["required_solution"],
-    buildingHeight: json["building_height"],
+    buildingHeight: json["building_height"], // ✅ No change needed in parsing
     roofSizeLengthFt: json["roof_size_length_ft"],
     roofSizeBreadthFt: json["roof_size_breadth_ft"],
     roofNature: json["roof_nature"],
-    ageOfMetalSheet: json["age_of_metal_sheet"],
+    ageOfMetalSheet:
+        json["age_of_metal_sheet"], // ✅ No change needed in parsing
     groundSizeLengthFt: json["ground_size_length_ft"],
     groundSizeBreadthFt: json["ground_size_breadth_ft"],
     leadCategory: json["lead_category"],
@@ -341,56 +342,88 @@ class UploadedFile {
 class Payment {
   int? id;
   int? leadId;
+  int? customerId;
   String? paymentType;
   String? tokenAmount;
   bool? isTokenAmountReceived;
   String? tokenAmountReceiveDate;
+  String? financingType;
+  String? financingProgressStatus;
   String? totalProjectCost;
-  String? balanceAmount;
+  String? fullPaymentAmount;
+  int? balanceAmount; // ✅ Changed from String? to int?
   bool? isFullPaymentReceived;
+  String? fullPaymentReceivedDate;
   String? createdAt;
   String? updatedAt;
+  String? warrantyStartDate;
+  String? warrantyEndDate;
+  String? warrantyPeriod;
 
   Payment({
     this.id,
     this.leadId,
+    this.customerId,
     this.paymentType,
     this.tokenAmount,
     this.isTokenAmountReceived,
     this.tokenAmountReceiveDate,
+    this.financingType,
+    this.financingProgressStatus,
     this.totalProjectCost,
+    this.fullPaymentAmount,
     this.balanceAmount,
     this.isFullPaymentReceived,
+    this.fullPaymentReceivedDate,
     this.createdAt,
     this.updatedAt,
+    this.warrantyStartDate,
+    this.warrantyEndDate,
+    this.warrantyPeriod,
   });
 
   factory Payment.fromJson(Map<String, dynamic> json) => Payment(
     id: json["id"],
     leadId: json["lead_id"],
+    customerId: json["customer_id"],
     paymentType: json["payment_type"],
     tokenAmount: json["token_amount"],
     isTokenAmountReceived: json["is_token_amount_received"],
     tokenAmountReceiveDate: json["token_amount_receive_date"],
+    financingType: json["financing_type"],
+    financingProgressStatus: json["financing_progress_status"],
     totalProjectCost: json["total_project_cost"],
-    balanceAmount: json["balance_amount"]?.toString(),
+    fullPaymentAmount: json["full_payment_amount"],
+    balanceAmount: json["balance_amount"], // ✅ Removed .toString()
     isFullPaymentReceived: json["is_full_payment_received"],
+    fullPaymentReceivedDate: json["full_payment_received_date"],
     createdAt: json["created_at"],
     updatedAt: json["updated_at"],
+    warrantyStartDate: json["warranty_start_date"],
+    warrantyEndDate: json["warranty_end_date"],
+    warrantyPeriod: json["warranty_period"],
   );
 
   Map<String, dynamic> toJson() => {
     "id": id,
     "lead_id": leadId,
+    "customer_id": customerId,
     "payment_type": paymentType,
     "token_amount": tokenAmount,
     "is_token_amount_received": isTokenAmountReceived,
     "token_amount_receive_date": tokenAmountReceiveDate,
+    "financing_type": financingType,
+    "financing_progress_status": financingProgressStatus,
     "total_project_cost": totalProjectCost,
+    "full_payment_amount": fullPaymentAmount,
     "balance_amount": balanceAmount,
     "is_full_payment_received": isFullPaymentReceived,
+    "full_payment_received_date": fullPaymentReceivedDate,
     "created_at": createdAt,
     "updated_at": updatedAt,
+    "warranty_start_date": warrantyStartDate,
+    "warranty_end_date": warrantyEndDate,
+    "warranty_period": warrantyPeriod,
   };
 }
 

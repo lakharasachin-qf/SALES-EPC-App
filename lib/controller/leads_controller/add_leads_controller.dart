@@ -543,6 +543,7 @@ class AddLeadsController extends GetxController {
     tokenAmountCtr = TextEditingController();
     totalProjectCostCtr = TextEditingController();
     balanceAmonutCtr = TextEditingController();
+    financialTypeCtr = TextEditingController();
 
     // FocusNodes
     companyNameNode = FocusNode();
@@ -606,6 +607,7 @@ class AddLeadsController extends GetxController {
     tokenAmountNode = FocusNode();
     totalProjectCostNode = FocusNode();
     balanceAmonutNode = FocusNode();
+    financialNode = FocusNode();
 
     update();
     super.onInit();
@@ -668,6 +670,11 @@ class AddLeadsController extends GetxController {
     finalTechnicalProposal2Ctr.dispose();
     firstCommercialProposal1Ctr.dispose();
     finalCommercialProposal2Ctr.dispose();
+
+    tokenAmountCtr.dispose();
+    totalProjectCostCtr.dispose();
+    balanceAmonutCtr.dispose();
+    financialTypeCtr.dispose();
 
     // Dispose focus nodes
     companyNameNode.dispose();
@@ -736,6 +743,7 @@ class AddLeadsController extends GetxController {
     tokenAmountNode.dispose();
     totalProjectCostNode.dispose();
     balanceAmonutNode.dispose();
+    financialNode.dispose();
 
     super.dispose();
   }
@@ -3541,12 +3549,38 @@ class AddLeadsController extends GetxController {
       model.isValidate = true;
     });
   }
+  //isFinancialType
+
+  RxBool isFinancialType = false.obs;
+
+  late TextEditingController financialTypeCtr;
+
+  late FocusNode financialNode;
+
+  var financialModel = ValidationModel(null, null, isValidate: false).obs;
+
+  List<StatusItem> financialTypePaymentLeadStatus = [
+    StatusItem(label: "Payments", value: "payments"),
+  ];
+  List<StatusItem> financialTypePayment = [
+    StatusItem(label: "Select Financing Type", value: "select_financing_type"),
+    StatusItem(label: "Self Funding", value: "self_funding"),
+
+    StatusItem(
+      label: "Finance through OMC Partner",
+      value: "finance_through_omc_Partner",
+    ),
+
+    StatusItem(label: "Self Bank Financing", value: "self_bank_Financing"),
+  ];
 
   //commerical proposal
   RxBool isAppproveMode = false.obs;
 
   RxString selectedLeadStatusvalue = ''.obs;
+  RxString selectedfinanicalStatusvalue = ''.obs;
   RxList<StatusItem> leadStatusList = <StatusItem>[].obs;
+  RxList<StatusItem> financialTypePaymentListDropdown = <StatusItem>[].obs;
 
   void validateLeadStatus(String? val) {
     leadStatusModel.update((model) {
@@ -3676,6 +3710,78 @@ class AddLeadsController extends GetxController {
     });
   }
 
+  Widget setFinacialTypeDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        financialTypePaymentListDropdown,
+        controller: financialTypeCtr,
+        noDataLable: "No Roof Nature",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: financialTypePaymentListDropdown.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                final selectedItem = financialTypePaymentListDropdown[index];
+
+                selectedfinanicalStatusvalue.value = selectedItem.value;
+
+                // validateLeadStatus(leadStatusCtr.text);
+                if (selectedfinanicalStatusvalue.value == "self_funding") {
+                  // Enable technical proposal mode
+                } else if (selectedfinanicalStatusvalue.value ==
+                    "finance_through_omc_Partner") {
+                } else if (selectedfinanicalStatusvalue.value ==
+                    "self_bank_Financing") {
+                } else {
+                  // Neither technical nor commercial
+                  isTechnicalProposalMode.value = false;
+                  isCommercialProposalMode.value = false;
+                  isLeadPaymentMode.value = false;
+                  isAppproveMode.value = false;
+
+                  // // Reset all fields
+                  // firstTechnicalProposalFile.value = null;
+                  // finalTechnicalProposalFile.value = null;
+                  // firstTechnicalProposal1Ctr.clear();
+                  // finalTechnicalProposal2Ctr.clear();
+
+                  // firstCommercialProposalFile.value = null;
+                  // finalCommercialProposalFile.value = null;
+                  // firstCommercialProposal1Ctr.clear();
+                  // finalCommercialProposal2Ctr.clear();
+                }
+                Get.back();
+              },
+              title: buildSelectableRow(
+                financialTypePaymentListDropdown[index].label,
+                financialTypePaymentListDropdown[index].label.trim() ==
+                    financialTypeCtr.text.trim(),
+              ),
+            );
+          },
+        ),
+      );
+    });
+  }
+
   Future<void> getLeadDataByIdList(
     BuildContext context,
     bool isLoading,
@@ -3746,6 +3852,26 @@ class AddLeadsController extends GetxController {
             leadStatusCtr.text = leadStatusList.first.label;
             selectedLeadStatusvalue.value = 'rejected';
             validateLeadStatus(leadStatusCtr.text);
+          }
+
+          if (currentStatus == 'payments') {
+            isFinancialType.value = true;
+            isLeadPaymentMode.value = true;
+            leadStatusList.assignAll(financialTypePaymentLeadStatus);
+            leadStatusCtr.text = leadStatusList.first.label;
+            selectedLeadStatusvalue.value = 'payments';
+            tokenAmountCtr.text = result.payment?.tokenAmount ?? '';
+            totalProjectCostCtr.text = result.payment?.totalProjectCost ?? '';
+            calculateBalanceAmount();
+
+            financialTypePaymentListDropdown.assignAll(financialTypePayment);
+            financialTypeCtr.text =
+                financialTypePaymentListDropdown.first.label;
+            selectedfinanicalStatusvalue.value =
+                financialTypePaymentListDropdown.first.value;
+
+            // selectedLeadStatusvalue.value = 'Select Financing Type';
+            // validateLeadStatus(leadStatusCtr.text);
           }
         }
         logcat('isLeadRejectedMode.value', isLeadRejectedMode.value);

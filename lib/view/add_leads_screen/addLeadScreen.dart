@@ -1419,6 +1419,56 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                             .value
                                             .error,
                                       ),
+
+                                      Obx(() {
+                                        final financialType =
+                                            controller.isFinancialType.value;
+
+                                        if (financialType) {
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              getLable(
+                                                "Financing Type",
+                                                isRequired: true,
+                                              ),
+                                              getReactiveFormField(
+                                                node: controller.financialNode,
+                                                controller:
+                                                    controller.financialTypeCtr,
+                                                hintLabel:
+                                                    "Select Financing Type",
+                                                onChanged: (val) {
+                                                  // controller.validateRoofNature(
+                                                  //   val,
+                                                  // );
+                                                },
+                                                onTap: () {
+                                                  commonDropDownDialog(
+                                                    context,
+                                                    content: controller
+                                                        .setFinacialTypeDialog(),
+                                                    title: "Financing Type",
+                                                    onCloseClick: () {},
+                                                  );
+                                                },
+                                                formType: FieldType.text,
+                                                wantSuffix: true,
+                                                isdown: true,
+                                                isReadOnly: true,
+                                                inputType: TextInputType.none,
+                                                errorText: controller
+                                                    .financialModel
+                                                    .value
+                                                    .error,
+                                              ),
+                                            ],
+                                          );
+                                        } else {
+                                          return const SizedBox.shrink();
+                                        }
+                                      }),
                                     ],
                                   );
                                 } else {
