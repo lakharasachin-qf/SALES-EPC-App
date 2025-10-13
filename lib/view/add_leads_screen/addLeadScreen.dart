@@ -1352,8 +1352,20 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       getLable(
                                         "Token Amount",
                                         isRequired: true,
+                                        isVerified:
+                                            controller.iswonShow.value == true
+                                            ? true
+                                            : false,
                                       ),
                                       getReactiveFormField(
+                                        isEnable:
+                                            controller.iswonShow.value == true
+                                            ? false
+                                            : true,
+                                        isVerified:
+                                            controller.iswonShow.value == true
+                                            ? true
+                                            : false,
                                         node: controller.tokenAmountNode,
                                         controller: controller.tokenAmountCtr,
                                         hintLabel: "Enter Token Amount",
@@ -1375,11 +1387,23 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       getLable(
                                         "Total Project Cost",
                                         isRequired: true,
+                                        isVerified:
+                                            controller.iswonShow.value == true
+                                            ? true
+                                            : false,
                                       ),
                                       getReactiveFormField(
                                         node: controller.totalProjectCostNode,
                                         controller:
                                             controller.totalProjectCostCtr,
+                                        isEnable:
+                                            controller.iswonShow.value == true
+                                            ? false
+                                            : true,
+                                        isVerified:
+                                            controller.iswonShow.value == true
+                                            ? true
+                                            : false,
                                         hintLabel: "Enter Total Project Cost",
                                         onChanged: (val) {
                                           controller.validateTotalProject(val);
@@ -1713,7 +1737,9 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller.addLoadElement(context);
                                 },
                                 isAddShow:
-                                    controller.isLeadRejectedMode.value == true
+                                    controller.isLeadRejectedMode.value ==
+                                            true ||
+                                        controller.iswonShow.value == true
                                     ? false
                                     : true,
                               ),
@@ -1737,7 +1763,8 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                     ],
                                     onEdit: (i, item) {
                                       if (controller.isLeadRejectedMode.value ==
-                                          true) {
+                                              true ||
+                                          controller.iswonShow.value) {
                                         Get.snackbar(
                                           'Action Not Allowed',
                                           'You can’t edit items in Rejected mode',
@@ -1756,7 +1783,8 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                     },
                                     onDelete: (i) {
                                       if (controller.isLeadRejectedMode.value ==
-                                          true) {
+                                              true ||
+                                          controller.iswonShow.value) {
                                         Get.snackbar(
                                           'Action Not Allowed',
                                           'You can’t delete items in Rejected mode',
@@ -1770,7 +1798,8 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       controller.deleteLoad(i);
                                     },
                                     isRejected:
-                                        controller.isLeadRejectedMode.value,
+                                        controller.isLeadRejectedMode.value ||
+                                        controller.iswonShow.value,
                                   ),
                                 );
                               }),
@@ -1784,7 +1813,9 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   controller.addUploadFile(context);
                                 },
                                 isAddShow:
-                                    controller.isLeadRejectedMode.value == true
+                                    controller.isLeadRejectedMode.value ==
+                                            true ||
+                                        controller.iswonShow.value == true
                                     ? false
                                     : true,
                               ),
@@ -1808,7 +1839,8 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                     ],
                                     onEdit: (i, file) {
                                       if (controller.isLeadRejectedMode.value ==
-                                          true) {
+                                              true ||
+                                          controller.iswonShow.value) {
                                         Get.snackbar(
                                           'Action Not Allowed',
                                           'You can’t edit items in Rejected mode',
@@ -1827,7 +1859,8 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                     },
                                     onDelete: (i) {
                                       if (controller.isLeadRejectedMode.value ==
-                                          true) {
+                                              true ||
+                                          controller.iswonShow.value) {
                                         Get.snackbar(
                                           'Action Not Allowed',
                                           'You can’t delete items in Rejected mode',
@@ -1841,7 +1874,8 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       controller.deleteFile(i);
                                     },
                                     isRejected:
-                                        controller.isLeadRejectedMode.value,
+                                        controller.isLeadRejectedMode.value ||
+                                        controller.iswonShow.value,
                                   ),
                                 );
                               }),

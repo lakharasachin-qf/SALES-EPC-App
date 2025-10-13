@@ -3904,7 +3904,8 @@ class AddLeadsController extends GetxController {
                   );
                   isCommercialProposalMode.value = false;
                   isTechnicalProposalMode.value = false;
-                } else if (selectedLeadStatusvalue.value == "won") {
+                } else if (selectedLeadStatusvalue.value == "payments" ||
+                    selectedLeadStatusvalue.value == "won") {
                   isLeadPaymentMode.value = true;
                   // leadStatusCtr.text = selectedItem.label;
                   validateLeadStatus(leadStatusCtr.text);
