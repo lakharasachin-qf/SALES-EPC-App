@@ -3783,6 +3783,23 @@ class AddLeadsController extends GetxController {
     }
   }
 
+  //isSendTopartner
+  RxBool isSendToPartnerMode = false.obs;
+  List<StatusItem> financialTypePaymentfinancethroughomcPartner = [
+    StatusItem(
+      label: "Finance through OMC Partner",
+      value: "finance_through_omc_Partner",
+    ),
+  ];
+
+  List<StatusItem> financingProgressStatuToPartnersMode = [
+    StatusItem(label: "Documents Collected", value: "documents_collected"),
+    StatusItem(
+      label: "Documents Sent to Partner",
+      value: "documents_sent_to_partner",
+    ),
+  ];
+
   Widget setLeadStatusstDialog() {
     return Obx(() {
       if (isCountryApiCallLoading.value) {
@@ -4115,6 +4132,7 @@ class AddLeadsController extends GetxController {
           if (currentStatus == 'payments') {
             isFinancialType.value = true;
             isLeadPaymentMode.value = true;
+
             leadStatusList.assignAll(financialTypePaymentLeadStatus);
             leadStatusCtr.text = leadStatusList.first.label;
             selectedLeadStatusvalue.value = 'payments';
@@ -4125,7 +4143,27 @@ class AddLeadsController extends GetxController {
             validateTotalProject(totalProjectCostCtr.text);
             calculateBalanceAmount();
 
-            financialTypePaymentListDropdown.assignAll(financialTypePayment);
+            if (result.uploadedFiles != null &&
+                result.uploadedFiles!.any(
+                  (f) => f.category == 'finance_document',
+                )) {
+              isSendToPartnerMode.value = true;
+              isOMCPartnerMode.value = true;
+              financialTypePaymentListDropdown.assignAll(
+                financialTypePaymentfinancethroughomcPartner,
+              );
+              omcParternerListDropdown.assignAll(
+                financingProgressStatuToPartnersMode,
+              );
+              financialOMCPartnerCtr.text =
+                  omcParternerListDropdown.first.label;
+              selectedfinancingProgressStatusMode.value =
+                  omcParternerListDropdown.first.value;
+            } else {
+              isSendToPartnerMode.value = false;
+              financialTypePaymentListDropdown.assignAll(financialTypePayment);
+            }
+
             financialTypeCtr.text =
                 financialTypePaymentListDropdown.first.label;
             selectedfinanicalStatusvalue.value =
