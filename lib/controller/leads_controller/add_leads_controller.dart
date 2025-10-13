@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart' hide ScreenType;
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
@@ -27,6 +28,7 @@ import 'package:sales_app/models/LocationModel.dart';
 import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
 import 'package:sales_app/preference/UserPreference.dart';
+import 'package:sales_app/utils/AppPermissions.dart';
 import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sales_app/utils/log.dart';
@@ -2092,6 +2094,7 @@ class AddLeadsController extends GetxController {
 
   resetvalidationOfAddLoadElement() {
     isvalidateAddLoadElement.value = false;
+    isLeadRejectedMode.value = false;
     deviceNameCtr.clear();
     categoryCtr.clear();
     powerCtr.clear();
@@ -2421,6 +2424,9 @@ class AddLeadsController extends GetxController {
                               return getReactiveFormField(
                                 node: usageHrsNode,
                                 controller: usageHrsCtr,
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(2),
+                                ],
                                 hintLabel: "Enter Usage (hrs)",
                                 onChanged: (val) {
                                   usageHrsModel.update((model) {
@@ -2434,6 +2440,16 @@ class AddLeadsController extends GetxController {
                                       model!.error =
                                           "Usage hours cannot be negative";
                                       model.isValidate = false;
+                                    } else if (double.tryParse(val) != null) {
+                                      double value = double.parse(val);
+                                      if (value < 0 || value > 24) {
+                                        model!.error =
+                                            "Grid Availability must be between 0 and 24";
+                                        model.isValidate = false;
+                                      } else {
+                                        model!.error = null;
+                                        model.isValidate = true;
+                                      }
                                     } else {
                                       model!.error = null;
                                       model.isValidate = true;
@@ -3410,6 +3426,22 @@ class AddLeadsController extends GetxController {
     update();
   }
 
+  //approove reject lead
+  List<StatusItem> leadStatusApproveReject = [
+    StatusItem(label: "Approve", value: "approved"),
+    StatusItem(label: "Reject", value: "rejected"),
+  ];
+
+  //if rejected
+  RxBool isLeadRejectedMode = false.obs;
+
+  List<StatusItem> leadStatusReject = [
+    StatusItem(label: "Reject", value: "rejected"),
+  ];
+
+  //commerical proposal
+  RxBool isAppproveMode = false.obs;
+
   RxString selectedLeadStatusvalue = ''.obs;
   RxList<StatusItem> leadStatusList = <StatusItem>[].obs;
 
@@ -3481,10 +3513,25 @@ class AddLeadsController extends GetxController {
                   firstTechnicalProposal1Ctr.clear();
                   finalTechnicalProposal2Ctr.clear();
                   isTechnicalProposalMode.value = false;
+                } else if (selectedLeadStatusvalue.value == "approve") {
+                  leadStatusCtr.text = selectedItem.label;
+                  validateLeadStatus(leadStatusCtr.text);
+                  logcat(
+                    'selectedLeadStatusvalue',
+                    selectedLeadStatusvalue.value,
+                  );
+                } else if (selectedLeadStatusvalue.value == "reject") {
+                  leadStatusCtr.text = selectedItem.label;
+                  validateLeadStatus(leadStatusCtr.text);
+                  logcat(
+                    'selectedLeadStatusvalue',
+                    selectedLeadStatusvalue.value,
+                  );
                 } else {
                   // Neither technical nor commercial
                   isTechnicalProposalMode.value = false;
                   isCommercialProposalMode.value = false;
+                  isAppproveMode.value = false;
 
                   // Reset all fields
                   firstTechnicalProposalFile.value = null;
@@ -3554,9 +3601,31 @@ class AddLeadsController extends GetxController {
                 leadStatusList.assignAll(leadStatusCommercial);
                 leadStatusCtr.text = leadStatusList.first.label;
                 break;
+              case 'approved':
+              case 'rejected':
+                if (AppPermissions().canApproveLead) {
+                  isAppproveMode.value = true;
+                  leadStatusList.assignAll(leadStatusApproveReject);
+
+                  logcat('isAppproveMode.value', 'isAppproveMode.value');
+                }
+                // Add your handling for these statuses
+                break;
             }
           }
         }
+
+        if (result.leadStatus != null) {
+          final currentStatus = result.leadStatus!;
+          if (currentStatus == 'rejected') {
+            isLeadRejectedMode.value = true;
+            leadStatusList.assignAll(leadStatusReject);
+            leadStatusCtr.text = leadStatusList.first.label;
+            selectedLeadStatusvalue.value = 'rejected';
+            validateLeadStatus(leadStatusCtr.text);
+          }
+        }
+        logcat('isLeadRejectedMode.value', isLeadRejectedMode.value);
 
         // 🔹 Helper: safely set text controller values
         void setText(TextEditingController ctr, dynamic value) =>

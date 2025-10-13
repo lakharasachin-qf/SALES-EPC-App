@@ -677,6 +677,8 @@ getCommonLableWithButton(
   String title, {
   bool isRequired = false,
   Function? onClick,
+
+  required isAddShow,
 }) {
   return Row(
     crossAxisAlignment: CrossAxisAlignment.center,
@@ -705,19 +707,21 @@ getCommonLableWithButton(
           ),
         ),
       ),
-      Container(
-        margin: EdgeInsets.only(right: 2.w),
-        child: IconButton(
-          icon: Icon(
-            Icons.add_circle_rounded,
-            color: primaryColor,
-            size: 20.sp,
+      if (isAddShow == true)
+        Container(
+          margin: EdgeInsets.only(right: 2.w),
+          child: IconButton(
+            icon: Icon(
+              Icons.add_circle_rounded,
+              color: primaryColor,
+              size: 20.sp,
+            ),
+            onPressed: () {
+              if (onClick != null) onClick();
+            },
           ),
-          onPressed: () {
-            if (onClick != null) onClick();
-          },
         ),
-      ),
+    
     ],
   );
 }

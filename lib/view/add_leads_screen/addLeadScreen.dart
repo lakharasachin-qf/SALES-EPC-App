@@ -1071,13 +1071,18 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                               }),
                               getDynamicSizedBox(height: 2.h),
 
-                              widget.isEdit == false
-                                  ? const SizedBox.shrink()
-                                  : getLable("Lead Status", isRequired: true),
-                              widget.isEdit == false
-                                  ? const SizedBox.shrink()
-                                  : Obx(() {
-                                      return getReactiveFormField(
+                              Obx(() {
+                                final canShowLeadStatus =
+                                    widget.isEdit ||
+                                    (controller.isAppproveMode.value);
+
+                                if (canShowLeadStatus) {
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      getLable("Lead Status", isRequired: true),
+                                      getReactiveFormField(
                                         node: controller.leadStatusNode,
                                         controller: controller.leadStatusCtr,
                                         hintLabel: "Select Lead Status",
@@ -1091,7 +1096,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                                 .setLeadStatusstDialog(),
                                             title: "Lead Status",
                                             onCloseClick: () {},
-                                          ).then((_) {});
+                                          );
                                         },
                                         formType: FieldType.text,
                                         wantSuffix: true,
@@ -1102,8 +1107,14 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                             .roofNatureModel
                                             .value
                                             .error,
-                                      );
-                                    }),
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  return const SizedBox.shrink();
+                                }
+                              }),
+
                               Obx(() {
                                 return controller
                                             .isTechnicalProposalMode
@@ -1381,6 +1392,10 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                 onClick: () {
                                   controller.addLoadElement(context);
                                 },
+                                isAddShow:
+                                    controller.isLeadRejectedMode.value == true
+                                    ? false
+                                    : true,
                               ),
                               Obx(() {
                                 if (controller.productDetailList.isEmpty) {
@@ -1401,6 +1416,18 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       item.energyKWh.toString(),
                                     ],
                                     onEdit: (i, item) {
+                                      if (controller.isLeadRejectedMode.value ==
+                                          true) {
+                                        Get.snackbar(
+                                          'Action Not Allowed',
+                                          'You can’t edit items in Rejected mode',
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          backgroundColor: Colors.red
+                                              .withOpacity(0.1),
+                                          colorText: Colors.redAccent,
+                                        );
+                                        return;
+                                      }
                                       controller.addLoadElement(
                                         context,
                                         loadElementItem: item,
@@ -1408,8 +1435,22 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       );
                                     },
                                     onDelete: (i) {
+                                      if (controller.isLeadRejectedMode.value ==
+                                          true) {
+                                        Get.snackbar(
+                                          'Action Not Allowed',
+                                          'You can’t delete items in Rejected mode',
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          backgroundColor: Colors.red
+                                              .withOpacity(0.1),
+                                          colorText: Colors.redAccent,
+                                        );
+                                        return;
+                                      }
                                       controller.deleteLoad(i);
                                     },
+                                    isRejected:
+                                        controller.isLeadRejectedMode.value,
                                   ),
                                 );
                               }),
@@ -1422,6 +1463,10 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                 onClick: () {
                                   controller.addUploadFile(context);
                                 },
+                                isAddShow:
+                                    controller.isLeadRejectedMode.value == true
+                                    ? false
+                                    : true,
                               ),
                               Obx(() {
                                 if (controller.fileList.isEmpty) {
@@ -1442,13 +1487,41 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       // ),
                                     ],
                                     onEdit: (i, file) {
+                                      if (controller.isLeadRejectedMode.value ==
+                                          true) {
+                                        Get.snackbar(
+                                          'Action Not Allowed',
+                                          'You can’t edit items in Rejected mode',
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          backgroundColor: Colors.red
+                                              .withOpacity(0.1),
+                                          colorText: Colors.redAccent,
+                                        );
+                                        return;
+                                      }
                                       controller.addUploadFile(
                                         context,
                                         fileItem: file,
                                         index: i,
                                       );
                                     },
-                                    onDelete: (i) => controller.deleteFile(i),
+                                    onDelete: (i) {
+                                      if (controller.isLeadRejectedMode.value ==
+                                          true) {
+                                        Get.snackbar(
+                                          'Action Not Allowed',
+                                          'You can’t delete items in Rejected mode',
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          backgroundColor: Colors.red
+                                              .withOpacity(0.1),
+                                          colorText: Colors.redAccent,
+                                        );
+                                        return;
+                                      }
+                                      controller.deleteFile(i);
+                                    },
+                                    isRejected:
+                                        controller.isLeadRejectedMode.value,
                                   ),
                                 );
                               }),
