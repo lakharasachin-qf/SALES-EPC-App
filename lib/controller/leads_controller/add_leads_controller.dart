@@ -3800,6 +3800,16 @@ class AddLeadsController extends GetxController {
     ),
   ];
 
+  //ispaymentReceivedShow
+  RxBool ispaymentReceivedShow = false.obs;
+  List<StatusItem> financingProgressStatuToPartnersPaymentReceiveedMode = [
+    StatusItem(
+      label: "Documents Sent to Partner",
+      value: "documents_sent_to_partner",
+    ),
+    StatusItem(label: "Payment Received", value: "payment_received"),
+  ];
+
   Widget setLeadStatusstDialog() {
     return Obx(() {
       if (isCountryApiCallLoading.value) {
@@ -4042,7 +4052,19 @@ class AddLeadsController extends GetxController {
               onTap: () {
                 final selectedItem = omcParternerListDropdown[index];
                 selectedfinancingProgressStatusMode.value = selectedItem.value;
+                financialOMCPartnerCtr.text = selectedItem.label;
 
+                validateOMCProgressStatus(financialOMCPartnerCtr.text);
+                if (selectedfinancingProgressStatusMode.value ==
+                    "documents_sent_to_partner") {
+                  // Enable technical proposal mode
+                  isFullPaymentAmountMode.value = false;
+                } else if (selectedfinancingProgressStatusMode.value ==
+                    "payment_received") {
+                  isFullPaymentAmountMode.value = true;
+
+                  validateFullPaymentProject(balanceAmonutCtr.text);
+                }
                 Get.back();
               },
               title: buildSelectableRow(
@@ -4155,6 +4177,44 @@ class AddLeadsController extends GetxController {
               omcParternerListDropdown.assignAll(
                 financingProgressStatuToPartnersMode,
               );
+              financialOMCPartnerCtr.text =
+                  omcParternerListDropdown.first.label;
+              selectedfinancingProgressStatusMode.value =
+                  omcParternerListDropdown.first.value;
+            } else {
+              isSendToPartnerMode.value = false;
+              financialTypePaymentListDropdown.assignAll(financialTypePayment);
+            }
+
+            if (result.uploadedFiles != null &&
+                result.uploadedFiles!.any(
+                  (f) => f.category == 'finance_document',
+                )) {
+              isSendToPartnerMode.value = true;
+              isOMCPartnerMode.value = true;
+              financialTypePaymentListDropdown.assignAll(
+                financialTypePaymentfinancethroughomcPartner,
+              );
+
+              if (result.payment != null &&
+                  result.payment!.financingProgressStatus ==
+                      "documents_sent_to_partner") {
+                ispaymentReceivedShow.value = true;
+                omcParternerListDropdown.assignAll(
+                  financingProgressStatuToPartnersPaymentReceiveedMode,
+                );
+
+                // financingProgressStatuToPartnersPaymentReceiveedMode.value =
+                //     true;
+              } else {
+                ispaymentReceivedShow.value = false;
+                omcParternerListDropdown.assignAll(
+                  financingProgressStatuToPartnersMode,
+                );
+                // financingProgressStatuToPartnersPaymentReceiveedMode.value =
+                //     false;
+              }
+
               financialOMCPartnerCtr.text =
                   omcParternerListDropdown.first.label;
               selectedfinancingProgressStatusMode.value =
