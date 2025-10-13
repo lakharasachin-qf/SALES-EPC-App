@@ -545,6 +545,8 @@ class AddLeadsController extends GetxController {
     balanceAmonutCtr = TextEditingController();
     financialTypeCtr = TextEditingController();
 
+    financialOMCPartnerCtr = TextEditingController();
+
     // FocusNodes
     companyNameNode = FocusNode();
     addressNode = FocusNode();
@@ -608,6 +610,8 @@ class AddLeadsController extends GetxController {
     totalProjectCostNode = FocusNode();
     balanceAmonutNode = FocusNode();
     financialNode = FocusNode();
+
+    financialOMCPartnerNode = FocusNode();
 
     //
     update();
@@ -676,6 +680,8 @@ class AddLeadsController extends GetxController {
     totalProjectCostCtr.dispose();
     balanceAmonutCtr.dispose();
     financialTypeCtr.dispose();
+
+    financialOMCPartnerCtr.dispose();
 
     // Dispose focus nodes
     companyNameNode.dispose();
@@ -746,6 +752,7 @@ class AddLeadsController extends GetxController {
     balanceAmonutNode.dispose();
     financialNode.dispose();
 
+    financialOMCPartnerNode.dispose();
     super.dispose();
   }
 
@@ -2169,35 +2176,52 @@ class AddLeadsController extends GetxController {
       if (!leadStatusModel.value.isValidate) isValid = false;
 
       if (isLeadPaymentMode.value == true) {
-        //payment model condition
+        // payment model condition
         if (isFinancialType.value == true) {
           if (!financialModel.value.isValidate) isValid = false;
 
           if (isFullPaymentAmountMode.value == true) {
             if (!balanceAmonutModel.value.isValidate) isValid = false;
           }
+
+          if (isOMCPartnerMode.value == true) {
+            if (!financialOMCPartnerModel.value.isValidate) isValid = false;
+          }
         }
+
         if (!tokenAmountModel.value.isValidate) isValid = false;
         if (!totalProjectCostModel.value.isValidate) isValid = false;
 
         // if (!paymentReceivedModel.value.isValidate) isValid = false;
       }
     }
+
     isStep2Valid.value = isValid;
     logcat('validateStep2 result: isStep2Valid = $isStep2Valid', '');
 
-    // ✅ Single combined logcat at the end
-    logcat('validateStep2 result:', '');
+    // ✅ Combined log summary for debugging
+    logcat('---------------- validateStep2 logs ----------------', '');
     logcat('isStep2Valid', isStep2Valid.value);
+    logcat('isEditMode', isEditMode.value);
     logcat('roofNatureModel', roofNatureModel.value.isValidate);
     logcat('scheduleMeeeingModel', scheduleMeeeingModel.value.isValidate);
     logcat('leadStatusModel', leadStatusModel.value.isValidate);
     logcat('isLeadPaymentMode', isLeadPaymentMode.value);
     logcat('isFinancialType', isFinancialType.value);
     logcat('financialModel', financialModel.value.isValidate);
+    logcat('isFullPaymentAmountMode', isFullPaymentAmountMode.value);
+    logcat('balanceAmonutModel', balanceAmonutModel.value.isValidate);
+    logcat('isOMCPartnerMode', isOMCPartnerMode.value);
+    logcat(
+      'financialOMCPartnerModel',
+      financialOMCPartnerModel.value.isValidate,
+    );
     logcat('tokenAmountModel', tokenAmountModel.value.isValidate);
     logcat('totalProjectCostModel', totalProjectCostModel.value.isValidate);
-    // logcat('paymentReceivedModel', paymentReceivedModel.value.isValidate);    update();
+    // logcat('paymentReceivedModel', paymentReceivedModel.value.isValidate);
+    logcat('----------------------------------------------------', '');
+
+    update();
   }
 
   void validateStep3() {
@@ -3615,6 +3639,17 @@ class AddLeadsController extends GetxController {
     StatusItem(label: "Self Bank Financing", value: "self_bank_Financing"),
   ];
 
+  resetOMCModeData() {
+    financialOMCPartnerCtr.clear();
+    financialOMCPartnerModel.value = ValidationModel(
+      null,
+      null,
+      isValidate: false,
+    );
+
+    update();
+  }
+
   //self funding
 
   RxBool isFullPaymentAmountMode = false.obs;
@@ -3626,6 +3661,7 @@ class AddLeadsController extends GetxController {
   RxString selectedfinanicalStatusvalue = ''.obs;
   RxList<StatusItem> leadStatusList = <StatusItem>[].obs;
   RxList<StatusItem> financialTypePaymentListDropdown = <StatusItem>[].obs;
+  RxList<StatusItem> omcParternerListDropdown = <StatusItem>[].obs;
 
   void validateLeadStatus(String? val) {
     leadStatusModel.update((model) {
@@ -3643,7 +3679,7 @@ class AddLeadsController extends GetxController {
   void validateFinancialStatus(String? val) {
     financialModel.update((model) {
       if (val == null || val.trim().isEmpty) {
-        model!.error = "Select Lead Status";
+        model!.error = "Select Financial Status";
         model.isValidate = false;
       } else {
         model!.error = null;
@@ -3652,6 +3688,38 @@ class AddLeadsController extends GetxController {
     });
     validateStep2();
   }
+
+  void validateOMCProgressStatus(String? val) {
+    financialOMCPartnerModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Select Financial Status";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  //finance through OMC parenter
+  RxBool isOMCPartnerMode = false.obs;
+
+  late TextEditingController financialOMCPartnerCtr;
+
+  late FocusNode financialOMCPartnerNode;
+
+  var financialOMCPartnerModel = ValidationModel(
+    null,
+    null,
+    isValidate: false,
+  ).obs;
+
+  List<StatusItem> financingProgressStatusMode = [
+    StatusItem(label: "Documents Collected", value: "documents_collected"),
+  ];
+
+  RxString selectedfinancingProgressStatusMode = ''.obs;
 
   Widget setLeadStatusstDialog() {
     return Obx(() {
@@ -3805,19 +3873,34 @@ class AddLeadsController extends GetxController {
                 // validateLeadStatus(leadStatusCtr.text);
                 if (selectedfinanicalStatusvalue.value == "self_funding") {
                   isFullPaymentAmountMode.value = true;
+                  isOMCPartnerMode.value = false;
+
                   validateFullPaymentProject(balanceAmonutCtr.text);
                   // Enable technical proposal mode
                 } else if (selectedfinanicalStatusvalue.value ==
                     "finance_through_omc_Partner") {
+                  isOMCPartnerMode.value = true;
+                  omcParternerListDropdown.assignAll(
+                    financingProgressStatusMode,
+                  );
+                  financialOMCPartnerCtr.text =
+                      omcParternerListDropdown.first.label;
+                  selectedfinancingProgressStatusMode.value =
+                      omcParternerListDropdown.first.value;
+
                   isFullPaymentAmountMode.value = false;
+                  validateOMCProgressStatus(financialOMCPartnerCtr.text);
                   validateFullPaymentProject(balanceAmonutCtr.text);
                 } else if (selectedfinanicalStatusvalue.value ==
                     "self_bank_Financing") {
                   isFullPaymentAmountMode.value = true;
+                  isOMCPartnerMode.value = false;
+
                   validateFullPaymentProject(balanceAmonutCtr.text);
                 } else {
                   // Neither technical nor commercial
                   isFullPaymentAmountMode.value = false;
+                  isOMCPartnerMode.value = false;
                   validateFullPaymentProject(balanceAmonutCtr.text);
 
                   // // Reset all fields
@@ -3837,6 +3920,52 @@ class AddLeadsController extends GetxController {
                 financialTypePaymentListDropdown[index].label,
                 financialTypePaymentListDropdown[index].label.trim() ==
                     financialTypeCtr.text.trim(),
+              ),
+            );
+          },
+        ),
+      );
+    });
+  }
+
+  Widget setOMCPartnerTypeDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        omcParternerListDropdown,
+        controller: financialOMCPartnerCtr,
+        noDataLable: "No Roof Nature",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: omcParternerListDropdown.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                final selectedItem = omcParternerListDropdown[index];
+                selectedfinancingProgressStatusMode.value = selectedItem.value;
+
+                Get.back();
+              },
+              title: buildSelectableRow(
+                omcParternerListDropdown[index].label,
+                omcParternerListDropdown[index].label.trim() ==
+                    financialOMCPartnerCtr.text.trim(),
               ),
             );
           },

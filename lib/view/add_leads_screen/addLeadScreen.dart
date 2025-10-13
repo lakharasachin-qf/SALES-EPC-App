@@ -1479,6 +1479,69 @@ class _AddLeadScreenState extends State<AddLeadScreen>
 
                                       Obx(() {
                                         return controller
+                                                    .isOMCPartnerMode
+                                                    .value ==
+                                                true
+                                            ? getDynamicSizedBox(height: 2.h)
+                                            : SizedBox.shrink();
+                                      }),
+
+                                      Obx(() {
+                                        final financialType =
+                                            controller.isOMCPartnerMode.value ==
+                                            true;
+
+                                        if (financialType) {
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              getLable(
+                                                "Financing Progress Status",
+                                                isRequired: true,
+                                              ),
+                                              getReactiveFormField(
+                                                node: controller
+                                                    .financialOMCPartnerNode,
+                                                controller: controller
+                                                    .financialOMCPartnerCtr,
+                                                hintLabel:
+                                                    "Select Financing Progress Type",
+                                                onChanged: (val) {
+                                                  // controller
+                                                  //     .validateFinancialStatus(
+                                                  //       val,
+                                                  //     );
+                                                },
+                                                onTap: () {
+                                                  commonDropDownDialog(
+                                                    context,
+                                                    content: controller
+                                                        .setOMCPartnerTypeDialog(),
+                                                    title:
+                                                        "Financing Progress Status",
+                                                    onCloseClick: () {},
+                                                  );
+                                                },
+                                                formType: FieldType.text,
+                                                wantSuffix: true,
+                                                isdown: true,
+                                                isReadOnly: true,
+                                                inputType: TextInputType.none,
+                                                errorText: controller
+                                                    .financialOMCPartnerModel
+                                                    .value
+                                                    .error,
+                                              ),
+                                            ],
+                                          );
+                                        } else {
+                                          return const SizedBox.shrink();
+                                        }
+                                      }),
+
+                                      Obx(() {
+                                        return controller
                                                 .isFullPaymentAmountMode
                                                 .value
                                             ? getDynamicSizedBox(height: 2.h)
