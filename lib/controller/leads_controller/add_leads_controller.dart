@@ -3448,6 +3448,7 @@ class AddLeadsController extends GetxController {
     isValidate: false,
   ).obs;
   List<StatusItem> leadStatusCommercial = [
+    StatusItem(label: "Technical Proposal", value: "technical_proposal"),
     StatusItem(label: "Commercial proposal", value: "commercial_proposal"),
   ];
 
@@ -3490,6 +3491,7 @@ class AddLeadsController extends GetxController {
 
   //approove reject lead
   List<StatusItem> leadStatusApproveReject = [
+    StatusItem(label: "Commercial proposal", value: "commercial_proposal"),
     StatusItem(label: "Approve", value: "approved"),
     StatusItem(label: "Reject", value: "rejected"),
   ];
@@ -3857,7 +3859,12 @@ class AddLeadsController extends GetxController {
                 validateLeadStatus(leadStatusCtr.text);
                 if (selectedLeadStatusvalue.value == "technical_proposal") {
                   // Enable technical proposal mode
-                  isTechnicalProposalMode.value = true;
+
+                  if (isCommercialProposalMode.value == true) {
+                    isTechnicalProposalMode.value = false;
+                  } else {
+                    isTechnicalProposalMode.value = true;
+                  }
 
                   // Reset commercial proposal fields
                   firstCommercialProposalFile.value = null;
@@ -3868,7 +3875,12 @@ class AddLeadsController extends GetxController {
                 } else if (selectedLeadStatusvalue.value ==
                     "commercial_proposal") {
                   // Enable commercial proposal mode
-                  isCommercialProposalMode.value = true;
+
+                  if (isAppproveMode.value == true) {
+                    isCommercialProposalMode.value = false;
+                  } else {
+                    isCommercialProposalMode.value = true;
+                  }
 
                   // Reset technical proposal fields
                   firstTechnicalProposalFile.value = null;
@@ -4136,18 +4148,25 @@ class AddLeadsController extends GetxController {
                 // isTechnicalProposalMode.value = true;
                 leadStatusList.assignAll(leadStatusTechnical);
                 leadStatusCtr.text = leadStatusList.first.label;
+                selectedLeadStatusvalue.value = leadStatusList.first.value;
+                validateLeadStatus(leadStatusCtr.text);
 
                 break;
               case 'commercial_proposal':
-                isCommercialProposalMode.value = true;
+                // isCommercialProposalMode.value = true;
                 leadStatusList.assignAll(leadStatusCommercial);
                 leadStatusCtr.text = leadStatusList.first.label;
+                selectedLeadStatusvalue.value = leadStatusList.first.value;
+                validateLeadStatus(leadStatusCtr.text);
                 break;
               case 'approved':
               case 'rejected':
                 if (AppPermissions().canApproveLead) {
                   isAppproveMode.value = true;
                   leadStatusList.assignAll(leadStatusApproveReject);
+                  leadStatusCtr.text = leadStatusList.first.label;
+                  selectedLeadStatusvalue.value = leadStatusList.first.value;
+                  validateLeadStatus(leadStatusCtr.text);
 
                   logcat('isAppproveMode.value', 'isAppproveMode.value');
                 }
@@ -4157,6 +4176,8 @@ class AddLeadsController extends GetxController {
               case 'payments':
                 leadStatusList.assignAll(leadStatusPayment);
                 leadStatusCtr.text = leadStatusList.first.label;
+                selectedLeadStatusvalue.value = leadStatusList.first.value;
+                validateLeadStatus(leadStatusCtr.text);
                 break;
 
               case 'won':
