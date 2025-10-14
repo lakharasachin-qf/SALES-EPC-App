@@ -3638,6 +3638,8 @@ class AddLeadsController extends GetxController {
     StatusItem(label: "Payments", value: "payments"),
   ];
 
+  List<StatusItem> totalWon = [StatusItem(label: "Won", value: "won")];
+
   List<StatusItem> isWonData = [
     StatusItem(label: "Payments", value: "payments"),
     StatusItem(label: "Won", value: "won"),
@@ -3678,6 +3680,10 @@ class AddLeadsController extends GetxController {
 
   //commerical proposal
   RxBool isAppproveMode = false.obs;
+
+  //wom
+
+  RxBool iswonstatusMode = false.obs;
 
   RxString selectedLeadStatusvalue = ''.obs;
   RxString selectedfinanicalStatusvalue = ''.obs;
@@ -4331,6 +4337,60 @@ class AddLeadsController extends GetxController {
 
             // selectedLeadStatusvalue.value = 'Select Financing Type';
             // validateLeadStatus(leadStatusCtr.text);
+          }
+
+          if (currentStatus == 'won') {
+            leadStatusList.assignAll(totalWon);
+            leadStatusCtr.text = leadStatusList.first.label;
+            selectedLeadStatusvalue.value = leadStatusList.first.value;
+
+            iswonShow.value = true;
+            isLeadPaymentMode.value = true;
+            isFullPaymentAmountMode.value = true;
+            isFinancialType.value = true;
+
+            //payment
+            tokenAmountCtr.text = result.payment?.tokenAmount ?? '';
+            totalProjectCostCtr.text = result.payment?.totalProjectCost ?? '';
+            calculateBalanceAmount();
+            validateLeadStatus(leadStatusCtr.text);
+            validateTokenAmountt(tokenAmountCtr.text);
+            validateTotalProject(totalProjectCostCtr.text);
+            validateLeadStatus(leadStatusCtr.text);
+
+            //show conditionaly
+
+            if (result.payment != null &&
+                result.payment!.financingType == "self_finance") {
+              financialTypePaymentListDropdown.assignAll(
+                selfFundingTypePayment,
+              ); 
+              
+
+              // financingProgressStatuToPartnersPaymentReceiveedMode.value =
+              //     true;
+            } else if (result.payment!.financingType == "bank") {
+              financialTypePaymentListDropdown.assignAll(
+                selfBankFinancingPayment,
+              );
+            } else if (result.payment!.financingType == "omc_partner") {
+              financialTypePaymentListDropdown.assignAll(
+                financialTypePaymentfinancethroughomcPartner,
+              );
+            }
+            financialTypeCtr.text =
+                financialTypePaymentListDropdown.first.label;
+            selectedfinanicalStatusvalue.value =
+                financialTypePaymentListDropdown.first.value;
+
+            validateFinancialStatus(financialTypeCtr.text);
+
+            // financialTypeCtr.text =
+            //     financialTypePaymentListDropdown.first.label;
+            // selectedfinanicalStatusvalue.value =
+            //     financialTypePaymentListDropdown.first.value;
+
+            // validateFinancialStatus(financialTypeCtr.text);
           }
         }
         logcat('isLeadRejectedMode.value', isLeadRejectedMode.value);
