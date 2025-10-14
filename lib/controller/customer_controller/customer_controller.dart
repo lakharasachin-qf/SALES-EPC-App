@@ -674,24 +674,23 @@ class CustomerScreenController extends GetxController {
           ? DateFormat('dd-MM-yyyy').format(DateTime.parse(e.liveAt))
           : '';
 
-      // Format warranty type nicely
-      // String formattedWarrantyType = e.warrantyType.toLowerCase().replaceAll(
-      //   RegExp(r'[_-]'),
-      //   ' ',
-      // );
-
-      // formattedWarrantyType = formattedWarrantyType
-      //     .split(' ')
-      //     .map((s) => s.capitalize)
-      //     .join(' ');
-
-      // Format warranty type nicely
       String formattedWarrantyType = e.warrantyType.toLowerCase();
-      if (formattedWarrantyType == 'amc') {
-        formattedWarrantyType = 'AMC';
-      } else if (formattedWarrantyType == 'non-amc' ||
-          formattedWarrantyType == 'non_amc') {
-        formattedWarrantyType = 'Non-Amc';
+
+      // Parse end date safely
+      DateTime? endDate;
+      if (e.warrantyEndDate != null && e.warrantyEndDate.isNotEmpty) {
+        try {
+          endDate = DateTime.parse(e.warrantyEndDate);
+        } catch (_) {
+          endDate = null;
+        }
+      }
+
+      // Check if expired and type is not AMC
+      if (endDate != null &&
+          DateTime.now().isAfter(endDate) &&
+          e.warrantyType.toLowerCase() != "amc") {
+        formattedWarrantyType = "Not In AMC";
       } else {
         formattedWarrantyType = formattedWarrantyType.capitalize.toString();
       }
@@ -703,7 +702,7 @@ class CustomerScreenController extends GetxController {
         e.contactPersonMobile,
         e.customerStatus.capitalize.toString(),
         formattedLiveAt,
-        formattedWarrantyType,
+        formatText(formattedWarrantyType),
         e.warrantyEndDate,
         "",
       ];

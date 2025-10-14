@@ -14,6 +14,19 @@ import 'package:sizer/sizer.dart';
 import '../../configs/colors_constant.dart';
 import '../../configs/font_constant.dart';
 
+String formatText(String text) {
+  if (text.isEmpty) return '';
+  return text
+      .replaceAll('_', ' ')
+      .split(' ')
+      .map(
+        (word) => word.isEmpty
+            ? ''
+            : word[0].toUpperCase() + word.substring(1).toLowerCase(),
+      )
+      .join(' ');
+}
+
 Widget deleteWidget(
   BuildContext context, {
   title,
@@ -720,7 +733,6 @@ getCommonLableWithButton(
             },
           ),
         ),
-    
     ],
   );
 }

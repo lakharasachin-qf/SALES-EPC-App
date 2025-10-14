@@ -627,19 +627,6 @@ class LeadController extends GetxController {
   List<List<String>> get leadData {
     if (filteredLeadList.isEmpty) return [];
 
-    String formatText(String text) {
-      if (text.isEmpty) return '';
-      return text
-          .replaceAll('_', ' ')
-          .split(' ')
-          .map(
-            (word) => word.isEmpty
-                ? ''
-                : word[0].toUpperCase() + word.substring(1).toLowerCase(),
-          )
-          .join(' ');
-    }
-
     return filteredLeadList.asMap().entries.map((entry) {
       final index = entry.key + 1 + ((currentPage.value - 1) * 10);
       final e = entry.value;
