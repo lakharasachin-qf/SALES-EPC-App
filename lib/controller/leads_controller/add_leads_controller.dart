@@ -3654,6 +3654,13 @@ class AddLeadsController extends GetxController {
     StatusItem(label: "Self Bank Financing", value: "self_bank_Financing"),
   ];
 
+  List<StatusItem> selfFundingTypePayment = [
+    StatusItem(label: "Self Funding", value: "self_funding"),
+  ];
+
+  List<StatusItem> selfBankFinancingPayment = [
+    StatusItem(label: "Self Bank Financing", value: "self_bank_Financing"),
+  ];
   resetOMCModeData() {
     financialOMCPartnerCtr.clear();
     financialOMCPartnerModel.value = ValidationModel(
@@ -4295,9 +4302,24 @@ class AddLeadsController extends GetxController {
                   omcParternerListDropdown.first.label;
               selectedfinancingProgressStatusMode.value =
                   omcParternerListDropdown.first.value;
+            } else if (result.payment != null &&
+                result.payment!.financingType == "bank") {
+              financialTypePaymentListDropdown.assignAll(
+                selfBankFinancingPayment,
+              );
+              isFullPaymentAmountMode.value = true;
             } else {
               isSendToPartnerMode.value = false;
-              financialTypePaymentListDropdown.assignAll(financialTypePayment);
+
+              if (iswonShow.value == true) {
+                financialTypePaymentListDropdown.assignAll(
+                  selfFundingTypePayment,
+                );
+              } else {
+                financialTypePaymentListDropdown.assignAll(
+                  financialTypePayment,
+                );
+              }
             }
 
             financialTypeCtr.text =
