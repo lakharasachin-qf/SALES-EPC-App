@@ -12,6 +12,7 @@ import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/configs/apicall_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
+import 'package:sales_app/controller/master_controller/Master_Controller.dart';
 import 'package:sales_app/models/MeetingCalendarModel.dart';
 import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
@@ -49,7 +50,6 @@ class MeetingsCalendarController extends GetxController {
   RxBool isStartDateSelected = false.obs;
   RxBool isDistrictSelected = false.obs;
   RxBool isClusterSelected = false.obs;
-  RxBool isFormInvalidate = false.obs;
   RxList<Category> districtList = <Category>[].obs;
   RxList<Category> clustersList = <Category>[].obs;
 
@@ -312,7 +312,7 @@ class MeetingsCalendarController extends GetxController {
     isStartDateSelected.value = false;
     isDistrictSelected.value = false;
     isClusterSelected.value = false;
-    isFormInvalidate.value = false;
+    isEditMeetingEnable.value = false;
   }
 
   void updateMeetings(context, int meetingId) async {
@@ -322,6 +322,44 @@ class MeetingsCalendarController extends GetxController {
       title: "Edit Meeting",
       widget: addFilterSheetWidget(context, meetingId),
     );
+  }
+
+  RxBool isEditMeetingEnable = false.obs;
+
+  void validateFields(
+    val, {
+    required Rx<ValidationModel> model,
+    errorText1,
+    errorText2,
+    errorText3,
+    iscomman = false,
+    isemail = false,
+    ispassword = false,
+  }) {
+    return validateField(
+      val: val,
+      models: model,
+      isEmail: isemail,
+      iscomman: iscomman,
+      errorText1: errorText1,
+      errorText2: errorText2,
+      errorText3: errorText3,
+      ispassword: ispassword,
+      notifyListeners: () {
+        refresh();
+      },
+      enableBtnFunction: () {
+        enableSubmitButton();
+      },
+    );
+  }
+
+  void enableSubmitButton() {
+    isEditMeetingEnable.value =
+        statusModel.value.isValidate &&
+        dateModel.value.isValidate &&
+        reasonModel.value.isValidate;
+    update();
   }
 
   final List<String> status = ['Select Status', 'Reschedule'];
@@ -343,6 +381,13 @@ class MeetingsCalendarController extends GetxController {
               onChanged: (value) {
                 selectStatus.value = value!;
                 update();
+
+                validateFields(
+                  selectStatus.value,
+                  model: statusModel,
+                  iscomman: true,
+                  errorText1: 'Please selecte status',
+                );
               },
             ),
           ),
@@ -384,7 +429,14 @@ class MeetingsCalendarController extends GetxController {
                     node: reasonNode,
                     model: reasonModel.value,
                     hint: 'Enter Reason',
-                    function: (val) {},
+                    function: (val) {
+                      validateFields(
+                        val,
+                        model: reasonModel,
+                        iscomman: true,
+                        errorText1: 'Please Enter Reason',
+                      );
+                    },
                     isRequired: true,
                   ),
                   getDynamicSizedBox(height: 1.h),
@@ -406,7 +458,7 @@ class MeetingsCalendarController extends GetxController {
               hint: 'Enter Notes',
               isMultipline: true,
               function: (val) {},
-              isRequired: true,
+              isRequired: false,
             );
           }),
 
@@ -419,6 +471,7 @@ class MeetingsCalendarController extends GetxController {
                   context,
                   () {
                     Get.back();
+                    isEditMeetingEnable.value = false;
                   },
                   'Cancel',
                   validate: true,
@@ -426,21 +479,23 @@ class MeetingsCalendarController extends GetxController {
               ),
               getDynamicSizedBox(width: 3.w),
               Expanded(
-                child: getFormButton(
-                  context,
-                  () {
-                    updateMeetingApi(
-                      context,
-                      meetingId: meetingId,
-                      status: selectStatus.value.toLowerCase(),
-                      newScheduledAt: dateCtr.text,
-                      reason: reasonCtr.text,
-                      notes: notesCtr.text,
-                    );
-                  },
-                  "Update",
-                  validate: true,
-                ),
+                child: Obx(() {
+                  return getFormButton(
+                    context,
+                    () {
+                      updateMeetingApi(
+                        context,
+                        meetingId: meetingId,
+                        status: selectStatus.value.toLowerCase(),
+                        newScheduledAt: dateCtr.text,
+                        reason: reasonCtr.text,
+                        notes: notesCtr.text,
+                      );
+                    },
+                    "Update",
+                    validate: isEditMeetingEnable.value,
+                  );
+                }),
               ),
             ],
           ),
@@ -477,6 +532,12 @@ class MeetingsCalendarController extends GetxController {
         final formatted = displayFormat.format(date);
         dateRx.value = formatted;
         controller.text = formatted;
+        validateFields(
+          dateCtr.text,
+          model: dateModel,
+          iscomman: true,
+          errorText1: 'Please select date',
+        );
       },
     );
   }
