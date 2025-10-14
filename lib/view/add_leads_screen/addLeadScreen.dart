@@ -107,7 +107,15 @@ class _AddLeadScreenState extends State<AddLeadScreen>
     } else {
       // Submit logic
       if (controller.isFormValid()) {
-        controller.addLeadApi(context);
+        if (widget.isEdit == true) {
+          controller.updateLeadApi(
+            context,
+            int.tryParse(widget.leadId ?? '') ?? 0,
+          );
+        } else {
+          controller.addLeadApi(context);
+        }
+
         // Implement submit logic here
         // ScaffoldMessenger.of(context).showSnackBar(
         //   SnackBar(

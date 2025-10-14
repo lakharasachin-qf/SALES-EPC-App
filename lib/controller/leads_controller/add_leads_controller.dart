@@ -3148,6 +3148,225 @@ class AddLeadsController extends GetxController {
     }
   }
 
+  Future<void> updateLeadApi(BuildContext context, int leadId) async {
+    var loadingIndicator = LoadingProgressDialog();
+    User? user = await UserPreferences().getSignInInfo();
+    String? password = await UserPreferences().getPassword();
+
+    // ---------- Network check ----------
+    if (networkManager.connectionType.value == 0) {
+      loadingIndicator.hide(context);
+      showDialogForScreen(
+        context,
+        "Update Lead",
+        Connection.noConnection,
+        callback: () => Get.back(),
+      );
+      return;
+    }
+
+    // ---------- Build request ----------
+    var request = http.MultipartRequest(
+      'POST', // cURL uses POST for update
+      Repository.buildUrl('${ApiUrl.addLead}/$leadId'), // e.g., /api/leads/84
+    );
+
+    // Headers (same as cURL)
+    request.headers.addAll({
+      'Accept': 'application/json',
+      'X-USER-EMAIL': user?.email ?? '',
+      'X-USER-PASSWORD': password ?? '',
+    });
+
+    // ---------- Scalar form fields ----------
+    request.fields.addAll({
+      'user_id': user?.userId.toString() ?? '',
+      'company_name': companyNameCtr.text.trim(),
+      'address': addressCtr.text.trim(),
+      'country': selectedCountryId.value.toString(),
+      'state': selectedStateId.value.toString(),
+      'district': selectedDistrictId.value.toString(),
+      'contact_person_name': personNameCtr.text.trim(),
+      'contact_person_mobile': personMobileCtr.text.trim(),
+      'latitude': latitudeCtr.text.trim(),
+      'longitude': longitudeCtr.text.trim(),
+      'dg_capacity_kva': dgCapacityCtr.text.trim(),
+      'dg_sync_required': selectedDgSyncValue.value == 'Yes' ? '1' : '0',
+      'curr_inst_solar_cap_kwp': installedSolarCapCtr.text.trim(),
+      'dist_to_nearest_transformer': distanceToTransformerCtr.text.trim(),
+      'rating_of_nearest_transformer_kva': ratingOfTransformerCtr.text.trim(),
+      'sanctioned_load_kva': sanctionedLoadCtr.text.trim(),
+      'required_solution_type': selectedRequiredSolutionTypeValue.value,
+      'vfd_required': selectedVfdValue.value == 'Yes' ? '1' : '0',
+      'grid_availability_hrs': gridAvailabilityCtr.text.trim(),
+      'peak_monthly_energy_cons_kwh': peakMonthlyEnergyCtr.text.trim(),
+      'required_solar_cap_kwp': requiredSolarCapCtr.text.trim(),
+      'purpose_of_solarisation': selectedPurposeOfSolarisationValue.value,
+      'dist_btw_inverter_acdb_panel_mtrs': distInverterACDBCtr.text.trim(),
+      'dist_btw_solar_acdb_panel_mtrs': distSolarACDBCtr.text.trim(),
+      'required_solution': selectedRequiredSolutionValue.value,
+      'building_height': buildingHeightCtr.text.trim(),
+      'roof_size_length_ft': roofSizeLengthCtr.text.trim(),
+      'roof_size_breadth_ft': roofSizeBreadthCtr.text.trim(),
+      'roof_nature': selectedRoofNatureValue.value,
+      'age_of_metal_sheet': ageOfMetalSheetCtr.text.trim(),
+      'ground_size_length_ft': groundSizeLengthCtr.text.trim(),
+      'ground_size_breadth_ft': groundSizeBreadthCtr.text.trim(),
+      'other_remarks': otherRemarksCtr.text.trim(),
+      'lead_category': selectedLeadCategoryValue.value,
+      'lead_status': selectedLeadStatusvalue.value,
+      'token_amount': tokenAmountCtr.text.trim(),
+      'total_project_cost': totalProjectCostCtr.text.trim(),
+      'financing_type': selectedfinanicalStatusvalue.value,
+      'financing_progress_status': selectedfinancingProgressStatusMode.value,
+    });
+
+    // ---------- Load elements ----------
+    for (int i = 0; i < productDetailList.length; i++) {
+      final product = productDetailList[i];
+      request.fields.addAll({
+        'load_elements[$i][device_name]': product.deviceName,
+        'load_elements[$i][category]': product.category,
+        'load_elements[$i][power_rating_w]': product.power,
+        'load_elements[$i][daily_usage_hrs]': product.usageHrs,
+      });
+    }
+
+    // ---------- Proposal files (single files) ----------
+    // Helper to add a file if it exists
+    Future<void> _addFileIfExists(String fieldName, File? file) async {
+      if (file != null && await file.exists()) {
+        request.files.add(
+          await http.MultipartFile.fromPath(fieldName, file.path),
+        );
+        logcat('File added', '$fieldName => ${file.path}');
+      } else {
+        logcat('File not added', '$fieldName => missing or not found');
+      }
+    }
+
+    // Add single-file proposals using reactive variables
+    await _addFileIfExists(
+      'first_technical_proposal',
+      firstTechnicalProposalFile.value,
+    );
+    await _addFileIfExists(
+      'final_technical_proposal',
+      finalTechnicalProposalFile.value,
+    );
+    await _addFileIfExists(
+      'first_commercial_proposal',
+      firstCommercialProposalFile.value,
+    );
+    await _addFileIfExists(
+      'final_commercial_proposal',
+      finalCommercialProposalFile.value,
+    );
+
+    // ---------- Finance documents (array) ----------
+    // Assuming financeDocumentFiles is RxList<File> or RxList<FileModel>
+    // ---------- Finance documents (array) ----------
+    for (int i = 0; i < selectedPdfPaths.length; i++) {
+      final filePath = selectedPdfPaths[i];
+      if (await File(filePath).exists()) {
+        request.files.add(
+          await http.MultipartFile.fromPath('finance_documents[]', filePath),
+        );
+        logcat('Finance doc added', 'finance_documents[] => $filePath');
+      } else {
+        logcat('Finance doc skipped', 'index $i => file not found');
+      }
+    }
+
+    // ---------- Optional: existing uploaded_files (from addLeadApi) ----------
+    /*
+  for (int i = 0; i < fileList.length; i++) {
+    final file = fileList[i];
+    if (file.path != null && file.path!.isNotEmpty) {
+      final f = File(file.path!);
+      if (await f.exists()) {
+        request.files.add(
+          await http.MultipartFile.fromPath('uploaded_files[$i][file]', f.path),
+        );
+        request.fields['uploaded_files[$i][category]'] = file.category ?? '';
+        logcat('File added', 'uploaded_files[$i][file] => ${f.path}');
+      } else {
+        logcat('File not found', 'uploaded_files[$i][file] => ${f.path}');
+      }
+    }
+  }
+  */
+
+    // ---------- Log fields ----------
+    logcat('UpdateLead Form Fields', jsonEncode(request.fields));
+    logcat('UpdateLead Files Count', '${request.files.length}');
+
+    // ---------- Log fields and files before sending ----------
+    logcat('🧾 UpdateLeadApi TEST MODE 🧾', '--- START ---');
+    logcat('Headers', jsonEncode(request.headers));
+    logcat('Fields', jsonEncode(request.fields));
+    logcat('Files Count', request.files.length.toString());
+    for (var f in request.files) {
+      logcat('File', '${f.field} => ${f.filename}');
+    }
+    logcat('🧾 UpdateLeadApi TEST MODE 🧾', '--- END ---');
+
+    // ✅ EARLY RETURN: Skip sending API
+    // return;
+    // ---------- Send request ----------
+    try {
+      loadingIndicator.show(context, '');
+      state.value = ScreenState.apiLoading;
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      loadingIndicator.hide(context);
+      state.value = ScreenState.apiSuccess;
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        logcat('UpdateLeadApi Success', data.toString());
+        if (data['status']?.toString().toLowerCase() == 'success') {
+          showDialogForScreen(
+            context,
+            "Update Lead",
+            data['message'] ?? 'Lead updated successfully',
+            callback: () => Get.back(),
+          );
+        } else {
+          _showErrorDialog(context, data);
+        }
+      } else {
+        logcat('UpdateLeadApi Error', response.body);
+        _showErrorDialog(context, data);
+        message.value = "Failed to update lead (${response.statusCode})";
+      }
+    } catch (e) {
+      loadingIndicator.hide(context);
+      state.value = ScreenState.apiError;
+      message.value = "Exception: $e";
+      logcat('UpdateLeadApi Exception', e.toString());
+      showDialogForScreen(
+        context,
+        "Error",
+        "Something went wrong: $e",
+        callback: () => Get.back(),
+      );
+    }
+  }
+
+  // Helper to keep error handling DRY
+  void _showErrorDialog(BuildContext context, Map<String, dynamic> data) {
+    showDialogForScreen(
+      context,
+      'Error',
+      data['message']?.toString() ??
+          data['errors']?.values?.first?[0]?.toString() ??
+          'Server error',
+      callback: () => Get.back(),
+    );
+  }
   // Future<void> getLocation(BuildContext context, bool isLoading) async {
   //   var loadingIndicator = LoadingProgressDialog();
 
@@ -3404,6 +3623,7 @@ class AddLeadsController extends GetxController {
 
   final Rx<File?> finalTechnicalProposalFile = Rx<File?>(null);
 
+  List<File> financeDocumentsList = [];
   void setTechnicalProposalFile(File file) {
     firstTechnicalProposalFile.value = file;
     update();
@@ -3467,9 +3687,10 @@ class AddLeadsController extends GetxController {
   ];
 
   final Rx<File?> firstCommercialProposalFile = Rx<File?>(null);
-
   final Rx<File?> finalCommercialProposalFile = Rx<File?>(null);
-
+  final RxList<File> financeDocumentFiles = RxList<File>(
+    [],
+  ); // or RxList<FileModel>
   void setCommercialProposalFile(File file) {
     firstCommercialProposalFile.value = file;
     update();
@@ -3656,22 +3877,19 @@ class AddLeadsController extends GetxController {
   ];
   List<StatusItem> financialTypePayment = [
     StatusItem(label: "Select Financing Type", value: "select_financing_type"),
-    StatusItem(label: "Self Funding", value: "self_funding"),
+    StatusItem(label: "Self Funding", value: "self_finance"),
 
-    StatusItem(
-      label: "Finance through OMC Partner",
-      value: "finance_through_omc_Partner",
-    ),
+    StatusItem(label: "Finance through OMC Partner", value: "omc_partner"),
 
-    StatusItem(label: "Self Bank Financing", value: "self_bank_Financing"),
+    StatusItem(label: "Self Bank Financing", value: "bank"),
   ];
 
   List<StatusItem> selfFundingTypePayment = [
-    StatusItem(label: "Self Funding", value: "self_funding"),
+    StatusItem(label: "Self Funding", value: "self_finance"),
   ];
 
   List<StatusItem> selfBankFinancingPayment = [
-    StatusItem(label: "Self Bank Financing", value: "self_bank_Financing"),
+    StatusItem(label: "Self Bank Financing", value: "bank"),
   ];
   resetOMCModeData() {
     financialOMCPartnerCtr.clear();
@@ -3820,10 +4038,7 @@ class AddLeadsController extends GetxController {
   //isSendTopartner
   RxBool isSendToPartnerMode = false.obs;
   List<StatusItem> financialTypePaymentfinancethroughomcPartner = [
-    StatusItem(
-      label: "Finance through OMC Partner",
-      value: "finance_through_omc_Partner",
-    ),
+    StatusItem(label: "Finance through OMC Partner", value: "omc_partner"),
   ];
 
   List<StatusItem> financingProgressStatuToPartnersMode = [
@@ -4024,7 +4239,7 @@ class AddLeadsController extends GetxController {
                 selectedfinanicalStatusvalue.value = selectedItem.value;
                 financialTypeCtr.text = selectedItem.label;
                 // validateLeadStatus(leadStatusCtr.text);
-                if (selectedfinanicalStatusvalue.value == "self_funding") {
+                if (selectedfinanicalStatusvalue.value == "self_finance") {
                   isFullPaymentAmountMode.value = true;
                   isOMCPartnerMode.value = false;
                   isOMCFinanceDocumentShown.value = false;
@@ -4032,7 +4247,7 @@ class AddLeadsController extends GetxController {
                   validateFullPaymentProject(balanceAmonutCtr.text);
                   // Enable technical proposal mode
                 } else if (selectedfinanicalStatusvalue.value ==
-                    "finance_through_omc_Partner") {
+                    "omc_partner") {
                   isOMCPartnerMode.value = true;
                   omcParternerListDropdown.assignAll(
                     financingProgressStatusMode,
@@ -4046,8 +4261,7 @@ class AddLeadsController extends GetxController {
                   validateOMCProgressStatus(financialOMCPartnerCtr.text);
                   validateFullPaymentProject(balanceAmonutCtr.text);
                   isOMCFinanceDocumentShown.value = true;
-                } else if (selectedfinanicalStatusvalue.value ==
-                    "self_bank_Financing") {
+                } else if (selectedfinanicalStatusvalue.value == "bank") {
                   isFullPaymentAmountMode.value = true;
                   isOMCPartnerMode.value = false;
                   isOMCFinanceDocumentShown.value = false;
@@ -4363,6 +4577,11 @@ class AddLeadsController extends GetxController {
 
                 // financingProgressStatuToPartnersPaymentReceiveedMode.value =
                 //     true;
+              } else if (result.payment!.financingProgressStatus ==
+                  "payment_received") {
+                ispaymentReceivedShow.value = false;
+                omcParternerListDropdown.assignAll(iswonShowdata);
+                validateOMCProgressStatus(financialOMCPartnerCtr.text);
               } else {
                 ispaymentReceivedShow.value = false;
 
