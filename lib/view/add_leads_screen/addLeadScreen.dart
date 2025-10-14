@@ -1751,6 +1751,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                             controller:
                                                 controller.scheduleMeetingCtr,
                                             dateRx: controller.startDate,
+
                                             model:
                                                 controller.scheduleMeeeingModel,
                                           );
