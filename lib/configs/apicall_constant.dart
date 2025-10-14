@@ -33,11 +33,9 @@ class ApiUrl {
   static const getmeterbyId = 'get-meters-by-customers';
   static const getmeterdetail = 'get-meter-details';
 
-  //fillter
-
   //customer list
-  static const getcustomerbyIdwwithpagination = 'get-customers-by-user?user_id';
+  static const getCustomerList = 'customers';
 
-  //add meter
-  static const meterreadingsubmit = 'meter-reading';
+  //Meetings Calendar
+  static const getMeetingsCalendarList = 'meetings';
 }

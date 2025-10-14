@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -5,6 +7,7 @@ import 'package:sales_app/api_handle/apiCallingFormate.dart';
 import 'package:sales_app/componant/dialogs/loading_indicator.dart';
 import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
+import 'package:sales_app/models/ViewCustomerModel.dart';
 import 'package:sales_app/models/customer_model_wo_p.dart';
 import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
@@ -268,14 +271,18 @@ class ViewCustomerController extends GetxController {
     update();
   }
 
-  Future<void> getCustomerbyID(context, bool isLoading) async {
+  RxString installationUrl = ''.obs;
+  Future<void> getViewCustomer(
+    context,
+    bool isLoading,
+    String customerid,
+  ) async {
     var loadingIndicator = LoadingProgressDialog();
-    User? userData = await UserPreferences().getSignInInfo();
+    // User? userData = await UserPreferences().getSignInInfo();
     commonGetApiCallFormate(
       context,
-      title: 'Meter Screen',
-      apiEndPoint:
-          "${ApiUrl.getcustomerbyIdwwithoutpagination}${userData?.userId ?? ''}",
+      title: 'View Customer Screen',
+      apiEndPoint: "${ApiUrl.getCustomerList}/$customerid",
       allowHeader: true,
       state: state,
       message: message,
@@ -290,11 +297,49 @@ class ViewCustomerController extends GetxController {
       },
       onResponse: (data) {
         personNameCtr.clear();
-        CustomerModelWp responseDetail = CustomerModelWp.fromJson(data);
-        // customerList.value = responseDetail.result;
+        var responseDetail = ViewCustomerModel.fromJson(data);
+        setCustomerData(responseDetail.data);
+        logcat("customerResponse", jsonEncode(responseDetail.data));
         update();
       },
       networkManager: networkManager,
     );
+  }
+
+  void setCustomerData(ViewCustomerData data) {
+    companyNameCtr.text = data.companyName;
+    personNameCtr.text = data.contactPersonName;
+    mobileCtr.text = data.contactPersonMobile;
+    addressCtr.text = data.address;
+    countryCtr.text = data.countryName;
+    stateCtr.text = data.stateName;
+    districtCtr.text = data.districtName;
+    latitudeCtr.text = data.latitude;
+    longitudeCtr.text = data.longitude;
+    customerStatusCtr.text = data.customerStatusFormatted;
+    conversionDateCtr.text = data.conversionDateFormatted;
+    liveAtCtr.text = data.liveAtFormatted;
+    leadIdCtr.text = data.leadId.toString();
+    deliveryDateCtr.text = data.expectedDeliveryDateFormatted;
+    warrantyPeriodCtr.text = data.warrantyPeriod.toString();
+    warrantyTypeCtr.text = data.warrantyTypeFormatted;
+    warrantyStartCtr.text = data.warrantyStartDateFormatted;
+    expiryCtr.text = data.warrantyEndDateFormatted;
+
+    // Installation certificate
+    if (data.hasInstallationCertificate &&
+        data.installationCertificate!.path.isNotEmpty) {
+      logcat(
+        "installationCertificat::",
+        data.installationCertificate!.path.toString(),
+      );
+      installationUrl.value = data.installationCertificate!.path;
+      // installationCtr.text = "View File";
+      installationCtr.text = "Uploaded";
+    } else {
+      installationCtr.text = "Not Uploaded";
+    }
+
+    update(); // refresh Obx widgets
   }
 }

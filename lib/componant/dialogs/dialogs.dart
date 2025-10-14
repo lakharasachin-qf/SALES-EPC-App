@@ -121,6 +121,7 @@ void showUpdatedMultpleSelectionPopup<T>(
                           return CheckboxListTile(
                             value: isSelected,
                             title: Text(title),
+                            activeColor: primaryColor,
                             onChanged: (val) {
                               setState(() {
                                 if (val == true) {
@@ -132,7 +133,7 @@ void showUpdatedMultpleSelectionPopup<T>(
                                     .map((e) => getTitle(e))
                                     .join(', ');
                                 onSelected(selectedItems);
-                                function(); // validation on-the-fly
+                                function();
                               });
                             },
                           );

@@ -510,23 +510,6 @@ class DashboardController extends GetxController {
         logcat('District List', districtList.length.toString());
         logcat('Clusters List', clustersList.length.toString());
 
-        // Prefill selectedClusterId with cluster ID from API request (e.g., "8")
-        // if (selectedClusterId.value.isEmpty && clustersList.isNotEmpty) {
-        //   final defaultCluster = clustersList.firstWhere(
-        //     (cluster) => cluster.id.toString() == '8',
-        //     orElse: () => clustersList.first,
-        //   );
-        //   selectedClusterId.value = defaultCluster.id.toString();
-        //   clusterListInt.value = [defaultCluster.id];
-        //   clusterCtr.text = defaultCluster.name;
-        //   clusterModel.value = ValidationModel(
-        //     defaultCluster.name,
-        //     null,
-        //     isValidate: true,
-        //   );
-        //   isClusterSelected.value = true;
-        // }
-
         update();
       },
       networkManager: networkManager,

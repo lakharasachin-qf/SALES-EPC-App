@@ -67,7 +67,7 @@ class Repository {
     Map<String, String> headers = {
       'Content-Type': "application/json",
       'X-USER-EMAIL': user?.email ?? '',
-      'X-USER-PASSWORD': password ?? '',
+      'X-USER-PASSWORD': password,
     };
 
     var response = await client.put(
@@ -92,7 +92,7 @@ class Repository {
     Map<String, String> headers = {
       'Content-Type': "multipart/form-data",
       'X-USER-EMAIL': user?.email ?? '',
-      'X-USER-PASSWORD': password ?? '',
+      'X-USER-PASSWORD': password,
     };
 
     var response = await client.get(
@@ -115,7 +115,7 @@ class Repository {
     Map<String, String> headers = {
       'Content-Type': "multipart/form-data",
       'X-USER-EMAIL': user?.email ?? '',
-      'X-USER-PASSWORD': password ?? '',
+      'X-USER-PASSWORD': password,
     };
 
     var request = http.MultipartRequest("POST", buildUrl(endPoint));

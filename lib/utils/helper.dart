@@ -124,6 +124,21 @@ void viewNetworkFile(BuildContext context, String imageUrl) {
   }
 }
 
+/// Converts a display date string to API format
+String toApiFormat(String displayDate) {
+  final dateTimeFormat = DateFormat('yyyy-MM-dd HH:mm');
+  final displayFormat = DateFormat('dd-MM-yyyy hh:mm a');
+
+  if (displayDate.isEmpty) return '';
+  try {
+    DateTime parsedDate = displayFormat.parse(displayDate);
+    return dateTimeFormat.format(parsedDate);
+  } catch (e) {
+    print("Date conversion error: $e");
+    return '';
+  }
+}
+
 Future<void> fetchLocationTracking(
   context,
   Function onClick, {

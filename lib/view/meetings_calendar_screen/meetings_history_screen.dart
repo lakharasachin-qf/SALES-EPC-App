@@ -10,9 +10,11 @@ import 'package:sales_app/controller/meetings_calendar_controller/meetings_histo
 import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sizer/sizer.dart';
+import '../../models/MeetingCalendarModel.dart';
 
 class MeetingsHistoryScreen extends StatefulWidget {
-  const MeetingsHistoryScreen({super.key});
+  MeetingsHistoryScreen({required this.meetingsItemData, super.key});
+  List<MeetingHistory> meetingsItemData;
 
   @override
   State<MeetingsHistoryScreen> createState() => CustomerScreenState();
@@ -25,10 +27,9 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
 
   @override
   void initState() {
+    final meetingHistory = widget.meetingsItemData;
+    ctr.setMeetingHistory(meetingHistory);
     super.initState();
-    futureDelay(() {
-      ctr.getCustomerbyID(context, 1, false, isFirstTime: true);
-    }, isOneSecond: true);
   }
 
   final Map<String, double> columnWidths = {
@@ -71,8 +72,7 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
               ),
               onRefresh: () async {
                 await futureDelay(() {
-                  ctr.currentPage.value = 1;
-                  ctr.getCustomerbyID(context, 1, false, isFirstTime: true);
+                  // ctr.currentPage.value = 1;
                 }, isOneSecond: false);
                 _refreshController.refreshCompleted();
               },
@@ -118,7 +118,9 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                                           child:
                                               ctr.state.value ==
                                                       ScreenState.apiSuccess &&
-                                                  ctr.customerList.isEmpty
+                                                  ctr
+                                                      .meetingsHistoryData
+                                                      .isEmpty
                                               ? SizedBox(
                                                   width: MediaQuery.of(
                                                     context,
@@ -147,7 +149,7 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                                                   dataTextStyle: TextStyle(
                                                     fontSize: 12.sp,
                                                   ),
-                                                  columns: ctr.customerHeaders
+                                                  columns: ctr.headers
                                                       .asMap()
                                                       .entries
                                                       .map((entry) {
@@ -190,11 +192,11 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                                                           SizedBox(
                                                             width:
                                                                 columnWidths[ctr
-                                                                    .customerHeaders[cell
+                                                                    .headers[cell
                                                                     .key]] ??
                                                                 16.w,
                                                             child: Text(
-                                                              cell.value,
+                                                              cell.value!,
                                                               style: TextStyle(
                                                                 fontSize: 14.sp,
                                                               ),
@@ -216,17 +218,8 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                                       ),
                                     ),
                                   ),
-                                  // Loader
                                   if (ctr.state.value == ScreenState.apiLoading)
                                     screnLoader(tableHeight),
-                                  // Container(
-                                  //   height: tableHeight,
-                                  //   width: double.infinity,
-                                  //   color: transparent,
-                                  //   child: const Center(
-                                  //     child: CircularProgressIndicator(),
-                                  //   ),
-                                  // ),
                                 ],
                               ),
                             );

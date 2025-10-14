@@ -1,17 +1,18 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide ScreenType;
+import 'package:intl/intl.dart';
 import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/common_date_time_picker.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
+import 'package:sales_app/componant/dialogs/loading_indicator.dart';
 import 'package:sales_app/componant/input/getReactiveDropdown.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/configs/apicall_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
-import 'package:sales_app/models/customer_model.dart';
-import 'package:sales_app/models/customer_model_wo_p.dart';
+import 'package:sales_app/models/MeetingCalendarModel.dart';
 import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
 import 'package:sales_app/preference/UserPreference.dart';
@@ -30,17 +31,15 @@ class MeetingsCalendarController extends GetxController {
 
   void clearSearch() {
     searchCtr.clear();
-    // filterData('');
-    unfocusAll();
+    filteredMeetingsList.assignAll(meetingsList);
+    isTextEmpty.value = false;
+    update();
   }
 
-  // 🔹 Controllers
   late TextEditingController statusCtr, searchCtr, dateCtr, reasonCtr, notesCtr;
 
-  // 🔹 FocusNodes
   late FocusNode statusNode, dateNode, searchNode, reasonNode, notesNode;
 
-  // 🔹 Validation Models
   var statusModel = ValidationModel(null, null, isValidate: false).obs;
   var dateModel = ValidationModel(null, null, isValidate: false).obs;
   var reasonModel = ValidationModel(null, null, isValidate: false).obs;
@@ -58,31 +57,31 @@ class MeetingsCalendarController extends GetxController {
   void onInit() {
     super.onInit();
 
-    // 🔹 Initialize Controllers
     statusCtr = TextEditingController();
     dateCtr = TextEditingController();
     reasonCtr = TextEditingController();
     notesCtr = TextEditingController();
     searchCtr = TextEditingController();
 
-    // 🔹 Initialize FocusNodes
     statusNode = FocusNode();
     dateNode = FocusNode();
     reasonNode = FocusNode();
     notesNode = FocusNode();
     searchNode = FocusNode();
+
+    searchCtr.addListener(() {
+      filterCustomer(searchCtr.text);
+    });
   }
 
   @override
   void onClose() {
-    // 🔹 Dispose Controllers
     statusCtr.dispose();
     dateCtr.dispose();
     reasonCtr.dispose();
     notesCtr.dispose();
     searchCtr.dispose();
 
-    // 🔹 Dispose FocusNodes
     statusNode.dispose();
     dateNode.dispose();
     reasonNode.dispose();
@@ -101,7 +100,8 @@ class MeetingsCalendarController extends GetxController {
     update();
   }
 
-  RxList<Result> customerList = <Result>[].obs;
+  RxList<MeetingData> meetingsList = <MeetingData>[].obs;
+  RxList<MeetingData> filteredMeetingsList = <MeetingData>[].obs;
   RxString nextPageURL = "".obs;
   final RxInt currentPage = 1.obs;
   final RxInt lastPage = 1.obs;
@@ -111,95 +111,91 @@ class MeetingsCalendarController extends GetxController {
 
   var isCustomerLoading = false.obs;
 
-  Future<void> getCustomerbyID(
-    BuildContext context,
-    int currentPage,
-    bool hideLoading, {
-    bool isFirstTime = false,
+  Future<void> getMeetingsListApi({
+    required BuildContext context,
+    int page = 1,
+    bool? hideLoading,
+    bool isApplyFilter = false,
+    bool isInitialLoad = false,
   }) async {
     User? userData = await UserPreferences().getSignInInfo();
 
     if (hideLoading == false) {
       state.value = ScreenState.apiLoading;
     }
-    if (isFirstTime == true) {
-      isCustomerLoading(
-        true,
-      ); // Assuming you have a loading state for customers
+    if (isInitialLoad == true) {
+      isCustomerLoading(true);
+    }
+
+    if (isInitialLoad && !isApplyFilter) {
+      resetForm();
     }
 
     try {
       if (networkManager.connectionType.value == 0) {
-        if (isFirstTime == true) {
+        if (isInitialLoad == true) {
           isCustomerLoading(false);
         }
         showDialogForScreen(
           context,
-          'Meter Screen',
+          'Meetings Calendar Screen',
           Connection.noConnection,
-          callback: () {
-            Get.back();
-          },
+          callback: Get.back,
         );
         return;
       }
 
-      var pageURL =
-          "${ApiUrl.getcustomerbyIdwwithpagination}=${userData?.userId ?? ''}&page=$currentPage&per_page=10";
-      var response = await Repository.get({}, pageURL, allowHeader: true);
+      final apiUrl =
+          "${ApiUrl.getMeetingsCalendarList}?user_id=${userData?.userId ?? 1}&page=$page&per_page=10";
 
-      if (isFirstTime == true) {
+      // ✅ Build query string dynamically
+      // final queryString = buildCustomerQuery(userData: userData!, page: page);
+      // final apiUrl = "${ApiUrl.getMeetingsCalendarList}?$queryString";
+
+      logcat("MeetingsCalendarURL:", apiUrl);
+
+      final response = await Repository.get({}, apiUrl, allowHeader: true);
+
+      isCustomerLoading(false);
+      if (isInitialLoad == true) {
         isCustomerLoading(false);
       }
-
-      logcat("RESPONSE::", response.body);
-      var responseData = jsonDecode(response.body);
+      final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        if (responseData['status'] == true) {
+        if (responseData['status'] == "success") {
           state.value = ScreenState.apiSuccess;
           message.value = '';
-
-          if (isFirstTime == true && customerList.isNotEmpty) {
-            currentPage = 1;
-            customerList.clear();
-          }
-
-          var customerListData = CustomerModel.fromJson(responseData);
-          if (customerListData.result.isNotEmpty) {
-            customerList.addAll(customerListData.result);
-            customerList.refresh();
-            update();
+          final model = MeetingCalendarModel.fromJson(responseData);
+          meetingsList.clear();
+          filteredMeetingsList.clear();
+          if (model.result!.data!.isNotEmpty) {
+            meetingsList.addAll(model.result!.data!);
+            filteredMeetingsList.addAll(meetingsList);
+            meetingsList.refresh();
+            filteredMeetingsList.refresh();
+            currentPage.value = model.result!.pagination!.page!;
+            lastPage.value = model.result!.pagination!.lastPage!;
+            totalItems.value = model.result!.pagination!.total!;
+            const int perPage = 10;
+            fromItem.value = (currentPage.value - 1) * perPage + 1;
+            toItem.value = currentPage.value * perPage > totalItems.value
+                ? totalItems.value
+                : currentPage.value * perPage;
           } else {
-            customerList.clear();
+            currentPage.value = 1;
+            lastPage.value = 1;
+            totalItems.value = 0;
+            fromItem.value = 0;
+            toItem.value = 0;
           }
-
-          // ✅ Set pagination info
-          this.currentPage.value = customerListData.pagination.currentPage;
-          lastPage.value = customerListData.pagination.lastPage;
-          totalItems.value = customerListData.pagination.total;
-          fromItem.value = customerListData.pagination.from;
-          toItem.value = customerListData.pagination.to;
-          // Handle pagination
-          if (customerListData.pagination.currentPage <
-              customerListData.pagination.lastPage) {
-            nextPageURL.value =
-                "${ApiUrl.getcustomerbyIdwwithpagination}=${userData?.userId ?? ''}&page=${currentPage + 1}&per_page=10";
-            logcat("nextPageURL-1", nextPageURL.value.toString());
-            update();
-          } else {
-            nextPageURL.value = "";
-            logcat("nextPageURL-2", nextPageURL.value.toString());
-            update();
-          }
-          logcat("nextPageURL", nextPageURL.value.toString());
         } else {
           message.value = responseData['message'];
           showDialogForScreen(
             context,
-            'Meter Screen',
+            'Meetings Calendar Screen',
             responseData['message'],
-            callback: () {},
+            callback: Get.back,
           );
         }
       } else {
@@ -207,7 +203,7 @@ class MeetingsCalendarController extends GetxController {
         message.value = APIResponseHandleText.serverError;
         showDialogForScreen(
           context,
-          'Meter Screen',
+          'Meetings Calendar Screen',
           responseData['message'] ?? ServerError.servererror,
           callback: () {
             getUnauthenticatedUser(
@@ -220,13 +216,21 @@ class MeetingsCalendarController extends GetxController {
       }
     } catch (e) {
       logcat("Exception", e);
-      if (isFirstTime == true) {
+      if (isInitialLoad == true) {
         isCustomerLoading(false);
       }
       state.value = ScreenState.apiError;
-      // message.value = ServerError.servererror;
-      // showDialogForScreen(context, 'Meter Screen', ServerError.servererror, callback: () {});
     }
+  }
+
+  String buildCustomerQuery({required User userData, required int page}) {
+    final queryParams = <String>[];
+
+    queryParams.add('user_id=${userData.userId}');
+    queryParams.add('page=$page');
+    queryParams.add('per_page=10');
+
+    return queryParams.join('&');
   }
 
   final RxList<String> customerHeaders = <String>[
@@ -234,48 +238,76 @@ class MeetingsCalendarController extends GetxController {
     "Lead Id",
     "Contact Person",
     "Latest Appointment",
-    "Contacted",
     "Status",
     "Action",
   ].obs;
 
-  // Provide all customer data without pagination
-  List<List<String>> get meetingsData {
-    if (customerList.isEmpty) return [];
+  // "Contacted",
 
-    return customerList.asMap().entries.map((entry) {
+  // Provide all customer data without pagination
+  List<List<String?>> get meetingsData {
+    if (filteredMeetingsList.isEmpty) return [];
+
+    return filteredMeetingsList.asMap().entries.map((entry) {
       final index = entry.key + 1 + ((currentPage.value - 1) * 10);
       final e = entry.value;
+      final formattedLiveAt = e.scheduledAt!.isNotEmpty
+          ? DateFormat('dd-MM-yyyy').format(DateTime.parse(e.scheduledAt!))
+          : '';
 
       return [
-        index.toString(), // Sr No.
-        e.businessUnit ?? 'N/A',
-        e.cafNo ?? 'N/A',
-        e.customerName ?? 'N/A',
-        e.categoryName.toString().split('.').last,
-        e.customerStatus.toString().split('.').last ?? 'N/A',
+        index.toString(),
+        e.leadId.toString(),
+        e.contactPersonName,
+        formattedLiveAt,
+        e.meetingStatus!.toString().capitalize,
         "",
       ];
     }).toList();
   }
 
+  void filterCustomer(String query) {
+    logcat("filterCustomer::", query.toString());
+    final lowerQuery = query.toLowerCase().trim();
+
+    if (lowerQuery.isEmpty) {
+      filteredMeetingsList.assignAll(meetingsList);
+      isTextEmpty.value = false;
+      return;
+    }
+
+    filteredMeetingsList.assignAll(
+      meetingsList.where((lead) {
+        final formattedLiveAt = lead.scheduledAt!.isNotEmpty
+            ? DateFormat('dd-MM-yyyy').format(DateTime.parse(lead.scheduledAt!))
+            : '';
+        final values = [
+          lead.leadId.toString(),
+          lead.contactPersonName,
+          formattedLiveAt,
+          lead.meetingStatus,
+        ];
+        return values.any((value) => value!.toLowerCase().contains(lowerQuery));
+      }).toList(),
+    );
+
+    logcat("filterResponse::", jsonEncode(filteredMeetingsList));
+    isTextEmpty.value = true;
+  }
+
   void resetFilterFields() {
-    // 🔹 Controllers
     statusCtr.clear();
     dateCtr.clear();
     reasonCtr.clear();
     notesCtr.clear();
 
-    // 🔹 Dropdown / reactive selection
     selectStatus.value = 'Select Status';
 
-    // 🔹 Validation Models
     statusModel.value = ValidationModel(null, null, isValidate: false);
     dateModel.value = ValidationModel(null, null, isValidate: false);
     reasonModel.value = ValidationModel(null, null, isValidate: false);
     notesModel.value = ValidationModel(null, null, isValidate: false);
 
-    // 🔹 Other flags
     isStartDateActive.value = true;
     isStartDateSelected.value = false;
     isDistrictSelected.value = false;
@@ -283,19 +315,19 @@ class MeetingsCalendarController extends GetxController {
     isFormInvalidate.value = false;
   }
 
-  void updateMeetings(context) async {
+  void updateMeetings(context, int meetingId) async {
     resetFilterFields();
     openBottomtsheetDialog(
       context,
       title: "Edit Meeting",
-      widget: addFilterSheetWidget(context),
+      widget: addFilterSheetWidget(context, meetingId),
     );
   }
 
   final List<String> status = ['Select Status', 'Reschedule'];
   RxString selectStatus = 'Select Status'.obs;
 
-  Widget addFilterSheetWidget(context) {
+  Widget addFilterSheetWidget(context, int meetingId) {
     return Container(
       margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.5.h, bottom: 4.h),
       child: Column(
@@ -352,6 +384,7 @@ class MeetingsCalendarController extends GetxController {
                     node: reasonNode,
                     model: reasonModel.value,
                     hint: 'Enter Reason',
+                    function: (val) {},
                     isRequired: true,
                   ),
                   getDynamicSizedBox(height: 1.h),
@@ -372,6 +405,7 @@ class MeetingsCalendarController extends GetxController {
               model: notesModel.value,
               hint: 'Enter Notes',
               isMultipline: true,
+              function: (val) {},
               isRequired: true,
             );
           }),
@@ -395,7 +429,14 @@ class MeetingsCalendarController extends GetxController {
                 child: getFormButton(
                   context,
                   () {
-                    Get.back();
+                    updateMeetingApi(
+                      context,
+                      meetingId: meetingId,
+                      status: selectStatus.value.toLowerCase(),
+                      newScheduledAt: dateCtr.text,
+                      reason: reasonCtr.text,
+                      notes: notesCtr.text,
+                    );
                   },
                   "Update",
                   validate: true,
@@ -407,6 +448,9 @@ class MeetingsCalendarController extends GetxController {
       ),
     );
   }
+
+  final dateTimeFormat = DateFormat('yyyy-MM-dd HH:mm');
+  final displayFormat = DateFormat('dd-MM-yyyy hh:mm a');
 
   DateTime? selectedDateTime;
   final RxString startDate = ''.obs;
@@ -424,35 +468,99 @@ class MeetingsCalendarController extends GetxController {
       title: title,
       initialDate: dateRx.value.isNotEmpty
           ? dateTimeFormat.parse(dateRx.value)
-          : null,
+          : DateTime.now(),
       minDate: startDate.value.isNotEmpty
           ? dateTimeFormat.parse(startDate.value)
           : null,
       showTimePickers: showTimePickers,
       onDatePicked: (DateTime date) {
-        final formatted = dateTimeFormat.format(date);
+        final formatted = displayFormat.format(date);
         dateRx.value = formatted;
         controller.text = formatted;
-        // validateFields(
-        //   controller.text,
-        //   iscomman: true,
-        //   model: model,
-        //   errorText1: showTimePickers
-        //       ? 'Please choose date and time'
-        //       : 'Please choose date',
-        // );
       },
     );
   }
 
-  // Common filter
-  var currentFilterSource = [].obs;
-  var filteredData = [].obs;
-  RxString categoryId = "".obs;
-  RxList<CategoryModel> warrantyType = <CategoryModel>[
-    CategoryModel(id: "1", name: "Invoice"),
-    CategoryModel(id: "2", name: "Bills"),
-    CategoryModel(id: "3", name: "Reports"),
-    CategoryModel(id: "4", name: "Others"),
-  ].obs;
+  Future<void> updateMeetingApi(
+    BuildContext context, {
+    required int meetingId,
+    required String status,
+    required String newScheduledAt,
+    required String reason,
+    String? notes,
+  }) async {
+    var loadingIndicator = LoadingProgressDialog();
+    if (networkManager.connectionType.value == 0) {
+      showDialogForScreen(
+        context,
+        "Meetings Update",
+        Connection.noConnection,
+        callback: () => Get.back(),
+      );
+      return;
+    }
+
+    try {
+      loadingIndicator.show(context, '');
+      final endPoint = "${ApiUrl.getMeetingsCalendarList}/$meetingId";
+
+      // Prepare request body
+      final body = {
+        'meeting_status': status.toLowerCase() == 'reschedule'
+            ? "rescheduled"
+            : '',
+        'new_scheduled_at': toApiFormat(newScheduledAt),
+        'reason': reason,
+        if (notes != null) 'meeting_notes': notes,
+      };
+
+      logcat("body::", body);
+      final response = await Repository.post(body, endPoint, allowHeader: true);
+      final data = jsonDecode(response.body);
+      loadingIndicator.hide(context);
+      if (response.statusCode == 200) {
+        logcat('updateMeetingResponse', data.toString());
+        if (data['status']?.toString().toLowerCase() == 'success') {
+          showDialogForScreen(
+            context,
+            "Meeting Updated",
+            data['message'] ?? "Meeting updated successfully!",
+            callback: () {
+              Get.back(result: true);
+              getMeetingsListApi(
+                context: context,
+                isInitialLoad: true,
+                page: 1,
+                hideLoading: false,
+              );
+            },
+          );
+        } else {
+          showDialogForScreen(
+            context,
+            "Error",
+            data['message'] ?? "Failed to update meeting",
+            callback: () => Get.back(),
+          );
+        }
+      } else {
+        logcat('Error Response', response.body);
+        showDialogForScreen(
+          context,
+          "Error",
+          response.body,
+          callback: () => Get.back(),
+        );
+      }
+    } catch (e) {
+      loadingIndicator.hide(context);
+      logcat("Exception", e.toString());
+      showDialogForScreen(
+        context,
+        "Error",
+        e.toString(),
+        callback: () => Get.back(),
+      );
+    }
+  }
 }

@@ -7,6 +7,7 @@ import 'package:sales_app/componant/parentWidgets/CustomeParentBackground.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/configs/colors_constant.dart';
+import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/controller/meetings_calendar_controller/meetings_calendar_controller.dart';
 import 'package:sales_app/utils/enum.dart';
@@ -30,7 +31,12 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
   void initState() {
     super.initState();
     futureDelay(() {
-      // ctr.getCustomerbyID(context, 1, false, isFirstTime: true);
+      ctr.getMeetingsListApi(
+        context: context,
+        isInitialLoad: true,
+        page: 1,
+        hideLoading: false,
+      );
     }, isOneSecond: true);
   }
 
@@ -39,10 +45,10 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
     "Lead Id": 20.w,
     "Contact Person": 20.w,
     "Latest Appointment": 20.w,
-    "Contacted": 20.w,
     "Status": 20.w,
     "Action": 20.w,
   };
+  // "Contacted": 20.w,
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +81,12 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
               onRefresh: () async {
                 await futureDelay(() {
                   ctr.currentPage.value = 1;
-                  // ctr.getCustomerbyID(context, 1, false, isFirstTime: true);
+                  ctr.getMeetingsListApi(
+                    context: context,
+                    isInitialLoad: true,
+                    page: 1,
+                    hideLoading: false,
+                  );
                 }, isOneSecond: false);
                 _refreshController.refreshCompleted();
               },
@@ -102,15 +113,13 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                           onChanged: (val) {
                             if (val!.isNotEmpty) {
                               ctr.isTextEmpty.value = true;
+                              ctr.filterCustomer(val);
                             } else {
                               ctr.isTextEmpty.value = false;
                             }
-                            // ctr.filterData(val!);
                           },
                           inputType: TextInputType.text,
                           isBorderSideEnable: false,
-                          // wantSuffix: true,
-                          // isMick: true,
                           formType: FieldType.search,
                         );
                       }),
@@ -127,44 +136,47 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                             double tableHeight = 60.h;
                             return SizedBox(
                               height: tableHeight,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Align(
-                                    alignment: Alignment.topLeft,
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      padding: EdgeInsets.zero,
-                                      child: ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                          minHeight: tableHeight,
-                                        ),
-                                        child: Theme(
-                                          data: Theme.of(context).copyWith(
-                                            dataTableTheme: DataTableThemeData(
-                                              headingRowHeight: 7.h,
-                                              dataRowMinHeight: 5.h,
-                                              dataRowMaxHeight: 5.h,
-                                            ),
+                              child:
+                                  ctr.state.value == ScreenState.apiSuccess &&
+                                      ctr.filteredMeetingsList.isEmpty
+                                  ? SizedBox(
+                                      width: Device.width,
+                                      child: Center(
+                                        child: Text(
+                                          'No Meetings Found',
+                                          style: TextStyle(
+                                            fontSize: 16.sp,
+                                            fontFamily: plusJakartaSansBold,
                                           ),
-                                          child:
-                                              ctr.state.value ==
-                                                      ScreenState.apiSuccess &&
-                                                  ctr.customerList.isEmpty
-                                              ? SizedBox(
-                                                  width: MediaQuery.of(
-                                                    context,
-                                                  ).size.width,
-                                                  child: Center(
-                                                    child: Text(
-                                                      'No customers found',
-                                                      style: TextStyle(
-                                                        fontSize: 16,
-                                                      ),
+                                        ),
+                                      ),
+                                    )
+                                  : Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Align(
+                                          alignment: Alignment.topLeft,
+                                          child: SingleChildScrollView(
+                                            scrollDirection: Axis.horizontal,
+                                            padding: EdgeInsets.zero,
+                                            child: ConstrainedBox(
+                                              constraints: BoxConstraints(
+                                                minHeight: tableHeight,
+                                              ),
+                                              child: Theme(
+                                                data: Theme.of(context)
+                                                    .copyWith(
+                                                      dataTableTheme:
+                                                          DataTableThemeData(
+                                                            headingRowHeight:
+                                                                7.h,
+                                                            dataRowMinHeight:
+                                                                5.h,
+                                                            dataRowMaxHeight:
+                                                                5.h,
+                                                          ),
                                                     ),
-                                                  ),
-                                                )
-                                              : DataTable(
+                                                child: DataTable(
                                                   columnSpacing: 1.w,
                                                   headingRowColor:
                                                       WidgetStateColor.resolveWith(
@@ -213,8 +225,7 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                                   rows: ctr.meetingsData.asMap().entries.map((
                                                     entry,
                                                   ) {
-                                                    final row = entry
-                                                        .value; // row data (list of cell values)
+                                                    final row = entry.value;
                                                     return DataRow(
                                                       cells: row.asMap().entries.map((
                                                         cell,
@@ -225,7 +236,6 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
 
                                                         if (columnName ==
                                                             "Action") {
-                                                          // Custom UI for Action column
                                                           return DataCell(
                                                             Center(
                                                               child: Row(
@@ -242,29 +252,6 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                                                               .zero,
                                                                       icon: const Icon(
                                                                         Icons
-                                                                            .schedule,
-                                                                        color:
-                                                                            primaryColor,
-                                                                      ),
-                                                                      onPressed: () {
-                                                                        Get.to(
-                                                                          MeetingsHistoryScreen(),
-                                                                        );
-                                                                      },
-                                                                    ),
-                                                                  ),
-                                                                  getDynamicSizedBox(
-                                                                    width: 1.w,
-                                                                  ),
-                                                                  SizedBox(
-                                                                    width: 4.h,
-                                                                    height: 4.h,
-                                                                    child: IconButton(
-                                                                      padding:
-                                                                          EdgeInsets
-                                                                              .zero,
-                                                                      icon: const Icon(
-                                                                        Icons
                                                                             .edit,
                                                                         color:
                                                                             primaryColor,
@@ -272,6 +259,9 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                                                       onPressed: () {
                                                                         ctr.updateMeetings(
                                                                           context,
+                                                                          ctr
+                                                                              .filteredMeetingsList[entry.key]
+                                                                              .id!,
                                                                         );
                                                                       },
                                                                     ),
@@ -279,44 +269,46 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                                                   getDynamicSizedBox(
                                                                     width: 1.w,
                                                                   ),
-                                                                  // SizedBox(
-                                                                  //   width: 1.w,
-                                                                  // ),
-                                                                  // SizedBox(
-                                                                  //   width: 4.h,
-                                                                  //   height: 4.h,
-                                                                  //   child: IconButton(
-                                                                  //     padding:
-                                                                  //         EdgeInsets
-                                                                  //             .zero,
-                                                                  //     icon: const Icon(
-                                                                  //       Icons
-                                                                  //           .delete,
-                                                                  //       color: Colors
-                                                                  //           .red,
-                                                                  //     ),
-                                                                  //     onPressed: () {
-                                                                  //       // 🗑 Delete action
-                                                                  //       // ctr.deleteCustomer(
-                                                                  //       //   rowIndex,
-                                                                  //       // );
-                                                                  //     },
-                                                                  //   ),
-                                                                  // ),
+                                                                  if (ctr
+                                                                          .filteredMeetingsList[entry
+                                                                              .key]
+                                                                          .meetingStatus ==
+                                                                      'rescheduled')
+                                                                    SizedBox(
+                                                                      width:
+                                                                          4.h,
+                                                                      height:
+                                                                          4.h,
+                                                                      child: IconButton(
+                                                                        padding:
+                                                                            EdgeInsets.zero,
+                                                                        icon: const Icon(
+                                                                          Icons
+                                                                              .schedule,
+                                                                          color:
+                                                                              primaryColor,
+                                                                        ),
+                                                                        onPressed: () {
+                                                                          Get.to(
+                                                                            MeetingsHistoryScreen(
+                                                                              meetingsItemData: ctr.filteredMeetingsList[entry.key]!.history!,
+                                                                            ),
+                                                                          );
+                                                                        },
+                                                                      ),
+                                                                    ),
                                                                 ],
                                                               ),
                                                             ),
                                                           );
                                                         }
-
-                                                        // Default case → render normal text cell
                                                         return DataCell(
                                                           SizedBox(
                                                             width:
                                                                 columnWidths[columnName] ??
                                                                 16.w,
                                                             child: Text(
-                                                              cell.value,
+                                                              cell.value!,
                                                               style: TextStyle(
                                                                 fontSize: 14.sp,
                                                               ),
@@ -333,58 +325,17 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                                       }).toList(),
                                                     );
                                                   }).toList(),
-
-                                                  // rows: ctr.customerData.asMap().entries.map((
-                                                  //   entry,
-                                                  // ) {
-                                                  //   final row = entry.value;
-                                                  //   return DataRow(
-                                                  //     cells: row.asMap().entries.map((
-                                                  //       cell,
-                                                  //     ) {
-                                                  //       return DataCell(
-                                                  //         SizedBox(
-                                                  //           width:
-                                                  //               columnWidths[ctr
-                                                  //                   .customerHeaders[cell
-                                                  //                   .key]] ??
-                                                  //               16.w,
-                                                  //           child: Text(
-                                                  //             cell.value,
-                                                  //             style: TextStyle(
-                                                  //               fontSize: 14.sp,
-                                                  //             ),
-                                                  //             textAlign:
-                                                  //                 TextAlign
-                                                  //                     .center,
-                                                  //             overflow:
-                                                  //                 TextOverflow
-                                                  //                     .ellipsis,
-                                                  //             maxLines: 2,
-                                                  //           ),
-                                                  //         ),
-                                                  //       );
-                                                  //     }).toList(),
-                                                  //   );
-                                                  // }).toList(),
                                                 ),
+                                              ),
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                        // Loader
+                                        if (ctr.state.value ==
+                                            ScreenState.apiLoading)
+                                          screnLoader(tableHeight),
+                                      ],
                                     ),
-                                  ),
-                                  // Loader
-                                  if (ctr.state.value == ScreenState.apiLoading)
-                                    screnLoader(tableHeight),
-                                  // Container(
-                                  //   height: tableHeight,
-                                  //   width: double.infinity,
-                                  //   color: transparent,
-                                  //   child: const Center(
-                                  //     child: CircularProgressIndicator(),
-                                  //   ),
-                                  // ),
-                                ],
-                              ),
                             );
                           }),
                         ),
@@ -398,22 +349,11 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                         ),
                         padding: EdgeInsets.symmetric(horizontal: 0.w),
                         child: Obx(() {
-                          // if (ctr.totalItems.value == 0) {
-                          //   return const Text(
-                          //     "0–0 of 0",
-                          //     style: TextStyle(
-                          //       fontSize: 14,
-                          //       color: Colors.black,
-                          //     ),
-                          //   );
-                          // }
-
                           return Container(
                             decoration: BoxDecoration(
                               color: white,
                               borderRadius: BorderRadius.circular(12),
                             ),
-
                             padding: EdgeInsets.symmetric(
                               horizontal: 3.w,
                               vertical: 1.h,
@@ -421,7 +361,6 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                // ==== UPDATED DESIGN ====
                                 Row(
                                   children: [
                                     const Icon(
@@ -448,16 +387,15 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                     ),
                                   ],
                                 ),
-                                // ==== PAGINATION BUTTONS ====
                                 Row(
                                   children: [
                                     ElevatedButton(
                                       onPressed: ctr.currentPage.value > 1
-                                          ? () => ctr.getCustomerbyID(
-                                              context,
-                                              ctr.currentPage.value - 1,
-                                              false,
-                                              isFirstTime: true,
+                                          ? () => ctr.getMeetingsListApi(
+                                              context: context,
+                                              page: ctr.currentPage.value - 1,
+                                              isInitialLoad: true,
+                                              hideLoading: false,
                                             )
                                           : null,
                                       style: ElevatedButton.styleFrom(
@@ -487,11 +425,11 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                       onPressed:
                                           ctr.currentPage.value <
                                               ctr.lastPage.value
-                                          ? () => ctr.getCustomerbyID(
-                                              context,
-                                              ctr.currentPage.value + 1,
-                                              false,
-                                              isFirstTime: true,
+                                          ? () => ctr.getMeetingsListApi(
+                                              context: context,
+                                              page: ctr.currentPage.value + 1,
+                                              isInitialLoad: false,
+                                              hideLoading: false,
                                             )
                                           : null,
                                       style: ElevatedButton.styleFrom(
@@ -516,6 +454,7 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                           );
                         }),
                       ),
+
                       getDynamicSizedBox(height: 12.h),
                     ],
                   ),

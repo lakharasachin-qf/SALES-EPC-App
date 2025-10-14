@@ -503,7 +503,6 @@ Widget getTextField({
   function,
   bool isNumeric = false,
   bool isNumber = false,
-  bool isReadOnly = false,
   bool wantsuffix = false,
   bool ispass = false,
   bool isenable = true,

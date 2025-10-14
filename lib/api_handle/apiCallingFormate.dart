@@ -160,82 +160,82 @@ void commonGetApiCallFormate(
   isShowDialog = true,
   isStatus = false,
 }) async {
-  try {
-    if (apisLoading != null) apisLoading(true);
-    state?.value = ScreenState.apiLoading;
+  // try {
+  if (apisLoading != null) apisLoading(true);
+  state?.value = ScreenState.apiLoading;
 
-    if (networkManager!.connectionType.value == 0) {
-      if (apisLoading != null) apisLoading(false);
+  if (networkManager!.connectionType.value == 0) {
+    if (apisLoading != null) apisLoading(false);
+    showDialogForScreen(
+      context,
+      title!,
+      Connection.noConnection,
+      callback: () {
+        Get.back();
+      },
+    );
+    return;
+  }
+
+  var response = await Repository.get({}, apiEndPoint!, allowHeader: true);
+
+  if (apisLoading != null) apisLoading(false);
+
+  var responseData = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    state?.value = ScreenState.apiSuccess;
+    message?.value = '';
+
+    bool isResponseOk = false;
+
+    // 🔹 Flexible status checking logic
+    if (isStatus) {
+      // Case 1: Expecting boolean true
+      isResponseOk = responseData['status'] == true;
+    } else {
+      // Case 2: Expecting string "success"
+      isResponseOk =
+          responseData['status']?.toString().toLowerCase() == 'success';
+    }
+    if (isResponseOk) {
+      onResponse(responseData);
+      print('common get api if case');
+    } else {
+      message?.value = responseData['message'];
       showDialogForScreen(
         context,
         title!,
-        Connection.noConnection,
-        callback: () {
-          Get.back();
-        },
-      );
-      return;
-    }
-
-    var response = await Repository.get({}, apiEndPoint!, allowHeader: true);
-
-    if (apisLoading != null) apisLoading(false);
-
-    var responseData = jsonDecode(response.body);
-
-    if (response.statusCode == 200) {
-      state?.value = ScreenState.apiSuccess;
-      message?.value = '';
-
-      bool isResponseOk = false;
-
-      // 🔹 Flexible status checking logic
-      if (isStatus) {
-        // Case 1: Expecting boolean true
-        isResponseOk = responseData['status'] == true;
-      } else {
-        // Case 2: Expecting string "success"
-        isResponseOk =
-            responseData['status']?.toString().toLowerCase() == 'success';
-      }
-      if (isResponseOk) {
-        onResponse(responseData);
-        print('common get api if case');
-      } else {
-        message?.value = responseData['message'];
-        showDialogForScreen(
-          context,
-          title!,
-          responseData['message'],
-          callback: () {},
-        );
-      }
-    } else {
-      print('common get api else case');
-      state?.value = ScreenState.apiError;
-      message?.value = APIResponseHandleText.serverError;
-      getUnauthenticatedUser(
-        context,
-        responseData['message'] ?? '',
-        "Unauthenticated user",
-      );
-    }
-  } catch (e) {
-    print('common get api catch block');
-    state?.value = ScreenState.apiError;
-    logcat("Exception", e);
-
-    if (isShowDialog == true) {
-      showDialogForScreen(
-        context,
-        title ?? "Error",
-        e.toString(),
+        responseData['message'],
         callback: () {},
       );
     }
-
-    if (apisLoading != null) apisLoading(false);
+  } else {
+    print('common get api else case');
+    state?.value = ScreenState.apiError;
+    message?.value = APIResponseHandleText.serverError;
+    getUnauthenticatedUser(
+      context,
+      responseData['message'] ?? '',
+      "Unauthenticated user",
+    );
   }
+  // } catch (e) {
+  //   print('common get api catch block');
+  //   state?.value = ScreenState.apiError;
+  //   logcat("Exception", e);
+
+  //   if (isShowDialog == true) {
+  //     showDialogForScreen(
+  //       context,
+  //       title ?? "Error",
+  //       e.toString(),
+  //       callback: () {},
+  //     );
+  //   }
+
+  //   if (apisLoading != null) apisLoading(false);
+  // }
 }
   // on http.ClientException catch (e) {
   //   print('common get api client exception case');

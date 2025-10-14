@@ -10,7 +10,8 @@ import 'package:sales_app/utils/helper.dart';
 import 'package:sizer/sizer.dart';
 
 class ViewCustomerScreen extends StatefulWidget {
-  const ViewCustomerScreen({super.key});
+  ViewCustomerScreen({super.key, required this.customerId});
+  String customerId;
 
   @override
   State<ViewCustomerScreen> createState() => _ViewCustomerScreenState();
@@ -22,9 +23,9 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
   @override
   void initState() {
     super.initState();
-    // futureDelay(() {
-    //   ctr.getCustomerbyID(context, true);
-    // }, isOneSecond: true);
+    futureDelay(() {
+      ctr.getViewCustomer(context, true, widget.customerId);
+    }, isOneSecond: false);
   }
 
   @override
@@ -103,8 +104,6 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
                       );
                     }),
                     getDynamicSizedBox(height: 2.h),
-
-                    /// Address
                     Obx(() {
                       return getTextField(
                         context: context,
@@ -115,6 +114,7 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
                         model: ctr.addressModel.value,
                         isenable: false,
                         hint: 'Not Set',
+                        isMultipline: true,
                         isRequired: true,
                       );
                     }),
@@ -347,13 +347,11 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
                         ispass: true,
                         isenable: false,
                         usegesture: true,
-                        isReadOnly: true,
                         gestureFunction: () {
                           // https://staging.sync-in.co.za/modules/auth/images/children_male_3.png
-                          viewNetworkFile(
-                            context,
-                            "http://103.255.64.70/storage/uploads/installation-certificate/ecbd0be1-209c-455f-8d9c-411eb122a300.pdf",
-                          );
+                          if (ctr.installationUrl.isNotEmpty) {
+                            viewNetworkFile(context, ctr.installationUrl.value);
+                          }
                         },
                         hint: 'Not Uploaded',
                       );
