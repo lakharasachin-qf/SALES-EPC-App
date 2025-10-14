@@ -805,12 +805,18 @@ class CustomerScreenController extends GetxController {
             item.value.toLowerCase() == customer.warrantyType.toLowerCase(),
       );
 
-      updateWarrantyCtr.text =
-          matchedItem?.label ?? customer.warrantyType.capitalize ?? '';
-      selectedWarrantyTypeValue.value = customer.warrantyType.isNotEmpty
-          ? customer.warrantyType
-          : '';
-      warrantyPeriodCtr.text = customer.warrantyPeriod.toString();
+      if (customer.warrantyType.toLowerCase().toString() != "amc") {
+        updateWarrantyCtr.text = "";
+        selectedWarrantyTypeValue.value = '';
+        warrantyPeriodCtr.clear();
+      } else {
+        updateWarrantyCtr.text =
+            matchedItem?.label ?? customer.warrantyType.capitalize ?? '';
+        selectedWarrantyTypeValue.value = customer.warrantyType.isNotEmpty
+            ? customer.warrantyType.toLowerCase()
+            : '';
+        warrantyPeriodCtr.text = customer.warrantyPeriod.toString();
+      }
     }
     amountCtr.clear();
     // warrantyPeriodCtr.clear();
@@ -1042,14 +1048,12 @@ class CustomerScreenController extends GetxController {
                                   isRequired: true,
                                 );
                               }),
-                            if (selectedWarrantyTypeValue.value != "non_amc" &&
-                                selectedWarrantyTypeValue.value !=
-                                    'under-warranty')
+                            if (selectedWarrantyTypeValue.value == 'amc')
                               getDynamicSizedBox(height: 1.h),
-
-                            if (selectedWarrantyTypeValue.value != "non_amc" &&
-                                selectedWarrantyTypeValue.value !=
-                                    'under-warranty')
+                            // if (selectedWarrantyTypeValue.value != "non_amc" &&
+                            //     selectedWarrantyTypeValue.value !=
+                            //         'under-warranty')
+                            if (selectedWarrantyTypeValue.value == 'amc')
                               /// Contact Person Name
                               Obx(() {
                                 return getTextField(
