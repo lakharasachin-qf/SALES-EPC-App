@@ -432,19 +432,8 @@ class AddLeadsController extends GetxController {
 
   // Category List
   // Category List
-  RxList<CategoryModel> categoryList = <CategoryModel>[
-    CategoryModel(id: "1", name: "Equipment Photo", value: "equipment_photo"),
-    CategoryModel(
-      id: "2",
-      name: "Map Marked Screenshot",
-      value: "map_marked_screenshot",
-    ),
-    CategoryModel(
-      id: "3",
-      name: "Hand Sketch Installation Area",
-      value: "hand_sketch_installation_area",
-    ),
-  ].obs;
+  RxList<DgSyncRequired> categoryList = <DgSyncRequired>[].obs;
+  var filtercategoryList = <DgSyncRequired>[].obs;
 
   var currentFilterSource = [].obs;
   var filteredData = [].obs;
@@ -1180,6 +1169,95 @@ class AddLeadsController extends GetxController {
     } else {
       filterRequiredSolutionTypeList.assignAll(
         requiredSolutionTypeList
+            .where(
+              (item) =>
+                  item.label.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  Widget setUploadedCategoryListDialog() {
+    return Obx(() {
+      if (isResoltuinSolutonTypeApiCallLoading.value) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isResoltuinSolutonTypeApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        filtercategoryList,
+        controller: uploadCategoryCtr,
+        noDataLable: "No Category Found",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: filtercategoryList.length,
+          itemBuilder: (BuildContext context, int index) {
+            final selectedItem = filtercategoryList[index];
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                uploadCategoryCtr.text = selectedItem.label;
+                categoryValue.value = selectedItem.value.toString();
+                validateUploadCategory(uploadCategoryCtr.text);
+                update();
+
+                logcat(
+                  'uploadFileModel.value.isValidate',
+                  uploadFileModel.value.isValidate,
+                );
+                logcat(
+                  'uploadCategoryModel.value.isValidate',
+                  uploadCategoryModel.value.isValidate,
+                );
+
+                // Reset filter list
+                if (uploadCategoryCtr.text.isNotEmpty) {
+                  filtercategoryList.clear();
+                  filtercategoryList.addAll(categoryList);
+                }
+                Get.back();
+              },
+              title: buildSelectableRow(
+                selectedItem.label,
+                selectedItem.value.toString().trim() == categoryValue.value,
+              ),
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: searchUploadCategoryNode,
+          controller: searchUploadCategoryCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForUploadedCategoryType(val.toString());
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: uploadCategoryModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForUploadedCategoryType(String keyword) {
+    if (keyword.isEmpty) {
+      filtercategoryList.assignAll(categoryList);
+    } else {
+      filtercategoryList.assignAll(
+        categoryList
             .where(
               (item) =>
                   item.label.toLowerCase().contains(keyword.toLowerCase()),
@@ -2110,6 +2188,7 @@ class AddLeadsController extends GetxController {
   resetFileUpload() {
     uploadFileCtr.clear();
     uploadCategoryCtr.clear();
+    categoryValue.value = '';
 
     uploadFileModel.update((m) {
       m!.error = null;
@@ -2792,7 +2871,16 @@ class AddLeadsController extends GetxController {
                               wantsuffix: true,
                               usegesture: true,
                               gestureFunction: () {
-                                showCategorySelectionPopups(context);
+                                logcat('openData', '');
+
+                                commonDropDownDialog(
+                                  context,
+                                  content: setUploadedCategoryListDialog(),
+                                  title: "Category",
+                                  onCloseClick: () {
+                                    applyFilterForUploadedCategoryType('');
+                                  },
+                                ).then((_) {});
                               },
                               hint: 'Select Category',
                               isRequired: true,
@@ -2814,33 +2902,37 @@ class AddLeadsController extends GetxController {
                               ),
                               getDynamicSizedBox(width: 3.w),
                               Expanded(
-                                child: getFormButton(
-                                  context,
-                                  () {
-                                    if (uploadFileModel.value.isValidate &&
-                                        uploadCategoryModel.value.isValidate) {
-                                      logcat(
-                                        "selectedFilePath::",
-                                        selectedFilePath.value,
-                                      );
-                                      final newFile = UploadedFile(
-                                        path: selectedFilePath.value,
-                                        // category: uploadCategoryCtr.text,
-                                        category: categoryValue.value,
-                                      );
-                                      if (index == null) {
-                                        addFile(newFile);
-                                      } else {
-                                        updateFile(index, newFile);
+                                child: Obx(() {
+                                  return getFormButton(
+                                    context,
+                                    () {
+                                      if (uploadFileModel.value.isValidate &&
+                                          uploadCategoryModel
+                                              .value
+                                              .isValidate) {
+                                        logcat(
+                                          "selectedFilePath::",
+                                          selectedFilePath.value,
+                                        );
+                                        final newFile = UploadedFile(
+                                          path: selectedFilePath.value,
+                                          // category: uploadCategoryCtr.text,
+                                          category: categoryValue.value,
+                                        );
+                                        if (index == null) {
+                                          addFile(newFile);
+                                        } else {
+                                          updateFile(index, newFile);
+                                        }
+                                        Get.back();
                                       }
-                                      Get.back();
-                                    }
-                                  },
-                                  fileItem != null ? "Update" : 'Add',
-                                  validate:
-                                      uploadFileModel.value.isValidate &&
-                                      uploadCategoryModel.value.isValidate,
-                                ),
+                                    },
+                                    fileItem != null ? "Update" : 'Add',
+                                    validate:
+                                        uploadFileModel.value.isValidate &&
+                                        uploadCategoryModel.value.isValidate,
+                                  );
+                                }),
                               ),
                             ],
                           ),
@@ -2886,41 +2978,10 @@ class AddLeadsController extends GetxController {
             model.isValidate = true;
           }
         });
-        validateStep4();
         update();
+        validateStep4();
       }
     }
-  }
-
-  void showCategorySelectionPopups(BuildContext context) {
-    currentFilterSource.value = List.from(categoryList);
-    filteredData.value = List.from(categoryList);
-    searchUploadCategoryCtr.clear();
-    fetchSelectionPopup<CategoryModel>(
-      context,
-      title: 'Category',
-      controller: uploadCategoryCtr,
-      list: filteredData,
-      searchCtr: searchUploadCategoryCtr,
-      searchNode: searchUploadCategoryNode,
-      filterFunction: (val) {
-        filterFetchData<CategoryModel>(
-          val,
-          source: categoryList,
-          getTitle: (item) => item.name,
-        );
-      },
-      getTitle: (value) => value.name,
-      onSelected: (data) {
-        uploadCategoryCtr.text = data.name;
-        categoryValue.value = data.value.toString();
-        validateUploadCategory(uploadCategoryCtr.text);
-        update();
-      },
-      backBtn: () {
-        Get.back();
-      },
-    );
   }
 
   void validateUploadCategory(String? val) {
@@ -3432,10 +3493,19 @@ class AddLeadsController extends GetxController {
 
   Future<void> getDropDownList(BuildContext context, bool isLoading) async {
     var loadingIndicator = LoadingProgressDialog();
+
+    var user = await UserPreferences().getSignInInfo();
+
+    var userId = '';
+
+    if (user != null) {
+      userId = user.userId.toString();
+    }
+
     commonGetApiCallFormate(
       context,
       title: 'Add Lead Screen',
-      apiEndPoint: ApiUrl.getDropdownList,
+      apiEndPoint: '${ApiUrl.getDropdownList}?user_id=${userId}',
       allowHeader: true,
       state: state,
       message: message,
@@ -3451,7 +3521,7 @@ class AddLeadsController extends GetxController {
       },
       onResponse: (data) {
         var responseDetail = LeadDropDownListModel.fromJson(data);
-        var dropdowns = responseDetail.data.dropdowns;
+        var dropdowns = responseDetail.data;
 
         countries.assignAll(responseDetail.data.locations);
 
@@ -3485,6 +3555,12 @@ class AddLeadsController extends GetxController {
         }
 
         // Populate dynamic lists from API response
+
+        categoryList.assignAll(dropdowns.uploadedFilesCategories);
+        filtercategoryList.assignAll(dropdowns.uploadedFilesCategories);
+
+        logcat('filtercategoryList_Length', filtercategoryList.length);
+        //category
         requiredSolutionTypeList.assignAll(dropdowns.requiredSolutionType);
         filterRequiredSolutionTypeList.assignAll(
           dropdowns.requiredSolutionType,
