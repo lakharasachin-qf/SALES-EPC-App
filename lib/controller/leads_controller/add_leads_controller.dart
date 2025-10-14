@@ -2338,6 +2338,7 @@ class AddLeadsController extends GetxController {
     showCommonDatePicker(
       context: context,
       title: title,
+      disablePastDates: true,
       initialDate: dateRx.value.isNotEmpty
           ? DateTime.parse(dateRx.value)
           : null,

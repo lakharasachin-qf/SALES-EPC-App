@@ -20,6 +20,7 @@ Future<void> showCommonDatePicker({
   bool showTimePickers = false,
   bool isStartDate = false,
   bool isEndDate = false,
+  bool disablePastDates = false,
 }) async {
   // Initialize selectedDate to track new selection
   DateTime? selectedDate = initialDate; // Initialize with initialDate
@@ -54,7 +55,7 @@ Future<void> showCommonDatePicker({
                 // Use initialDate for display, or current date if null
                 initialDisplayDate: initialDate ?? DateTime.now(),
                 // Set minimum date if provided (e.g., for end date to be >= start date)
-                minDate: minDate,
+                minDate: disablePastDates ? DateTime.now() : minDate,
                 selectableDayPredicate: (DateTime date) {
                   if (isStartDate) {
                     return date.weekday == DateTime.monday;
