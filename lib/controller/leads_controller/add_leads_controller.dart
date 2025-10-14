@@ -3374,6 +3374,12 @@ class AddLeadsController extends GetxController {
   RxBool isEditMode = false.obs;
 
   //technical proposal
+
+  RxBool isFirstTechincaluploaded = true.obs;
+  RxBool isFinalTechnicaluploaded = true.obs;
+
+  RxBool isFirstComercialluploaded = true.obs;
+  RxBool isFinalComercialluploaded = true.obs;
   RxBool isTechnicalProposalMode = false.obs;
   late TextEditingController firstTechnicalProposal1Ctr,
       finalTechnicalProposal2Ctr;
@@ -3448,8 +3454,12 @@ class AddLeadsController extends GetxController {
     isValidate: false,
   ).obs;
 
+  List<StatusItem> leadStatusTechnicallOnly = [
+    StatusItem(label: "Technical Proposal", value: "technical_proposal"),
+  ];
+
   List<StatusItem> leadStatusCommercialOnlyNoRights = [
-    StatusItem(label: "Commercial proposal", value: "commercial_proposal"),
+    StatusItem(label: "Commercial Proposal", value: "commercial_proposal"),
   ];
   List<StatusItem> leadStatusCommercial = [
     StatusItem(label: "Technical Proposal", value: "technical_proposal"),
@@ -4217,6 +4227,72 @@ class AddLeadsController extends GetxController {
 
         if (result.leadStatus != null) {
           final currentStatus = result.leadStatus!;
+
+          if (currentStatus == 'technical_proposal') {
+            if (result.uploadedFiles != null &&
+                result.uploadedFiles!.isNotEmpty) {
+              // Check if 'first' file exists under technical_proposal
+              bool hasFirst = result.uploadedFiles!.any(
+                (f) => f.category == 'technical_proposal' && f.tag == 'first',
+              );
+
+              // Check if 'final' file exists under technical_proposal
+              bool hasFinal = result.uploadedFiles!.any(
+                (f) => f.category == 'technical_proposal' && f.tag == 'final',
+              );
+
+              // Update your observables accordingly
+              isTechnicalProposalMode.value = true;
+              isFirstTechincaluploaded.value = !hasFirst;
+              isFinalTechnicaluploaded.value = !hasFinal;
+
+              if (isFirstTechincaluploaded.value == false &&
+                  isFinalTechnicaluploaded.value == false) {
+                leadStatusList.assignAll(leadStatusCommercial);
+              } else {
+                logcat('going in else case', 'data');
+                leadStatusList.assignAll(leadStatusTechnicallOnly);
+              }
+            }
+
+            leadStatusCtr.text = leadStatusList.first.label;
+            selectedLeadStatusvalue.value = leadStatusList.first.value;
+            validateLeadStatus(leadStatusCtr.text);
+          }
+
+          if (currentStatus == 'commercial_proposal') {
+            if (result.uploadedFiles != null &&
+                result.uploadedFiles!.isNotEmpty) {
+              // Check if 'first' file exists under technical_proposal
+              bool hasFirst = result.uploadedFiles!.any(
+                (f) => f.category == 'commercial_proposal' && f.tag == 'first',
+              );
+
+              // Check if 'final' file exists under technical_proposal
+              bool hasFinal = result.uploadedFiles!.any(
+                (f) => f.category == 'commercial_proposal' && f.tag == 'final',
+              );
+
+              // Update your observables accordingly
+              isCommercialProposalMode.value = true;
+              isFirstComercialluploaded.value = !hasFirst;
+              isFinalComercialluploaded.value = !hasFinal;
+
+              if (isFirstComercialluploaded.value == false &&
+                  isFinalComercialluploaded.value == false) {
+                isCommercialProposalMode.value = false;
+                isTechnicalProposalMode.value = false;
+              } else {
+                logcat('going in else case', 'data');
+                leadStatusList.assignAll(leadStatusCommercialOnlyNoRights);
+              }
+            }
+
+            leadStatusCtr.text = leadStatusList.first.label;
+            selectedLeadStatusvalue.value = leadStatusList.first.value;
+            validateLeadStatus(leadStatusCtr.text);
+          }
+
           if (currentStatus == 'rejected') {
             isLeadRejectedMode.value = true;
             leadStatusList.assignAll(leadStatusReject);
@@ -4364,8 +4440,7 @@ class AddLeadsController extends GetxController {
                 result.payment!.financingType == "self_finance") {
               financialTypePaymentListDropdown.assignAll(
                 selfFundingTypePayment,
-              ); 
-              
+              );
 
               // financingProgressStatuToPartnersPaymentReceiveedMode.value =
               //     true;

@@ -1117,18 +1117,26 @@ class _AddLeadScreenState extends State<AddLeadScreen>
 
                               Obx(() {
                                 return controller
-                                            .isTechnicalProposalMode
-                                            .value ==
-                                        true
+                                                .isTechnicalProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFirstTechincaluploaded
+                                                .value ==
+                                            true
                                     ? getDynamicSizedBox(height: 2.h)
                                     : SizedBox.shrink();
                               }),
 
                               Obx(() {
                                 return controller
-                                            .isTechnicalProposalMode
-                                            .value ==
-                                        true
+                                                .isTechnicalProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFirstTechincaluploaded
+                                                .value ==
+                                            true
                                     ? getTextField(
                                         context: context,
                                         wantLabel: true,
@@ -1176,17 +1184,25 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                               }),
                               Obx(() {
                                 return controller
-                                            .isTechnicalProposalMode
-                                            .value ==
-                                        true
+                                                .isTechnicalProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFinalTechnicaluploaded
+                                                .value ==
+                                            true
                                     ? getDynamicSizedBox(height: 2.h)
                                     : SizedBox.shrink();
                               }),
                               Obx(() {
                                 return controller
-                                            .isTechnicalProposalMode
-                                            .value ==
-                                        true
+                                                .isTechnicalProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFinalTechnicaluploaded
+                                                .value ==
+                                            true
                                     ? getTextField(
                                         context: context,
                                         wantLabel: true,
@@ -1230,18 +1246,26 @@ class _AddLeadScreenState extends State<AddLeadScreen>
 
                               Obx(() {
                                 return controller
-                                            .isCommercialProposalMode
-                                            .value ==
-                                        true
+                                                .isCommercialProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFirstComercialluploaded
+                                                .value ==
+                                            true
                                     ? getDynamicSizedBox(height: 2.h)
                                     : SizedBox.shrink();
                               }),
 
                               Obx(() {
                                 return controller
-                                            .isCommercialProposalMode
-                                            .value ==
-                                        true
+                                                .isCommercialProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFirstComercialluploaded
+                                                .value ==
+                                            true
                                     ? getTextField(
                                         context: context,
                                         wantLabel: true,
@@ -1289,17 +1313,25 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                               }),
                               Obx(() {
                                 return controller
-                                            .isCommercialProposalMode
-                                            .value ==
-                                        true
+                                                .isCommercialProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFinalComercialluploaded
+                                                .value ==
+                                            true
                                     ? getDynamicSizedBox(height: 2.h)
                                     : SizedBox.shrink();
                               }),
                               Obx(() {
                                 return controller
-                                            .isCommercialProposalMode
-                                            .value ==
-                                        true
+                                                .isCommercialProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFinalComercialluploaded
+                                                .value ==
+                                            true
                                     ? getTextField(
                                         context: context,
                                         wantLabel: true,
