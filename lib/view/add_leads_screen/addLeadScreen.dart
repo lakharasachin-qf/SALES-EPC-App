@@ -158,7 +158,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
             getCommonToolbar(
               widget.isEdit == true ? 'Edit Lead' : "Add Leads",
               onClick: () {
-                Get.back();
+                Get.back(result: true);
               },
             ),
             getDynamicSizedBox(height: 2.h),

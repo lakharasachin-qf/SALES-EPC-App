@@ -3183,7 +3183,7 @@ class AddLeadsController extends GetxController {
             "Add Lead",
             data['message'],
             callback: () {
-              Get.back();
+              Get.back(result: true);
             },
           );
         }
@@ -3393,7 +3393,7 @@ class AddLeadsController extends GetxController {
             context,
             "Update Lead",
             data['message'] ?? 'Lead updated successfully',
-            callback: () => Get.back(),
+            callback: () => Get.back(result: true),
           );
         } else {
           _showErrorDialog(context, data);

@@ -718,6 +718,16 @@ class LeadScreenState extends State<LeadScreen> {
                           final result = await Get.to(
                             AddLeadScreen(isEdit: false),
                           );
+
+                          if (result == true) {
+                            ctr.getLeadList(
+                              context: context,
+                              isInitialLoad: true,
+                              page: 1,
+                              hideLoading: false,
+                            );
+                            ctr.getFillterOptions(context);
+                          }
                         },
                         'Add Lead',
                         validate: true,
