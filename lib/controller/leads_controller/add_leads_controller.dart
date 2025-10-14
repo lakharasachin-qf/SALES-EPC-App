@@ -3447,6 +3447,10 @@ class AddLeadsController extends GetxController {
     null,
     isValidate: false,
   ).obs;
+
+  List<StatusItem> leadStatusCommercialOnlyNoRights = [
+    StatusItem(label: "Commercial proposal", value: "commercial_proposal"),
+  ];
   List<StatusItem> leadStatusCommercial = [
     StatusItem(label: "Technical Proposal", value: "technical_proposal"),
     StatusItem(label: "Commercial proposal", value: "commercial_proposal"),
@@ -3879,7 +3883,11 @@ class AddLeadsController extends GetxController {
                   if (isAppproveMode.value == true) {
                     isCommercialProposalMode.value = false;
                   } else {
-                    isCommercialProposalMode.value = true;
+                    if (AppPermissions().canApproveLead == false) {
+                      isCommercialProposalMode.value = false;
+                    } else {
+                      isCommercialProposalMode.value = true;
+                    }
                   }
 
                   // Reset technical proposal fields
@@ -4169,6 +4177,11 @@ class AddLeadsController extends GetxController {
                   validateLeadStatus(leadStatusCtr.text);
 
                   logcat('isAppproveMode.value', 'isAppproveMode.value');
+                } else {
+                  leadStatusList.assignAll(leadStatusCommercialOnlyNoRights);
+                  leadStatusCtr.text = leadStatusList.first.label;
+                  selectedLeadStatusvalue.value = leadStatusList.first.value;
+                  validateLeadStatus(leadStatusCtr.text);
                 }
                 // Add your handling for these statuses
                 break;
