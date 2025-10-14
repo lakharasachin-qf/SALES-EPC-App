@@ -107,7 +107,15 @@ class _AddLeadScreenState extends State<AddLeadScreen>
     } else {
       // Submit logic
       if (controller.isFormValid()) {
-        controller.addLeadApi(context);
+        if (widget.isEdit == true) {
+          controller.updateLeadApi(
+            context,
+            int.tryParse(widget.leadId ?? '') ?? 0,
+          );
+        } else {
+          controller.addLeadApi(context);
+        }
+
         // Implement submit logic here
         // ScaffoldMessenger.of(context).showSnackBar(
         //   SnackBar(
@@ -150,7 +158,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
             getCommonToolbar(
               widget.isEdit == true ? 'Edit Lead' : "Add Leads",
               onClick: () {
-                Get.back();
+                Get.back(result: true);
               },
             ),
             getDynamicSizedBox(height: 2.h),
@@ -1071,13 +1079,18 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                               }),
                               getDynamicSizedBox(height: 2.h),
 
-                              widget.isEdit == false
-                                  ? const SizedBox.shrink()
-                                  : getLable("Lead Status", isRequired: true),
-                              widget.isEdit == false
-                                  ? const SizedBox.shrink()
-                                  : Obx(() {
-                                      return getReactiveFormField(
+                              Obx(() {
+                                final canShowLeadStatus =
+                                    widget.isEdit ||
+                                    (controller.isAppproveMode.value);
+
+                                if (canShowLeadStatus) {
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      getLable("Lead Status", isRequired: true),
+                                      getReactiveFormField(
                                         node: controller.leadStatusNode,
                                         controller: controller.leadStatusCtr,
                                         hintLabel: "Select Lead Status",
@@ -1091,7 +1104,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                                 .setLeadStatusstDialog(),
                                             title: "Lead Status",
                                             onCloseClick: () {},
-                                          ).then((_) {});
+                                          );
                                         },
                                         formType: FieldType.text,
                                         wantSuffix: true,
@@ -1102,22 +1115,36 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                             .roofNatureModel
                                             .value
                                             .error,
-                                      );
-                                    }),
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  return const SizedBox.shrink();
+                                }
+                              }),
+
                               Obx(() {
                                 return controller
-                                            .isTechnicalProposalMode
-                                            .value ==
-                                        true
+                                                .isTechnicalProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFirstTechincaluploaded
+                                                .value ==
+                                            true
                                     ? getDynamicSizedBox(height: 2.h)
                                     : SizedBox.shrink();
                               }),
 
                               Obx(() {
                                 return controller
-                                            .isTechnicalProposalMode
-                                            .value ==
-                                        true
+                                                .isTechnicalProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFirstTechincaluploaded
+                                                .value ==
+                                            true
                                     ? getTextField(
                                         context: context,
                                         wantLabel: true,
@@ -1165,17 +1192,25 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                               }),
                               Obx(() {
                                 return controller
-                                            .isTechnicalProposalMode
-                                            .value ==
-                                        true
+                                                .isTechnicalProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFinalTechnicaluploaded
+                                                .value ==
+                                            true
                                     ? getDynamicSizedBox(height: 2.h)
                                     : SizedBox.shrink();
                               }),
                               Obx(() {
                                 return controller
-                                            .isTechnicalProposalMode
-                                            .value ==
-                                        true
+                                                .isTechnicalProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFinalTechnicaluploaded
+                                                .value ==
+                                            true
                                     ? getTextField(
                                         context: context,
                                         wantLabel: true,
@@ -1219,18 +1254,26 @@ class _AddLeadScreenState extends State<AddLeadScreen>
 
                               Obx(() {
                                 return controller
-                                            .isCommercialProposalMode
-                                            .value ==
-                                        true
+                                                .isCommercialProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFirstComercialluploaded
+                                                .value ==
+                                            true
                                     ? getDynamicSizedBox(height: 2.h)
                                     : SizedBox.shrink();
                               }),
 
                               Obx(() {
                                 return controller
-                                            .isCommercialProposalMode
-                                            .value ==
-                                        true
+                                                .isCommercialProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFirstComercialluploaded
+                                                .value ==
+                                            true
                                     ? getTextField(
                                         context: context,
                                         wantLabel: true,
@@ -1278,17 +1321,25 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                               }),
                               Obx(() {
                                 return controller
-                                            .isCommercialProposalMode
-                                            .value ==
-                                        true
+                                                .isCommercialProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFinalComercialluploaded
+                                                .value ==
+                                            true
                                     ? getDynamicSizedBox(height: 2.h)
                                     : SizedBox.shrink();
                               }),
                               Obx(() {
                                 return controller
-                                            .isCommercialProposalMode
-                                            .value ==
-                                        true
+                                                .isCommercialProposalMode
+                                                .value ==
+                                            true &&
+                                        controller
+                                                .isFinalComercialluploaded
+                                                .value ==
+                                            true
                                     ? getTextField(
                                         context: context,
                                         wantLabel: true,
@@ -1328,6 +1379,350 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         isRequired: false,
                                       )
                                     : SizedBox.shrink();
+                              }),
+                              Obx(() {
+                                if (controller.isLeadPaymentMode.value) {
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      getDynamicSizedBox(height: 2.h),
+
+                                      // Token Amount
+                                      getLable(
+                                        "Token Amount",
+                                        isRequired: true,
+                                        isVerified:
+                                            controller.iswonShow.value == true
+                                            ? true
+                                            : false,
+                                      ),
+                                      getReactiveFormField(
+                                        isEnable:
+                                            controller.iswonShow.value == true
+                                            ? false
+                                            : true,
+                                        isVerified:
+                                            controller.iswonShow.value == true
+                                            ? true
+                                            : false,
+                                        node: controller.tokenAmountNode,
+                                        controller: controller.tokenAmountCtr,
+                                        hintLabel: "Enter Token Amount",
+                                        onChanged: (val) {
+                                          controller.validateTokenAmountt(val);
+                                        },
+                                        inputType: TextInputType.number,
+                                        formType: FieldType.text,
+                                        wantSuffix: false,
+                                        errorText: controller
+                                            .tokenAmountModel
+                                            .value
+                                            .error,
+                                      ),
+
+                                      getDynamicSizedBox(height: 2.h),
+
+                                      // Total Project Cost
+                                      getLable(
+                                        "Total Project Cost",
+                                        isRequired: true,
+                                        isVerified:
+                                            controller.iswonShow.value == true
+                                            ? true
+                                            : false,
+                                      ),
+                                      getReactiveFormField(
+                                        node: controller.totalProjectCostNode,
+                                        controller:
+                                            controller.totalProjectCostCtr,
+                                        isEnable:
+                                            controller.iswonShow.value == true
+                                            ? false
+                                            : true,
+                                        isVerified:
+                                            controller.iswonShow.value == true
+                                            ? true
+                                            : false,
+                                        hintLabel: "Enter Total Project Cost",
+                                        onChanged: (val) {
+                                          controller.validateTotalProject(val);
+                                        },
+                                        inputType: TextInputType.number,
+                                        formType: FieldType.text,
+                                        wantSuffix: false,
+                                        errorText: controller
+                                            .totalProjectCostModel
+                                            .value
+                                            .error,
+                                      ),
+
+                                      getDynamicSizedBox(height: 2.h),
+
+                                      // Balance Amount
+                                      getLable(
+                                        "Balance Amount",
+                                        isVerified: true,
+                                      ),
+                                      getReactiveFormField(
+                                        isEnable: false,
+                                        isVerified: true,
+                                        node: controller.balanceAmonutNode,
+                                        controller: controller.balanceAmonutCtr,
+                                        hintLabel: "Enter Balance Amount",
+                                        onChanged: (val) {
+                                          // controller.validateGroundSizeLength(
+                                          //   val,
+                                          // );
+                                        },
+                                        inputType: TextInputType.number,
+                                        formType: FieldType.text,
+                                        wantSuffix: false,
+                                        errorText: controller
+                                            .balanceAmonutModel
+                                            .value
+                                            .error,
+                                      ),
+
+                                      Obx(() {
+                                        return controller.isFinancialType.value
+                                            ? getDynamicSizedBox(height: 2.h)
+                                            : SizedBox.shrink();
+                                      }),
+
+                                      Obx(() {
+                                        final financialType =
+                                            controller.isFinancialType.value;
+
+                                        if (financialType) {
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              getLable(
+                                                "Financing Type",
+                                                isRequired: true,
+                                              ),
+                                              getReactiveFormField(
+                                                node: controller.financialNode,
+                                                controller:
+                                                    controller.financialTypeCtr,
+                                                hintLabel:
+                                                    "Select Financing Type",
+                                                onChanged: (val) {
+                                                  controller
+                                                      .validateFinancialStatus(
+                                                        val,
+                                                      );
+                                                },
+                                                onTap: () {
+                                                  commonDropDownDialog(
+                                                    context,
+                                                    content: controller
+                                                        .setFinacialTypeDialog(),
+                                                    title: "Financing Type",
+                                                    onCloseClick: () {},
+                                                  );
+                                                },
+                                                formType: FieldType.text,
+                                                wantSuffix: true,
+                                                isdown: true,
+                                                isReadOnly: true,
+                                                inputType: TextInputType.none,
+                                                errorText: controller
+                                                    .financialModel
+                                                    .value
+                                                    .error,
+                                              ),
+                                            ],
+                                          );
+                                        } else {
+                                          return const SizedBox.shrink();
+                                        }
+                                      }),
+
+                                      Obx(() {
+                                        return controller
+                                                    .isOMCPartnerMode
+                                                    .value ==
+                                                true
+                                            ? getDynamicSizedBox(height: 2.h)
+                                            : SizedBox.shrink();
+                                      }),
+
+                                      Obx(() {
+                                        final financialType =
+                                            controller.isOMCPartnerMode.value ==
+                                            true;
+
+                                        if (financialType) {
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              getLable(
+                                                "Financing Progress Status",
+                                                isRequired: true,
+                                              ),
+                                              getReactiveFormField(
+                                                node: controller
+                                                    .financialOMCPartnerNode,
+                                                controller: controller
+                                                    .financialOMCPartnerCtr,
+                                                hintLabel:
+                                                    "Select Financing Progress Type",
+                                                onChanged: (val) {
+                                                  // controller
+                                                  //     .validateFinancialStatus(
+                                                  //       val,
+                                                  //     );
+                                                },
+                                                onTap: () {
+                                                  commonDropDownDialog(
+                                                    context,
+                                                    content: controller
+                                                        .setOMCPartnerTypeDialog(),
+                                                    title:
+                                                        "Financing Progress Status",
+                                                    onCloseClick: () {},
+                                                  );
+                                                },
+                                                formType: FieldType.text,
+                                                wantSuffix: true,
+                                                isdown: true,
+                                                isReadOnly: true,
+                                                inputType: TextInputType.none,
+                                                errorText: controller
+                                                    .financialOMCPartnerModel
+                                                    .value
+                                                    .error,
+                                              ),
+                                            ],
+                                          );
+                                        } else {
+                                          return const SizedBox.shrink();
+                                        }
+                                      }),
+
+                                      Obx(() {
+                                        return controller
+                                                    .isFullPaymentAmountMode
+                                                    .value ||
+                                                controller.iswonShow.value
+                                            ? getDynamicSizedBox(height: 2.h)
+                                            : SizedBox.shrink();
+                                      }),
+                                      Obx(() {
+                                        return controller
+                                                    .isFullPaymentAmountMode
+                                                    .value ||
+                                                controller.iswonShow.value
+                                            ? getLable(
+                                                "Full Payment Amount",
+                                                isVerified: true,
+                                                isRequired: true,
+                                              )
+                                            : SizedBox.shrink();
+                                      }),
+                                      Obx(() {
+                                        return controller
+                                                    .isFullPaymentAmountMode
+                                                    .value ||
+                                                controller.iswonShow.value
+                                            ? getReactiveFormField(
+                                                isEnable: false,
+                                                isVerified: true,
+                                                node: controller
+                                                    .balanceAmonutNode,
+                                                controller:
+                                                    controller.balanceAmonutCtr,
+                                                hintLabel:
+                                                    "Enter Full Payment Amount",
+                                                onChanged: (val) {
+                                                  // controller.validateGroundSizeLength(
+                                                  //   val,
+                                                  // );
+                                                },
+                                                inputType: TextInputType.number,
+                                                formType: FieldType.text,
+                                                wantSuffix: false,
+                                                errorText: controller
+                                                    .balanceAmonutModel
+                                                    .value
+                                                    .error,
+                                              )
+                                            : SizedBox.shrink();
+                                      }),
+                                      Obx(() {
+                                        return controller
+                                                .isOMCFinanceDocumentShown
+                                                .value
+                                            ? getDynamicSizedBox(height: 2.h)
+                                            : SizedBox.shrink();
+                                      }),
+
+                                      // Obx(() {
+                                      //   return controller
+                                      //           .isOMCFinanceDocumentShown
+                                      //           .value
+                                      //       ? getLable(
+                                      //           "Finance Documents (PDF only)",
+                                      //         )
+                                      //       : SizedBox.shrink();
+                                      // }),
+                                      Obx(() {
+                                        return controller
+                                                .isOMCFinanceDocumentShown
+                                                .value
+                                            ? getTextField(
+                                                context: context,
+                                                wantLabel: true,
+                                                label:
+                                                    'Finance Documents (PDF only)',
+                                                ctr: controller
+                                                    .financeDocumentCtr,
+                                                node: controller
+                                                    .financeDocumentNode,
+                                                model: controller
+                                                    .financeDocumentModel
+                                                    .value,
+                                                isenable: false,
+                                                isdropdown: true,
+                                                wantsuffix: false,
+                                                usegesture: true,
+                                                gestureFunction: () async {
+                                                  await controller
+                                                      .pickMultiplePdfFiles();
+                                                },
+                                                hint: 'Select File',
+                                                isRequired: true,
+                                              )
+                                            : SizedBox.shrink();
+                                      }),
+
+                                      Obx(() {
+                                        return controller
+                                                .isOMCFinanceDocumentShown
+                                                .value
+                                            ? Container(
+                                                padding: EdgeInsets.only(
+                                                  top: 0.5.h,
+                                                ),
+                                                child: Text(
+                                                  'You can select multiple PDF files.',
+                                                  style: TextStyle(
+                                                    fontSize: 14.sp,
+                                                    color: grey,
+                                                  ),
+                                                ),
+                                              )
+                                            : SizedBox.shrink();
+                                      }),
+                                    ],
+                                  );
+                                } else {
+                                  return const SizedBox.shrink();
+                                }
                               }),
 
                               widget.isEdit
@@ -1381,6 +1776,12 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                 onClick: () {
                                   controller.addLoadElement(context);
                                 },
+                                isAddShow:
+                                    controller.isLeadRejectedMode.value ==
+                                            true ||
+                                        controller.iswonShow.value == true
+                                    ? false
+                                    : true,
                               ),
                               Obx(() {
                                 if (controller.productDetailList.isEmpty) {
@@ -1401,6 +1802,19 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       item.energyKWh.toString(),
                                     ],
                                     onEdit: (i, item) {
+                                      if (controller.isLeadRejectedMode.value ==
+                                              true ||
+                                          controller.iswonShow.value) {
+                                        Get.snackbar(
+                                          'Action Not Allowed',
+                                          'You can’t edit items in Rejected mode',
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          backgroundColor: Colors.red
+                                              .withOpacity(0.1),
+                                          colorText: Colors.redAccent,
+                                        );
+                                        return;
+                                      }
                                       controller.addLoadElement(
                                         context,
                                         loadElementItem: item,
@@ -1408,8 +1822,24 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       );
                                     },
                                     onDelete: (i) {
+                                      if (controller.isLeadRejectedMode.value ==
+                                              true ||
+                                          controller.iswonShow.value) {
+                                        Get.snackbar(
+                                          'Action Not Allowed',
+                                          'You can’t delete items in Rejected mode',
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          backgroundColor: Colors.red
+                                              .withOpacity(0.1),
+                                          colorText: Colors.redAccent,
+                                        );
+                                        return;
+                                      }
                                       controller.deleteLoad(i);
                                     },
+                                    isRejected:
+                                        controller.isLeadRejectedMode.value ||
+                                        controller.iswonShow.value,
                                   ),
                                 );
                               }),
@@ -1422,6 +1852,12 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                 onClick: () {
                                   controller.addUploadFile(context);
                                 },
+                                isAddShow:
+                                    controller.isLeadRejectedMode.value ==
+                                            true ||
+                                        controller.iswonShow.value == true
+                                    ? false
+                                    : true,
                               ),
                               Obx(() {
                                 if (controller.fileList.isEmpty) {
@@ -1442,13 +1878,44 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       // ),
                                     ],
                                     onEdit: (i, file) {
+                                      if (controller.isLeadRejectedMode.value ==
+                                              true ||
+                                          controller.iswonShow.value) {
+                                        Get.snackbar(
+                                          'Action Not Allowed',
+                                          'You can’t edit items in Rejected mode',
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          backgroundColor: Colors.red
+                                              .withOpacity(0.1),
+                                          colorText: Colors.redAccent,
+                                        );
+                                        return;
+                                      }
                                       controller.addUploadFile(
                                         context,
                                         fileItem: file,
                                         index: i,
                                       );
                                     },
-                                    onDelete: (i) => controller.deleteFile(i),
+                                    onDelete: (i) {
+                                      if (controller.isLeadRejectedMode.value ==
+                                              true ||
+                                          controller.iswonShow.value) {
+                                        Get.snackbar(
+                                          'Action Not Allowed',
+                                          'You can’t delete items in Rejected mode',
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          backgroundColor: Colors.red
+                                              .withOpacity(0.1),
+                                          colorText: Colors.redAccent,
+                                        );
+                                        return;
+                                      }
+                                      controller.deleteFile(i);
+                                    },
+                                    isRejected:
+                                        controller.isLeadRejectedMode.value ||
+                                        controller.iswonShow.value,
                                   ),
                                 );
                               }),

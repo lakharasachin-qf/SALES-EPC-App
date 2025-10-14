@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart' hide ScreenType;
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
@@ -27,6 +28,7 @@ import 'package:sales_app/models/LocationModel.dart';
 import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
 import 'package:sales_app/preference/UserPreference.dart';
+import 'package:sales_app/utils/AppPermissions.dart';
 import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sales_app/utils/log.dart';
@@ -430,19 +432,8 @@ class AddLeadsController extends GetxController {
 
   // Category List
   // Category List
-  RxList<CategoryModel> categoryList = <CategoryModel>[
-    CategoryModel(id: "1", name: "Equipment Photo", value: "equipment_photo"),
-    CategoryModel(
-      id: "2",
-      name: "Map Marked Screenshot",
-      value: "map_marked_screenshot",
-    ),
-    CategoryModel(
-      id: "3",
-      name: "Hand Sketch Installation Area",
-      value: "hand_sketch_installation_area",
-    ),
-  ].obs;
+  RxList<DgSyncRequired> categoryList = <DgSyncRequired>[].obs;
+  var filtercategoryList = <DgSyncRequired>[].obs;
 
   var currentFilterSource = [].obs;
   var filteredData = [].obs;
@@ -538,6 +529,14 @@ class AddLeadsController extends GetxController {
     firstCommercialProposal1Ctr = TextEditingController();
     finalCommercialProposal2Ctr = TextEditingController();
 
+    tokenAmountCtr = TextEditingController();
+    totalProjectCostCtr = TextEditingController();
+    balanceAmonutCtr = TextEditingController();
+    financialTypeCtr = TextEditingController();
+
+    financialOMCPartnerCtr = TextEditingController();
+    financeDocumentCtr = TextEditingController();
+
     // FocusNodes
     companyNameNode = FocusNode();
     addressNode = FocusNode();
@@ -597,7 +596,15 @@ class AddLeadsController extends GetxController {
     finalTechnicalProposal2Node = FocusNode();
     firstCommercialProposal1Node = FocusNode();
     finalCommercialProposal2Node = FocusNode();
+    tokenAmountNode = FocusNode();
+    totalProjectCostNode = FocusNode();
+    balanceAmonutNode = FocusNode();
+    financialNode = FocusNode();
 
+    financialOMCPartnerNode = FocusNode();
+    financeDocumentNode = FocusNode();
+
+    //
     update();
     super.onInit();
   }
@@ -659,6 +666,14 @@ class AddLeadsController extends GetxController {
     finalTechnicalProposal2Ctr.dispose();
     firstCommercialProposal1Ctr.dispose();
     finalCommercialProposal2Ctr.dispose();
+
+    tokenAmountCtr.dispose();
+    totalProjectCostCtr.dispose();
+    balanceAmonutCtr.dispose();
+    financialTypeCtr.dispose();
+
+    financialOMCPartnerCtr.dispose();
+    financeDocumentCtr.dispose();
 
     // Dispose focus nodes
     companyNameNode.dispose();
@@ -724,7 +739,13 @@ class AddLeadsController extends GetxController {
     finalTechnicalProposal2Node.dispose();
     firstCommercialProposal1Node.dispose();
     finalCommercialProposal2Node.dispose();
+    tokenAmountNode.dispose();
+    totalProjectCostNode.dispose();
+    balanceAmonutNode.dispose();
+    financialNode.dispose();
 
+    financialOMCPartnerNode.dispose();
+    financeDocumentNode.dispose();
     super.dispose();
   }
 
@@ -1148,6 +1169,95 @@ class AddLeadsController extends GetxController {
     } else {
       filterRequiredSolutionTypeList.assignAll(
         requiredSolutionTypeList
+            .where(
+              (item) =>
+                  item.label.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  Widget setUploadedCategoryListDialog() {
+    return Obx(() {
+      if (isResoltuinSolutonTypeApiCallLoading.value) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isResoltuinSolutonTypeApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        filtercategoryList,
+        controller: uploadCategoryCtr,
+        noDataLable: "No Category Found",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: filtercategoryList.length,
+          itemBuilder: (BuildContext context, int index) {
+            final selectedItem = filtercategoryList[index];
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                uploadCategoryCtr.text = selectedItem.label;
+                categoryValue.value = selectedItem.value.toString();
+                validateUploadCategory(uploadCategoryCtr.text);
+                update();
+
+                logcat(
+                  'uploadFileModel.value.isValidate',
+                  uploadFileModel.value.isValidate,
+                );
+                logcat(
+                  'uploadCategoryModel.value.isValidate',
+                  uploadCategoryModel.value.isValidate,
+                );
+
+                // Reset filter list
+                if (uploadCategoryCtr.text.isNotEmpty) {
+                  filtercategoryList.clear();
+                  filtercategoryList.addAll(categoryList);
+                }
+                Get.back();
+              },
+              title: buildSelectableRow(
+                selectedItem.label,
+                selectedItem.value.toString().trim() == categoryValue.value,
+              ),
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: searchUploadCategoryNode,
+          controller: searchUploadCategoryCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForUploadedCategoryType(val.toString());
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: uploadCategoryModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForUploadedCategoryType(String keyword) {
+    if (keyword.isEmpty) {
+      filtercategoryList.assignAll(categoryList);
+    } else {
+      filtercategoryList.assignAll(
+        categoryList
             .where(
               (item) =>
                   item.label.toLowerCase().contains(keyword.toLowerCase()),
@@ -2078,6 +2188,7 @@ class AddLeadsController extends GetxController {
   resetFileUpload() {
     uploadFileCtr.clear();
     uploadCategoryCtr.clear();
+    categoryValue.value = '';
 
     uploadFileModel.update((m) {
       m!.error = null;
@@ -2092,6 +2203,7 @@ class AddLeadsController extends GetxController {
 
   resetvalidationOfAddLoadElement() {
     isvalidateAddLoadElement.value = false;
+    isLeadRejectedMode.value = false;
     deviceNameCtr.clear();
     categoryCtr.clear();
     powerCtr.clear();
@@ -2138,28 +2250,60 @@ class AddLeadsController extends GetxController {
 
   void validateStep2() {
     bool isValid = true;
-    // if (!peakMonthlyEnergyModel.value.isValidate) isValid = false;
-    // if (!requiredSolarCapModel.value.isValidate) isValid = false;
-    // if (!distanceToTransformerModel.value.isValidate) isValid = false;
-    // if (!ratingOfTransformerModel.value.isValidate) isValid = false;
-    // if (!purposeOfSolarizationModel.value.isValidate) isValid = false;
-    // if (!distInverterACDBModel.value.isValidate) isValid = false;
-    // if (!distSolarACDBModel.value.isValidate) isValid = false;
-    // if (!buildingHeightModel.value.isValidate) isValid = false;
-    // if (!roofSizeLengthModel.value.isValidate) isValid = false;
-    // if (!roofSizeBreadthModel.value.isValidate) isValid = false;
+
     if (!roofNatureModel.value.isValidate) isValid = false;
-    // if (!ageOfMetalSheetModel.value.isValidate) isValid = false;
-    // if (!groundSizeLengthModel.value.isValidate) isValid = false;
-    // if (!groundSizeBreadthModel.value.isValidate) isValid = false;
-    // if (!otherRemarksModel.value.isValidate) isValid = false;
 
     if (isEditMode.value == false) {
       if (!scheduleMeeeingModel.value.isValidate) isValid = false;
     } else {
       if (!leadStatusModel.value.isValidate) isValid = false;
+
+      if (isLeadPaymentMode.value == true) {
+        // payment model condition
+        if (isFinancialType.value == true) {
+          if (!financialModel.value.isValidate) isValid = false;
+
+          if (isFullPaymentAmountMode.value == true) {
+            if (!balanceAmonutModel.value.isValidate) isValid = false;
+          }
+
+          if (isOMCPartnerMode.value == true) {
+            if (!financialOMCPartnerModel.value.isValidate) isValid = false;
+          }
+        }
+
+        if (!tokenAmountModel.value.isValidate) isValid = false;
+        if (!totalProjectCostModel.value.isValidate) isValid = false;
+
+        // if (!paymentReceivedModel.value.isValidate) isValid = false;
+      }
     }
+
     isStep2Valid.value = isValid;
+    logcat('validateStep2 result: isStep2Valid = $isStep2Valid', '');
+
+    // ✅ Combined log summary for debugging
+    logcat('---------------- validateStep2 logs ----------------', '');
+    logcat('isStep2Valid', isStep2Valid.value);
+    logcat('isEditMode', isEditMode.value);
+    logcat('roofNatureModel', roofNatureModel.value.isValidate);
+    logcat('scheduleMeeeingModel', scheduleMeeeingModel.value.isValidate);
+    logcat('leadStatusModel', leadStatusModel.value.isValidate);
+    logcat('isLeadPaymentMode', isLeadPaymentMode.value);
+    logcat('isFinancialType', isFinancialType.value);
+    logcat('financialModel', financialModel.value.isValidate);
+    logcat('isFullPaymentAmountMode', isFullPaymentAmountMode.value);
+    logcat('balanceAmonutModel', balanceAmonutModel.value.isValidate);
+    logcat('isOMCPartnerMode', isOMCPartnerMode.value);
+    logcat(
+      'financialOMCPartnerModel',
+      financialOMCPartnerModel.value.isValidate,
+    );
+    logcat('tokenAmountModel', tokenAmountModel.value.isValidate);
+    logcat('totalProjectCostModel', totalProjectCostModel.value.isValidate);
+    // logcat('paymentReceivedModel', paymentReceivedModel.value.isValidate);
+    logcat('----------------------------------------------------', '');
+
     update();
   }
 
@@ -2421,6 +2565,9 @@ class AddLeadsController extends GetxController {
                               return getReactiveFormField(
                                 node: usageHrsNode,
                                 controller: usageHrsCtr,
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(2),
+                                ],
                                 hintLabel: "Enter Usage (hrs)",
                                 onChanged: (val) {
                                   usageHrsModel.update((model) {
@@ -2434,6 +2581,16 @@ class AddLeadsController extends GetxController {
                                       model!.error =
                                           "Usage hours cannot be negative";
                                       model.isValidate = false;
+                                    } else if (double.tryParse(val) != null) {
+                                      double value = double.parse(val);
+                                      if (value < 0 || value > 24) {
+                                        model!.error =
+                                            "Grid Availability must be between 0 and 24";
+                                        model.isValidate = false;
+                                      } else {
+                                        model!.error = null;
+                                        model.isValidate = true;
+                                      }
                                     } else {
                                       model!.error = null;
                                       model.isValidate = true;
@@ -2714,7 +2871,16 @@ class AddLeadsController extends GetxController {
                               wantsuffix: true,
                               usegesture: true,
                               gestureFunction: () {
-                                showCategorySelectionPopups(context);
+                                logcat('openData', '');
+
+                                commonDropDownDialog(
+                                  context,
+                                  content: setUploadedCategoryListDialog(),
+                                  title: "Category",
+                                  onCloseClick: () {
+                                    applyFilterForUploadedCategoryType('');
+                                  },
+                                ).then((_) {});
                               },
                               hint: 'Select Category',
                               isRequired: true,
@@ -2736,33 +2902,37 @@ class AddLeadsController extends GetxController {
                               ),
                               getDynamicSizedBox(width: 3.w),
                               Expanded(
-                                child: getFormButton(
-                                  context,
-                                  () {
-                                    if (uploadFileModel.value.isValidate &&
-                                        uploadCategoryModel.value.isValidate) {
-                                      logcat(
-                                        "selectedFilePath::",
-                                        selectedFilePath.value,
-                                      );
-                                      final newFile = UploadedFile(
-                                        path: selectedFilePath.value,
-                                        // category: uploadCategoryCtr.text,
-                                        category: categoryValue.value,
-                                      );
-                                      if (index == null) {
-                                        addFile(newFile);
-                                      } else {
-                                        updateFile(index, newFile);
+                                child: Obx(() {
+                                  return getFormButton(
+                                    context,
+                                    () {
+                                      if (uploadFileModel.value.isValidate &&
+                                          uploadCategoryModel
+                                              .value
+                                              .isValidate) {
+                                        logcat(
+                                          "selectedFilePath::",
+                                          selectedFilePath.value,
+                                        );
+                                        final newFile = UploadedFile(
+                                          path: selectedFilePath.value,
+                                          // category: uploadCategoryCtr.text,
+                                          category: categoryValue.value,
+                                        );
+                                        if (index == null) {
+                                          addFile(newFile);
+                                        } else {
+                                          updateFile(index, newFile);
+                                        }
+                                        Get.back();
                                       }
-                                      Get.back();
-                                    }
-                                  },
-                                  fileItem != null ? "Update" : 'Add',
-                                  validate:
-                                      uploadFileModel.value.isValidate &&
-                                      uploadCategoryModel.value.isValidate,
-                                ),
+                                    },
+                                    fileItem != null ? "Update" : 'Add',
+                                    validate:
+                                        uploadFileModel.value.isValidate &&
+                                        uploadCategoryModel.value.isValidate,
+                                  );
+                                }),
                               ),
                             ],
                           ),
@@ -2808,41 +2978,10 @@ class AddLeadsController extends GetxController {
             model.isValidate = true;
           }
         });
-        validateStep4();
         update();
+        validateStep4();
       }
     }
-  }
-
-  void showCategorySelectionPopups(BuildContext context) {
-    currentFilterSource.value = List.from(categoryList);
-    filteredData.value = List.from(categoryList);
-    searchUploadCategoryCtr.clear();
-    fetchSelectionPopup<CategoryModel>(
-      context,
-      title: 'Category',
-      controller: uploadCategoryCtr,
-      list: filteredData,
-      searchCtr: searchUploadCategoryCtr,
-      searchNode: searchUploadCategoryNode,
-      filterFunction: (val) {
-        filterFetchData<CategoryModel>(
-          val,
-          source: categoryList,
-          getTitle: (item) => item.name,
-        );
-      },
-      getTitle: (value) => value.name,
-      onSelected: (data) {
-        uploadCategoryCtr.text = data.name;
-        categoryValue.value = data.value.toString();
-        validateUploadCategory(uploadCategoryCtr.text);
-        update();
-      },
-      backBtn: () {
-        Get.back();
-      },
-    );
   }
 
   void validateUploadCategory(String? val) {
@@ -3044,7 +3183,7 @@ class AddLeadsController extends GetxController {
             "Add Lead",
             data['message'],
             callback: () {
-              Get.back();
+              Get.back(result: true);
             },
           );
         }
@@ -3070,6 +3209,225 @@ class AddLeadsController extends GetxController {
     }
   }
 
+  Future<void> updateLeadApi(BuildContext context, int leadId) async {
+    var loadingIndicator = LoadingProgressDialog();
+    User? user = await UserPreferences().getSignInInfo();
+    String? password = await UserPreferences().getPassword();
+
+    // ---------- Network check ----------
+    if (networkManager.connectionType.value == 0) {
+      loadingIndicator.hide(context);
+      showDialogForScreen(
+        context,
+        "Update Lead",
+        Connection.noConnection,
+        callback: () => Get.back(),
+      );
+      return;
+    }
+
+    // ---------- Build request ----------
+    var request = http.MultipartRequest(
+      'POST', // cURL uses POST for update
+      Repository.buildUrl('${ApiUrl.addLead}/$leadId'), // e.g., /api/leads/84
+    );
+
+    // Headers (same as cURL)
+    request.headers.addAll({
+      'Accept': 'application/json',
+      'X-USER-EMAIL': user?.email ?? '',
+      'X-USER-PASSWORD': password ?? '',
+    });
+
+    // ---------- Scalar form fields ----------
+    request.fields.addAll({
+      'user_id': user?.userId.toString() ?? '',
+      'company_name': companyNameCtr.text.trim(),
+      'address': addressCtr.text.trim(),
+      'country': selectedCountryId.value.toString(),
+      'state': selectedStateId.value.toString(),
+      'district': selectedDistrictId.value.toString(),
+      'contact_person_name': personNameCtr.text.trim(),
+      'contact_person_mobile': personMobileCtr.text.trim(),
+      'latitude': latitudeCtr.text.trim(),
+      'longitude': longitudeCtr.text.trim(),
+      'dg_capacity_kva': dgCapacityCtr.text.trim(),
+      'dg_sync_required': selectedDgSyncValue.value == 'Yes' ? '1' : '0',
+      'curr_inst_solar_cap_kwp': installedSolarCapCtr.text.trim(),
+      'dist_to_nearest_transformer': distanceToTransformerCtr.text.trim(),
+      'rating_of_nearest_transformer_kva': ratingOfTransformerCtr.text.trim(),
+      'sanctioned_load_kva': sanctionedLoadCtr.text.trim(),
+      'required_solution_type': selectedRequiredSolutionTypeValue.value,
+      'vfd_required': selectedVfdValue.value == 'Yes' ? '1' : '0',
+      'grid_availability_hrs': gridAvailabilityCtr.text.trim(),
+      'peak_monthly_energy_cons_kwh': peakMonthlyEnergyCtr.text.trim(),
+      'required_solar_cap_kwp': requiredSolarCapCtr.text.trim(),
+      'purpose_of_solarisation': selectedPurposeOfSolarisationValue.value,
+      'dist_btw_inverter_acdb_panel_mtrs': distInverterACDBCtr.text.trim(),
+      'dist_btw_solar_acdb_panel_mtrs': distSolarACDBCtr.text.trim(),
+      'required_solution': selectedRequiredSolutionValue.value,
+      'building_height': buildingHeightCtr.text.trim(),
+      'roof_size_length_ft': roofSizeLengthCtr.text.trim(),
+      'roof_size_breadth_ft': roofSizeBreadthCtr.text.trim(),
+      'roof_nature': selectedRoofNatureValue.value,
+      'age_of_metal_sheet': ageOfMetalSheetCtr.text.trim(),
+      'ground_size_length_ft': groundSizeLengthCtr.text.trim(),
+      'ground_size_breadth_ft': groundSizeBreadthCtr.text.trim(),
+      'other_remarks': otherRemarksCtr.text.trim(),
+      'lead_category': selectedLeadCategoryValue.value,
+      'lead_status': selectedLeadStatusvalue.value,
+      'token_amount': tokenAmountCtr.text.trim(),
+      'total_project_cost': totalProjectCostCtr.text.trim(),
+      'financing_type': selectedfinanicalStatusvalue.value,
+      'financing_progress_status': selectedfinancingProgressStatusMode.value,
+    });
+
+    // ---------- Load elements ----------
+    for (int i = 0; i < productDetailList.length; i++) {
+      final product = productDetailList[i];
+      request.fields.addAll({
+        'load_elements[$i][device_name]': product.deviceName,
+        'load_elements[$i][category]': product.category,
+        'load_elements[$i][power_rating_w]': product.power,
+        'load_elements[$i][daily_usage_hrs]': product.usageHrs,
+      });
+    }
+
+    // ---------- Proposal files (single files) ----------
+    // Helper to add a file if it exists
+    Future<void> _addFileIfExists(String fieldName, File? file) async {
+      if (file != null && await file.exists()) {
+        request.files.add(
+          await http.MultipartFile.fromPath(fieldName, file.path),
+        );
+        logcat('File added', '$fieldName => ${file.path}');
+      } else {
+        logcat('File not added', '$fieldName => missing or not found');
+      }
+    }
+
+    // Add single-file proposals using reactive variables
+    await _addFileIfExists(
+      'first_technical_proposal',
+      firstTechnicalProposalFile.value,
+    );
+    await _addFileIfExists(
+      'final_technical_proposal',
+      finalTechnicalProposalFile.value,
+    );
+    await _addFileIfExists(
+      'first_commercial_proposal',
+      firstCommercialProposalFile.value,
+    );
+    await _addFileIfExists(
+      'final_commercial_proposal',
+      finalCommercialProposalFile.value,
+    );
+
+    // ---------- Finance documents (array) ----------
+    // Assuming financeDocumentFiles is RxList<File> or RxList<FileModel>
+    // ---------- Finance documents (array) ----------
+    for (int i = 0; i < selectedPdfPaths.length; i++) {
+      final filePath = selectedPdfPaths[i];
+      if (await File(filePath).exists()) {
+        request.files.add(
+          await http.MultipartFile.fromPath('finance_documents[]', filePath),
+        );
+        logcat('Finance doc added', 'finance_documents[] => $filePath');
+      } else {
+        logcat('Finance doc skipped', 'index $i => file not found');
+      }
+    }
+
+    // ---------- Optional: existing uploaded_files (from addLeadApi) ----------
+    /*
+  for (int i = 0; i < fileList.length; i++) {
+    final file = fileList[i];
+    if (file.path != null && file.path!.isNotEmpty) {
+      final f = File(file.path!);
+      if (await f.exists()) {
+        request.files.add(
+          await http.MultipartFile.fromPath('uploaded_files[$i][file]', f.path),
+        );
+        request.fields['uploaded_files[$i][category]'] = file.category ?? '';
+        logcat('File added', 'uploaded_files[$i][file] => ${f.path}');
+      } else {
+        logcat('File not found', 'uploaded_files[$i][file] => ${f.path}');
+      }
+    }
+  }
+  */
+
+    // ---------- Log fields ----------
+    logcat('UpdateLead Form Fields', jsonEncode(request.fields));
+    logcat('UpdateLead Files Count', '${request.files.length}');
+
+    // ---------- Log fields and files before sending ----------
+    logcat('🧾 UpdateLeadApi TEST MODE 🧾', '--- START ---');
+    logcat('Headers', jsonEncode(request.headers));
+    logcat('Fields', jsonEncode(request.fields));
+    logcat('Files Count', request.files.length.toString());
+    for (var f in request.files) {
+      logcat('File', '${f.field} => ${f.filename}');
+    }
+    logcat('🧾 UpdateLeadApi TEST MODE 🧾', '--- END ---');
+
+    // ✅ EARLY RETURN: Skip sending API
+    // return;
+    // ---------- Send request ----------
+    try {
+      loadingIndicator.show(context, '');
+      state.value = ScreenState.apiLoading;
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      loadingIndicator.hide(context);
+      state.value = ScreenState.apiSuccess;
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        logcat('UpdateLeadApi Success', data.toString());
+        if (data['status']?.toString().toLowerCase() == 'success') {
+          showDialogForScreen(
+            context,
+            "Update Lead",
+            data['message'] ?? 'Lead updated successfully',
+            callback: () => Get.back(result: true),
+          );
+        } else {
+          _showErrorDialog(context, data);
+        }
+      } else {
+        logcat('UpdateLeadApi Error', response.body);
+        _showErrorDialog(context, data);
+        message.value = "Failed to update lead (${response.statusCode})";
+      }
+    } catch (e) {
+      loadingIndicator.hide(context);
+      state.value = ScreenState.apiError;
+      message.value = "Exception: $e";
+      logcat('UpdateLeadApi Exception', e.toString());
+      showDialogForScreen(
+        context,
+        "Error",
+        "Something went wrong: $e",
+        callback: () => Get.back(),
+      );
+    }
+  }
+
+  // Helper to keep error handling DRY
+  void _showErrorDialog(BuildContext context, Map<String, dynamic> data) {
+    showDialogForScreen(
+      context,
+      'Error',
+      data['message']?.toString() ??
+          data['errors']?.values?.first?[0]?.toString() ??
+          'Server error',
+      callback: () => Get.back(),
+    );
+  }
   // Future<void> getLocation(BuildContext context, bool isLoading) async {
   //   var loadingIndicator = LoadingProgressDialog();
 
@@ -3135,10 +3493,19 @@ class AddLeadsController extends GetxController {
 
   Future<void> getDropDownList(BuildContext context, bool isLoading) async {
     var loadingIndicator = LoadingProgressDialog();
+
+    var user = await UserPreferences().getSignInInfo();
+
+    var userId = '';
+
+    if (user != null) {
+      userId = user.userId.toString();
+    }
+
     commonGetApiCallFormate(
       context,
       title: 'Add Lead Screen',
-      apiEndPoint: ApiUrl.getDropdownList,
+      apiEndPoint: '${ApiUrl.getDropdownList}?user_id=${userId}',
       allowHeader: true,
       state: state,
       message: message,
@@ -3154,7 +3521,7 @@ class AddLeadsController extends GetxController {
       },
       onResponse: (data) {
         var responseDetail = LeadDropDownListModel.fromJson(data);
-        var dropdowns = responseDetail.data.dropdowns;
+        var dropdowns = responseDetail.data;
 
         countries.assignAll(responseDetail.data.locations);
 
@@ -3188,6 +3555,12 @@ class AddLeadsController extends GetxController {
         }
 
         // Populate dynamic lists from API response
+
+        categoryList.assignAll(dropdowns.uploadedFilesCategories);
+        filtercategoryList.assignAll(dropdowns.uploadedFilesCategories);
+
+        logcat('filtercategoryList_Length', filtercategoryList.length);
+        //category
         requiredSolutionTypeList.assignAll(dropdowns.requiredSolutionType);
         filterRequiredSolutionTypeList.assignAll(
           dropdowns.requiredSolutionType,
@@ -3296,6 +3669,12 @@ class AddLeadsController extends GetxController {
   RxBool isEditMode = false.obs;
 
   //technical proposal
+
+  RxBool isFirstTechincaluploaded = true.obs;
+  RxBool isFinalTechnicaluploaded = true.obs;
+
+  RxBool isFirstComercialluploaded = true.obs;
+  RxBool isFinalComercialluploaded = true.obs;
   RxBool isTechnicalProposalMode = false.obs;
   late TextEditingController firstTechnicalProposal1Ctr,
       finalTechnicalProposal2Ctr;
@@ -3320,6 +3699,7 @@ class AddLeadsController extends GetxController {
 
   final Rx<File?> finalTechnicalProposalFile = Rx<File?>(null);
 
+  List<File> financeDocumentsList = [];
   void setTechnicalProposalFile(File file) {
     firstTechnicalProposalFile.value = file;
     update();
@@ -3369,14 +3749,24 @@ class AddLeadsController extends GetxController {
     null,
     isValidate: false,
   ).obs;
+
+  List<StatusItem> leadStatusTechnicallOnly = [
+    StatusItem(label: "Technical Proposal", value: "technical_proposal"),
+  ];
+
+  List<StatusItem> leadStatusCommercialOnlyNoRights = [
+    StatusItem(label: "Commercial Proposal", value: "commercial_proposal"),
+  ];
   List<StatusItem> leadStatusCommercial = [
+    StatusItem(label: "Technical Proposal", value: "technical_proposal"),
     StatusItem(label: "Commercial proposal", value: "commercial_proposal"),
   ];
 
   final Rx<File?> firstCommercialProposalFile = Rx<File?>(null);
-
   final Rx<File?> finalCommercialProposalFile = Rx<File?>(null);
-
+  final RxList<File> financeDocumentFiles = RxList<File>(
+    [],
+  ); // or RxList<FileModel>
   void setCommercialProposalFile(File file) {
     firstCommercialProposalFile.value = file;
     update();
@@ -3410,8 +3800,200 @@ class AddLeadsController extends GetxController {
     update();
   }
 
+  //approove reject lead
+  List<StatusItem> leadStatusApproveReject = [
+    StatusItem(label: "Commercial proposal", value: "commercial_proposal"),
+    StatusItem(label: "Approve", value: "approved"),
+    StatusItem(label: "Reject", value: "rejected"),
+  ];
+
+  //if rejected
+  RxBool isLeadRejectedMode = false.obs;
+
+  List<StatusItem> leadStatusReject = [
+    StatusItem(label: "Reject", value: "rejected"),
+  ];
+
+  //payment mode
+  RxBool isLeadPaymentMode = false.obs;
+  late TextEditingController tokenAmountCtr,
+      totalProjectCostCtr,
+      balanceAmonutCtr;
+
+  late FocusNode tokenAmountNode, totalProjectCostNode, balanceAmonutNode;
+
+  var tokenAmountModel = ValidationModel(null, null, isValidate: false).obs;
+  var totalProjectCostModel = ValidationModel(
+    null,
+    null,
+    isValidate: false,
+  ).obs;
+  var balanceAmonutModel = ValidationModel(null, null, isValidate: false).obs;
+
+  List<StatusItem> leadStatusPayment = [
+    StatusItem(label: "Approve", value: "approved"),
+    StatusItem(label: "Payments", value: "payments"),
+  ];
+
+  resetPaymentModeData() {
+    isLeadPaymentMode.value = false;
+    tokenAmountCtr.clear();
+    totalProjectCostCtr.clear();
+    balanceAmonutCtr.clear();
+    tokenAmountModel.value = ValidationModel(null, null, isValidate: false);
+    totalProjectCostModel.value = ValidationModel(
+      null,
+      null,
+      isValidate: false,
+    );
+    balanceAmonutModel.value = ValidationModel(null, null, isValidate: false);
+
+    update();
+  }
+
+  void validateTokenAmountt(String? val) {
+    tokenAmountModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Token amount is required";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter a valid number";
+        model.isValidate = false;
+      } else if (double.parse(val) < 0) {
+        model!.error = "Token amount cannot be negative";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    calculateBalanceAmount();
+    validateStep2();
+  }
+
+  void validateTotalProject(String? val) {
+    totalProjectCostModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Total project cost is required";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter a valid number";
+        model.isValidate = false;
+      } else if (double.parse(val) < 0) {
+        model!.error = "Total project cost cannot be negative";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    calculateBalanceAmount();
+    validateStep2();
+  }
+
+  void validateFullPaymentProject(String? val) {
+    balanceAmonutModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Total project cost is required";
+        model.isValidate = false;
+      } else if (double.tryParse(val) == null) {
+        model!.error = "Enter a valid number";
+        model.isValidate = false;
+      } else if (double.parse(val) < 0) {
+        model!.error = "Total project cost cannot be negative";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    calculateBalanceAmount();
+    validateStep2();
+  }
+
+  void calculateBalanceAmount() {
+    final tokenText = tokenAmountCtr.text.trim();
+    final totalText = totalProjectCostCtr.text.trim();
+
+    final token = double.tryParse(tokenText) ?? 0;
+    final total = double.tryParse(totalText) ?? 0;
+
+    double balance = total - token;
+
+    // Avoid negative or invalid balance
+    if (balance < 0) balance = 0;
+
+    balanceAmonutCtr.text = balance.toStringAsFixed(2);
+
+    // Optionally validate or mark as verified
+    balanceAmonutModel.update((model) {
+      model!.error = null;
+      model.isValidate = true;
+    });
+  }
+  //isFinancialType
+
+  RxBool isFinancialType = false.obs;
+
+  late TextEditingController financialTypeCtr;
+
+  late FocusNode financialNode;
+
+  var financialModel = ValidationModel(null, null, isValidate: false).obs;
+
+  List<StatusItem> financialTypePaymentLeadStatus = [
+    StatusItem(label: "Payments", value: "payments"),
+  ];
+
+  List<StatusItem> totalWon = [StatusItem(label: "Won", value: "won")];
+
+  List<StatusItem> isWonData = [
+    StatusItem(label: "Payments", value: "payments"),
+    StatusItem(label: "Won", value: "won"),
+  ];
+  List<StatusItem> financialTypePayment = [
+    StatusItem(label: "Select Financing Type", value: "select_financing_type"),
+    StatusItem(label: "Self Funding", value: "self_finance"),
+
+    StatusItem(label: "Finance through OMC Partner", value: "omc_partner"),
+
+    StatusItem(label: "Self Bank Financing", value: "bank"),
+  ];
+
+  List<StatusItem> selfFundingTypePayment = [
+    StatusItem(label: "Self Funding", value: "self_finance"),
+  ];
+
+  List<StatusItem> selfBankFinancingPayment = [
+    StatusItem(label: "Self Bank Financing", value: "bank"),
+  ];
+  resetOMCModeData() {
+    financialOMCPartnerCtr.clear();
+    financialOMCPartnerModel.value = ValidationModel(
+      null,
+      null,
+      isValidate: false,
+    );
+
+    update();
+  }
+
+  //self funding
+
+  RxBool isFullPaymentAmountMode = false.obs;
+
+  //commerical proposal
+  RxBool isAppproveMode = false.obs;
+
+  //wom
+
+  RxBool iswonstatusMode = false.obs;
+
   RxString selectedLeadStatusvalue = ''.obs;
+  RxString selectedfinanicalStatusvalue = ''.obs;
   RxList<StatusItem> leadStatusList = <StatusItem>[].obs;
+  RxList<StatusItem> financialTypePaymentListDropdown = <StatusItem>[].obs;
+  RxList<StatusItem> omcParternerListDropdown = <StatusItem>[].obs;
 
   void validateLeadStatus(String? val) {
     leadStatusModel.update((model) {
@@ -3426,6 +4008,138 @@ class AddLeadsController extends GetxController {
     validateStep2();
   }
 
+  void validateFinancialStatus(String? val) {
+    financialModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Select Financial Status";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  void validateOMCProgressStatus(String? val) {
+    financialOMCPartnerModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Select Financial Status";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep2();
+  }
+
+  //finance through OMC parenter
+  RxBool isOMCPartnerMode = false.obs;
+
+  late TextEditingController financialOMCPartnerCtr;
+
+  late FocusNode financialOMCPartnerNode;
+
+  var financialOMCPartnerModel = ValidationModel(
+    null,
+    null,
+    isValidate: false,
+  ).obs;
+
+  List<StatusItem> financingProgressStatusMode = [
+    StatusItem(label: "Documents Collected", value: "documents_collected"),
+  ];
+
+  RxString selectedfinancingProgressStatusMode = ''.obs;
+
+  //Finance Documents
+
+  late TextEditingController financeDocumentCtr;
+  late FocusNode financeDocumentNode;
+
+  var financeDocumentModel = ValidationModel(null, null, isValidate: false).obs;
+
+  RxBool isOMCFinanceDocumentShown = false.obs;
+  RxList<String> selectedPdfPaths = <String>[].obs;
+
+  /// Reset the PDF upload data
+  void resetOMCuploadFileData() {
+    financeDocumentCtr.clear();
+    financeDocumentModel.value = ValidationModel(null, null, isValidate: false);
+    selectedPdfPaths.clear();
+    update();
+  }
+
+  /// Pick multiple PDF files
+  Future<void> pickMultiplePdfFiles() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+      allowMultiple: true,
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      // Clear old selections
+      selectedPdfPaths.clear();
+
+      // Add all selected PDF paths
+      for (var file in result.files) {
+        if (file.path != null) {
+          selectedPdfPaths.add(file.path!);
+        }
+      }
+
+      // Show count of selected files in the text field
+      financeDocumentCtr.text =
+          "${selectedPdfPaths.length} PDF file${selectedPdfPaths.length > 1 ? 's' : ''} selected";
+
+      // Update validation
+      if (selectedPdfPaths.isEmpty) {
+        financeDocumentModel.update((model) {
+          model!.error = "At least one PDF file is required";
+          model.isValidate = false;
+        });
+      } else {
+        financeDocumentModel.update((model) {
+          model!.error = null;
+          model.isValidate = true;
+        });
+      }
+
+      update();
+    }
+  }
+
+  //isSendTopartner
+  RxBool isSendToPartnerMode = false.obs;
+  List<StatusItem> financialTypePaymentfinancethroughomcPartner = [
+    StatusItem(label: "Finance through OMC Partner", value: "omc_partner"),
+  ];
+
+  List<StatusItem> financingProgressStatuToPartnersMode = [
+    StatusItem(label: "Documents Collected", value: "documents_collected"),
+    StatusItem(
+      label: "Documents Sent to Partner",
+      value: "documents_sent_to_partner",
+    ),
+  ];
+
+  //ispaymentReceivedShow
+  RxBool ispaymentReceivedShow = false.obs;
+  List<StatusItem> financingProgressStatuToPartnersPaymentReceiveedMode = [
+    StatusItem(
+      label: "Documents Sent to Partner",
+      value: "documents_sent_to_partner",
+    ),
+    StatusItem(label: "Payment Received", value: "payment_received"),
+  ];
+
+  //isWon
+  List<StatusItem> iswonShowdata = [
+    StatusItem(label: "Payment Received", value: "payment_received"),
+  ];
+  RxBool iswonShow = false.obs;
   Widget setLeadStatusstDialog() {
     return Obx(() {
       if (isCountryApiCallLoading.value) {
@@ -3458,11 +4172,17 @@ class AddLeadsController extends GetxController {
                 final selectedItem = leadStatusList[index];
 
                 selectedLeadStatusvalue.value = selectedItem.value;
+                leadStatusCtr.text = selectedItem.label;
 
                 validateLeadStatus(leadStatusCtr.text);
                 if (selectedLeadStatusvalue.value == "technical_proposal") {
                   // Enable technical proposal mode
-                  isTechnicalProposalMode.value = true;
+
+                  if (isCommercialProposalMode.value == true) {
+                    isTechnicalProposalMode.value = false;
+                  } else {
+                    isTechnicalProposalMode.value = true;
+                  }
 
                   // Reset commercial proposal fields
                   firstCommercialProposalFile.value = null;
@@ -3473,7 +4193,16 @@ class AddLeadsController extends GetxController {
                 } else if (selectedLeadStatusvalue.value ==
                     "commercial_proposal") {
                   // Enable commercial proposal mode
-                  isCommercialProposalMode.value = true;
+
+                  if (isAppproveMode.value == true) {
+                    isCommercialProposalMode.value = false;
+                  } else {
+                    if (AppPermissions().canApproveLead == false) {
+                      isCommercialProposalMode.value = false;
+                    } else {
+                      isCommercialProposalMode.value = true;
+                    }
+                  }
 
                   // Reset technical proposal fields
                   firstTechnicalProposalFile.value = null;
@@ -3481,10 +4210,51 @@ class AddLeadsController extends GetxController {
                   firstTechnicalProposal1Ctr.clear();
                   finalTechnicalProposal2Ctr.clear();
                   isTechnicalProposalMode.value = false;
+                } else if (selectedLeadStatusvalue.value == "approved") {
+                  // leadStatusCtr.text = selectedItem.label;
+                  validateLeadStatus(leadStatusCtr.text);
+                  logcat(
+                    'selectedLeadStatusvalue',
+                    selectedLeadStatusvalue.value,
+                  );
+                  if (isLeadPaymentMode.value == true) {
+                    isLeadPaymentMode.value = false;
+                    resetPaymentModeData();
+                  }
+                } else if (selectedLeadStatusvalue.value == "rejected") {
+                  // leadStatusCtr.text = selectedItem.label;
+                  validateLeadStatus(leadStatusCtr.text);
+                  logcat(
+                    'selectedLeadStatusvalue',
+                    selectedLeadStatusvalue.value,
+                  );
+                } else if (selectedLeadStatusvalue.value == "payments") {
+                  isLeadPaymentMode.value = true;
+                  // leadStatusCtr.text = selectedItem.label;
+                  validateLeadStatus(leadStatusCtr.text);
+                  logcat(
+                    'selectedLeadStatusvalue',
+                    selectedLeadStatusvalue.value,
+                  );
+                  isCommercialProposalMode.value = false;
+                  isTechnicalProposalMode.value = false;
+                } else if (selectedLeadStatusvalue.value == "payments" ||
+                    selectedLeadStatusvalue.value == "won") {
+                  isLeadPaymentMode.value = true;
+                  // leadStatusCtr.text = selectedItem.label;
+                  validateLeadStatus(leadStatusCtr.text);
+                  logcat(
+                    'selectedLeadStatusvalue',
+                    selectedLeadStatusvalue.value,
+                  );
+                  isCommercialProposalMode.value = false;
+                  isTechnicalProposalMode.value = false;
                 } else {
                   // Neither technical nor commercial
                   isTechnicalProposalMode.value = false;
                   isCommercialProposalMode.value = false;
+                  isLeadPaymentMode.value = false;
+                  isAppproveMode.value = false;
 
                   // Reset all fields
                   firstTechnicalProposalFile.value = null;
@@ -3503,6 +4273,158 @@ class AddLeadsController extends GetxController {
               title: buildSelectableRow(
                 leadStatusList[index].label,
                 leadStatusList[index].label.trim() == leadStatusCtr.text.trim(),
+              ),
+            );
+          },
+        ),
+      );
+    });
+  }
+
+  Widget setFinacialTypeDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        financialTypePaymentListDropdown,
+        controller: financialTypeCtr,
+        noDataLable: "No Roof Nature",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: financialTypePaymentListDropdown.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                final selectedItem = financialTypePaymentListDropdown[index];
+
+                selectedfinanicalStatusvalue.value = selectedItem.value;
+                financialTypeCtr.text = selectedItem.label;
+                // validateLeadStatus(leadStatusCtr.text);
+                if (selectedfinanicalStatusvalue.value == "self_finance") {
+                  isFullPaymentAmountMode.value = true;
+                  isOMCPartnerMode.value = false;
+                  isOMCFinanceDocumentShown.value = false;
+
+                  validateFullPaymentProject(balanceAmonutCtr.text);
+                  // Enable technical proposal mode
+                } else if (selectedfinanicalStatusvalue.value ==
+                    "omc_partner") {
+                  isOMCPartnerMode.value = true;
+                  omcParternerListDropdown.assignAll(
+                    financingProgressStatusMode,
+                  );
+                  financialOMCPartnerCtr.text =
+                      omcParternerListDropdown.first.label;
+                  selectedfinancingProgressStatusMode.value =
+                      omcParternerListDropdown.first.value;
+
+                  isFullPaymentAmountMode.value = false;
+                  validateOMCProgressStatus(financialOMCPartnerCtr.text);
+                  validateFullPaymentProject(balanceAmonutCtr.text);
+                  isOMCFinanceDocumentShown.value = true;
+                } else if (selectedfinanicalStatusvalue.value == "bank") {
+                  isFullPaymentAmountMode.value = true;
+                  isOMCPartnerMode.value = false;
+                  isOMCFinanceDocumentShown.value = false;
+
+                  validateFullPaymentProject(balanceAmonutCtr.text);
+                } else {
+                  // Neither technical nor commercial
+                  isFullPaymentAmountMode.value = false;
+                  isOMCPartnerMode.value = false;
+                  isOMCFinanceDocumentShown.value = false;
+                  validateFullPaymentProject(balanceAmonutCtr.text);
+
+                  // // Reset all fields
+                  // firstTechnicalProposalFile.value = null;
+                  // finalTechnicalProposalFile.value = null;
+                  // firstTechnicalProposal1Ctr.clear();
+                  // finalTechnicalProposal2Ctr.clear();
+
+                  // firstCommercialProposalFile.value = null;
+                  // finalCommercialProposalFile.value = null;
+                  // firstCommercialProposal1Ctr.clear();
+                  // finalCommercialProposal2Ctr.clear();
+                }
+                Get.back();
+              },
+              title: buildSelectableRow(
+                financialTypePaymentListDropdown[index].label,
+                financialTypePaymentListDropdown[index].label.trim() ==
+                    financialTypeCtr.text.trim(),
+              ),
+            );
+          },
+        ),
+      );
+    });
+  }
+
+  Widget setOMCPartnerTypeDialog() {
+    return Obx(() {
+      if (isCountryApiCallLoading.value) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isCountryApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        omcParternerListDropdown,
+        controller: financialOMCPartnerCtr,
+        noDataLable: "No Roof Nature",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: omcParternerListDropdown.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                final selectedItem = omcParternerListDropdown[index];
+                selectedfinancingProgressStatusMode.value = selectedItem.value;
+                financialOMCPartnerCtr.text = selectedItem.label;
+
+                validateOMCProgressStatus(financialOMCPartnerCtr.text);
+                if (selectedfinancingProgressStatusMode.value ==
+                    "documents_sent_to_partner") {
+                  // Enable technical proposal mode
+                  isFullPaymentAmountMode.value = false;
+                } else if (selectedfinancingProgressStatusMode.value ==
+                    "payment_received") {
+                  isFullPaymentAmountMode.value = true;
+
+                  validateFullPaymentProject(balanceAmonutCtr.text);
+                }
+                Get.back();
+              },
+              title: buildSelectableRow(
+                omcParternerListDropdown[index].label,
+                omcParternerListDropdown[index].label.trim() ==
+                    financialOMCPartnerCtr.text.trim(),
               ),
             );
           },
@@ -3547,16 +4469,301 @@ class AddLeadsController extends GetxController {
                 // isTechnicalProposalMode.value = true;
                 leadStatusList.assignAll(leadStatusTechnical);
                 leadStatusCtr.text = leadStatusList.first.label;
+                selectedLeadStatusvalue.value = leadStatusList.first.value;
+                validateLeadStatus(leadStatusCtr.text);
 
                 break;
               case 'commercial_proposal':
-                isCommercialProposalMode.value = true;
+                // isCommercialProposalMode.value = true;
                 leadStatusList.assignAll(leadStatusCommercial);
                 leadStatusCtr.text = leadStatusList.first.label;
+                selectedLeadStatusvalue.value = leadStatusList.first.value;
+                validateLeadStatus(leadStatusCtr.text);
+                break;
+              case 'approved':
+              case 'rejected':
+                if (AppPermissions().canApproveLead) {
+                  isAppproveMode.value = true;
+                  leadStatusList.assignAll(leadStatusApproveReject);
+                  leadStatusCtr.text = leadStatusList.first.label;
+                  selectedLeadStatusvalue.value = leadStatusList.first.value;
+                  validateLeadStatus(leadStatusCtr.text);
+
+                  logcat('isAppproveMode.value', 'isAppproveMode.value');
+                } else {
+                  leadStatusList.assignAll(leadStatusCommercialOnlyNoRights);
+                  leadStatusCtr.text = leadStatusList.first.label;
+                  selectedLeadStatusvalue.value = leadStatusList.first.value;
+                  validateLeadStatus(leadStatusCtr.text);
+                }
+                // Add your handling for these statuses
+                break;
+
+              case 'payments':
+                leadStatusList.assignAll(leadStatusPayment);
+                leadStatusCtr.text = leadStatusList.first.label;
+                selectedLeadStatusvalue.value = leadStatusList.first.value;
+                validateLeadStatus(leadStatusCtr.text);
+                break;
+
+              case 'won':
+                iswonShow.value = true;
+                validateFullPaymentProject(balanceAmonutCtr.text);
+                //last case
                 break;
             }
           }
         }
+
+        if (result.leadStatus != null) {
+          final currentStatus = result.leadStatus!;
+
+          if (currentStatus == 'technical_proposal') {
+            if (result.uploadedFiles != null &&
+                result.uploadedFiles!.isNotEmpty) {
+              // Check if 'first' file exists under technical_proposal
+              bool hasFirst = result.uploadedFiles!.any(
+                (f) => f.category == 'technical_proposal' && f.tag == 'first',
+              );
+
+              // Check if 'final' file exists under technical_proposal
+              bool hasFinal = result.uploadedFiles!.any(
+                (f) => f.category == 'technical_proposal' && f.tag == 'final',
+              );
+
+              // Update your observables accordingly
+              isTechnicalProposalMode.value = true;
+              isFirstTechincaluploaded.value = !hasFirst;
+              isFinalTechnicaluploaded.value = !hasFinal;
+
+              if (isFirstTechincaluploaded.value == false &&
+                  isFinalTechnicaluploaded.value == false) {
+                leadStatusList.assignAll(leadStatusCommercial);
+              } else {
+                logcat('going in else case', 'data');
+                leadStatusList.assignAll(leadStatusTechnicallOnly);
+              }
+            }
+
+            leadStatusCtr.text = leadStatusList.first.label;
+            selectedLeadStatusvalue.value = leadStatusList.first.value;
+            validateLeadStatus(leadStatusCtr.text);
+          }
+
+          if (currentStatus == 'commercial_proposal') {
+            if (result.uploadedFiles != null &&
+                result.uploadedFiles!.isNotEmpty) {
+              // Check if 'first' file exists under technical_proposal
+              bool hasFirst = result.uploadedFiles!.any(
+                (f) => f.category == 'commercial_proposal' && f.tag == 'first',
+              );
+
+              // Check if 'final' file exists under technical_proposal
+              bool hasFinal = result.uploadedFiles!.any(
+                (f) => f.category == 'commercial_proposal' && f.tag == 'final',
+              );
+
+              // Update your observables accordingly
+              isCommercialProposalMode.value = true;
+              isFirstComercialluploaded.value = !hasFirst;
+              isFinalComercialluploaded.value = !hasFinal;
+
+              if (isFirstComercialluploaded.value == false &&
+                  isFinalComercialluploaded.value == false) {
+                isCommercialProposalMode.value = false;
+                isTechnicalProposalMode.value = false;
+              } else {
+                logcat('going in else case', 'data');
+                leadStatusList.assignAll(leadStatusCommercialOnlyNoRights);
+              }
+            }
+
+            leadStatusCtr.text = leadStatusList.first.label;
+            selectedLeadStatusvalue.value = leadStatusList.first.value;
+            validateLeadStatus(leadStatusCtr.text);
+          }
+
+          if (currentStatus == 'rejected') {
+            isLeadRejectedMode.value = true;
+            leadStatusList.assignAll(leadStatusReject);
+            leadStatusCtr.text = leadStatusList.first.label;
+            selectedLeadStatusvalue.value = 'rejected';
+            validateLeadStatus(leadStatusCtr.text);
+          }
+
+          if (currentStatus == 'payments') {
+            isFinancialType.value = true;
+            isLeadPaymentMode.value = true;
+
+            if (iswonShow.value == true) {
+              leadStatusList.assignAll(isWonData);
+              selectedLeadStatusvalue.value = 'won';
+            } else {
+              leadStatusList.assignAll(financialTypePaymentLeadStatus);
+              selectedLeadStatusvalue.value = 'payments';
+            }
+
+            leadStatusCtr.text = leadStatusList.first.label;
+
+            tokenAmountCtr.text = result.payment?.tokenAmount ?? '';
+            totalProjectCostCtr.text = result.payment?.totalProjectCost ?? '';
+            validateLeadStatus(leadStatusCtr.text);
+            validateTokenAmountt(tokenAmountCtr.text);
+            validateTotalProject(totalProjectCostCtr.text);
+            calculateBalanceAmount();
+
+            if (result.uploadedFiles != null &&
+                result.uploadedFiles!.any(
+                  (f) => f.category == 'finance_document',
+                )) {
+              isSendToPartnerMode.value = true;
+              isOMCPartnerMode.value = true;
+              financialTypePaymentListDropdown.assignAll(
+                financialTypePaymentfinancethroughomcPartner,
+              );
+              omcParternerListDropdown.assignAll(
+                financingProgressStatuToPartnersMode,
+              );
+              financialOMCPartnerCtr.text =
+                  omcParternerListDropdown.first.label;
+              selectedfinancingProgressStatusMode.value =
+                  omcParternerListDropdown.first.value;
+            } else {
+              isSendToPartnerMode.value = false;
+              financialTypePaymentListDropdown.assignAll(financialTypePayment);
+            }
+
+            if (result.uploadedFiles != null &&
+                result.uploadedFiles!.any(
+                  (f) => f.category == 'finance_document',
+                )) {
+              isSendToPartnerMode.value = true;
+              isOMCPartnerMode.value = true;
+              financialTypePaymentListDropdown.assignAll(
+                financialTypePaymentfinancethroughomcPartner,
+              );
+
+              if (result.payment != null &&
+                  result.payment!.financingProgressStatus ==
+                      "documents_sent_to_partner") {
+                ispaymentReceivedShow.value = true;
+                omcParternerListDropdown.assignAll(
+                  financingProgressStatuToPartnersPaymentReceiveedMode,
+                );
+
+                // financingProgressStatuToPartnersPaymentReceiveedMode.value =
+                //     true;
+              } else if (result.payment!.financingProgressStatus ==
+                  "payment_received") {
+                ispaymentReceivedShow.value = false;
+                omcParternerListDropdown.assignAll(iswonShowdata);
+                validateOMCProgressStatus(financialOMCPartnerCtr.text);
+              } else {
+                ispaymentReceivedShow.value = false;
+
+                if (iswonShow.value == true) {
+                  omcParternerListDropdown.assignAll(iswonShowdata);
+                } else {
+                  omcParternerListDropdown.assignAll(
+                    financingProgressStatuToPartnersMode,
+                  );
+                }
+
+                validateOMCProgressStatus(financialOMCPartnerCtr.text);
+
+                // financingProgressStatuToPartnersPaymentReceiveedMode.value =
+                //     false;
+              }
+
+              financialOMCPartnerCtr.text =
+                  omcParternerListDropdown.first.label;
+              selectedfinancingProgressStatusMode.value =
+                  omcParternerListDropdown.first.value;
+            } else if (result.payment != null &&
+                result.payment!.financingType == "bank") {
+              financialTypePaymentListDropdown.assignAll(
+                selfBankFinancingPayment,
+              );
+              isFullPaymentAmountMode.value = true;
+            } else {
+              isSendToPartnerMode.value = false;
+
+              if (iswonShow.value == true) {
+                financialTypePaymentListDropdown.assignAll(
+                  selfFundingTypePayment,
+                );
+              } else {
+                financialTypePaymentListDropdown.assignAll(
+                  financialTypePayment,
+                );
+              }
+            }
+
+            financialTypeCtr.text =
+                financialTypePaymentListDropdown.first.label;
+            selectedfinanicalStatusvalue.value =
+                financialTypePaymentListDropdown.first.value;
+
+            validateFinancialStatus(financialTypeCtr.text);
+
+            // selectedLeadStatusvalue.value = 'Select Financing Type';
+            // validateLeadStatus(leadStatusCtr.text);
+          }
+
+          if (currentStatus == 'won') {
+            leadStatusList.assignAll(totalWon);
+            leadStatusCtr.text = leadStatusList.first.label;
+            selectedLeadStatusvalue.value = leadStatusList.first.value;
+
+            iswonShow.value = true;
+            isLeadPaymentMode.value = true;
+            isFullPaymentAmountMode.value = true;
+            isFinancialType.value = true;
+
+            //payment
+            tokenAmountCtr.text = result.payment?.tokenAmount ?? '';
+            totalProjectCostCtr.text = result.payment?.totalProjectCost ?? '';
+            calculateBalanceAmount();
+            validateLeadStatus(leadStatusCtr.text);
+            validateTokenAmountt(tokenAmountCtr.text);
+            validateTotalProject(totalProjectCostCtr.text);
+            validateLeadStatus(leadStatusCtr.text);
+
+            //show conditionaly
+
+            if (result.payment != null &&
+                result.payment!.financingType == "self_finance") {
+              financialTypePaymentListDropdown.assignAll(
+                selfFundingTypePayment,
+              );
+
+              // financingProgressStatuToPartnersPaymentReceiveedMode.value =
+              //     true;
+            } else if (result.payment!.financingType == "bank") {
+              financialTypePaymentListDropdown.assignAll(
+                selfBankFinancingPayment,
+              );
+            } else if (result.payment!.financingType == "omc_partner") {
+              financialTypePaymentListDropdown.assignAll(
+                financialTypePaymentfinancethroughomcPartner,
+              );
+            }
+            financialTypeCtr.text =
+                financialTypePaymentListDropdown.first.label;
+            selectedfinanicalStatusvalue.value =
+                financialTypePaymentListDropdown.first.value;
+
+            validateFinancialStatus(financialTypeCtr.text);
+
+            // financialTypeCtr.text =
+            //     financialTypePaymentListDropdown.first.label;
+            // selectedfinanicalStatusvalue.value =
+            //     financialTypePaymentListDropdown.first.value;
+
+            // validateFinancialStatus(financialTypeCtr.text);
+          }
+        }
+        logcat('isLeadRejectedMode.value', isLeadRejectedMode.value);
 
         // 🔹 Helper: safely set text controller values
         void setText(TextEditingController ctr, dynamic value) =>

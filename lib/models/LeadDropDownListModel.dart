@@ -14,34 +14,17 @@ class LeadDropDownListModel {
 
   factory LeadDropDownListModel.fromJson(Map<String, dynamic> json) =>
       LeadDropDownListModel(
-        status: json["status"],
-        data: LeadDropDownListData.fromJson(json["data"]),
+        status: json["status"] ?? '',
+        data: LeadDropDownListData.fromJson(json["data"] ?? {}),
       );
 
   Map<String, dynamic> toJson() => {"status": status, "data": data.toJson()};
 }
 
 class LeadDropDownListData {
-  Dropdowns dropdowns;
-  List<CountryData> locations; // rename
-
-  LeadDropDownListData({required this.dropdowns, required this.locations});
-
-  factory LeadDropDownListData.fromJson(Map<String, dynamic> json) =>
-      LeadDropDownListData(
-        dropdowns: Dropdowns.fromJson(json["dropdowns"]),
-        locations: (json["locations"] ?? [])
-            .map<CountryData>((x) => CountryData.fromJson(x))
-            .toList(),
-      );
-
-  Map<String, dynamic> toJson() => {
-    "dropdowns": dropdowns.toJson(),
-    "locations": List<dynamic>.from(locations.map((x) => x.toJson())),
-  };
-}
-
-class Dropdowns {
+  List<CommonIdName> clusters;
+  List<CommonIdName> districts;
+  List<CountryData> locations;
   List<DgSyncRequired> requiredSolutionType;
   List<DgSyncRequired> requiredSolution;
   List<DgSyncRequired> leadCategory;
@@ -50,8 +33,14 @@ class Dropdowns {
   List<DgSyncRequired> roofNature;
   List<DgSyncRequired> financingType;
   List<DgSyncRequired> purposeOfSolarisation;
+  List<DgSyncRequired> uploadedFilesCategories;
+  List<DgSyncRequired> customerStatus;
+  List<DgSyncRequired> warrantyType;
 
-  Dropdowns({
+  LeadDropDownListData({
+    required this.clusters,
+    required this.districts,
+    required this.locations,
     required this.requiredSolutionType,
     required this.requiredSolution,
     required this.leadCategory,
@@ -60,36 +49,61 @@ class Dropdowns {
     required this.roofNature,
     required this.financingType,
     required this.purposeOfSolarisation,
+    required this.uploadedFilesCategories,
+    required this.customerStatus,
+    required this.warrantyType,
   });
 
-  factory Dropdowns.fromJson(Map<String, dynamic> json) => Dropdowns(
-    requiredSolutionType: List<DgSyncRequired>.from(
-      json["required_solution_type"].map((x) => DgSyncRequired.fromJson(x)),
-    ),
-    requiredSolution: List<DgSyncRequired>.from(
-      json["required_solution"].map((x) => DgSyncRequired.fromJson(x)),
-    ),
-    leadCategory: List<DgSyncRequired>.from(
-      json["lead_category"].map((x) => DgSyncRequired.fromJson(x)),
-    ),
-    dgSyncRequired: List<DgSyncRequired>.from(
-      json["dg_sync_required"].map((x) => DgSyncRequired.fromJson(x)),
-    ),
-    vfdRequired: List<DgSyncRequired>.from(
-      json["vfd_required"].map((x) => DgSyncRequired.fromJson(x)),
-    ),
-    roofNature: List<DgSyncRequired>.from(
-      json["roof_nature"].map((x) => DgSyncRequired.fromJson(x)),
-    ),
-    financingType: List<DgSyncRequired>.from(
-      json["financing_type"].map((x) => DgSyncRequired.fromJson(x)),
-    ),
-    purposeOfSolarisation: List<DgSyncRequired>.from(
-      json["purpose_of_solarisation"].map((x) => DgSyncRequired.fromJson(x)),
-    ),
-  );
+  factory LeadDropDownListData.fromJson(Map<String, dynamic> json) =>
+      LeadDropDownListData(
+        clusters: (json["clusters"] ?? [])
+            .map<CommonIdName>((x) => CommonIdName.fromJson(x))
+            .toList(),
+        districts: (json["districts"] ?? [])
+            .map<CommonIdName>((x) => CommonIdName.fromJson(x))
+            .toList(),
+        locations: (json["locations"] ?? [])
+            .map<CountryData>((x) => CountryData.fromJson(x))
+            .toList(),
+        requiredSolutionType: (json["required_solution_type"] ?? [])
+            .map<DgSyncRequired>((x) => DgSyncRequired.fromJson(x))
+            .toList(),
+        requiredSolution: (json["required_solution"] ?? [])
+            .map<DgSyncRequired>((x) => DgSyncRequired.fromJson(x))
+            .toList(),
+        leadCategory: (json["lead_category"] ?? [])
+            .map<DgSyncRequired>((x) => DgSyncRequired.fromJson(x))
+            .toList(),
+        dgSyncRequired: (json["dg_sync_required"] ?? [])
+            .map<DgSyncRequired>((x) => DgSyncRequired.fromJson(x))
+            .toList(),
+        vfdRequired: (json["vfd_required"] ?? [])
+            .map<DgSyncRequired>((x) => DgSyncRequired.fromJson(x))
+            .toList(),
+        roofNature: (json["roof_nature"] ?? [])
+            .map<DgSyncRequired>((x) => DgSyncRequired.fromJson(x))
+            .toList(),
+        financingType: (json["financing_type"] ?? [])
+            .map<DgSyncRequired>((x) => DgSyncRequired.fromJson(x))
+            .toList(),
+        purposeOfSolarisation: (json["purpose_of_solarisation"] ?? [])
+            .map<DgSyncRequired>((x) => DgSyncRequired.fromJson(x))
+            .toList(),
+        uploadedFilesCategories: (json["uploaded_files_categories"] ?? [])
+            .map<DgSyncRequired>((x) => DgSyncRequired.fromJson(x))
+            .toList(),
+        customerStatus: (json["customer_status"] ?? [])
+            .map<DgSyncRequired>((x) => DgSyncRequired.fromJson(x))
+            .toList(),
+        warrantyType: (json["warranty_type"] ?? [])
+            .map<DgSyncRequired>((x) => DgSyncRequired.fromJson(x))
+            .toList(),
+      );
 
   Map<String, dynamic> toJson() => {
+    "clusters": List<dynamic>.from(clusters.map((x) => x.toJson())),
+    "districts": List<dynamic>.from(districts.map((x) => x.toJson())),
+    "locations": List<dynamic>.from(locations.map((x) => x.toJson())),
     "required_solution_type": List<dynamic>.from(
       requiredSolutionType.map((x) => x.toJson()),
     ),
@@ -106,7 +120,26 @@ class Dropdowns {
     "purpose_of_solarisation": List<dynamic>.from(
       purposeOfSolarisation.map((x) => x.toJson()),
     ),
+    "uploaded_files_categories": List<dynamic>.from(
+      uploadedFilesCategories.map((x) => x.toJson()),
+    ),
+    "customer_status": List<dynamic>.from(
+      customerStatus.map((x) => x.toJson()),
+    ),
+    "warranty_type": List<dynamic>.from(warrantyType.map((x) => x.toJson())),
   };
+}
+
+class CommonIdName {
+  int id;
+  String name;
+
+  CommonIdName({required this.id, required this.name});
+
+  factory CommonIdName.fromJson(Map<String, dynamic> json) =>
+      CommonIdName(id: json["id"] ?? 0, name: json["name"] ?? '');
+
+  Map<String, dynamic> toJson() => {"id": id, "name": name};
 }
 
 class DgSyncRequired {
@@ -180,7 +213,7 @@ class District {
   District({required this.districtId, required this.districtName});
 
   factory District.fromJson(Map<String, dynamic> json) => District(
-    districtId: json["district_id"],
+    districtId: json["district_id"] ?? 0,
     districtName: json["district_name"] ?? '',
   );
 

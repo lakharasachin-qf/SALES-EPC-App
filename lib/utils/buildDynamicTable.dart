@@ -10,6 +10,7 @@ Widget buildDynamicTable<T>({
   required List<String> Function(T) getValues,
   required void Function(int, T)? onEdit,
   required void Function(int)? onDelete,
+  required isRejected,
 }) {
   List<DataRow> rows = [];
   for (var i = 0; i < data.length; i++) {
@@ -43,7 +44,10 @@ Widget buildDynamicTable<T>({
                     height: 4.h,
                     child: IconButton(
                       padding: EdgeInsets.zero,
-                      icon: const Icon(Icons.edit),
+                      icon: Icon(
+                        Icons.edit,
+                        color: isRejected == true ? grey : null,
+                      ),
                       onPressed: () {
                         if (onEdit != null) onEdit(i, item);
                       },
@@ -54,7 +58,10 @@ Widget buildDynamicTable<T>({
                     height: 4.h,
                     child: IconButton(
                       padding: EdgeInsets.zero,
-                      icon: const Icon(Icons.delete, color: red),
+                      icon: Icon(
+                        Icons.delete,
+                        color: isRejected == true ? grey : red,
+                      ),
                       onPressed: () {
                         if (onDelete != null) onDelete(i);
                       },

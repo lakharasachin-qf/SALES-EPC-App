@@ -265,33 +265,33 @@ class LeadScreenState extends State<LeadScreen> {
                                                                   getDynamicSizedBox(
                                                                     width: 1.w,
                                                                   ),
-                                                                  SizedBox(
-                                                                    width: 4.h,
-                                                                    height: 4.h,
-                                                                    child: IconButton(
-                                                                      padding:
-                                                                          EdgeInsets
-                                                                              .zero,
-                                                                      icon: const Icon(
-                                                                        Icons
-                                                                            .delete,
-                                                                        color:
-                                                                            red,
-                                                                      ),
-                                                                      onPressed: () {
-                                                                        // ctr.openDeleteBottomSheet(
-                                                                        //   context:
-                                                                        //       context,
-                                                                        // );
-                                                                        // ctr.updateMeetings(
-                                                                        //   context,
-                                                                        // );
-                                                                      },
-                                                                    ),
-                                                                  ),
-                                                                  getDynamicSizedBox(
-                                                                    width: 1.w,
-                                                                  ),
+                                                                  // SizedBox(
+                                                                  //   width: 4.h,
+                                                                  //   height: 4.h,
+                                                                  //   child: IconButton(
+                                                                  //     padding:
+                                                                  //         EdgeInsets
+                                                                  //             .zero,
+                                                                  //     icon: const Icon(
+                                                                  //       Icons
+                                                                  //           .delete,
+                                                                  //       color:
+                                                                  //           red,
+                                                                  //     ),
+                                                                  //     onPressed: () {
+                                                                  //       // ctr.openDeleteBottomSheet(
+                                                                  //       //   context:
+                                                                  //       //       context,
+                                                                  //       // );
+                                                                  //       // ctr.updateMeetings(
+                                                                  //       //   context,
+                                                                  //       // );
+                                                                  //     },
+                                                                  //   ),
+                                                                  // ),
+                                                                  // getDynamicSizedBox(
+                                                                  //   width: 1.w,
+                                                                  // ),
                                                                   // SizedBox(
                                                                   //   width: 1.w,
                                                                   // ),
@@ -718,6 +718,16 @@ class LeadScreenState extends State<LeadScreen> {
                           final result = await Get.to(
                             AddLeadScreen(isEdit: false),
                           );
+
+                          if (result == true) {
+                            ctr.getLeadList(
+                              context: context,
+                              isInitialLoad: true,
+                              page: 1,
+                              hideLoading: false,
+                            );
+                            ctr.getFillterOptions(context);
+                          }
                         },
                         'Add Lead',
                         validate: true,
