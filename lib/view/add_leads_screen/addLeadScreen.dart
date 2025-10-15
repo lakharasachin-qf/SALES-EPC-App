@@ -1874,7 +1874,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                     data: controller.fileList,
                                     columns: controller.uploadColumns,
                                     getValues: (file) => [
-                                      file.path.toString(),
+                                      displayFileName(file),
                                       formatText(file.category.toString()),
                                       // controller.formatCategory(
                                       //   file.category,

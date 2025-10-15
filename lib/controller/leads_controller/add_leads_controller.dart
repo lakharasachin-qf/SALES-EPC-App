@@ -3339,6 +3339,28 @@ class AddLeadsController extends GetxController {
       finalCommercialProposalFile.value,
     );
 
+    logcat("filepAth:::", jsonEncode(fileList));
+    for (int i = 0; i < fileList.length; i++) {
+      final file = fileList[i];
+      if (file.path != null && file.path!.isNotEmpty) {
+        final fileToUpload = File(file.path!);
+        if (await fileToUpload.exists()) {
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'uploaded_files[$i][file]',
+              fileToUpload.path,
+            ),
+          );
+          logcat("fileToUpload", "Step-");
+          // Attach category for this file
+          request.fields['uploaded_files[$i][category]'] = file.category ?? '';
+          // request.fields['uploaded_files[$i][category]'] = "equipment_photo";
+        } else {
+          logcat("File not found:", fileToUpload.path);
+        }
+      }
+    }
+
     // ---------- Finance documents (array) ----------
     // Assuming financeDocumentFiles is RxList<File> or RxList<FileModel>
     // ---------- Finance documents (array) ----------
@@ -4945,16 +4967,38 @@ class AddLeadsController extends GetxController {
         fileList
           ..clear()
           ..assignAll(
-            result.uploadedFiles?.map(
-                  (f) => UploadedFile(
-                    path: f.category?.split('/').last ?? '',
+            result.uploadedFiles?.map((f) {
+                  // Extract the file extension from the original path
+                  String extension = '';
+                  if (f.path != null && f.path!.contains('.')) {
+                    extension = f.path!.split('.').last;
+                  }
+
+                  return UploadedFile(
+                    // path = category + .extension
+                    path: f.tag != null && f.tag!.isNotEmpty
+                        ? "${f.tag}_${f.category}.$extension"
+                        : "${f.category}.$extension",
                     category: f.tag != null && f.tag!.isNotEmpty
                         ? "${f.tag}_${f.category}"
-                        : f.category,
-                  ),
-                ) ??
+                        : f.category, // keep category as it is
+                  );
+                }).toList() ??
                 [],
           );
+        // fileList
+        //   ..clear()
+        //   ..assignAll(
+        //     result.uploadedFiles?.map(
+        //           (f) => UploadedFile(
+        //             path: f.category?.split('/').last ?? '',
+        //             category: f.tag != null && f.tag!.isNotEmpty
+        //                 ? "${f.tag}_${f.category}"
+        //                 : f.category,
+        //           ),
+        //         ) ??
+        //         [],
+        //   );
 
         // Validations (can be extracted into one helper call)
         validateAll();
