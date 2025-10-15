@@ -179,7 +179,7 @@ Widget getDashboardDrawer(
       //       ? getDynamicSizedBox(height: 1.h)
       //       : SizedBox.shrink();
       // }),
-      AppPermissions().canViewCustomer
+      AppPermissions().isCustomerManagement
           ? buildDrawerItem(Asset.users2, HomeScreenConst.customers, () {
               ctr.scaffoldKey.currentState?.closeDrawer();
               Get.to(Customerscreen());
