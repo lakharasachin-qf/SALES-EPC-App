@@ -663,33 +663,28 @@ class CustomerScreenController extends GetxController {
     "Action",
   ].obs;
 
-  // Provide all customer data without pagination
   List<List<String>> get customerData {
     if (filteredCustomerList.isEmpty) return [];
+
+    final now = DateTime.now();
 
     return filteredCustomerList.asMap().entries.map((entry) {
       final index = entry.key + 1 + ((currentPage.value - 1) * 10);
       final e = entry.value;
-      final formattedLiveAt = e.liveAt.isNotEmpty
-          ? DateFormat('dd-MM-yyyy').format(DateTime.parse(e.liveAt))
-          : '';
 
+      // Format live_at
+      final formattedLiveAt = formatDate(e.liveAt);
+
+      // Format warranty_end_date
+      final formattedWarrantyEndDate = formatDate(e.warrantyEndDate);
+
+      // Determine warranty type
       String formattedWarrantyType = e.warrantyType.toLowerCase();
+      final endDate = parseDate(e.warrantyEndDate);
 
-      // Parse end date safely
-      DateTime? endDate;
-      if (e.warrantyEndDate != null && e.warrantyEndDate.isNotEmpty) {
-        try {
-          endDate = DateTime.parse(e.warrantyEndDate);
-        } catch (_) {
-          endDate = null;
-        }
-      }
-
-      // Check if expired and type is not AMC
       if (endDate != null &&
-          DateTime.now().isAfter(endDate) &&
-          e.warrantyType.toLowerCase() != "amc") {
+          now.isAfter(endDate) &&
+          formattedWarrantyType != "amc") {
         formattedWarrantyType = "Not In AMC";
       } else {
         formattedWarrantyType = formattedWarrantyType.capitalize.toString();
@@ -703,11 +698,70 @@ class CustomerScreenController extends GetxController {
         e.customerStatus.capitalize.toString(),
         formattedLiveAt,
         formatText(formattedWarrantyType),
-        e.warrantyEndDate,
+        formattedWarrantyEndDate,
         "",
       ];
     }).toList();
   }
+  // // Provide all customer data without pagination
+  // List<List<String>> get customerData {
+  //   if (filteredCustomerList.isEmpty) return [];
+
+  //   return filteredCustomerList.asMap().entries.map((entry) {
+  //     final index = entry.key + 1 + ((currentPage.value - 1) * 10);
+  //     final e = entry.value;
+  //     final formattedLiveAt = e.liveAt.isNotEmpty
+  //         ? DateFormat('dd-MM-yyyy').format(DateTime.parse(e.liveAt))
+  //         : '';
+
+  //     String formattedWarrantyType = e.warrantyType.toLowerCase();
+
+  //     // Format warranty_end_date
+  //     String formattedWarrantyEndDate = '';
+  //     if (e.warrantyEndDate != null && e.warrantyEndDate.isNotEmpty) {
+  //       try {
+  //         formattedWarrantyEndDate = DateFormat(
+  //           'dd-MM-yyyy',
+  //         ).format(DateTime.parse(e.warrantyEndDate));
+  //       } catch (_) {
+  //         formattedWarrantyEndDate = e.warrantyEndDate;
+  //       }
+  //     }
+
+  //     // Format warranty type
+
+  //     // Parse end date safely
+  //     DateTime? endDate;
+  //     if (e.warrantyEndDate != null && e.warrantyEndDate.isNotEmpty) {
+  //       try {
+  //         endDate = DateTime.parse(e.warrantyEndDate);
+  //       } catch (_) {
+  //         endDate = null;
+  //       }
+  //     }
+
+  //     // Check if expired and type is not AMC
+  //     if (endDate != null &&
+  //         DateTime.now().isAfter(endDate) &&
+  //         e.warrantyType.toLowerCase() != "amc") {
+  //       formattedWarrantyType = "Not In AMC";
+  //     } else {
+  //       formattedWarrantyType = formattedWarrantyType.capitalize.toString();
+  //     }
+
+  //     return [
+  //       index.toString(),
+  //       e.companyName,
+  //       e.contactPersonName,
+  //       e.contactPersonMobile,
+  //       e.customerStatus.capitalize.toString(),
+  //       formattedLiveAt,
+  //       formatText(formattedWarrantyType),
+  //       formattedWarrantyEndDate,
+  //       "",
+  //     ];
+  //   }).toList();
+  // }
 
   RxBool isUpdateEnabled = false.obs;
   CustomerData? currentCustomer;
@@ -716,7 +770,6 @@ class CustomerScreenController extends GetxController {
     if (currentCustomer == null) return;
 
     final customer = currentCustomer!;
-    logcat("validateUpdateButton::", "Done");
 
     bool isDateFilled = true;
     bool isFileUploaded = true;
@@ -726,11 +779,9 @@ class CustomerScreenController extends GetxController {
 
     // 🔹 Case 1: Customer status = Open
     if (customer.customerStatus.toLowerCase() == "open") {
-      logcat("Steop::", "1");
       isDateFilled = dateCtr.text.isNotEmpty;
       isFileUploaded = uploadFileCtr.text.isNotEmpty;
       isPeriodFilled = warrantyPeriodCtr.text.isNotEmpty;
-      logcat("update::", "Done");
     } else {
       if (selectedWarrantyTypeValue.value == "amc") {
         isPeriodFilled = warrantyPeriodCtr.text.isNotEmpty;
@@ -741,24 +792,22 @@ class CustomerScreenController extends GetxController {
       }
     }
 
-    // ✅ Final validation
+    // Final validation
     isUpdateEnabled.value =
         isDateFilled &&
         isFileUploaded &&
         isWarrantyFilled &&
         isPeriodFilled &&
         isAmountFilled;
-
-    logcat("isDateFilled::", isDateFilled);
-    logcat("isFileUploaded::", isFileUploaded);
-    logcat("isWarrantyFilled::", isWarrantyFilled);
-    logcat("isPeriodFilled::", isPeriodFilled);
-    logcat("isAmountFilled::", isAmountFilled);
   }
 
-  void updateCustomer(context, CustomerData customer) async {
+  void setCustomerFormFields(CustomerData customer) {
     currentCustomer = customer;
+
+    //  Expected Delivery Date
     dateCtr.text = customer.expectedDeliveryDate;
+
+    //  Installation Certificate
     if (customer.hasInstallationCertificate &&
         customer.installationCertificate != null) {
       final url = customer.installationCertificate!.path;
@@ -767,6 +816,7 @@ class CustomerScreenController extends GetxController {
       uploadFileCtr.clear();
     }
 
+    //  Match Warranty Type
     final matchedItem = filterWarrantyType.firstWhereOrNull(
       (item) => item.value.toLowerCase() == customer.warrantyType.toLowerCase(),
     );
@@ -777,51 +827,93 @@ class CustomerScreenController extends GetxController {
         ? customer.warrantyType
         : '';
 
-    // if (customer.warrantyType.toLowerCase().toString() == "non_amc") {
-    // } else {
-    //   warrantyPeriodCtr.text = customer.warrantyPeriod.toString();
-    // }
-    DateTime today = DateTime.now();
-    DateTime? warrantyEnd;
-
-    try {
-      warrantyEnd = DateTime.parse(customer.warrantyEndDate);
-    } catch (_) {
-      warrantyEnd = null;
-    }
-
-    // if (customer.customerStatus == "open" &&
-    //     warrantyEnd != null &&
-    //     warrantyEnd.isAfter(today.subtract(const Duration(days: 1)))) {
-
+    //  Handle Warranty Logic Based on Status
     if (customer.customerStatus == "open") {
       updateWarrantyCtr.text = "Under-Warranty";
       selectedWarrantyTypeValue.value = "under-warranty";
     } else {
-      // Warranty expired → use existing value or Non-AMC
-      final matchedItem = filterWarrantyType.firstWhereOrNull(
-        (item) =>
-            item.value.toLowerCase() == customer.warrantyType.toLowerCase(),
-      );
-
-      if (customer.warrantyType.toLowerCase().toString() != "amc") {
-        updateWarrantyCtr.text = "";
+      // If not AMC, clear warranty fields
+      if (customer.warrantyType.toLowerCase() != "amc") {
+        updateWarrantyCtr.clear();
         selectedWarrantyTypeValue.value = '';
         warrantyPeriodCtr.clear();
       } else {
         updateWarrantyCtr.text =
             matchedItem?.label ?? customer.warrantyType.capitalize ?? '';
-        selectedWarrantyTypeValue.value = customer.warrantyType.isNotEmpty
-            ? customer.warrantyType.toLowerCase()
-            : '';
+        selectedWarrantyTypeValue.value = customer.warrantyType.toLowerCase();
         warrantyPeriodCtr.text = customer.warrantyPeriod.toString();
       }
     }
-    amountCtr.clear();
-    // warrantyPeriodCtr.clear();
-    validateUpdateButton();
 
-    logcat("warrantyTypeId.value", selectedWarrantyTypeValue.value);
+    amountCtr.clear();
+    validateUpdateButton();
+  }
+
+  void updateCustomer(context, CustomerData customer) async {
+    setCustomerFormFields(customer);
+    // currentCustomer = customer;
+    // dateCtr.text = customer.expectedDeliveryDate;
+    // if (customer.hasInstallationCertificate &&
+    //     customer.installationCertificate != null) {
+    //   final url = customer.installationCertificate!.path;
+    //   uploadFileCtr.text = url.split('/').last;
+    // } else {
+    //   uploadFileCtr.clear();
+    // }
+
+    // final matchedItem = filterWarrantyType.firstWhereOrNull(
+    //   (item) => item.value.toLowerCase() == customer.warrantyType.toLowerCase(),
+    // );
+
+    // updateWarrantyCtr.text =
+    //     matchedItem?.label ?? customer.warrantyType.capitalize ?? '';
+    // selectedWarrantyTypeValue.value = customer.warrantyType.isNotEmpty
+    //     ? customer.warrantyType
+    // : '';
+
+    // if (customer.warrantyType.toLowerCase().toString() == "non_amc") {
+    // } else {
+    //   warrantyPeriodCtr.text = customer.warrantyPeriod.toString();
+    // }
+    // DateTime today = DateTime.now();
+    // DateTime? warrantyEnd;
+
+    // try {
+    //   warrantyEnd = DateTime.parse(customer.warrantyEndDate);
+    // } catch (_) {
+    //   warrantyEnd = null;
+    // }
+
+    // if (customer.customerStatus == "open" &&
+    //     warrantyEnd != null &&
+    //     warrantyEnd.isAfter(today.subtract(const Duration(days: 1)))) {
+
+    // if (customer.customerStatus == "open") {
+    //   updateWarrantyCtr.text = "Under-Warranty";
+    //   selectedWarrantyTypeValue.value = "under-warranty";
+    // } else {
+    //   // Warranty expired → use existing value or Non-AMC
+    //   final matchedItem = filterWarrantyType.firstWhereOrNull(
+    //     (item) =>
+    //         item.value.toLowerCase() == customer.warrantyType.toLowerCase(),
+    //   );
+
+    //   if (customer.warrantyType.toLowerCase().toString() != "amc") {
+    //     updateWarrantyCtr.text = "";
+    //     selectedWarrantyTypeValue.value = '';
+    //     warrantyPeriodCtr.clear();
+    //   } else {
+    //     updateWarrantyCtr.text =
+    //         matchedItem?.label ?? customer.warrantyType.capitalize ?? '';
+    //     selectedWarrantyTypeValue.value = customer.warrantyType.isNotEmpty
+    //         ? customer.warrantyType.toLowerCase()
+    //         : '';
+    //     warrantyPeriodCtr.text = customer.warrantyPeriod.toString();
+    //   }
+    // }
+    // amountCtr.clear();
+    // validateUpdateButton();
+    logcat("warrantyTypeId:", selectedWarrantyTypeValue.value);
     var result = await showModalBottomSheet(
       context: context,
       isDismissible: false,
@@ -846,65 +938,7 @@ class CustomerScreenController extends GetxController {
                   color: white,
                   child: Wrap(
                     children: [
-                      Stack(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10.w),
-                            ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: primaryColor,
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(10.w),
-                                ),
-                              ),
-                              padding: EdgeInsets.only(top: 2.5.h, bottom: 2.h),
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: Text(
-                                  "Update Customer",
-                                  style: TextStyle(
-                                    color: white,
-                                    fontSize: 16.sp,
-                                    fontFamily: plusJakartaSansBold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            bottom: 0,
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.only(
-                                  left: 10,
-                                  right: 10,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Icon(
-                                      Icons.close_rounded,
-                                      color: white,
-                                      size:
-                                          Device.screenType == ScreenType.mobile
-                                          ? 25
-                                          : 50,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      buildHeader(context, "Update Customer"),
                       Container(
                         margin: EdgeInsets.only(
                           left: 5.w,
@@ -930,7 +964,6 @@ class CustomerScreenController extends GetxController {
                                   isenable: false,
                                   wantsuffix: true,
                                   gestureFunction: () async {
-                                    logcat("click", "Done");
                                     openDatePicker(
                                       context: context,
                                       title: 'Select Start Date',
