@@ -2971,6 +2971,7 @@ class AddLeadsController extends GetxController {
       if (result != null && result.files.isNotEmpty) {
         selectedFilePath.value = result.files.single.path ?? '';
         uploadFileCtr.text = result.files.single.name.split('.').first;
+        validateUploadFile(uploadFileCtr.text);
       }
     } else {
       final picker = ImagePicker();
@@ -2978,9 +2979,23 @@ class AddLeadsController extends GetxController {
       if (pickedFile != null) {
         selectedFilePath.value = pickedFile.path;
         uploadFileCtr.text = pickedFile.name.split('.').first;
+        validateUploadFile(uploadFileCtr.text);
       }
     }
     update();
+    validateStep4();
+  }
+
+  void validateUploadFile(String? val) {
+    uploadFileModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Image is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
     validateStep4();
   }
 
