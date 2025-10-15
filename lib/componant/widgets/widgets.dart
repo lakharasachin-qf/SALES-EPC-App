@@ -13,6 +13,25 @@ import 'package:sales_app/configs/string_constant.dart';
 import 'package:sizer/sizer.dart';
 import '../../configs/colors_constant.dart';
 import '../../configs/font_constant.dart';
+// ignore: depend_on_referenced_packages
+import 'package:path/path.dart' as p;
+
+String getDisplayFileName(String? filePath, {bool isEdit = false}) {
+  if (filePath == null || filePath.isEmpty) return '';
+
+  // If editing existing files (text like abc_def)
+  if (isEdit && !filePath.contains('/') && !filePath.contains('\\')) {
+    return formatText(filePath);
+  }
+
+  // If new file (with full path like /storage/emulated/0/Download/test.pdf)
+  return p.basename(filePath);
+}
+
+String getFileName(String? filePath) {
+  if (filePath == null || filePath.isEmpty) return '';
+  return p.basename(filePath);
+}
 
 String formatText(String text) {
   if (text.isEmpty) return '';
