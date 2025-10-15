@@ -82,6 +82,7 @@ class LeadScreenState extends State<LeadScreen> {
                     isInitialLoad: true,
                     page: 1,
                   );
+                  ctr.getFillterOptions(context);
                 }, isOneSecond: false);
                 _refreshController.refreshCompleted();
               },

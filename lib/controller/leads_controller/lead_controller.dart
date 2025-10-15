@@ -59,7 +59,7 @@ class LeadController extends GetxController {
   RxBool isCategorySelected = false.obs;
   RxList<Cluster> districtList = <Cluster>[].obs;
   RxList<Cluster> clustersList = <Cluster>[].obs;
-  RxList<Cluster> categoryList = <Cluster>[].obs;
+  RxList<LabelValue> categoryList = <LabelValue>[].obs;
 
   var currentFilterSource = [].obs;
   var filteredData = [].obs;
@@ -338,9 +338,9 @@ class LeadController extends GetxController {
               .where(
                 (c) => selectedCategoryId.value
                     .split(', ')
-                    .contains(c.id.toString()),
+                    .contains(c.value.toString()),
               )
-              .map((c) => c.name)
+              .map((c) => c.label)
               .join(', ')
         : '';
     statusCtr.text = selectedStatus.value != 'Select Status'
@@ -454,11 +454,13 @@ class LeadController extends GetxController {
 
         districtList.clear();
         clustersList.clear();
+        categoryList.clear();
         var innerData = data['data'];
         FiltterData responseDetail = FiltterData.fromJson(innerData);
 
         districtList.addAll(responseDetail.districts);
         clustersList.addAll(responseDetail.clusters);
+        categoryList.addAll(responseDetail.leadCategory);
 
         logcat('District List', districtList.length.toString());
         logcat('Clusters List', clustersList.length.toString());
@@ -500,6 +502,55 @@ class LeadController extends GetxController {
   //   );
   // }
 
+  String buildCustomerQuery({
+    required User userData,
+    required int page,
+    required String startDateApi,
+    required String endDateApi,
+    required String customerStatus,
+    required String categoryType,
+    required RxList<dynamic> districtListInt,
+    required RxList<dynamic> clusterListInt,
+  }) {
+    final queryParams = <String>[];
+
+    // Required params
+    queryParams.add('user_id=${userData.userId}');
+    queryParams.add('page=$page');
+    queryParams.add('per_page=10');
+
+    // Add date filters
+
+    // Add date filters
+    if (startDateApi.isNotEmpty) {
+      queryParams.add('startMonthYear=$startDateApi');
+    }
+
+    if (endDateApi.isNotEmpty) {
+      queryParams.add('endMonthYear=$endDateApi');
+    }
+
+    if (customerStatus.isNotEmpty) {
+      queryParams.add('status=$customerStatus');
+    }
+
+    if (categoryType.isNotEmpty) {
+      queryParams.add('category=$categoryType');
+    }
+
+    // Add district list
+    for (final districtId in districtListInt) {
+      queryParams.add('districts[]=$districtId');
+    }
+
+    // Add cluster list
+    for (final clusterId in clusterListInt) {
+      queryParams.add('clusters[]=$clusterId');
+    }
+
+    return queryParams.join('&');
+  }
+
   Future<void> getLeadList({
     required BuildContext context,
     int page = 1,
@@ -529,8 +580,18 @@ class LeadController extends GetxController {
         return;
       }
 
-      final apiUrl =
-          "${ApiUrl.leadList}?user_id=${userData?.userId ?? 1}&page=$page&per_page=10";
+      final queryString = buildCustomerQuery(
+        userData: userData!,
+        page: page,
+        startDateApi: startDateApi.value, // e.g. "2027-02"
+        endDateApi: endDateApi.value, // e.g. "2027-12"
+        districtListInt: districtListInt,
+        clusterListInt: clusterListInt,
+        customerStatus: '',
+        categoryType: selectedCategoryId.value,
+      );
+
+      final apiUrl = "${ApiUrl.leadList}?$queryString";
 
       final response = await Repository.get({}, apiUrl, allowHeader: true);
 
@@ -538,6 +599,7 @@ class LeadController extends GetxController {
       if (isInitialLoad == true) {
         isCustomerLoading(false);
       }
+
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
@@ -682,12 +744,6 @@ class LeadController extends GetxController {
     'Inactive',
   ];
 
-  final List<String> cateory = [
-    'Select Status',
-    'Reschedule',
-    'Active',
-    'Inactive',
-  ];
   RxString selectStatus = 'Select Status'.obs;
 
   DateTime? selectedDateTime;
@@ -721,24 +777,27 @@ class LeadController extends GetxController {
   }
 
   void showCategorySelectionPopups(BuildContext context) {
-    fetchSelectionPopup<String>(
+    currentFilterSource.value = List.from(categoryList);
+
+    searchCategoriesCtr.clear();
+    fetchSelectionPopup<LabelValue>(
       context,
       title: 'Categories',
       controller: categoryCtr,
-      list: cateory,
+      list: categoryList,
       searchCtr: searchCategoriesCtr,
       searchNode: searchCategoriesNode,
       filterFunction: (val) {
         return categoryList
             .where(
-              (item) => item.name.toLowerCase().contains(val.toLowerCase()),
+              (item) => item.label.toLowerCase().contains(val.toLowerCase()),
             )
             .toList();
       },
-      getTitle: (value) => value,
+      getTitle: (value) => value.label,
       // getId: (value) => value.id.toString(),
       onSelected: (selectedList) {
-        selectedCategoryId.value = selectedList;
+        selectedCategoryId.value = selectedList.value;
         //     .map((e) => e.id.toString())
         //     .join(', ');
         // categoryListInt.value = selectedList.map((e) => e.id).toList();
@@ -1058,6 +1117,12 @@ Widget addFilterSheetWidget(
                     () {
                       ctr.resetForm();
                       Get.back();
+                      ctr.getLeadList(
+                        context: context,
+                        isInitialLoad: true,
+                        page: 1,
+                        hideLoading: false,
+                      );
                     },
                     'Clear',
                     validate: true,
@@ -1068,6 +1133,12 @@ Widget addFilterSheetWidget(
                   child: getFormButton(
                     context,
                     () {
+                      ctr.getLeadList(
+                        context: context,
+                        isInitialLoad: true,
+                        page: 1,
+                        hideLoading: false,
+                      );
                       Get.back();
                     },
                     'Search',
