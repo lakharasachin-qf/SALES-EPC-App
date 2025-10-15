@@ -778,21 +778,21 @@ class LeadController extends GetxController {
 
   void showCategorySelectionPopups(BuildContext context) {
     currentFilterSource.value = List.from(categoryList);
-
+    filteredData.value = List.from(categoryList);
     searchCategoriesCtr.clear();
     fetchSelectionPopup<LabelValue>(
       context,
       title: 'Categories',
       controller: categoryCtr,
-      list: categoryList,
+      list: filteredData,
       searchCtr: searchCategoriesCtr,
       searchNode: searchCategoriesNode,
       filterFunction: (val) {
-        return categoryList
-            .where(
-              (item) => item.label.toLowerCase().contains(val.toLowerCase()),
-            )
-            .toList();
+        filterFetchData<LabelValue>(
+          val,
+          source: categoryList,
+          getTitle: (item) => item.label,
+        );
       },
       getTitle: (value) => value.label,
       // getId: (value) => value.id.toString(),
@@ -813,6 +813,26 @@ class LeadController extends GetxController {
         Get.back();
       },
     );
+  }
+
+  void filterFetchData<T>(
+    String query, {
+    required List<T> source,
+    required String Function(T) getTitle,
+  }) {
+    logcat("query::", query.toString());
+    logcat("List:::::", jsonEncode(source));
+    if (query.isEmpty) {
+      filteredData.value = List.from(source);
+    } else {
+      filteredData.value = source.where((item) {
+        String title = getTitle(item).toLowerCase();
+        return title.startsWith(query.toLowerCase());
+      }).toList();
+    }
+
+    logcat("filteredData::", jsonEncode(filteredData.value));
+    update();
   }
 
   void showStatusSelectionPopups(BuildContext context) {
