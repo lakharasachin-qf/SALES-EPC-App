@@ -10,6 +10,7 @@ import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/controller/leads_controller/lead_controller.dart';
+import 'package:sales_app/utils/AppPermissions.dart';
 import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sales_app/view/add_leads_screen/addLeadScreen.dart';
@@ -226,7 +227,9 @@ class LeadScreenState extends State<LeadScreen> {
                                                                 .key];
 
                                                         if (columnName ==
-                                                            "Action") {
+                                                                "Action" &&
+                                                            AppPermissions()
+                                                                .canUpdateLead) {
                                                           // Custom UI for Action column
                                                           return DataCell(
                                                             Center(
@@ -480,32 +483,36 @@ class LeadScreenState extends State<LeadScreen> {
                                         style: TextStyle(fontSize: 12.sp),
                                       ),
                                     ),
-                                    ElevatedButton(
-                                      onPressed:
-                                          ctr.currentPage.value <
-                                              ctr.lastPage.value
-                                          ? () => ctr.getLeadList(
-                                              context: context,
-                                              page: ctr.currentPage.value + 1,
-                                              isInitialLoad: false,
-                                              hideLoading: false,
-                                            )
-                                          : null,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            ctr.currentPage.value <
-                                                ctr.lastPage.value
-                                            ? primaryColor
-                                            : Colors.grey.shade300,
-                                        minimumSize: const Size(36, 36),
-                                        shape: const CircleBorder(),
-                                        padding: EdgeInsets.zero,
-                                      ),
-                                      child: const Icon(
-                                        Icons.chevron_right,
-                                        color: Colors.white,
-                                      ),
-                                    ),
+                                    AppPermissions().canAddLead
+                                        ? ElevatedButton(
+                                            onPressed:
+                                                ctr.currentPage.value <
+                                                    ctr.lastPage.value
+                                                ? () => ctr.getLeadList(
+                                                    context: context,
+                                                    page:
+                                                        ctr.currentPage.value +
+                                                        1,
+                                                    isInitialLoad: false,
+                                                    hideLoading: false,
+                                                  )
+                                                : null,
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  ctr.currentPage.value <
+                                                      ctr.lastPage.value
+                                                  ? primaryColor
+                                                  : Colors.grey.shade300,
+                                              minimumSize: const Size(36, 36),
+                                              shape: const CircleBorder(),
+                                              padding: EdgeInsets.zero,
+                                            ),
+                                            child: const Icon(
+                                              Icons.chevron_right,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : SizedBox.shrink(),
                                   ],
                                 ),
                               ],
