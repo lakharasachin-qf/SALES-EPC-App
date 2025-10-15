@@ -10,6 +10,7 @@ import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/controller/customer_controller/customer_controller.dart';
+import 'package:sales_app/utils/AppPermissions.dart';
 import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sales_app/view/customer_screen.dart/view_customer_screen.dart';
@@ -243,7 +244,11 @@ class CustomerScreenState extends State<Customerscreen> {
                                                                 .key];
 
                                                         if (columnName ==
-                                                            "Action") {
+                                                                "Action" &&
+                                                            (AppPermissions()
+                                                                    .canUpdateCustomer ||
+                                                                AppPermissions()
+                                                                    .canViewCustomer)) {
                                                           // Custom UI for Action column
 
                                                           return DataCell(
@@ -253,31 +258,31 @@ class CustomerScreenState extends State<Customerscreen> {
                                                                     MainAxisAlignment
                                                                         .center,
                                                                 children: [
-                                                                  SizedBox(
-                                                                    width: 4.h,
-                                                                    height: 4.h,
-                                                                    child: IconButton(
-                                                                      padding:
-                                                                          EdgeInsets
-                                                                              .zero,
-                                                                      icon: const Icon(
-                                                                        Icons
-                                                                            .visibility,
-                                                                        color:
-                                                                            primaryColor,
-                                                                      ),
-                                                                      onPressed: () {
-                                                                        final customerData =
-                                                                            ctr.filteredCustomerList[entry.key];
-                                                                        Get.to(
-                                                                          ViewCustomerScreen(
-                                                                            customerId:
-                                                                                customerData.id.toString(),
+                                                                  AppPermissions()
+                                                                          .canUpdateCustomer
+                                                                      ? SizedBox(
+                                                                          width:
+                                                                              4.h,
+                                                                          height:
+                                                                              4.h,
+                                                                          child: IconButton(
+                                                                            padding:
+                                                                                EdgeInsets.zero,
+                                                                            icon: const Icon(
+                                                                              Icons.visibility,
+                                                                              color: primaryColor,
+                                                                            ),
+                                                                            onPressed: () {
+                                                                              final customerData = ctr.filteredCustomerList[entry.key];
+                                                                              Get.to(
+                                                                                ViewCustomerScreen(
+                                                                                  customerId: customerData.id.toString(),
+                                                                                ),
+                                                                              );
+                                                                            },
                                                                           ),
-                                                                        );
-                                                                      },
-                                                                    ),
-                                                                  ),
+                                                                        )
+                                                                      : SizedBox.shrink(),
                                                                   getDynamicSizedBox(
                                                                     width: 1.w,
                                                                   ),
@@ -342,7 +347,8 @@ class CustomerScreenState extends State<Customerscreen> {
                                                                       }
 
                                                                       // ✅ Only render SizedBox when true (no empty space otherwise)
-                                                                      return showEdit
+                                                                      return showEdit &&
+                                                                              AppPermissions().canUpdateCustomer
                                                                           ? SizedBox(
                                                                               width: 4.h,
                                                                               height: 4.h,
