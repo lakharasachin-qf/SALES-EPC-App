@@ -37,7 +37,7 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
         page: 1,
         hideLoading: false,
       );
-    }, isOneSecond: true);
+    }, milliseconds: true);
   }
 
   final Map<String, double> columnWidths = {
@@ -310,7 +310,13 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                                                 columnWidths[columnName] ??
                                                                 16.w,
                                                             child: Text(
-                                                              cell.value!,
+                                                              cell.value
+                                                                          ?.toString()
+                                                                          .isEmpty ??
+                                                                      true
+                                                                  ? '-'
+                                                                  : cell.value
+                                                                        .toString(),
                                                               style: TextStyle(
                                                                 fontSize: 14.sp,
                                                               ),

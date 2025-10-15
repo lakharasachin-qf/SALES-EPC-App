@@ -10,9 +10,44 @@ import 'package:sales_app/componant/input/form_inputs.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/configs/assets_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
+import 'package:sales_app/utils/log.dart';
 import 'package:sizer/sizer.dart';
 import '../../configs/colors_constant.dart';
 import '../../configs/font_constant.dart';
+// ignore: depend_on_referenced_packages
+import 'package:path/path.dart' as p;
+
+import '../../models/LeadByIdModel.dart';
+
+String displayFileName(UploadedFile file) {
+  logcat('uploaded fole', file.toJson());
+  final path = file.path ?? '';
+  if (path.isEmpty) return '';
+  logcat(file.path.toString(), 'data');
+
+  // Extract file name with extension
+  String fileName = getFileName(path); // works for URLs and local paths
+
+  // Split base name and extension
+  final dotIndex = fileName.lastIndexOf('.');
+  String namePart = fileName;
+  String extensionPart = '';
+
+  if (dotIndex != -1) {
+    namePart = fileName.substring(0, dotIndex); // base name
+    extensionPart = fileName.substring(dotIndex); // keep .pdf/.png
+  }
+
+  // Only format the base name (replace _ with space, capitalize)
+  final formattedName = formatText(namePart);
+
+  return '$formattedName$extensionPart';
+}
+
+String getFileName(String? filePath) {
+  if (filePath == null || filePath.isEmpty) return '';
+  return p.basename(filePath);
+}
 
 String formatText(String text) {
   if (text.isEmpty) return '';

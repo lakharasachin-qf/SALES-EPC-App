@@ -473,9 +473,11 @@ class DashboardController extends GetxController {
     );
   }
 
+  RxBool isSceenloaderShow = false.obs;
+
   Future<void> getFillterOptions(context, {showLoader = true}) async {
     User? userData = await UserPreferences().getSignInInfo();
-    var loadingIndicator = LoadingProgressDialog();
+    // var loadingIndicator = LoadingProgressDialog();
     commonGetApiCallFormate(
       context,
       title: 'Dashboard Screen',
@@ -484,13 +486,13 @@ class DashboardController extends GetxController {
       state: state,
       message: message,
       apisLoading: (isloaing) {
-        if (showLoader == true) {
-          if (isloaing == true) {
-            loadingIndicator.show(context, '');
-          } else {
-            loadingIndicator.hide(context);
-          }
-        }
+        // if (showLoader == true) {
+        //   if (isloaing == true) {
+        //     isSceenloaderShow.value = true;
+        //   } else {
+        //     isSceenloaderShow.value = false;
+        //   }
+        // }
       },
       onResponse: (data) {
         logcat('Filter Options Data', data.toString());
@@ -540,7 +542,7 @@ class DashboardController extends GetxController {
       resetForm();
     }
 
-    var loadingIndicator = LoadingProgressDialog();
+    // var loadingIndicator = LoadingProgressDialog();
     try {
       if (networkManager.connectionType.value == 0) {
         showDialogForScreen(
@@ -567,8 +569,8 @@ class DashboardController extends GetxController {
 
       logcat('Start Date:', startDateApi.value);
       logcat('End Date:', endDateApi.value);
-
-      loadingIndicator.show(context, '');
+      isSceenloaderShow.value = true;
+      // loadingIndicator.show(context, '');
 
       final Map<String, dynamic> body = {
         'user_id': userData.userId,
@@ -594,7 +596,8 @@ class DashboardController extends GetxController {
 
       logcat('RESPONSE::', response.body);
       var responseData = jsonDecode(response.body);
-      loadingIndicator.hide(context);
+      isSceenloaderShow.value = false;
+      // loadingIndicator.hide(context);
 
       if (response.statusCode == 200) {
         if (responseData['success'] == true) {
@@ -652,7 +655,8 @@ class DashboardController extends GetxController {
     } catch (e, st) {
       logcat('getDashboardData error', e);
       logcat('stacktrace', st);
-      loadingIndicator.hide(context);
+      isSceenloaderShow.value = false;
+      // loadingIndicator.hide(context);
       state.value = ScreenState.apiError;
       message.value = 'Failed to load dashboard data';
       showDialogForScreen(

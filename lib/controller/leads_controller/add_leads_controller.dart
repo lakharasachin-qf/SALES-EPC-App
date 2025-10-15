@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:path/path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart' hide ScreenType;
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sales_app/api_handle/Repository.dart';
 import 'package:sales_app/api_handle/apiCallingFormate.dart';
@@ -35,6 +36,18 @@ import 'package:sales_app/utils/log.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../configs/apicall_constant.dart';
+
+class ExistingFile {
+  final String id;
+  final String keep;
+
+  ExistingFile({required this.id, required this.keep});
+
+  Map<String, dynamic> toJson() => {'id': id, 'keep': keep};
+
+  @override
+  String toString() => 'ExistingFile(id: $id, keep: $keep)';
+}
 
 class CategoryModel {
   final String id;
@@ -136,6 +149,7 @@ class AddLeadsController extends GetxController {
   var filterVfdRequiredList = <DgSyncRequired>[].obs;
   var filterRoofNatureList = <DgSyncRequired>[].obs;
   var filterFinancingTypeList = <DgSyncRequired>[].obs;
+  RxList<ExistingFile> existingFiles = <ExistingFile>[].obs;
 
   // RxList<Cluster> districtList = <Cluster>[].obs;
 
@@ -196,8 +210,20 @@ class AddLeadsController extends GetxController {
     update();
   }
 
-  void deleteFile(int index) {
+  void deleteFile({required int index, required int fileId }) {
+    logcat('fileId', fileId);
+
     fileList.removeAt(index);
+
+    // Update existingFiles: set keep to '0' for the matching id
+    for (int i = 0; i < existingFiles.length; i++) {
+      if (existingFiles[i].id == fileId.toString()) {
+        existingFiles[i] = ExistingFile(id: existingFiles[i].id, keep: '0');
+        break; // stop after updating the first match
+      }
+    }
+
+    logcat('existing files delete', existingFiles);
     validateStep4();
     update();
   }
@@ -2740,7 +2766,12 @@ class AddLeadsController extends GetxController {
     }
   }
 
-  addUploadFile(context, {UploadedFile? fileItem, int? index}) async {
+  addUploadFile(
+    context, {
+    UploadedFile? fileItem,
+    int? index,
+    required isEdit,
+  }) async {
     if (fileItem != null) {
       uploadFileCtr.text = fileItem.path ?? '';
       uploadCategoryCtr.text = fileItem.category ?? '';
@@ -2852,7 +2883,7 @@ class AddLeadsController extends GetxController {
                               wantsuffix: false,
                               usegesture: true,
                               gestureFunction: () async {
-                                await pickAnyFile();
+                                await pickAnyFile(isEdit: isEdit);
                               },
                               hint: 'Select File',
                               isRequired: true,
@@ -2959,30 +2990,38 @@ class AddLeadsController extends GetxController {
 
   RxString selectedFilePath = ''.obs;
 
-  Future<void> pickAnyFile() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.any);
-    if (result != null && result.files.isNotEmpty) {
-      final file = result.files.single;
-      final fileName = file.name;
-      final filePath = file.path;
-
-      if (filePath != null) {
-        uploadFileCtr.text = fileName.split('.').first;
-        selectedFilePath.value = filePath;
-
-        uploadFileModel.update((model) {
-          if (filePath.isEmpty) {
-            model!.error = "File is required";
-            model.isValidate = false;
-          } else {
-            model!.error = null;
-            model.isValidate = true;
-          }
-        });
-        update();
-        validateStep4();
+  Future<void> pickAnyFile({bool isEdit = false}) async {
+    if (isEdit) {
+      final result = await FilePicker.platform.pickFiles(type: FileType.any);
+      if (result != null && result.files.isNotEmpty) {
+        selectedFilePath.value = result.files.single.path ?? '';
+        uploadFileCtr.text = result.files.single.name.split('.').first;
+        validateUploadFile(uploadFileCtr.text);
+      }
+    } else {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        selectedFilePath.value = pickedFile.path;
+        uploadFileCtr.text = pickedFile.name.split('.').first;
+        validateUploadFile(uploadFileCtr.text);
       }
     }
+    update();
+    validateStep4();
+  }
+
+  void validateUploadFile(String? val) {
+    uploadFileModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "Image is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+    validateStep4();
   }
 
   void validateUploadCategory(String? val) {
@@ -3325,10 +3364,31 @@ class AddLeadsController extends GetxController {
       finalCommercialProposalFile.value,
     );
 
-    // ---------- Finance documents (array) ----------
-    // Assuming financeDocumentFiles is RxList<File> or RxList<FileModel>
-    // ---------- Finance documents (array) ----------
-    for (int i = 0; i < selectedPdfPaths.length; i++) {
+    logcat("filepAth:::", jsonEncode(fileList));
+    for (int i = 0; i < fileList.length; i++) {
+      final file = fileList[i];
+      if (file.path != null && file.path!.isNotEmpty) {
+        final fileToUpload = File(file.path!);
+        if (await fileToUpload.exists()) {
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'uploaded_files[$i][file]',
+              fileToUpload.path,
+            ),
+          );
+          logcat("fileToUpload", "Step-");
+          // Attach category for this file
+          request.fields['uploaded_files[$i][category]'] = file.category ?? '';
+          // request.fields['uploaded_files[$i][category]'] = "equipment_photo";
+        } else {
+          logcat("File not found:", fileToUpload.path);
+        }
+      }
+    }
+
+    /*
+      for (int i = 0; i < selectedPdfPaths.length; i++) {
+      logcat('filepaths are', selectedPdfPaths);
       final filePath = selectedPdfPaths[i];
       if (await File(filePath).exists()) {
         request.files.add(
@@ -3337,6 +3397,41 @@ class AddLeadsController extends GetxController {
         logcat('Finance doc added', 'finance_documents[] => $filePath');
       } else {
         logcat('Finance doc skipped', 'index $i => file not found');
+      }
+    }
+     */
+
+    if (existingFiles.isNotEmpty) {
+      // existingFiles is List<ExistingFile>
+      for (int i = 0; i < existingFiles.length; i++) {
+        final f = existingFiles[i];
+        request.fields['existing_files[$i][id]'] = f.id;
+        request.fields['existing_files[$i][keep]'] = f.keep; // '1' or '0'
+        // Log each field
+        logcat(
+          'Existing file field',
+          'existing_files[$i][id] = ${f.id}, existing_files[$i][keep] = ${f.keep}',
+        );
+      }
+    }
+
+    logcat('existing_filessss', request.fields['existing_files']);
+    // ---------- Finance documents (array) ----------
+    // Assuming financeDocumentFiles is RxList<File> or RxList<FileModel>
+    // ---------- Finance documents (array) ----------
+    for (int i = 0; i < selectedPdfPaths.length; i++) {
+      final filePath = selectedPdfPaths[i];
+      if (await File(filePath).exists()) {
+        final fileName =
+            '${i}_${basename(filePath)}'; // prefix index to ensure uniqueness
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'finance_documents[]',
+            filePath,
+            filename: fileName,
+          ),
+        );
+        logcat('Finance doc added', 'finance_documents[] => $fileName');
       }
     }
 
@@ -4927,20 +5022,55 @@ class AddLeadsController extends GetxController {
                 [],
           );
 
+        existingFiles
+          ..clear()
+          ..assignAll(
+            result.uploadedFiles?.map((f) {
+                  // Extract the file extension from the original path
+
+                  return ExistingFile(id: f.id.toString(), keep: '1');
+                }).toList() ??
+                [],
+          );
+
+        logcat('existing files', existingFiles);
         //  Uploaded Files
         fileList
           ..clear()
           ..assignAll(
-            result.uploadedFiles?.map(
-                  (f) => UploadedFile(
-                    path: f.category?.split('/').last ?? '',
+            result.uploadedFiles?.map((f) {
+                  // Extract the file extension from the original path
+                  String extension = '';
+                  if (f.path != null && f.path!.contains('.')) {
+                    extension = f.path!.split('.').last;
+                  }
+
+                  return UploadedFile(
+                    id: f.id,
+                    // path = category + .extension
+                    path: f.tag != null && f.tag!.isNotEmpty
+                        ? "${f.tag}_${f.category}.$extension"
+                        : "${f.category}.$extension",
                     category: f.tag != null && f.tag!.isNotEmpty
                         ? "${f.tag}_${f.category}"
-                        : f.category,
-                  ),
-                ) ??
+                        : f.category, // keep category as it is
+                  );
+                }).toList() ??
                 [],
           );
+        // fileList
+        //   ..clear()
+        //   ..assignAll(
+        //     result.uploadedFiles?.map(
+        //           (f) => UploadedFile(
+        //             path: f.category?.split('/').last ?? '',
+        //             category: f.tag != null && f.tag!.isNotEmpty
+        //                 ? "${f.tag}_${f.category}"
+        //                 : f.category,
+        //           ),
+        //         ) ??
+        //         [],
+        //   );
 
         // Validations (can be extracted into one helper call)
         validateAll();

@@ -1851,7 +1851,10 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                 "Add Files",
                                 // isRequired: true,
                                 onClick: () {
-                                  controller.addUploadFile(context);
+                                  controller.addUploadFile(
+                                    context,
+                                    isEdit: widget.isEdit,
+                                  );
                                 },
                                 isAddShow:
                                     controller.isLeadRejectedMode.value ==
@@ -1871,8 +1874,8 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                     data: controller.fileList,
                                     columns: controller.uploadColumns,
                                     getValues: (file) => [
-                                      file.path.toString(),
-                                      file.category.toString(),
+                                      displayFileName(file),
+                                      formatText(file.category.toString()),
                                       // controller.formatCategory(
                                       //   file.category,
                                       //   file.uploadFile,
@@ -1896,6 +1899,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         context,
                                         fileItem: file,
                                         index: i,
+                                        isEdit: widget.isEdit,
                                       );
                                     },
                                     onDelete: (i) {
@@ -1912,7 +1916,10 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         );
                                         return;
                                       }
-                                      controller.deleteFile(i);
+                                      controller.deleteFile(
+                                        index: i,
+                                        fileId: controller.fileList[i].id ?? 0,
+                                      );
                                     },
                                     isRejected:
                                         controller.isLeadRejectedMode.value ||
