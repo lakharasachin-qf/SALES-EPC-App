@@ -70,7 +70,7 @@ class MeetingsCalendarController extends GetxController {
     searchNode = FocusNode();
 
     searchCtr.addListener(() {
-      filterCustomer(searchCtr.text);
+      filterMeetings(searchCtr.text);
     });
   }
 
@@ -266,8 +266,8 @@ class MeetingsCalendarController extends GetxController {
     }).toList();
   }
 
-  void filterCustomer(String query) {
-    logcat("filterCustomer::", query.toString());
+  void filterMeetings(String query) {
+    logcat("filterMeetings::", query.toString());
     final lowerQuery = query.toLowerCase().trim();
 
     if (lowerQuery.isEmpty) {
@@ -275,17 +275,20 @@ class MeetingsCalendarController extends GetxController {
       isTextEmpty.value = false;
       return;
     }
+    logcat("filter::", query.toString());
 
     filteredMeetingsList.assignAll(
       meetingsList.where((lead) {
         final formattedLiveAt = lead.scheduledAt!.isNotEmpty
             ? DateFormat('dd-MM-yyyy').format(DateTime.parse(lead.scheduledAt!))
             : '';
+
+        logcat("meetingStatus::", lead.meetingStatus!.toLowerCase().toString());
         final values = [
           lead.leadId.toString(),
           lead.contactPersonName,
           formattedLiveAt,
-          lead.meetingStatus,
+          lead.meetingStatus!.toLowerCase().toString(),
         ];
         return values.any((value) => value!.toLowerCase().contains(lowerQuery));
       }).toList(),
@@ -624,21 +627,27 @@ class MeetingsCalendarController extends GetxController {
             },
           );
         } else {
-          showDialogForScreen(
-            context,
-            "Error",
-            data['message'] ?? "Failed to update meeting",
-            callback: () => Get.back(),
-          );
+          logcat("Update::", "Done");
+          showErrorDialog(context, data);
+          // showDialogForScreen(
+          //   context,
+          //   "Error",
+          //   data['message'] ?? "Failed to update meeting",
+          //   callback: () => Get.back(),
+          // );
         }
       } else {
         logcat('Error Response', response.body);
-        showDialogForScreen(
-          context,
-          "Error",
-          response.body,
-          callback: () => Get.back(),
-        );
+        showErrorDialog(context, data);
+        // showDialogForScreen(
+        //   context,
+        //   "Error",
+        //   data['message']?.toString() ??
+        //       data['errors']?.values.first[0]?.toString() ??
+        //       'Server error',
+        //   // response.body,
+        //   callback: () => Get.back(),
+        // );
       }
     } catch (e) {
       loadingIndicator.hide(context);

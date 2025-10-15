@@ -49,7 +49,6 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
     "Action": 20.w,
   };
   // "Contacted": 20.w,
-
   @override
   Widget build(BuildContext context) {
     Statusbar().trasparentStatusbar();
@@ -113,7 +112,7 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                           onChanged: (val) {
                             if (val!.isNotEmpty) {
                               ctr.isTextEmpty.value = true;
-                              ctr.filterCustomer(val);
+                              ctr.filterMeetings(val);
                             } else {
                               ctr.isTextEmpty.value = false;
                             }

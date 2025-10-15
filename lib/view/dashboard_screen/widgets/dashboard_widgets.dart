@@ -128,15 +128,9 @@ Widget getDashboardDrawer(
   BuildContext context, {
   required DashboardController ctr,
 }) {
-  logcat(
-    'AppPermissions().isLeadManagement',
-    AppPermissions().isLeadManagement,
-  );
-  logcat('AppPermissions().canViewCustomer', AppPermissions().canViewCustomer);
-  logcat(
-    'AppPermissions().canAccessMeetingCalendar',
-    AppPermissions().canAccessMeetingCalendar,
-  );
+  logcat('isLeadManagement', AppPermissions().isLeadManagement);
+  logcat('canViewCustomer', AppPermissions().canViewCustomer);
+  logcat('canAccessMeetingCalendar', AppPermissions().canAccessMeetingCalendar);
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -154,15 +148,10 @@ Widget getDashboardDrawer(
       }),
       // getDynamicSizedBox(height: 1.h),
       AppPermissions().isLeadManagement
-          ? buildDrawerItem(
-              Asset.compass,
-              iconHeight: 20,
-              HomeScreenConst.leads,
-              () {
-                ctr.scaffoldKey.currentState?.closeDrawer();
-                Get.to(LeadScreen());
-              },
-            )
+          ? buildDrawerItem(Asset.compass, HomeScreenConst.leads, () {
+              ctr.scaffoldKey.currentState?.closeDrawer();
+              Get.to(LeadScreen());
+            })
           : SizedBox.shrink(),
       // getDynamicSizedBox(height: 1.h),
       // Obx(() {

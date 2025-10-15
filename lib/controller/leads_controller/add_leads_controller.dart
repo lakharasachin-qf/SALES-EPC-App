@@ -210,7 +210,7 @@ class AddLeadsController extends GetxController {
     update();
   }
 
-  void deleteFile({required int index, required int fileId }) {
+  void deleteFile({required int index, required int fileId}) {
     logcat('fileId', fileId);
 
     fileList.removeAt(index);
@@ -3228,7 +3228,7 @@ class AddLeadsController extends GetxController {
           );
         }
       } else {
-        logcat('❌ AddLeadApi Error', response.body);
+        logcat('AddLeadApi Error', response.body);
         showDialogForScreen(
           context,
           'Error',
@@ -3245,7 +3245,7 @@ class AddLeadsController extends GetxController {
       loadingIndicator.hide(context);
       state.value = ScreenState.apiError;
       message.value = "Error: $e";
-      logcat("❌ Exception", e.toString());
+      logcat("Exception", e.toString());
     }
   }
 

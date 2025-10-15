@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:sales_app/componant/CustomSnakbar.dart';
 import 'package:sales_app/componant/dialogs/customDialog.dart';
+import 'package:sales_app/componant/dialogs/dialogs.dart'
+    show showDialogForScreen;
 import 'package:sales_app/componant/dialogs/fullscreen.dart';
 import 'package:sales_app/componant/dialogs/pdfviewer_screen.dart';
 import 'package:sales_app/configs/string_constant.dart';
@@ -253,4 +255,25 @@ Future<void> fetchLocationTracking(
 
   logcat("Latitude:", position.latitude);
   logcat("Longitude:", position.longitude);
+}
+
+void showErrorDialog(BuildContext context, Map<String, dynamic> data) {
+  String errorMessage = 'Server error';
+
+  // Try first error from 'errors' first
+  if (data['errors'] != null && data['errors'] is Map) {
+    final errorsMap = data['errors'] as Map;
+    if (errorsMap.isNotEmpty) {
+      final firstErrorList = errorsMap.values.first;
+      if (firstErrorList is List && firstErrorList.isNotEmpty) {
+        errorMessage = firstErrorList.first.toString();
+      }
+    }
+  }
+  // Fallback to 'message' if no errors
+  else if (data['message'] != null && data['message'].toString().isNotEmpty) {
+    errorMessage = data['message'].toString();
+  }
+
+  showDialogForScreen(context, 'Error', errorMessage, callback: () {});
 }

@@ -16,7 +16,6 @@ import '../../configs/colors_constant.dart';
 import '../../configs/font_constant.dart';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart' as p;
-
 import '../../models/LeadByIdModel.dart';
 
 String displayFileName(UploadedFile file) {
@@ -300,7 +299,7 @@ openBottomtsheetDialog(
       borderRadius: BorderRadius.only(topLeft: Radius.circular(13.w)),
     ),
     isScrollControlled: true,
-    enableDrag: true, // 👈 Enable drag-to-close
+    enableDrag: true,
     useRootNavigator: useRootNav,
     backgroundColor: white,
     barrierColor: Colors.black54,
