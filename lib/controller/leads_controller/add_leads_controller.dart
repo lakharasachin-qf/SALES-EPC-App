@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:path/path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart' hide ScreenType;
@@ -3361,10 +3361,9 @@ class AddLeadsController extends GetxController {
       }
     }
 
-    // ---------- Finance documents (array) ----------
-    // Assuming financeDocumentFiles is RxList<File> or RxList<FileModel>
-    // ---------- Finance documents (array) ----------
-    for (int i = 0; i < selectedPdfPaths.length; i++) {
+    /*
+      for (int i = 0; i < selectedPdfPaths.length; i++) {
+      logcat('filepaths are', selectedPdfPaths);
       final filePath = selectedPdfPaths[i];
       if (await File(filePath).exists()) {
         request.files.add(
@@ -3373,6 +3372,26 @@ class AddLeadsController extends GetxController {
         logcat('Finance doc added', 'finance_documents[] => $filePath');
       } else {
         logcat('Finance doc skipped', 'index $i => file not found');
+      }
+    }
+     */
+
+    // ---------- Finance documents (array) ----------
+    // Assuming financeDocumentFiles is RxList<File> or RxList<FileModel>
+    // ---------- Finance documents (array) ----------
+    for (int i = 0; i < selectedPdfPaths.length; i++) {
+      final filePath = selectedPdfPaths[i];
+      if (await File(filePath).exists()) {
+        final fileName =
+            '${i}_${basename(filePath)}'; // prefix index to ensure uniqueness
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'finance_documents[]',
+            filePath,
+            filename: fileName,
+          ),
+        );
+        logcat('Finance doc added', 'finance_documents[] => $fileName');
       }
     }
 
