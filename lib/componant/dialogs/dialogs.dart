@@ -245,7 +245,6 @@ fetchSelectionPopup<T>(
   bool isStandard = false,
 }) {
   String selecteddata = controller.text;
-
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -302,6 +301,7 @@ fetchSelectionPopup<T>(
                     ),
                   ),
 
+                  getDynamicSizedBox(height: 1.h),
                   // Search field
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 4.w),

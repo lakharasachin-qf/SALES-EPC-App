@@ -528,6 +528,8 @@ class CustomerScreenController extends GetxController {
 
         logcat('DistrictList', districtList.length.toString());
         logcat('ClustersList', clustersList.length.toString());
+        logcat('filterCustomerStatus', jsonEncode(filterCustomerStatus));
+        logcat('filterWarrantyType', jsonEncode(filterWarrantyType));
         update();
       },
       networkManager: networkManager,
@@ -1692,6 +1694,7 @@ class CustomerScreenController extends GetxController {
               wantsuffix: true,
               usegesture: true,
               gestureFunction: () {
+                searchWarrantyTypeCtr.clear();
                 showWarrantyTypeSelectionPopups(context, '');
               },
               hint: 'Select Warranty Type',
@@ -1712,6 +1715,7 @@ class CustomerScreenController extends GetxController {
               wantsuffix: true,
               usegesture: true,
               gestureFunction: () {
+                searchCustomerStatusCtr.clear();
                 showCustomerStatusSelectionPopups(context);
               },
               hint: 'Select Customer Status',
@@ -1822,13 +1826,13 @@ class CustomerScreenController extends GetxController {
 
   void showCustomerStatusSelectionPopups(BuildContext context) {
     currentFilterSource.value = List.from(customerStatus);
-    customerFlteredData.value = List.from(customerStatus);
+    filteredData.value = List.from(customerStatus);
 
     fetchSelectionPopup<LabelValue>(
       context,
       title: 'Customer Status',
       controller: customerStatusCtr,
-      list: customerFlteredData,
+      list: filteredData,
       searchCtr: searchCustomerStatusCtr,
       searchNode: searchCustomerStatusNode,
       filterFunction: (val) {
@@ -1857,6 +1861,8 @@ class CustomerScreenController extends GetxController {
     required List<T> source,
     required String Function(T) getTitle,
   }) {
+    logcat("query::", query.toString());
+    logcat("List:::::", jsonEncode(source));
     if (query.isEmpty) {
       filteredData.value = List.from(source);
     } else {
@@ -1865,6 +1871,8 @@ class CustomerScreenController extends GetxController {
         return title.startsWith(query.toLowerCase());
       }).toList();
     }
+
+    logcat("filteredData::", jsonEncode(filteredData.value));
     update();
   }
 
