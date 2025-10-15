@@ -38,7 +38,7 @@ class LeadScreenState extends State<LeadScreen> {
         hideLoading: false,
       );
       ctr.getFillterOptions(context);
-    }, isOneSecond: false);
+    }, milliseconds: false);
   }
 
   @override

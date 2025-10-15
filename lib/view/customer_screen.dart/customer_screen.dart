@@ -38,7 +38,7 @@ class CustomerScreenState extends State<Customerscreen> {
         page: 1,
         hideLoading: false,
       );
-    }, isOneSecond: false);
+    }, milliseconds: false);
   }
 
   final Map<String, double> columnWidths = {

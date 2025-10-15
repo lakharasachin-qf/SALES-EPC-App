@@ -37,7 +37,7 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
         page: 1,
         hideLoading: false,
       );
-    }, isOneSecond: true);
+    }, milliseconds: true);
   }
 
   final Map<String, double> columnWidths = {
