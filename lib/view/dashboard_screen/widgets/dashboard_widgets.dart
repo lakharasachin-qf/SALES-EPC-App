@@ -154,15 +154,10 @@ Widget getDashboardDrawer(
       }),
       getDynamicSizedBox(height: 1.h),
       AppPermissions().isLeadManagement
-          ? buildDrawerItem(
-              Asset.compass,
-              iconHeight: 20,
-              HomeScreenConst.leads,
-              () {
-                ctr.scaffoldKey.currentState?.closeDrawer();
-                Get.to(LeadScreen());
-              },
-            )
+          ? buildDrawerItem(Asset.compass2, HomeScreenConst.leads, () {
+              ctr.scaffoldKey.currentState?.closeDrawer();
+              Get.to(LeadScreen());
+            })
           : SizedBox.shrink(),
       getDynamicSizedBox(height: 1.h),
 

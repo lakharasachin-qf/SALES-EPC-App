@@ -13,6 +13,7 @@ class Asset {
   static const meetingsCalendar = '$assets${svgFolder}meetingsCalendar.svg';
 
   static const compass = '$assets${svgFolder}compass.svg';
+  static const compass2 = '$assets${svgFolder}compass2.svg';
   static const dashboard = '$assets${svgFolder}dashboard.svg';
   static const logout = '$assets${svgFolder}logout.svg';
   static const users = '$assets${svgFolder}users.svg';
