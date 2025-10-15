@@ -251,10 +251,10 @@ class LeadScreenState extends State<LeadScreen> {
                                                                         color:
                                                                             primaryColor,
                                                                       ),
-                                                                      onPressed: () {
+                                                                      onPressed: () async {
                                                                         final lead =
                                                                             ctr.filteredLeadList[entry.key];
-                                                                        Get.to(
+                                                                        final result = await Get.to(
                                                                           AddLeadScreen(
                                                                             isEdit:
                                                                                 true,
@@ -262,6 +262,23 @@ class LeadScreenState extends State<LeadScreen> {
                                                                                 lead.id.toString(),
                                                                           ),
                                                                         );
+
+                                                                        if (result ==
+                                                                            true) {
+                                                                          ctr.getLeadList(
+                                                                            context:
+                                                                                context,
+                                                                            isInitialLoad:
+                                                                                true,
+                                                                            page:
+                                                                                1,
+                                                                            hideLoading:
+                                                                                false,
+                                                                          );
+                                                                          ctr.getFillterOptions(
+                                                                            context,
+                                                                          );
+                                                                        }
                                                                       },
                                                                     ),
                                                                   ),

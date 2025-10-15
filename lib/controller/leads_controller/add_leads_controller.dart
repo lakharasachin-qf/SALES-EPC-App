@@ -3492,11 +3492,11 @@ class AddLeadsController extends GetxController {
             callback: () => Get.back(result: true),
           );
         } else {
-          _showErrorDialog(context, data);
+          showErrorDialog(context, data);
         }
       } else {
         logcat('UpdateLeadApi Error', response.body);
-        _showErrorDialog(context, data);
+        showErrorDialog(context, data);
         message.value = "Failed to update lead (${response.statusCode})";
       }
     } catch (e) {
@@ -3514,7 +3514,7 @@ class AddLeadsController extends GetxController {
   }
 
   // Helper to keep error handling DRY
-  void _showErrorDialog(BuildContext context, Map<String, dynamic> data) {
+  void showErrorDialog(BuildContext context, Map<String, dynamic> data) {
     showDialogForScreen(
       context,
       'Error',
