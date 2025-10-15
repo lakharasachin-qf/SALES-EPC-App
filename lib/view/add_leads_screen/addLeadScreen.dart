@@ -1751,6 +1751,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                             controller:
                                                 controller.scheduleMeetingCtr,
                                             dateRx: controller.startDate,
+
                                             model:
                                                 controller.scheduleMeeeingModel,
                                           );
@@ -1850,7 +1851,10 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                 "Add Files",
                                 // isRequired: true,
                                 onClick: () {
-                                  controller.addUploadFile(context);
+                                  controller.addUploadFile(
+                                    context,
+                                    isEdit: widget.isEdit,
+                                  );
                                 },
                                 isAddShow:
                                     controller.isLeadRejectedMode.value ==
@@ -1895,6 +1899,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         context,
                                         fileItem: file,
                                         index: i,
+                                        isEdit: widget.isEdit,
                                       );
                                     },
                                     onDelete: (i) {

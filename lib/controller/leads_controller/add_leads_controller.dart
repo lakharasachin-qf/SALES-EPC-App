@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart' hide ScreenType;
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sales_app/api_handle/Repository.dart';
 import 'package:sales_app/api_handle/apiCallingFormate.dart';
@@ -2338,6 +2339,7 @@ class AddLeadsController extends GetxController {
     showCommonDatePicker(
       context: context,
       title: title,
+      disablePastDates: true,
       initialDate: dateRx.value.isNotEmpty
           ? DateTime.parse(dateRx.value)
           : null,
@@ -2739,7 +2741,12 @@ class AddLeadsController extends GetxController {
     }
   }
 
-  addUploadFile(context, {UploadedFile? fileItem, int? index}) async {
+  addUploadFile(
+    context, {
+    UploadedFile? fileItem,
+    int? index,
+    required isEdit,
+  }) async {
     if (fileItem != null) {
       uploadFileCtr.text = fileItem.path ?? '';
       uploadCategoryCtr.text = fileItem.category ?? '';
@@ -2851,7 +2858,7 @@ class AddLeadsController extends GetxController {
                               wantsuffix: false,
                               usegesture: true,
                               gestureFunction: () async {
-                                await pickAnyFile();
+                                await pickAnyFile(isEdit: isEdit);
                               },
                               hint: 'Select File',
                               isRequired: true,
@@ -2958,30 +2965,23 @@ class AddLeadsController extends GetxController {
 
   RxString selectedFilePath = ''.obs;
 
-  Future<void> pickAnyFile() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.any);
-    if (result != null && result.files.isNotEmpty) {
-      final file = result.files.single;
-      final fileName = file.name;
-      final filePath = file.path;
-
-      if (filePath != null) {
-        uploadFileCtr.text = fileName.split('.').first;
-        selectedFilePath.value = filePath;
-
-        uploadFileModel.update((model) {
-          if (filePath.isEmpty) {
-            model!.error = "File is required";
-            model.isValidate = false;
-          } else {
-            model!.error = null;
-            model.isValidate = true;
-          }
-        });
-        update();
-        validateStep4();
+  Future<void> pickAnyFile({bool isEdit = false}) async {
+    if (isEdit) {
+      final result = await FilePicker.platform.pickFiles(type: FileType.any);
+      if (result != null && result.files.isNotEmpty) {
+        selectedFilePath.value = result.files.single.path ?? '';
+        uploadFileCtr.text = result.files.single.name.split('.').first;
+      }
+    } else {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        selectedFilePath.value = pickedFile.path;
+        uploadFileCtr.text = pickedFile.name.split('.').first;
       }
     }
+    update();
+    validateStep4();
   }
 
   void validateUploadCategory(String? val) {
