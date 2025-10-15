@@ -62,6 +62,57 @@ String formatText(String text) {
       .join(' ');
 }
 
+/// 🔹 Header Section
+Widget buildHeader(BuildContext context, String title) {
+  return Stack(
+    children: [
+      ClipRRect(
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(10.w)),
+        child: Container(
+          decoration: BoxDecoration(
+            color: primaryColor,
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(10.w)),
+          ),
+          padding: EdgeInsets.only(top: 2.5.h, bottom: 2.h),
+          child: Align(
+            alignment: Alignment.center,
+            child: Text(
+              "Update Customer",
+              style: TextStyle(
+                color: white,
+                fontSize: 16.sp,
+                fontFamily: plusJakartaSansBold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+      Positioned(
+        top: 0,
+        right: 0,
+        bottom: 0,
+        child: InkWell(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            padding: const EdgeInsets.only(left: 10, right: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Icon(
+                  Icons.close_rounded,
+                  color: white,
+                  size: Device.screenType == ScreenType.mobile ? 25 : 50,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
 Widget deleteWidget(
   BuildContext context, {
   title,

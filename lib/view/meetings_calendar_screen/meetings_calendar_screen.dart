@@ -259,9 +259,11 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                                                       onPressed: () {
                                                                         ctr.updateMeetings(
                                                                           context,
-                                                                          ctr
-                                                                              .filteredMeetingsList[entry.key]
-                                                                              .id!,
+                                                                          ctr.filteredMeetingsList[entry
+                                                                              .key],
+                                                                          // ctr
+                                                                          //     .filteredMeetingsList[entry.key]
+                                                                          //     .id!,
                                                                         );
                                                                       },
                                                                     ),

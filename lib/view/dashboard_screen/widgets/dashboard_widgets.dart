@@ -152,15 +152,14 @@ Widget getDashboardDrawer(
         ctr.scaffoldKey.currentState?.closeDrawer();
         logcat("onTap", "Done");
       }),
-      getDynamicSizedBox(height: 1.h),
+      // getDynamicSizedBox(height: 1.h),
       AppPermissions().isLeadManagement
           ? buildDrawerItem(Asset.compass2, HomeScreenConst.leads, () {
               ctr.scaffoldKey.currentState?.closeDrawer();
               Get.to(LeadScreen());
             })
           : SizedBox.shrink(),
-      getDynamicSizedBox(height: 1.h),
-
+      // getDynamicSizedBox(height: 1.h),
       // Obx(() {
       //   return ctr.isAddMeterReadings.value == true
       //       ? buildDrawerItem(Asset.compass, HomeScreenConst.leads, () {

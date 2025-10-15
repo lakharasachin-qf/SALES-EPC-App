@@ -315,12 +315,12 @@ class MeetingsCalendarController extends GetxController {
     isEditMeetingEnable.value = false;
   }
 
-  void updateMeetings(context, int meetingId) async {
+  void updateMeetings(context, MeetingData meetingsData) async {
     resetFilterFields();
     openBottomtsheetDialog(
       context,
       title: "Edit Meeting",
-      widget: addFilterSheetWidget(context, meetingId),
+      widget: updateMeetingsWidget(context, meetingsData),
     );
   }
 
@@ -365,7 +365,26 @@ class MeetingsCalendarController extends GetxController {
   final List<String> status = ['Select Status', 'Reschedule'];
   RxString selectStatus = 'Select Status'.obs;
 
-  Widget addFilterSheetWidget(context, int meetingId) {
+  Widget updateMeetingsWidget(context, MeetingData meetingsData) {
+    if (meetingsData.scheduledAt != null) {
+      dateCtr.text = formatMeetingDate(meetingsData.scheduledAt);
+      validateFields(
+        meetingsData.scheduledAt,
+        model: dateModel,
+        iscomman: true,
+        errorText1: "",
+      );
+    } else {
+      dateCtr.clear();
+    }
+
+    if (meetingsData.meetingNotes != null &&
+        meetingsData.meetingNotes.toString().isNotEmpty) {
+      notesCtr.text = meetingsData.meetingNotes!;
+    } else {
+      notesCtr.clear();
+    }
+
     return Container(
       margin: EdgeInsets.only(left: 5.w, right: 5.w, top: 1.5.h, bottom: 4.h),
       child: Column(
@@ -381,7 +400,6 @@ class MeetingsCalendarController extends GetxController {
               onChanged: (value) {
                 selectStatus.value = value!;
                 update();
-
                 validateFields(
                   selectStatus.value,
                   model: statusModel,
@@ -392,9 +410,8 @@ class MeetingsCalendarController extends GetxController {
             ),
           ),
           getDynamicSizedBox(height: 1.h),
-
           Obx(() {
-            if (selectStatus.value == 'Reschedule') {
+            if (selectStatus.value.toLowerCase() == 'reschedule') {
               return Column(
                 children: [
                   getTextField(
@@ -410,6 +427,10 @@ class MeetingsCalendarController extends GetxController {
                     isdate: true,
                     wantsuffix: true,
                     gestureFunction: () async {
+                      dateCtr.text = formatMeetingDate(
+                        meetingsData.scheduledAt,
+                      );
+                      startDate.value = dateCtr.text;
                       openDatePicker(
                         context: context,
                         title: 'Select New Date',
@@ -452,8 +473,8 @@ class MeetingsCalendarController extends GetxController {
               context: context,
               wantLabel: true,
               label: 'Notes',
-              ctr: notesCtr, // 🔹 use correct controller for Notes
-              node: notesNode, // 🔹 use correct node for Notes
+              ctr: notesCtr,
+              node: notesNode,
               model: notesModel.value,
               hint: 'Enter Notes',
               isMultipline: true,
@@ -483,14 +504,16 @@ class MeetingsCalendarController extends GetxController {
                   return getFormButton(
                     context,
                     () {
-                      updateMeetingApi(
-                        context,
-                        meetingId: meetingId,
-                        status: selectStatus.value.toLowerCase(),
-                        newScheduledAt: dateCtr.text,
-                        reason: reasonCtr.text,
-                        notes: notesCtr.text,
-                      );
+                      if (isEditMeetingEnable.value == true) {
+                        updateMeetingApi(
+                          context,
+                          meetingId: meetingsData.id!,
+                          status: selectStatus.value.toLowerCase(),
+                          newScheduledAt: dateCtr.text,
+                          reason: reasonCtr.text,
+                          notes: notesCtr.text,
+                        );
+                      }
                     },
                     "Update",
                     validate: isEditMeetingEnable.value,
@@ -504,7 +527,7 @@ class MeetingsCalendarController extends GetxController {
     );
   }
 
-  final dateTimeFormat = DateFormat('yyyy-MM-dd HH:mm');
+  // final dateTimeFormat = DateFormat('yyyy-MM-dd HH:mm');
   final displayFormat = DateFormat('dd-MM-yyyy hh:mm a');
 
   DateTime? selectedDateTime;
@@ -521,11 +544,14 @@ class MeetingsCalendarController extends GetxController {
     showCommonDatePicker(
       context: context,
       title: title,
+      disablePastDates: true,
       initialDate: dateRx.value.isNotEmpty
-          ? dateTimeFormat.parse(dateRx.value)
-          : DateTime.now(),
+          ? displayFormat.parse(dateRx.value)
+          : (controller.text.isNotEmpty
+                ? displayFormat.parse(controller.text)
+                : DateTime.now()),
       minDate: startDate.value.isNotEmpty
-          ? dateTimeFormat.parse(startDate.value)
+          ? displayFormat.parse(startDate.value)
           : null,
       showTimePickers: showTimePickers,
       onDatePicked: (DateTime date) {
@@ -576,6 +602,7 @@ class MeetingsCalendarController extends GetxController {
       };
 
       logcat("body::", body);
+      // return;
       final response = await Repository.post(body, endPoint, allowHeader: true);
       final data = jsonDecode(response.body);
       loadingIndicator.hide(context);

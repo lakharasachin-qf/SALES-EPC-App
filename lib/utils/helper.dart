@@ -134,9 +134,36 @@ String toApiFormat(String displayDate) {
     DateTime parsedDate = displayFormat.parse(displayDate);
     return dateTimeFormat.format(parsedDate);
   } catch (e) {
-    print("Date conversion error: $e");
+    logcat("Date conversion error:", e);
     return '';
   }
+}
+
+String formatMeetingDate(String? scheduledAt) {
+  if (scheduledAt == null || scheduledAt.isEmpty) return '';
+  try {
+    final date = DateTime.parse(scheduledAt);
+    return DateFormat('dd-MM-yyyy hh:mm a').format(date);
+  } catch (_) {
+    return scheduledAt;
+  }
+}
+
+/// Helper to safely parse a date string
+DateTime? parseDate(String? date) {
+  if (date == null || date.isEmpty) return null;
+  try {
+    return DateTime.parse(date);
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Helper to format a date in dd-MM-yyyy format
+String formatDate(String? date) {
+  final parsedDate = parseDate(date);
+  if (parsedDate == null) return '';
+  return DateFormat('dd-MM-yyyy').format(parsedDate);
 }
 
 Future<void> fetchLocationTracking(
