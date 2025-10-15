@@ -37,6 +37,18 @@ import 'package:sizer/sizer.dart';
 
 import '../../configs/apicall_constant.dart';
 
+class ExistingFile {
+  final String id;
+  final String keep;
+
+  ExistingFile({required this.id, required this.keep});
+
+  Map<String, dynamic> toJson() => {'id': id, 'keep': keep};
+
+  @override
+  String toString() => 'ExistingFile(id: $id, keep: $keep)';
+}
+
 class CategoryModel {
   final String id;
   final String name;
@@ -137,6 +149,7 @@ class AddLeadsController extends GetxController {
   var filterVfdRequiredList = <DgSyncRequired>[].obs;
   var filterRoofNatureList = <DgSyncRequired>[].obs;
   var filterFinancingTypeList = <DgSyncRequired>[].obs;
+  RxList<ExistingFile> existingFiles = <ExistingFile>[].obs;
 
   // RxList<Cluster> districtList = <Cluster>[].obs;
 
@@ -197,8 +210,20 @@ class AddLeadsController extends GetxController {
     update();
   }
 
-  void deleteFile(int index) {
+  void deleteFile({required int index, required int fileId }) {
+    logcat('fileId', fileId);
+
     fileList.removeAt(index);
+
+    // Update existingFiles: set keep to '0' for the matching id
+    for (int i = 0; i < existingFiles.length; i++) {
+      if (existingFiles[i].id == fileId.toString()) {
+        existingFiles[i] = ExistingFile(id: existingFiles[i].id, keep: '0');
+        break; // stop after updating the first match
+      }
+    }
+
+    logcat('existing files delete', existingFiles);
     validateStep4();
     update();
   }
@@ -3376,6 +3401,21 @@ class AddLeadsController extends GetxController {
     }
      */
 
+    if (existingFiles.isNotEmpty) {
+      // existingFiles is List<ExistingFile>
+      for (int i = 0; i < existingFiles.length; i++) {
+        final f = existingFiles[i];
+        request.fields['existing_files[$i][id]'] = f.id;
+        request.fields['existing_files[$i][keep]'] = f.keep; // '1' or '0'
+        // Log each field
+        logcat(
+          'Existing file field',
+          'existing_files[$i][id] = ${f.id}, existing_files[$i][keep] = ${f.keep}',
+        );
+      }
+    }
+
+    logcat('existing_filessss', request.fields['existing_files']);
     // ---------- Finance documents (array) ----------
     // Assuming financeDocumentFiles is RxList<File> or RxList<FileModel>
     // ---------- Finance documents (array) ----------
@@ -4982,6 +5022,18 @@ class AddLeadsController extends GetxController {
                 [],
           );
 
+        existingFiles
+          ..clear()
+          ..assignAll(
+            result.uploadedFiles?.map((f) {
+                  // Extract the file extension from the original path
+
+                  return ExistingFile(id: f.id.toString(), keep: '1');
+                }).toList() ??
+                [],
+          );
+
+        logcat('existing files', existingFiles);
         //  Uploaded Files
         fileList
           ..clear()
@@ -4994,6 +5046,7 @@ class AddLeadsController extends GetxController {
                   }
 
                   return UploadedFile(
+                    id: f.id,
                     // path = category + .extension
                     path: f.tag != null && f.tag!.isNotEmpty
                         ? "${f.tag}_${f.category}.$extension"

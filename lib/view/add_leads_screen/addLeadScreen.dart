@@ -1916,7 +1916,10 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         );
                                         return;
                                       }
-                                      controller.deleteFile(i);
+                                      controller.deleteFile(
+                                        index: i,
+                                        fileId: controller.fileList[i].id ?? 0,
+                                      );
                                     },
                                     isRejected:
                                         controller.isLeadRejectedMode.value ||
