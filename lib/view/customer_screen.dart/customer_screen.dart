@@ -506,7 +506,13 @@ class CustomerScreenState extends State<Customerscreen> {
                                                                 columnWidths[columnName] ??
                                                                 16.w,
                                                             child: Text(
-                                                              cell.value,
+                                                              cell.value
+                                                                          ?.toString()
+                                                                          .isEmpty ??
+                                                                      true
+                                                                  ? '-'
+                                                                  : cell.value
+                                                                        .toString(),
                                                               style: TextStyle(
                                                                 fontSize: 14.sp,
                                                               ),
