@@ -91,6 +91,9 @@ class AddLeadsController extends GetxController {
   RxBool isDistrictApiCallLoading = false.obs;
   RxBool isAddOnApiCallLoading = false.obs;
   var isAboutUsApiCallLoading = false.obs;
+
+  RxBool isFinanceThroughOMC = true.obs;
+
   RxString designationId = ''.obs;
   RxString addOnId = ''.obs;
   RxString addOnTicketId = ''.obs;
@@ -2277,6 +2280,8 @@ class AddLeadsController extends GetxController {
   void validateStep2() {
     bool isValid = true;
 
+    logcat('step1', 'step1');
+
     if (!roofNatureModel.value.isValidate) isValid = false;
 
     if (isEditMode.value == false) {
@@ -2305,7 +2310,13 @@ class AddLeadsController extends GetxController {
       }
     }
 
-    isStep2Valid.value = isValid;
+    if (isFinanceThroughOMC.value = false) {
+      logcat('isFinanceThroughOMC', isFinanceThroughOMC.value);
+      isStep2Valid.value = false;
+    } else {
+      isStep2Valid.value = isValid;
+    }
+
     logcat('validateStep2 result: isStep2Valid = $isStep2Valid', '');
 
     // ✅ Combined log summary for debugging
@@ -4430,19 +4441,42 @@ class AddLeadsController extends GetxController {
                   isFullPaymentAmountMode.value = true;
                   isOMCPartnerMode.value = false;
                   isOMCFinanceDocumentShown.value = false;
+                  isFinanceThroughOMC.value = true;
 
                   validateFullPaymentProject(balanceAmonutCtr.text);
                   // Enable technical proposal mode
                 } else if (selectedfinanicalStatusvalue.value ==
                     "omc_partner") {
                   if (AppPermissions().canUploadFinanceDocuments == false) {
-                    Get.snackbar(
-                      'Action Not Allowed',
-                      'You can’t add items in Rejected mode',
-                      snackPosition: SnackPosition.BOTTOM,
-                      backgroundColor: Colors.red.withOpacity(0.1),
-                      colorText: Colors.redAccent,
+                    logcat(
+                      'isFinanceThroughOMC_2222',
+                      isFinanceThroughOMC.value,
                     );
+                    isFinanceThroughOMC.value = false;
+                    selectedfinanicalStatusvalue.value =
+                        'select_Financing_Type';
+                    financialTypeCtr.text = 'Select Financing Type';
+                    showDialogForScreen(
+                      context,
+                      'Permission Required',
+                      'You do not have right to upload finance documents.',
+                      callback: () {
+                        validateStep2();
+
+                        isStep2Valid.value = false;
+                        update();
+                        Get.back();
+                      },
+                    );
+
+                    // Get.snackbar(
+                    //   'Action Not Allowed',
+                    //   'You do not have right to upload finance documents.',
+                    //   snackPosition: SnackPosition.BOTTOM,
+                    //   backgroundColor: Colors.red.withOpacity(0.1),
+                    //   colorText: Colors.redAccent,
+                    // );
+                    // Get.back();
                     return;
                   }
 
@@ -4463,6 +4497,7 @@ class AddLeadsController extends GetxController {
                   isFullPaymentAmountMode.value = true;
                   isOMCPartnerMode.value = false;
                   isOMCFinanceDocumentShown.value = false;
+                  isFinanceThroughOMC.value = true;
 
                   validateFullPaymentProject(balanceAmonutCtr.text);
                 } else {
@@ -4470,6 +4505,7 @@ class AddLeadsController extends GetxController {
                   isFullPaymentAmountMode.value = false;
                   isOMCPartnerMode.value = false;
                   isOMCFinanceDocumentShown.value = false;
+                  isFinanceThroughOMC.value = true;
                   validateFullPaymentProject(balanceAmonutCtr.text);
 
                   // // Reset all fields
