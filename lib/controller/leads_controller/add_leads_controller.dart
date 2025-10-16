@@ -4562,37 +4562,30 @@ class AddLeadsController extends GetxController {
           for (var status in result.availableNextStatuses!) {
             switch (status) {
               case 'technical_proposal':
-                // isTechnicalProposalMode.value = true;
                 leadStatusList.assignAll(leadStatusTechnical);
                 leadStatusCtr.text = leadStatusList.first.label;
                 selectedLeadStatusvalue.value = leadStatusList.first.value;
                 validateLeadStatus(leadStatusCtr.text);
-
                 break;
+
               case 'commercial_proposal':
-                // isCommercialProposalMode.value = true;
                 leadStatusList.assignAll(leadStatusCommercial);
                 leadStatusCtr.text = leadStatusList.first.label;
                 selectedLeadStatusvalue.value = leadStatusList.first.value;
                 validateLeadStatus(leadStatusCtr.text);
                 break;
+
               case 'approved':
               case 'rejected':
                 if (AppPermissions().canApproveLead) {
                   isAppproveMode.value = true;
                   leadStatusList.assignAll(leadStatusApproveReject);
-                  leadStatusCtr.text = leadStatusList.first.label;
-                  selectedLeadStatusvalue.value = leadStatusList.first.value;
-                  validateLeadStatus(leadStatusCtr.text);
-
-                  logcat('isAppproveMode.value', 'isAppproveMode.value');
                 } else {
                   leadStatusList.assignAll(leadStatusCommercialOnlyNoRights);
-                  leadStatusCtr.text = leadStatusList.first.label;
-                  selectedLeadStatusvalue.value = leadStatusList.first.value;
-                  validateLeadStatus(leadStatusCtr.text);
                 }
-                // Add your handling for these statuses
+                leadStatusCtr.text = leadStatusList.first.label;
+                selectedLeadStatusvalue.value = leadStatusList.first.value;
+                validateLeadStatus(leadStatusCtr.text);
                 break;
 
               case 'payments':
@@ -4605,7 +4598,6 @@ class AddLeadsController extends GetxController {
               case 'won':
                 iswonShow.value = true;
                 validateFullPaymentProject(balanceAmonutCtr.text);
-                //last case
                 break;
             }
           }
@@ -4614,62 +4606,66 @@ class AddLeadsController extends GetxController {
         if (result.leadStatus != null) {
           final currentStatus = result.leadStatus!;
 
+          // ===============================
+          // STATUS: technical_proposal
+          // ===============================
           if (currentStatus == 'technical_proposal') {
             if (result.uploadedFiles != null &&
                 result.uploadedFiles!.isNotEmpty) {
-              // Check if 'first' file exists under technical_proposal
               bool hasFirst = result.uploadedFiles!.any(
                 (f) => f.category == 'technical_proposal' && f.tag == 'first',
               );
-
-              // Check if 'final' file exists under technical_proposal
               bool hasFinal = result.uploadedFiles!.any(
                 (f) => f.category == 'technical_proposal' && f.tag == 'final',
               );
 
-              // Update your observables accordingly
               isTechnicalProposalMode.value = true;
               isFirstTechincaluploaded.value = !hasFirst;
               isFinalTechnicaluploaded.value = !hasFinal;
 
-              if (isFirstTechincaluploaded.value == false &&
-                  isFinalTechnicaluploaded.value == false) {
+              if (!isFirstTechincaluploaded.value &&
+                  !isFinalTechnicaluploaded.value) {
                 leadStatusList.assignAll(leadStatusCommercial);
               } else {
-                logcat('going in else case', 'data');
                 leadStatusList.assignAll(leadStatusTechnicallOnly);
               }
             }
-
-            leadStatusCtr.text = leadStatusList.first.label;
-            selectedLeadStatusvalue.value = leadStatusList.first.value;
-            validateLeadStatus(leadStatusCtr.text);
+            logcat('leadStatusList isssss', leadStatusList.toJson());
+            if (leadStatusList.isNotEmpty) {
+              leadStatusCtr.text = leadStatusList.first.label;
+              selectedLeadStatusvalue.value = leadStatusList.first.value;
+              validateLeadStatus(leadStatusCtr.text);
+            } else {
+              leadStatusList.assignAll(leadStatusTechnical);
+              leadStatusCtr.text = leadStatusList[1].label;
+              selectedLeadStatusvalue.value = leadStatusList[1].value;
+              validateLeadStatus(leadStatusCtr.text);
+              isTechnicalProposalMode.value = true;
+            }
           }
 
+          // ===============================
+          // STATUS: commercial_proposal
+          // ===============================
           if (currentStatus == 'commercial_proposal') {
             if (result.uploadedFiles != null &&
                 result.uploadedFiles!.isNotEmpty) {
-              // Check if 'first' file exists under technical_proposal
               bool hasFirst = result.uploadedFiles!.any(
                 (f) => f.category == 'commercial_proposal' && f.tag == 'first',
               );
-
-              // Check if 'final' file exists under technical_proposal
               bool hasFinal = result.uploadedFiles!.any(
                 (f) => f.category == 'commercial_proposal' && f.tag == 'final',
               );
 
-              // Update your observables accordingly
               isCommercialProposalMode.value = true;
               isFirstComercialluploaded.value = !hasFirst;
               isFinalComercialluploaded.value = !hasFinal;
 
-              if (isFirstComercialluploaded.value == false &&
-                  isFinalComercialluploaded.value == false) {
+              if (!isFirstComercialluploaded.value &&
+                  !isFinalComercialluploaded.value) {
                 isCommercialProposalMode.value = false;
                 isTechnicalProposalMode.value = false;
               } else {
-                logcat('going in else case', 'data');
                 leadStatusList.assignAll(leadStatusCommercialOnlyNoRights);
               }
             }
@@ -4679,6 +4675,9 @@ class AddLeadsController extends GetxController {
             validateLeadStatus(leadStatusCtr.text);
           }
 
+          // ===============================
+          // STATUS: rejected
+          // ===============================
           if (currentStatus == 'rejected') {
             isLeadRejectedMode.value = true;
             leadStatusList.assignAll(leadStatusReject);
@@ -4687,6 +4686,9 @@ class AddLeadsController extends GetxController {
             validateLeadStatus(leadStatusCtr.text);
           }
 
+          // ===============================
+          // STATUS: payments
+          // ===============================
           if (currentStatus == 'payments') {
             isFinancialType.value = true;
             isLeadPaymentMode.value = true;
@@ -4700,7 +4702,6 @@ class AddLeadsController extends GetxController {
             }
 
             leadStatusCtr.text = leadStatusList.first.label;
-
             tokenAmountCtr.text = result.payment?.tokenAmount ?? '';
             totalProjectCostCtr.text = result.payment?.totalProjectCost ?? '';
             validateLeadStatus(leadStatusCtr.text);
@@ -4708,6 +4709,7 @@ class AddLeadsController extends GetxController {
             validateTotalProject(totalProjectCostCtr.text);
             calculateBalanceAmount();
 
+            // handle finance document / OMC Partner logic
             if (result.uploadedFiles != null &&
                 result.uploadedFiles!.any(
                   (f) => f.category == 'finance_document',
@@ -4746,9 +4748,6 @@ class AddLeadsController extends GetxController {
                 omcParternerListDropdown.assignAll(
                   financingProgressStatuToPartnersPaymentReceiveedMode,
                 );
-
-                // financingProgressStatuToPartnersPaymentReceiveedMode.value =
-                //     true;
               } else if (result.payment!.financingProgressStatus ==
                   "payment_received") {
                 ispaymentReceivedShow.value = false;
@@ -4756,7 +4755,6 @@ class AddLeadsController extends GetxController {
                 validateOMCProgressStatus(financialOMCPartnerCtr.text);
               } else {
                 ispaymentReceivedShow.value = false;
-
                 if (iswonShow.value == true) {
                   omcParternerListDropdown.assignAll(iswonShowdata);
                 } else {
@@ -4764,11 +4762,7 @@ class AddLeadsController extends GetxController {
                     financingProgressStatuToPartnersMode,
                   );
                 }
-
                 validateOMCProgressStatus(financialOMCPartnerCtr.text);
-
-                // financingProgressStatuToPartnersPaymentReceiveedMode.value =
-                //     false;
               }
 
               financialOMCPartnerCtr.text =
@@ -4783,7 +4777,6 @@ class AddLeadsController extends GetxController {
               isFullPaymentAmountMode.value = true;
             } else {
               isSendToPartnerMode.value = false;
-
               if (iswonShow.value == true) {
                 financialTypePaymentListDropdown.assignAll(
                   selfFundingTypePayment,
@@ -4801,11 +4794,11 @@ class AddLeadsController extends GetxController {
                 financialTypePaymentListDropdown.first.value;
 
             validateFinancialStatus(financialTypeCtr.text);
-
-            // selectedLeadStatusvalue.value = 'Select Financing Type';
-            // validateLeadStatus(leadStatusCtr.text);
           }
 
+          // ===============================
+          // STATUS: won
+          // ===============================
           if (currentStatus == 'won') {
             leadStatusList.assignAll(totalWon);
             leadStatusCtr.text = leadStatusList.first.label;
@@ -4816,25 +4809,18 @@ class AddLeadsController extends GetxController {
             isFullPaymentAmountMode.value = true;
             isFinancialType.value = true;
 
-            //payment
             tokenAmountCtr.text = result.payment?.tokenAmount ?? '';
             totalProjectCostCtr.text = result.payment?.totalProjectCost ?? '';
             calculateBalanceAmount();
             validateLeadStatus(leadStatusCtr.text);
             validateTokenAmountt(tokenAmountCtr.text);
             validateTotalProject(totalProjectCostCtr.text);
-            validateLeadStatus(leadStatusCtr.text);
-
-            //show conditionaly
 
             if (result.payment != null &&
                 result.payment!.financingType == "self_finance") {
               financialTypePaymentListDropdown.assignAll(
                 selfFundingTypePayment,
               );
-
-              // financingProgressStatuToPartnersPaymentReceiveedMode.value =
-              //     true;
             } else if (result.payment!.financingType == "bank") {
               financialTypePaymentListDropdown.assignAll(
                 selfBankFinancingPayment,
@@ -4844,21 +4830,15 @@ class AddLeadsController extends GetxController {
                 financialTypePaymentfinancethroughomcPartner,
               );
             }
+
             financialTypeCtr.text =
                 financialTypePaymentListDropdown.first.label;
             selectedfinanicalStatusvalue.value =
                 financialTypePaymentListDropdown.first.value;
-
             validateFinancialStatus(financialTypeCtr.text);
-
-            // financialTypeCtr.text =
-            //     financialTypePaymentListDropdown.first.label;
-            // selectedfinanicalStatusvalue.value =
-            //     financialTypePaymentListDropdown.first.value;
-
-            // validateFinancialStatus(financialTypeCtr.text);
           }
         }
+
         logcat('isLeadRejectedMode.value', isLeadRejectedMode.value);
 
         // 🔹 Helper: safely set text controller values
@@ -4904,82 +4884,52 @@ class AddLeadsController extends GetxController {
         setText(otherRemarksCtr, result.otherRemarks);
         setText(scheduleMeetingCtr, result.meeting?.scheduledAt);
 
-        // 🔹 Dropdowns
-        void setDropdown(
-          RxString value,
-          RxString label,
-          TextEditingController ctr,
-          dynamic data,
-        ) {
-          value.value = (data ?? '').toString();
-          label.value = (data ?? '').toString();
-          ctr.text = (data ?? '').toString();
-        }
-
-        logcat(
-          "selectedRequiredSolutionTypeValue",
-          selectedRequiredSolutionTypeValue.toString(),
-        );
-        logcat("requiredSolutionType", result.requiredSolutionType.toString());
-        // setDropdown(
-        //   selectedRequiredSolutionTypeValue,
-        //   selectedRequiredSolutionTypeLabel,
-        //   requiredSolutionTypeCtr,
-        //   result.requiredSolutionType,
-        // );
-
-        final matchedLabel = getLabelFromValue(
+        // ==========================================================
+        // 🔹 DROPDOWN VALUE → LABEL USING getLabelFromValue
+        // ==========================================================
+        final requiredSolutionTypeLabel = getLabelFromValue(
           requiredSolutionTypeList,
-          result.requiredSolutionType!,
+          result.requiredSolutionType ?? '',
         );
-
-        selectedRequiredSolutionTypeValue.value = result.requiredSolutionType!;
-        selectedRequiredSolutionTypeLabel.value = matchedLabel;
-
-        if (filterRequiredSolutionTypeList.any(
-          (element) => element.label == selectedRequiredSolutionTypeLabel.value,
-        )) {
-          logcat("matchedLabel", "matchedLabel");
-        } else {
-          logcat("not matchedLabel", "not matchedLabel");
-        }
-
-        requiredSolutionTypeCtr.text = matchedLabel;
+        selectedRequiredSolutionTypeValue.value =
+            result.requiredSolutionType ?? '';
+        selectedRequiredSolutionTypeLabel.value = requiredSolutionTypeLabel;
+        requiredSolutionTypeCtr.text = requiredSolutionTypeLabel;
 
         final requiredSolutionLabel = getLabelFromValue(
           filterRequiredSolutionList,
-          result.requiredSolution!,
+          result.requiredSolution ?? '',
         );
-
-        selectedRequiredSolutionValue.value = result.requiredSolution!;
+        selectedRequiredSolutionValue.value = result.requiredSolution ?? '';
         selectedRequiredSolutionLabel.value = requiredSolutionLabel;
         requiredSolutionCtr.text = requiredSolutionLabel;
-        // setDropdown(
-        //   selectedRequiredSolutionValue,
-        //   selectedRequiredSolutionLabel,
-        //   requiredSolutionCtr,
-        //   result.requiredSolution,
-        // );
-        setDropdown(
-          selectedLeadCategoryValue,
-          selectedLeadCategoryLabel,
-          leadCategoryCtr,
-          result.leadCategory,
-        );
-        setDropdown(
-          selectedPurposeOfSolarisationValue,
-          selectedPurposeOfSolarisationLabel,
-          purposeOfSolarizationCtr,
-          result.purposeOfSolarisation,
-        );
-        setDropdown(
-          selectedRoofNatureValue,
-          selectedRoofNatureLabel,
-          roofNatureCtr,
-          result.roofNature,
-        );
 
-        // 🔹 Boolean dropdowns (Yes/No)
+        final leadCategoryLabel = getLabelFromValue(
+          leadCategoryList,
+          result.leadCategory ?? '',
+        );
+        selectedLeadCategoryValue.value = result.leadCategory ?? '';
+        selectedLeadCategoryLabel.value = leadCategoryLabel;
+        leadCategoryCtr.text = leadCategoryLabel;
+
+        final purposeOfSolarisationLabel = getLabelFromValue(
+          purposeOfSolarisationList,
+          result.purposeOfSolarisation ?? '',
+        );
+        selectedPurposeOfSolarisationValue.value =
+            result.purposeOfSolarisation ?? '';
+        selectedPurposeOfSolarisationLabel.value = purposeOfSolarisationLabel;
+        purposeOfSolarizationCtr.text = purposeOfSolarisationLabel;
+
+        final roofNatureLabel = getLabelFromValue(
+          roofNatureList,
+          result.roofNature ?? '',
+        );
+        selectedRoofNatureValue.value = result.roofNature ?? '';
+        selectedRoofNatureLabel.value = roofNatureLabel;
+        roofNatureCtr.text = roofNatureLabel;
+
+        // 🔹 Boolean Dropdowns (Yes / No)
         void setBoolDropdown(
           RxString value,
           RxString label,
@@ -5005,7 +4955,7 @@ class AddLeadsController extends GetxController {
           result.vfdRequired,
         );
 
-        // Product List
+        // 🔹 Product List
         productDetailList
           ..clear()
           ..assignAll(
@@ -5022,63 +4972,616 @@ class AddLeadsController extends GetxController {
                 [],
           );
 
+        // 🔹 Existing & Uploaded Files
         existingFiles
           ..clear()
           ..assignAll(
-            result.uploadedFiles?.map((f) {
-                  // Extract the file extension from the original path
-
-                  return ExistingFile(id: f.id.toString(), keep: '1');
-                }).toList() ??
+            result.uploadedFiles
+                    ?.map((f) => ExistingFile(id: f.id.toString(), keep: '1'))
+                    .toList() ??
                 [],
           );
 
-        logcat('existing files', existingFiles);
-        //  Uploaded Files
         fileList
           ..clear()
           ..assignAll(
             result.uploadedFiles?.map((f) {
-                  // Extract the file extension from the original path
                   String extension = '';
                   if (f.path != null && f.path!.contains('.')) {
                     extension = f.path!.split('.').last;
                   }
-
                   return UploadedFile(
                     id: f.id,
-                    // path = category + .extension
                     path: f.tag != null && f.tag!.isNotEmpty
                         ? "${f.tag}_${f.category}.$extension"
                         : "${f.category}.$extension",
                     category: f.tag != null && f.tag!.isNotEmpty
                         ? "${f.tag}_${f.category}"
-                        : f.category, // keep category as it is
+                        : f.category,
                   );
                 }).toList() ??
                 [],
           );
-        // fileList
-        //   ..clear()
-        //   ..assignAll(
-        //     result.uploadedFiles?.map(
-        //           (f) => UploadedFile(
-        //             path: f.category?.split('/').last ?? '',
-        //             category: f.tag != null && f.tag!.isNotEmpty
-        //                 ? "${f.tag}_${f.category}"
-        //                 : f.category,
-        //           ),
-        //         ) ??
-        //         [],
-        //   );
 
-        // Validations (can be extracted into one helper call)
         validateAll();
         update();
       },
       networkManager: networkManager,
     );
   }
+  
+  //fallback to this getleadData if in future any problem occures
+  // Future<void> getLeadDataByIdList(
+  //   BuildContext context,
+  //   bool isLoading,
+  //   String leadId,
+  // ) async {
+  //   final loadingIndicator = LoadingProgressDialog();
+  //   commonGetApiCallFormate(
+  //     context,
+  //     title: 'Update Lead Screen',
+  //     apiEndPoint: '${ApiUrl.leadList}/$leadId',
+  //     allowHeader: true,
+  //     state: state,
+  //     message: message,
+  //     isStatus: false,
+  //     apisLoading: (isTrue) {
+  //       if (isLoading) {
+  //         isTrue
+  //             ? loadingIndicator.show(context, '')
+  //             : loadingIndicator.hide(context);
+  //       }
+  //     },
+  //     onResponse: (data) {
+  //       final response = LeadByIdModel.fromJson(data);
+  //       final result = response.result;
+  //       if (result == null) return;
+
+  //       logcat("onResponse::", jsonEncode(result));
+
+  //       if (result.availableNextStatuses != null) {
+  //         leadStatusList.clear();
+  //         for (var status in result.availableNextStatuses!) {
+  //           switch (status) {
+  //             case 'technical_proposal':
+  //               // isTechnicalProposalMode.value = true;
+  //               leadStatusList.assignAll(leadStatusTechnical);
+  //               leadStatusCtr.text = leadStatusList.first.label;
+  //               selectedLeadStatusvalue.value = leadStatusList.first.value;
+  //               validateLeadStatus(leadStatusCtr.text);
+
+  //               break;
+  //             case 'commercial_proposal':
+  //               // isCommercialProposalMode.value = true;
+  //               leadStatusList.assignAll(leadStatusCommercial);
+  //               leadStatusCtr.text = leadStatusList.first.label;
+  //               selectedLeadStatusvalue.value = leadStatusList.first.value;
+  //               validateLeadStatus(leadStatusCtr.text);
+  //               break;
+  //             case 'approved':
+  //             case 'rejected':
+  //               if (AppPermissions().canApproveLead) {
+  //                 isAppproveMode.value = true;
+  //                 leadStatusList.assignAll(leadStatusApproveReject);
+  //                 leadStatusCtr.text = leadStatusList.first.label;
+  //                 selectedLeadStatusvalue.value = leadStatusList.first.value;
+  //                 validateLeadStatus(leadStatusCtr.text);
+
+  //                 logcat('isAppproveMode.value', 'isAppproveMode.value');
+  //               } else {
+  //                 leadStatusList.assignAll(leadStatusCommercialOnlyNoRights);
+  //                 leadStatusCtr.text = leadStatusList.first.label;
+  //                 selectedLeadStatusvalue.value = leadStatusList.first.value;
+  //                 validateLeadStatus(leadStatusCtr.text);
+  //               }
+  //               // Add your handling for these statuses
+  //               break;
+
+  //             case 'payments':
+  //               leadStatusList.assignAll(leadStatusPayment);
+  //               leadStatusCtr.text = leadStatusList.first.label;
+  //               selectedLeadStatusvalue.value = leadStatusList.first.value;
+  //               validateLeadStatus(leadStatusCtr.text);
+  //               break;
+
+  //             case 'won':
+  //               iswonShow.value = true;
+  //               validateFullPaymentProject(balanceAmonutCtr.text);
+  //               //last case
+  //               break;
+  //           }
+  //         }
+  //       }
+
+  //       if (result.leadStatus != null) {
+  //         final currentStatus = result.leadStatus!;
+
+  //         if (currentStatus == 'technical_proposal') {
+  //           if (result.uploadedFiles != null &&
+  //               result.uploadedFiles!.isNotEmpty) {
+  //             // Check if 'first' file exists under technical_proposal
+  //             bool hasFirst = result.uploadedFiles!.any(
+  //               (f) => f.category == 'technical_proposal' && f.tag == 'first',
+  //             );
+
+  //             // Check if 'final' file exists under technical_proposal
+  //             bool hasFinal = result.uploadedFiles!.any(
+  //               (f) => f.category == 'technical_proposal' && f.tag == 'final',
+  //             );
+
+  //             // Update your observables accordingly
+  //             isTechnicalProposalMode.value = true;
+  //             isFirstTechincaluploaded.value = !hasFirst;
+  //             isFinalTechnicaluploaded.value = !hasFinal;
+
+  //             if (isFirstTechincaluploaded.value == false &&
+  //                 isFinalTechnicaluploaded.value == false) {
+  //               leadStatusList.assignAll(leadStatusCommercial);
+  //             } else {
+  //               logcat('going in else case', 'data');
+  //               leadStatusList.assignAll(leadStatusTechnicallOnly);
+  //             }
+  //           }
+
+  //           leadStatusCtr.text = leadStatusList.first.label;
+  //           selectedLeadStatusvalue.value = leadStatusList.first.value;
+  //           validateLeadStatus(leadStatusCtr.text);
+  //         }
+
+  //         if (currentStatus == 'commercial_proposal') {
+  //           if (result.uploadedFiles != null &&
+  //               result.uploadedFiles!.isNotEmpty) {
+  //             // Check if 'first' file exists under technical_proposal
+  //             bool hasFirst = result.uploadedFiles!.any(
+  //               (f) => f.category == 'commercial_proposal' && f.tag == 'first',
+  //             );
+
+  //             // Check if 'final' file exists under technical_proposal
+  //             bool hasFinal = result.uploadedFiles!.any(
+  //               (f) => f.category == 'commercial_proposal' && f.tag == 'final',
+  //             );
+
+  //             // Update your observables accordingly
+  //             isCommercialProposalMode.value = true;
+  //             isFirstComercialluploaded.value = !hasFirst;
+  //             isFinalComercialluploaded.value = !hasFinal;
+
+  //             if (isFirstComercialluploaded.value == false &&
+  //                 isFinalComercialluploaded.value == false) {
+  //               isCommercialProposalMode.value = false;
+  //               isTechnicalProposalMode.value = false;
+  //             } else {
+  //               logcat('going in else case', 'data');
+  //               leadStatusList.assignAll(leadStatusCommercialOnlyNoRights);
+  //             }
+  //           }
+
+  //           leadStatusCtr.text = leadStatusList.first.label;
+  //           selectedLeadStatusvalue.value = leadStatusList.first.value;
+  //           validateLeadStatus(leadStatusCtr.text);
+  //         }
+
+  //         if (currentStatus == 'rejected') {
+  //           isLeadRejectedMode.value = true;
+  //           leadStatusList.assignAll(leadStatusReject);
+  //           leadStatusCtr.text = leadStatusList.first.label;
+  //           selectedLeadStatusvalue.value = 'rejected';
+  //           validateLeadStatus(leadStatusCtr.text);
+  //         }
+
+  //         if (currentStatus == 'payments') {
+  //           isFinancialType.value = true;
+  //           isLeadPaymentMode.value = true;
+
+  //           if (iswonShow.value == true) {
+  //             leadStatusList.assignAll(isWonData);
+  //             selectedLeadStatusvalue.value = 'won';
+  //           } else {
+  //             leadStatusList.assignAll(financialTypePaymentLeadStatus);
+  //             selectedLeadStatusvalue.value = 'payments';
+  //           }
+
+  //           leadStatusCtr.text = leadStatusList.first.label;
+
+  //           tokenAmountCtr.text = result.payment?.tokenAmount ?? '';
+  //           totalProjectCostCtr.text = result.payment?.totalProjectCost ?? '';
+  //           validateLeadStatus(leadStatusCtr.text);
+  //           validateTokenAmountt(tokenAmountCtr.text);
+  //           validateTotalProject(totalProjectCostCtr.text);
+  //           calculateBalanceAmount();
+
+  //           if (result.uploadedFiles != null &&
+  //               result.uploadedFiles!.any(
+  //                 (f) => f.category == 'finance_document',
+  //               )) {
+  //             isSendToPartnerMode.value = true;
+  //             isOMCPartnerMode.value = true;
+  //             financialTypePaymentListDropdown.assignAll(
+  //               financialTypePaymentfinancethroughomcPartner,
+  //             );
+  //             omcParternerListDropdown.assignAll(
+  //               financingProgressStatuToPartnersMode,
+  //             );
+  //             financialOMCPartnerCtr.text =
+  //                 omcParternerListDropdown.first.label;
+  //             selectedfinancingProgressStatusMode.value =
+  //                 omcParternerListDropdown.first.value;
+  //           } else {
+  //             isSendToPartnerMode.value = false;
+  //             financialTypePaymentListDropdown.assignAll(financialTypePayment);
+  //           }
+
+  //           if (result.uploadedFiles != null &&
+  //               result.uploadedFiles!.any(
+  //                 (f) => f.category == 'finance_document',
+  //               )) {
+  //             isSendToPartnerMode.value = true;
+  //             isOMCPartnerMode.value = true;
+  //             financialTypePaymentListDropdown.assignAll(
+  //               financialTypePaymentfinancethroughomcPartner,
+  //             );
+
+  //             if (result.payment != null &&
+  //                 result.payment!.financingProgressStatus ==
+  //                     "documents_sent_to_partner") {
+  //               ispaymentReceivedShow.value = true;
+  //               omcParternerListDropdown.assignAll(
+  //                 financingProgressStatuToPartnersPaymentReceiveedMode,
+  //               );
+
+  //               // financingProgressStatuToPartnersPaymentReceiveedMode.value =
+  //               //     true;
+  //             } else if (result.payment!.financingProgressStatus ==
+  //                 "payment_received") {
+  //               ispaymentReceivedShow.value = false;
+  //               omcParternerListDropdown.assignAll(iswonShowdata);
+  //               validateOMCProgressStatus(financialOMCPartnerCtr.text);
+  //             } else {
+  //               ispaymentReceivedShow.value = false;
+
+  //               if (iswonShow.value == true) {
+  //                 omcParternerListDropdown.assignAll(iswonShowdata);
+  //               } else {
+  //                 omcParternerListDropdown.assignAll(
+  //                   financingProgressStatuToPartnersMode,
+  //                 );
+  //               }
+
+  //               validateOMCProgressStatus(financialOMCPartnerCtr.text);
+
+  //               // financingProgressStatuToPartnersPaymentReceiveedMode.value =
+  //               //     false;
+  //             }
+
+  //             financialOMCPartnerCtr.text =
+  //                 omcParternerListDropdown.first.label;
+  //             selectedfinancingProgressStatusMode.value =
+  //                 omcParternerListDropdown.first.value;
+  //           } else if (result.payment != null &&
+  //               result.payment!.financingType == "bank") {
+  //             financialTypePaymentListDropdown.assignAll(
+  //               selfBankFinancingPayment,
+  //             );
+  //             isFullPaymentAmountMode.value = true;
+  //           } else {
+  //             isSendToPartnerMode.value = false;
+
+  //             if (iswonShow.value == true) {
+  //               financialTypePaymentListDropdown.assignAll(
+  //                 selfFundingTypePayment,
+  //               );
+  //             } else {
+  //               financialTypePaymentListDropdown.assignAll(
+  //                 financialTypePayment,
+  //               );
+  //             }
+  //           }
+
+  //           financialTypeCtr.text =
+  //               financialTypePaymentListDropdown.first.label;
+  //           selectedfinanicalStatusvalue.value =
+  //               financialTypePaymentListDropdown.first.value;
+
+  //           validateFinancialStatus(financialTypeCtr.text);
+
+  //           // selectedLeadStatusvalue.value = 'Select Financing Type';
+  //           // validateLeadStatus(leadStatusCtr.text);
+  //         }
+
+  //         if (currentStatus == 'won') {
+  //           leadStatusList.assignAll(totalWon);
+  //           leadStatusCtr.text = leadStatusList.first.label;
+  //           selectedLeadStatusvalue.value = leadStatusList.first.value;
+
+  //           iswonShow.value = true;
+  //           isLeadPaymentMode.value = true;
+  //           isFullPaymentAmountMode.value = true;
+  //           isFinancialType.value = true;
+
+  //           //payment
+  //           tokenAmountCtr.text = result.payment?.tokenAmount ?? '';
+  //           totalProjectCostCtr.text = result.payment?.totalProjectCost ?? '';
+  //           calculateBalanceAmount();
+  //           validateLeadStatus(leadStatusCtr.text);
+  //           validateTokenAmountt(tokenAmountCtr.text);
+  //           validateTotalProject(totalProjectCostCtr.text);
+  //           validateLeadStatus(leadStatusCtr.text);
+
+  //           //show conditionaly
+
+  //           if (result.payment != null &&
+  //               result.payment!.financingType == "self_finance") {
+  //             financialTypePaymentListDropdown.assignAll(
+  //               selfFundingTypePayment,
+  //             );
+
+  //             // financingProgressStatuToPartnersPaymentReceiveedMode.value =
+  //             //     true;
+  //           } else if (result.payment!.financingType == "bank") {
+  //             financialTypePaymentListDropdown.assignAll(
+  //               selfBankFinancingPayment,
+  //             );
+  //           } else if (result.payment!.financingType == "omc_partner") {
+  //             financialTypePaymentListDropdown.assignAll(
+  //               financialTypePaymentfinancethroughomcPartner,
+  //             );
+  //           }
+  //           financialTypeCtr.text =
+  //               financialTypePaymentListDropdown.first.label;
+  //           selectedfinanicalStatusvalue.value =
+  //               financialTypePaymentListDropdown.first.value;
+
+  //           validateFinancialStatus(financialTypeCtr.text);
+
+  //           // financialTypeCtr.text =
+  //           //     financialTypePaymentListDropdown.first.label;
+  //           // selectedfinanicalStatusvalue.value =
+  //           //     financialTypePaymentListDropdown.first.value;
+
+  //           // validateFinancialStatus(financialTypeCtr.text);
+  //         }
+  //       }
+  //       logcat('isLeadRejectedMode.value', isLeadRejectedMode.value);
+
+  //       // 🔹 Helper: safely set text controller values
+  //       void setText(TextEditingController ctr, dynamic value) =>
+  //           ctr.text = (value ?? '').toString();
+
+  //       // 🔹 Basic Info
+  //       setText(companyNameCtr, result.companyName);
+  //       setText(addressCtr, result.address);
+  //       setText(countryCtr, result.countryName);
+  //       selectedCountryId.value = result.country ?? 0;
+
+  //       setText(stateCtr, result.stateName);
+  //       selectedStateId.value = result.state ?? 0;
+
+  //       setText(districtCtr, result.districtName);
+  //       selectedDistrictId.value = result.district ?? 0;
+
+  //       setText(personNameCtr, result.contactPersonName);
+  //       setText(personMobileCtr, result.contactPersonMobile);
+  //       setText(latitudeCtr, result.latitude);
+  //       setText(longitudeCtr, result.longitude);
+
+  //       // 🔹 Power & Energy
+  //       setText(dgCapacityCtr, result.dgCapacityKva);
+  //       setText(installedSolarCapCtr, result.currInstSolarCapKwp);
+  //       setText(sanctionedLoadCtr, result.sanctionedLoadKva);
+  //       setText(gridAvailabilityCtr, result.gridAvailabilityHrs);
+  //       setText(peakMonthlyEnergyCtr, result.peakMonthlyEnergyConsKwh);
+  //       setText(requiredSolarCapCtr, result.requiredSolarCapKwp);
+  //       setText(distanceToTransformerCtr, result.distToNearestTransformer);
+  //       setText(ratingOfTransformerCtr, result.ratingOfNearestTransformerKva);
+  //       setText(distInverterACDBCtr, result.distBtwInverterAcdbPanelMtrs);
+  //       setText(distSolarACDBCtr, result.distBtwSolarAcdbPanelMtrs);
+
+  //       // 🔹 Physical Site
+  //       setText(buildingHeightCtr, result.buildingHeight);
+  //       setText(roofSizeLengthCtr, result.roofSizeLengthFt);
+  //       setText(roofSizeBreadthCtr, result.roofSizeBreadthFt);
+  //       setText(ageOfMetalSheetCtr, result.ageOfMetalSheet);
+  //       setText(groundSizeLengthCtr, result.groundSizeLengthFt);
+  //       setText(groundSizeBreadthCtr, result.groundSizeBreadthFt);
+  //       setText(otherRemarksCtr, result.otherRemarks);
+  //       setText(scheduleMeetingCtr, result.meeting?.scheduledAt);
+
+  //       // 🔹 Dropdowns
+  //       void setDropdown(
+  //         RxString value,
+  //         RxString label,
+  //         TextEditingController ctr,
+  //         dynamic data,
+  //       ) {
+  //         value.value = (data ?? '').toString();
+  //         label.value = (data ?? '').toString();
+  //         ctr.text = (data ?? '').toString();
+  //       }
+
+  //       logcat(
+  //         "selectedRequiredSolutionTypeValue",
+  //         selectedRequiredSolutionTypeValue.toString(),
+  //       );
+  //       logcat("requiredSolutionType", result.requiredSolutionType.toString());
+  //       // setDropdown(
+  //       //   selectedRequiredSolutionTypeValue,
+  //       //   selectedRequiredSolutionTypeLabel,
+  //       //   requiredSolutionTypeCtr,
+  //       //   result.requiredSolutionType,
+  //       // );
+
+  //       // 🔹 Required Solution Type
+  //       final requiredSolutionTypeLabel = getLabelFromValue(
+  //         requiredSolutionTypeList,
+  //         result.requiredSolutionType ?? '',
+  //       );
+  //       selectedRequiredSolutionTypeValue.value =
+  //           result.requiredSolutionType ?? '';
+  //       selectedRequiredSolutionTypeLabel.value = requiredSolutionTypeLabel;
+  //       requiredSolutionTypeCtr.text = requiredSolutionTypeLabel;
+
+  //       // 🔹 Required Solution
+  //       final requiredSolutionLabel = getLabelFromValue(
+  //         filterRequiredSolutionList,
+  //         result.requiredSolution ?? '',
+  //       );
+  //       selectedRequiredSolutionValue.value = result.requiredSolution ?? '';
+  //       selectedRequiredSolutionLabel.value = requiredSolutionLabel;
+  //       requiredSolutionCtr.text = requiredSolutionLabel;
+
+  //       // 🔹 Lead Category
+  //       final leadCategoryLabel = getLabelFromValue(
+  //         leadCategoryList,
+  //         result.leadCategory ?? '',
+  //       );
+  //       selectedLeadCategoryValue.value = result.leadCategory ?? '';
+  //       selectedLeadCategoryLabel.value = leadCategoryLabel;
+  //       leadCategoryCtr.text = leadCategoryLabel;
+
+  //       // 🔹 Purpose of Solarisation
+  //       final purposeOfSolarisationLabel = getLabelFromValue(
+  //         purposeOfSolarisationList,
+  //         result.purposeOfSolarisation ?? '',
+  //       );
+  //       selectedPurposeOfSolarisationValue.value =
+  //           result.purposeOfSolarisation ?? '';
+  //       selectedPurposeOfSolarisationLabel.value = purposeOfSolarisationLabel;
+  //       purposeOfSolarizationCtr.text = purposeOfSolarisationLabel;
+
+  //       // 🔹 Roof Nature
+  //       final roofNatureLabel = getLabelFromValue(
+  //         roofNatureList,
+  //         result.roofNature ?? '',
+  //       );
+  //       selectedRoofNatureValue.value = result.roofNature ?? '';
+  //       selectedRoofNatureLabel.value = roofNatureLabel;
+  //       roofNatureCtr.text = roofNatureLabel;
+
+  //       // setDropdown(
+  //       //   selectedRequiredSolutionValue,
+  //       //   selectedRequiredSolutionLabel,
+  //       //   requiredSolutionCtr,
+  //       //   result.requiredSolution,
+  //       // );
+  //       setDropdown(
+  //         selectedLeadCategoryValue,
+  //         selectedLeadCategoryLabel,
+  //         leadCategoryCtr,
+  //         result.leadCategory,
+  //       );
+  //       setDropdown(
+  //         selectedPurposeOfSolarisationValue,
+  //         selectedPurposeOfSolarisationLabel,
+  //         purposeOfSolarizationCtr,
+  //         result.purposeOfSolarisation,
+  //       );
+  //       setDropdown(
+  //         selectedRoofNatureValue,
+  //         selectedRoofNatureLabel,
+  //         roofNatureCtr,
+  //         result.roofNature,
+  //       );
+
+  //       // 🔹 Boolean dropdowns (Yes/No)
+  //       void setBoolDropdown(
+  //         RxString value,
+  //         RxString label,
+  //         TextEditingController ctr,
+  //         bool? condition,
+  //       ) {
+  //         final text = (condition ?? false) ? 'Yes' : 'No';
+  //         value.value = condition.toString();
+  //         label.value = text;
+  //         ctr.text = text;
+  //       }
+
+  //       setBoolDropdown(
+  //         selectedDgSyncValue,
+  //         selectedDgSyncLabel,
+  //         dgSyncCtr,
+  //         result.dgSyncRequired,
+  //       );
+  //       setBoolDropdown(
+  //         selectedVfdValue,
+  //         selectedVfdLabel,
+  //         vfdCtr,
+  //         result.vfdRequired,
+  //       );
+
+  //       // Product List
+  //       productDetailList
+  //         ..clear()
+  //         ..assignAll(
+  //           result.loadElementDetails?.map(
+  //                 (e) => LoadElement(
+  //                   deviceName: e.deviceName ?? '',
+  //                   category: e.category ?? '',
+  //                   power: e.powerRatingWatts?.toString() ?? '',
+  //                   usageHrs: e.dailyUsageHours?.toString() ?? '',
+  //                   energyWh: e.dailyEnergyWh?.toString() ?? '',
+  //                   energyKWh: e.dailyEnergyKwh?.toString() ?? '',
+  //                 ),
+  //               ) ??
+  //               [],
+  //         );
+
+  //       existingFiles
+  //         ..clear()
+  //         ..assignAll(
+  //           result.uploadedFiles?.map((f) {
+  //                 // Extract the file extension from the original path
+
+  //                 return ExistingFile(id: f.id.toString(), keep: '1');
+  //               }).toList() ??
+  //               [],
+  //         );
+
+  //       logcat('existing files', existingFiles);
+  //       //  Uploaded Files
+  //       fileList
+  //         ..clear()
+  //         ..assignAll(
+  //           result.uploadedFiles?.map((f) {
+  //                 // Extract the file extension from the original path
+  //                 String extension = '';
+  //                 if (f.path != null && f.path!.contains('.')) {
+  //                   extension = f.path!.split('.').last;
+  //                 }
+
+  //                 return UploadedFile(
+  //                   id: f.id,
+  //                   // path = category + .extension
+  //                   path: f.tag != null && f.tag!.isNotEmpty
+  //                       ? "${f.tag}_${f.category}.$extension"
+  //                       : "${f.category}.$extension",
+  //                   category: f.tag != null && f.tag!.isNotEmpty
+  //                       ? "${f.tag}_${f.category}"
+  //                       : f.category, // keep category as it is
+  //                 );
+  //               }).toList() ??
+  //               [],
+  //         );
+  //       // fileList
+  //       //   ..clear()
+  //       //   ..assignAll(
+  //       //     result.uploadedFiles?.map(
+  //       //           (f) => UploadedFile(
+  //       //             path: f.category?.split('/').last ?? '',
+  //       //             category: f.tag != null && f.tag!.isNotEmpty
+  //       //                 ? "${f.tag}_${f.category}"
+  //       //                 : f.category,
+  //       //           ),
+  //       //         ) ??
+  //       //         [],
+  //       //   );
+
+  //       // Validations (can be extracted into one helper call)
+  //       validateAll();
+  //       update();
+  //     },
+  //     networkManager: networkManager,
+  //   );
+  // }
 
   String getLabelFromValue(List<DgSyncRequired> list, String value) {
     final match = list.firstWhere(
