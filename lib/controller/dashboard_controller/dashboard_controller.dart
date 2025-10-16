@@ -96,10 +96,20 @@ class DashboardController extends GetxController {
 
   RxList<Cluster> districtList = <Cluster>[].obs;
   RxList<Cluster> clustersList = <Cluster>[].obs;
+  String userEmail = '';
+  Future<void> getuserEmail() async {
+    User? user = await UserPreferences().getSignInInfo();
+
+    if (user != null) {
+      userEmail = user.email;
+    }
+  }
 
   @override
   void onInit() {
     super.onInit();
+    getuserEmail();
+
     startTimeNode = FocusNode();
     endTimeNode = FocusNode();
     districtNode = FocusNode();

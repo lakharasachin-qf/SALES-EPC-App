@@ -60,6 +60,7 @@ class LeadController extends GetxController {
   RxList<Cluster> districtList = <Cluster>[].obs;
   RxList<Cluster> clustersList = <Cluster>[].obs;
   RxList<LabelValue> categoryList = <LabelValue>[].obs;
+  // RxList<LabelValue> categoryList = <LabelValue>[].obs;
 
   var currentFilterSource = [].obs;
   var filteredData = [].obs;

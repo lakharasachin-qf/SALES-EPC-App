@@ -36,6 +36,7 @@ class FiltterData {
   List<LabelValue> uploadedFilesCategories;
   List<LabelValue> customerStatus;
   List<LabelValue> warrantyType;
+  List<LabelValue> leadStatus; // ✅ new field added
 
   FiltterData({
     required this.clusters,
@@ -52,6 +53,7 @@ class FiltterData {
     required this.uploadedFilesCategories,
     required this.customerStatus,
     required this.warrantyType,
+    required this.leadStatus,
   });
 
   factory FiltterData.fromJson(Map<String, dynamic>? json) => FiltterData(
@@ -97,6 +99,9 @@ class FiltterData {
     warrantyType: (json?["warranty_type"] as List? ?? [])
         .map((x) => LabelValue.fromJson(x))
         .toList(),
+    leadStatus: (json?["lead_status"] as List? ?? [])
+        .map((x) => LabelValue.fromJson(x))
+        .toList(), // ✅ added parsing
   );
 
   Map<String, dynamic> toJson() => {
@@ -120,6 +125,9 @@ class FiltterData {
         .toList(),
     "customer_status": customerStatus.map((x) => x.toJson()).toList(),
     "warranty_type": warrantyType.map((x) => x.toJson()).toList(),
+    "lead_status": leadStatus
+        .map((x) => x.toJson())
+        .toList(), // ✅ added to toJson
   };
 }
 

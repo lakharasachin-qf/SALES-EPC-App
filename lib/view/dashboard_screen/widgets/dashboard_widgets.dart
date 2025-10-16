@@ -10,6 +10,7 @@ import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/dashboard_controller/dashboard_controller.dart';
+import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/preference/UserPreference.dart';
 import 'package:sales_app/utils/AppPermissions.dart';
 import 'package:sales_app/utils/log.dart';
@@ -139,7 +140,27 @@ Widget getDashboardDrawer(
         margin: EdgeInsets.symmetric(horizontal: 12.w),
         child: Image.asset(Asset.logoPng),
       ),
-      getDynamicSizedBox(height: 4.h),
+      getDynamicSizedBox(height: 2.h),
+      Row(
+        children: [
+          SizedBox(width: 2.w),
+          Icon(Icons.person),
+          SizedBox(width: 3.w),
+          Expanded(
+            child: Text(
+              ctr.userEmail,
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontFamily: plusJakartaSansSemiBold,
+              ),
+              softWrap: true,
+              overflow: TextOverflow.visible,
+            ),
+          ),
+        ],
+      ),
+
+      getDynamicSizedBox(height: 2.h),
       getappLine(),
       getDynamicSizedBox(height: 1.h),
       buildDrawerItem(Asset.dashboard2, HomeScreenConst.dashboard, () {
