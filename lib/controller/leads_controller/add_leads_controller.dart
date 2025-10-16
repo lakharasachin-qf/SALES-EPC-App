@@ -3791,6 +3791,10 @@ class AddLeadsController extends GetxController {
     StatusItem(label: "Technical Proposal", value: "technical_proposal"),
   ];
 
+  List<StatusItem> leadStatusTechnicalOnlyNewLead = [
+    StatusItem(label: "New Lead", value: "new_lead"),
+  ];
+
   final Rx<File?> firstTechnicalProposalFile = Rx<File?>(null);
 
   final Rx<File?> finalTechnicalProposalFile = Rx<File?>(null);
@@ -4562,14 +4566,24 @@ class AddLeadsController extends GetxController {
           for (var status in result.availableNextStatuses!) {
             switch (status) {
               case 'technical_proposal':
-                leadStatusList.assignAll(leadStatusTechnical);
+                if (AppPermissions().canUploadProposals == true) {
+                  leadStatusList.assignAll(leadStatusTechnical);
+                } else {
+                  leadStatusList.assignAll(leadStatusTechnicalOnlyNewLead);
+                }
+
                 leadStatusCtr.text = leadStatusList.first.label;
                 selectedLeadStatusvalue.value = leadStatusList.first.value;
                 validateLeadStatus(leadStatusCtr.text);
                 break;
 
               case 'commercial_proposal':
-                leadStatusList.assignAll(leadStatusCommercial);
+                if (AppPermissions().canUploadProposals == true) {
+                  leadStatusList.assignAll(leadStatusCommercial);
+                } else {
+                  leadStatusList.assignAll(leadStatusTechnicallOnly);
+                }
+                // leadStatusList.assignAll(leadStatusCommercial);
                 leadStatusCtr.text = leadStatusList.first.label;
                 selectedLeadStatusvalue.value = leadStatusList.first.value;
                 validateLeadStatus(leadStatusCtr.text);
@@ -4610,24 +4624,29 @@ class AddLeadsController extends GetxController {
           // STATUS: technical_proposal
           // ===============================
           if (currentStatus == 'technical_proposal') {
-            if (result.uploadedFiles != null &&
-                result.uploadedFiles!.isNotEmpty) {
-              bool hasFirst = result.uploadedFiles!.any(
-                (f) => f.category == 'technical_proposal' && f.tag == 'first',
-              );
-              bool hasFinal = result.uploadedFiles!.any(
-                (f) => f.category == 'technical_proposal' && f.tag == 'final',
-              );
+            if (AppPermissions().canUploadProposals == true) {
+              if (result.uploadedFiles != null &&
+                  result.uploadedFiles!.isNotEmpty) {
+                bool hasFirst = result.uploadedFiles!.any(
+                  (f) => f.category == 'technical_proposal' && f.tag == 'first',
+                );
+                bool hasFinal = result.uploadedFiles!.any(
+                  (f) => f.category == 'technical_proposal' && f.tag == 'final',
+                );
 
-              isTechnicalProposalMode.value = true;
-              isFirstTechincaluploaded.value = !hasFirst;
-              isFinalTechnicaluploaded.value = !hasFinal;
+                isTechnicalProposalMode.value = true;
+                isFirstTechincaluploaded.value = !hasFirst;
+                isFinalTechnicaluploaded.value = !hasFinal;
 
-              if (!isFirstTechincaluploaded.value &&
-                  !isFinalTechnicaluploaded.value) {
-                leadStatusList.assignAll(leadStatusCommercial);
+                if (!isFirstTechincaluploaded.value &&
+                    !isFinalTechnicaluploaded.value) {
+                  leadStatusList.assignAll(leadStatusCommercial);
+                } else {
+                  leadStatusList.assignAll(leadStatusTechnicallOnly);
+                }
               } else {
-                leadStatusList.assignAll(leadStatusTechnicallOnly);
+                isFirstTechincaluploaded.value = false;
+                isFinalTechnicaluploaded.value = false;
               }
             }
             logcat('leadStatusList isssss', leadStatusList.toJson());
@@ -4636,11 +4655,26 @@ class AddLeadsController extends GetxController {
               selectedLeadStatusvalue.value = leadStatusList.first.value;
               validateLeadStatus(leadStatusCtr.text);
             } else {
-              leadStatusList.assignAll(leadStatusTechnical);
-              leadStatusCtr.text = leadStatusList[1].label;
-              selectedLeadStatusvalue.value = leadStatusList[1].value;
-              validateLeadStatus(leadStatusCtr.text);
-              isTechnicalProposalMode.value = true;
+              if (AppPermissions().canUploadProposals == true) {
+                leadStatusList.assignAll(leadStatusTechnical);
+                leadStatusCtr.text = leadStatusList[1].label;
+                selectedLeadStatusvalue.value = leadStatusList[1].value;
+                validateLeadStatus(leadStatusCtr.text);
+                isTechnicalProposalMode.value = true;
+              } else {
+                leadStatusList.assignAll(leadStatusTechnicallOnly);
+                leadStatusCtr.text = leadStatusList[0].label;
+                selectedLeadStatusvalue.value = leadStatusList[0].value;
+                validateLeadStatus(leadStatusCtr.text);
+                isTechnicalProposalMode.value = true;
+                isFirstTechincaluploaded.value = false;
+                isFinalTechnicaluploaded.value = false;
+              }
+              // leadStatusList.assignAll(leadStatusTechnical);
+              // leadStatusCtr.text = leadStatusList[1].label;
+              // selectedLeadStatusvalue.value = leadStatusList[1].value;
+              // validateLeadStatus(leadStatusCtr.text);
+              // isTechnicalProposalMode.value = true;
             }
           }
 
