@@ -3249,6 +3249,7 @@ class AddLeadsController extends GetxController {
     }
   }
 
+  RxBool isPaymentReceived = false.obs;
   Future<void> updateLeadApi(BuildContext context, int leadId) async {
     var loadingIndicator = LoadingProgressDialog();
     User? user = await UserPreferences().getSignInInfo();
@@ -3320,7 +3321,17 @@ class AddLeadsController extends GetxController {
       'total_project_cost': totalProjectCostCtr.text.trim(),
       'financing_type': selectedfinanicalStatusvalue.value,
       'financing_progress_status': selectedfinancingProgressStatusMode.value,
+      'balance_amount': balanceAmonutCtr.text.trim(),
+      'full_payment_amount': balanceAmonutCtr.text.trim(),
     });
+
+    if (isPaymentReceived.value == true) {
+      logcat('isPaymentReceived', isPaymentReceived.value);
+      request.fields.addAll({
+        'balance_amount': balanceAmonutCtr.text.trim(),
+        'full_payment_amount': balanceAmonutCtr.text.trim(),
+      });
+    }
 
     // ---------- Load elements ----------
     for (int i = 0; i < productDetailList.length; i++) {
@@ -4424,6 +4435,17 @@ class AddLeadsController extends GetxController {
                   // Enable technical proposal mode
                 } else if (selectedfinanicalStatusvalue.value ==
                     "omc_partner") {
+                  if (AppPermissions().canUploadFinanceDocuments == false) {
+                    Get.snackbar(
+                      'Action Not Allowed',
+                      'You can’t add items in Rejected mode',
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.red.withOpacity(0.1),
+                      colorText: Colors.redAccent,
+                    );
+                    return;
+                  }
+
                   isOMCPartnerMode.value = true;
                   omcParternerListDropdown.assignAll(
                     financingProgressStatusMode,
@@ -4513,9 +4535,11 @@ class AddLeadsController extends GetxController {
                     "documents_sent_to_partner") {
                   // Enable technical proposal mode
                   isFullPaymentAmountMode.value = false;
+                  isPaymentReceived.value = false;
                 } else if (selectedfinancingProgressStatusMode.value ==
                     "payment_received") {
                   isFullPaymentAmountMode.value = true;
+                  isPaymentReceived.value = true;
 
                   validateFullPaymentProject(balanceAmonutCtr.text);
                 }
@@ -4785,6 +4809,7 @@ class AddLeadsController extends GetxController {
               } else if (result.payment!.financingProgressStatus ==
                   "payment_received") {
                 ispaymentReceivedShow.value = false;
+
                 omcParternerListDropdown.assignAll(iswonShowdata);
                 validateOMCProgressStatus(financialOMCPartnerCtr.text);
               } else {
