@@ -1149,7 +1149,7 @@ class CustomerScreenController extends GetxController {
                           ],
                         ),
                       ),
-                      getDynamicSizedBox(height: 2.h, width: Device.width),
+                      getDynamicSizedBox(height: 6.h, width: Device.width),
                     ],
                   ),
                 ),
@@ -1762,6 +1762,7 @@ class CustomerScreenController extends GetxController {
               ),
             ],
           ),
+          getDynamicSizedBox(height: 4.h),
         ],
       ),
     );

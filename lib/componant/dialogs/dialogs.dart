@@ -455,50 +455,52 @@ Widget setDropDownContent(
   isVerificationPopup = false,
   String? noDataLable,
 }) {
-  return SizedBox(
-    height: (Device.screenType == ScreenType.mobile
-        ? Device.height / 2
-        : Device.height / 1.9),
-    width: Device.width,
-    child: Container(
-      margin: EdgeInsets.only(left: 4.w, right: 4.w, top: 1.h, bottom: 1.h),
-      child: Column(
-        children: [
-          // getDividerForShowDialog(),
-          searchcontent ?? Container(),
-          if (list.isEmpty && isApiIsLoading == false)
-            Expanded(
-              child: Center(
-                child: Text(
-                  controller != null && controller.text.isNotEmpty
-                      ? AlertDialogList.searchlist
-                      : noDataLable ?? AlertDialogList.emptylist,
-                  style: TextStyle(
-                    fontSize: 4.5.w,
-                    fontFamily: plusJakartaSansMedium,
+  return SafeArea(
+    child: SizedBox(
+      height: (Device.screenType == ScreenType.mobile
+          ? Device.height / 2
+          : Device.height / 1.9),
+      width: Device.width,
+      child: Container(
+        margin: EdgeInsets.only(left: 4.w, right: 4.w, top: 1.h, bottom: 1.h),
+        child: Column(
+          children: [
+            // getDividerForShowDialog(),
+            searchcontent ?? Container(),
+            if (list.isEmpty && isApiIsLoading == false)
+              Expanded(
+                child: Center(
+                  child: Text(
+                    controller != null && controller.text.isNotEmpty
+                        ? AlertDialogList.searchlist
+                        : noDataLable ?? AlertDialogList.emptylist,
+                    style: TextStyle(
+                      fontSize: 4.5.w,
+                      fontFamily: plusJakartaSansMedium,
+                    ),
                   ),
                 ),
-              ),
-            )
-          else if (isApiIsLoading == true)
-            Expanded(
-              child: Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(100),
-                  child: SizedBox(
-                    height: 30,
-                    width: 30,
-                    child: LoadingAnimationWidget.discreteCircle(
-                      color: primaryColor,
-                      size: 35,
+              )
+            else if (isApiIsLoading == true)
+              Expanded(
+                child: Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(100),
+                    child: SizedBox(
+                      height: 30,
+                      width: 30,
+                      child: LoadingAnimationWidget.discreteCircle(
+                        color: primaryColor,
+                        size: 35,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          if (list.isNotEmpty) Expanded(child: content),
-          getDynamicSizedBox(height: 1.0.h),
-        ],
+            if (list.isNotEmpty) Expanded(child: content),
+            getDynamicSizedBox(height: 1.0.h),
+          ],
+        ),
       ),
     ),
   );

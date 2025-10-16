@@ -2750,7 +2750,7 @@ class AddLeadsController extends GetxController {
                       ),
                     ),
                     getDynamicSizedBox(
-                      height: 2.h,
+                      height: 6.h,
                       width: MediaQuery.of(context).size.width,
                     ),
                   ],
@@ -2972,7 +2972,7 @@ class AddLeadsController extends GetxController {
                       ),
                     ),
                     getDynamicSizedBox(
-                      height: 2.h,
+                      height: 6.h,
                       width: MediaQuery.of(context).size.width,
                     ),
                   ],
@@ -5009,7 +5009,7 @@ class AddLeadsController extends GetxController {
       networkManager: networkManager,
     );
   }
-  
+
   //fallback to this getleadData if in future any problem occures
   // Future<void> getLeadDataByIdList(
   //   BuildContext context,

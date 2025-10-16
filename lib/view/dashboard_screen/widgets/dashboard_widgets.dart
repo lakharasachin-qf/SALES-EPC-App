@@ -545,7 +545,7 @@ Widget addFilterSheetWidget(
                 ),
               ],
             ),
-            getDynamicSizedBox(height: 3.h),
+            getDynamicSizedBox(height: 4.h),
           ],
         ),
       ),

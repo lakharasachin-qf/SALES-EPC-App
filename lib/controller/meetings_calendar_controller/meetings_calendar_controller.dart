@@ -525,6 +525,8 @@ class MeetingsCalendarController extends GetxController {
               ),
             ],
           ),
+
+          getDynamicSizedBox(height: 4.h),
         ],
       ),
     );
