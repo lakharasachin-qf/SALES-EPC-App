@@ -60,7 +60,7 @@ class LeadController extends GetxController {
   RxList<Cluster> districtList = <Cluster>[].obs;
   RxList<Cluster> clustersList = <Cluster>[].obs;
   RxList<LabelValue> categoryList = <LabelValue>[].obs;
-  // RxList<LabelValue> categoryList = <LabelValue>[].obs;
+  RxList<LabelValue> statusList = <LabelValue>[].obs;
 
   var currentFilterSource = [].obs;
   var filteredData = [].obs;
@@ -220,7 +220,7 @@ class LeadController extends GetxController {
     selectedDistrictId.value = '';
     selectedClusterId.value = '';
     selectedCategoryId.value = '';
-    selectedStatus.value = 'Select Status';
+    selectedStatus.value = '';
     isDistrictSelected.value = false;
     isClusterSelected.value = false;
     isCategorySelected.value = false;
@@ -298,7 +298,7 @@ class LeadController extends GetxController {
   RxString selectedDistrictId = ''.obs;
   RxString selectedClusterId = ''.obs;
   RxString selectedCategoryId = ''.obs;
-  RxString selectedStatus = 'Select Status'.obs;
+  RxString selectedStatus = ''.obs;
   RxList districtListInt = [].obs;
   RxList categoryListInt = [].obs;
   RxList clusterListInt = [].obs;
@@ -344,8 +344,15 @@ class LeadController extends GetxController {
               .map((c) => c.label)
               .join(', ')
         : '';
-    statusCtr.text = selectedStatus.value != 'Select Status'
-        ? selectedStatus.value
+    statusCtr.text = selectedStatus.value.isNotEmpty
+        ? statusList
+              .where(
+                (c) => selectedStatus.value
+                    .split(', ')
+                    .contains(c.value.toString()),
+              )
+              .map((c) => c.label)
+              .join(', ')
         : '';
 
     startTimeModel.value = ValidationModel(
@@ -382,7 +389,7 @@ class LeadController extends GetxController {
     isDistrictSelected.value = selectedDistrictId.value.isNotEmpty;
     isClusterSelected.value = selectedClusterId.value.isNotEmpty;
     isCategorySelected.value = selectedCategoryId.value.isNotEmpty;
-    isStatusSelected.value = selectedStatus.value != 'Select Status';
+    isStatusSelected.value = selectedStatus.value.isNotEmpty;
     openBottomtsheetDialog(
       context,
       title: "Filter",
@@ -456,12 +463,14 @@ class LeadController extends GetxController {
         districtList.clear();
         clustersList.clear();
         categoryList.clear();
+        statusList.clear();
         var innerData = data['data'];
         FiltterData responseDetail = FiltterData.fromJson(innerData);
 
         districtList.addAll(responseDetail.districts);
         clustersList.addAll(responseDetail.clusters);
         categoryList.addAll(responseDetail.leadCategory);
+        statusList.addAll(responseDetail.leadStatus);
 
         logcat('District List', districtList.length.toString());
         logcat('Clusters List', clustersList.length.toString());
@@ -531,8 +540,8 @@ class LeadController extends GetxController {
       queryParams.add('endMonthYear=$endDateApi');
     }
 
-    if (customerStatus.isNotEmpty) {
-      queryParams.add('status=$customerStatus');
+    if (selectedStatus.isNotEmpty) {
+      queryParams.add('status=$selectedStatus');
     }
 
     if (categoryType.isNotEmpty) {
@@ -588,7 +597,7 @@ class LeadController extends GetxController {
         endDateApi: endDateApi.value, // e.g. "2027-12"
         districtListInt: districtListInt,
         clusterListInt: clusterListInt,
-        customerStatus: '',
+        customerStatus: selectedStatus.value,
         categoryType: selectedCategoryId.value,
       );
 
@@ -837,30 +846,30 @@ class LeadController extends GetxController {
   }
 
   void showStatusSelectionPopups(BuildContext context) {
-    fetchSelectionPopup<String>(
+    currentFilterSource.value = List.from(statusList);
+    filteredData.value = List.from(statusList);
+    searchCustomerCtr.clear();
+
+    fetchSelectionPopup<LabelValue>(
       context,
       title: 'Status',
       controller: statusCtr,
-      list: status,
+      list: filteredData,
       searchCtr: searchCustomerCtr,
       searchNode: searchCustomerNode,
       filterFunction: (val) {
-        return status
-            .where((item) => item.toLowerCase().contains(val.toLowerCase()))
-            .toList();
+        filterFetchData<LabelValue>(
+          val,
+          source: statusList,
+          getTitle: (item) => item.label,
+        );
       },
-      getTitle: (value) => value,
+      getTitle: (value) => value.label,
       // getId: (value) => value,
       onSelected: (selected) {
-        selectedStatus.value = selected;
-        statusCtr.text = selected;
-        statusModel.value = ValidationModel(
-          selected,
-          null,
-          isValidate: selected != 'Select Status',
-        );
-        isStatusSelected.value = selected != 'Select Status';
-        enableSubmitButton();
+        selectedStatus.value = selected.value;
+
+        // isStatusSelected.value = selected != 'Select Status';
       },
       function: () {},
       backBtn: () {
