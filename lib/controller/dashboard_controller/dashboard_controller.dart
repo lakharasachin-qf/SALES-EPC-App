@@ -96,12 +96,12 @@ class DashboardController extends GetxController {
 
   RxList<Cluster> districtList = <Cluster>[].obs;
   RxList<Cluster> clustersList = <Cluster>[].obs;
-  String userEmail = '';
+  RxString userEmail = ''.obs;
   Future<void> getuserEmail() async {
     User? user = await UserPreferences().getSignInInfo();
 
     if (user != null) {
-      userEmail = user.email;
+      userEmail.value = user.email;
     }
   }
 

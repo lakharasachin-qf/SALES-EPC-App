@@ -147,15 +147,17 @@ Widget getDashboardDrawer(
           Icon(Icons.person),
           SizedBox(width: 3.w),
           Expanded(
-            child: Text(
-              ctr.userEmail,
-              style: TextStyle(
-                fontSize: 15.sp,
-                fontFamily: plusJakartaSansSemiBold,
-              ),
-              softWrap: true,
-              overflow: TextOverflow.visible,
-            ),
+            child: Obx(() {
+              return Text(
+                ctr.userEmail.value,
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontFamily: plusJakartaSansSemiBold,
+                ),
+                softWrap: true,
+                overflow: TextOverflow.visible,
+              );
+            }),
           ),
         ],
       ),

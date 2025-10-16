@@ -9,34 +9,45 @@ import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/controller/meetings_calendar_controller/meetings_history_controller.dart';
 import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/helper.dart';
+import 'package:sales_app/utils/log.dart';
 import 'package:sizer/sizer.dart';
 import '../../models/MeetingCalendarModel.dart';
 
 class MeetingsHistoryScreen extends StatefulWidget {
-  MeetingsHistoryScreen({required this.meetingsItemData, super.key});
-  List<MeetingHistory> meetingsItemData;
+  final String meetingId;
+  MeetingsHistoryScreen({super.key, required this.meetingId});
 
   @override
   State<MeetingsHistoryScreen> createState() => CustomerScreenState();
 }
 
 class CustomerScreenState extends State<MeetingsHistoryScreen> {
-  final ctr = Get.put(MeetingsHistoryController());
+  final MeetingsHistoryController ctr = Get.put(MeetingsHistoryController());
 
   final RefreshController _refreshController = RefreshController();
 
   @override
   void initState() {
-    final meetingHistory = widget.meetingsItemData;
-    ctr.setMeetingHistory(meetingHistory);
     super.initState();
+
+    logcat('widget.meetingId', widget.meetingId);
+    // Initialize with static data if provided, else fetch from API
+    futureDelay(() {
+      ctr.getMeetingHistory(
+        context: context,
+        isInitialLoad: true,
+        page: 1,
+        hideLoading: false,
+        meetingId: widget.meetingId,
+      );
+    }, milliseconds: false);
   }
 
   final Map<String, double> columnWidths = {
     "Sr No.": 7.w,
     "Contacted": 20.w,
     "Status": 20.w,
-    "From	": 20.w,
+    "From": 20.w,
     "To": 20.w,
     "Reason": 20.w,
     "Action By": 20.w,
@@ -72,7 +83,14 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
               ),
               onRefresh: () async {
                 await futureDelay(() {
-                  // ctr.currentPage.value = 1;
+                  ctr.currentPage.value = 1;
+                  ctr.getMeetingHistory(
+                    context: context,
+                    isInitialLoad: true,
+                    page: 1,
+                    hideLoading: false,
+                    meetingId: widget.meetingId,
+                  );
                 }, isOneSecond: false);
                 _refreshController.refreshCompleted();
               },
@@ -118,9 +136,7 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                                           child:
                                               ctr.state.value ==
                                                       ScreenState.apiSuccess &&
-                                                  ctr
-                                                      .meetingsHistoryData
-                                                      .isEmpty
+                                                  ctr.meetingsList.isEmpty
                                               ? SizedBox(
                                                   width: MediaQuery.of(
                                                     context,
@@ -129,7 +145,7 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                                                     child: Text(
                                                       'No Meeting History found',
                                                       style: TextStyle(
-                                                        fontSize: 16,
+                                                        fontSize: 16.sp,
                                                       ),
                                                     ),
                                                   ),
@@ -196,7 +212,7 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                                                                     .key]] ??
                                                                 16.w,
                                                             child: Text(
-                                                              cell.value!,
+                                                              cell.value ?? '-',
                                                               style: TextStyle(
                                                                 fontSize: 14.sp,
                                                               ),
@@ -226,105 +242,121 @@ class CustomerScreenState extends State<MeetingsHistoryScreen> {
                           }),
                         ),
                       ),
-                      // getDynamicSizedBox(height: 1.5.h),
-                      // Padding(
-                      //   padding: EdgeInsets.symmetric(horizontal: 2.w),
-                      //   child: Obx(() {
-                      //     if (ctr.totalItems.value == 0) {
-                      //       return const Text(
-                      //         "0–0 of 0",
-                      //         style: TextStyle(fontSize: 14, color: black),
-                      //       );
-                      //     }
-
-                      //     return Container(
-                      //       padding: EdgeInsets.symmetric(
-                      //         horizontal: 3.w,
-                      //         vertical: 0.5.h,
-                      //       ),
-                      //       decoration: BoxDecoration(
-                      //         color: white,
-                      //         borderRadius: BorderRadius.circular(12),
-                      //         boxShadow: [
-                      //           BoxShadow(
-                      //             color: Colors.black12,
-                      //             blurRadius: 6,
-                      //             offset: Offset(0, 3),
-                      //           ),
-                      //         ],
-                      //       ),
-                      //       child: Row(
-                      //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      //         children: [
-                      //           Text(
-                      //             "${ctr.fromItem.value}–${ctr.toItem.value} of ${ctr.totalItems.value}",
-                      //             style: TextStyle(
-                      //               fontSize: 14.sp,
-                      //               fontWeight: FontWeight.w500,
-                      //               color: Colors.black87,
-                      //             ),
-                      //           ),
-                      //           Row(
-                      //             children: [
-                      //               IconButton(
-                      //                 onPressed: ctr.currentPage.value > 1
-                      //                     ? () {
-                      //                         ctr.getCustomerbyID(
-                      //                           context,
-                      //                           ctr.currentPage.value - 1,
-                      //                           false,
-                      //                           isFirstTime: true,
-                      //                         );
-                      //                       }
-                      //                     : null,
-                      //                 icon: Icon(
-                      //                   Icons.chevron_left,
-                      //                   color: ctr.currentPage.value > 1
-                      //                       ? Colors.black
-                      //                       : Colors.grey.shade400,
-                      //                 ),
-                      //                 splashRadius: 20,
-                      //               ),
-                      //               SizedBox(width: 6),
-                      //               Text(
-                      //                 "Page ${ctr.currentPage.value} of ${ctr.lastPage.value}",
-                      //                 style: TextStyle(
-                      //                   fontSize: 13.sp,
-                      //                   fontWeight: FontWeight.w500,
-                      //                   color: Colors.black87,
-                      //                 ),
-                      //               ),
-                      //               SizedBox(width: 6),
-                      //               IconButton(
-                      //                 onPressed:
-                      //                     ctr.currentPage.value <
-                      //                         ctr.lastPage.value
-                      //                     ? () {
-                      //                         ctr.getCustomerbyID(
-                      //                           context,
-                      //                           ctr.currentPage.value + 1,
-                      //                           false,
-                      //                           isFirstTime: true,
-                      //                         );
-                      //                       }
-                      //                     : null,
-                      //                 icon: Icon(
-                      //                   Icons.chevron_right,
-                      //                   color:
-                      //                       ctr.currentPage.value <
-                      //                           ctr.lastPage.value
-                      //                       ? Colors.black
-                      //                       : Colors.grey.shade400,
-                      //                 ),
-                      //                 splashRadius: 20,
-                      //               ),
-                      //             ],
-                      //           ),
-                      //         ],
-                      //       ),
-                      //     );
-                      //   }),
-                      // ),
+                      getDynamicSizedBox(height: 1.5.h),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 0.w),
+                        child: Obx(() {
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: white,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 3.w,
+                              vertical: 1.h,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.list_alt_rounded,
+                                      size: 18,
+                                      color: primaryColor,
+                                    ),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      "Showing ${ctr.fromItem.value}–${ctr.toItem.value}",
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      "of ${ctr.totalItems.value}",
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: primaryColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: ctr.currentPage.value > 1
+                                          ? () => ctr.getMeetingHistory(
+                                              context: context,
+                                              page: ctr.currentPage.value - 1,
+                                              isInitialLoad: true,
+                                              hideLoading: false,
+                                              meetingId: widget.meetingId,
+                                            )
+                                          : null,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            ctr.currentPage.value > 1
+                                            ? primaryColor
+                                            : Colors.grey.shade300,
+                                        minimumSize: const Size(36, 36),
+                                        shape: const CircleBorder(),
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      child: const Icon(
+                                        Icons.chevron_left,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 2.w,
+                                      ),
+                                      child: Text(
+                                        "Page ${ctr.currentPage.value}/${ctr.lastPage.value}",
+                                        style: TextStyle(fontSize: 12.sp),
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed:
+                                          ctr.currentPage.value <
+                                              ctr.lastPage.value
+                                          ? () => ctr.getMeetingHistory(
+                                              context: context,
+                                              page: ctr.currentPage.value + 1,
+                                              isInitialLoad: false,
+                                              hideLoading: false,
+                                              meetingId: widget.meetingId,
+                                            )
+                                          : null,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            ctr.currentPage.value <
+                                                ctr.lastPage.value
+                                            ? primaryColor
+                                            : Colors.grey.shade300,
+                                        minimumSize: const Size(36, 36),
+                                        shape: const CircleBorder(),
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      child: const Icon(
+                                        Icons.chevron_right,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
                       getDynamicSizedBox(height: 12.h),
                     ],
                   ),
