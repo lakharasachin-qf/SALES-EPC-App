@@ -514,12 +514,15 @@ class CustomerScreenController extends GetxController {
         FiltterData responseDetail = FiltterData.fromJson(innerData);
         districtList.addAll(responseDetail.districts);
         clustersList.addAll(responseDetail.clusters);
-        warrantyType.assignAll(
-          responseDetail.warrantyType.where((e) => e.value != 'under-warranty'),
-        );
-        filterWarrantyType.assignAll(
-          responseDetail.warrantyType.where((e) => e.value != 'under-warranty'),
-        );
+        // warrantyType.assignAll(
+        //   responseDetail.warrantyType.where((e) => e.value != 'under-warranty'),
+        // );
+        // filterWarrantyType.assignAll(
+        //   responseDetail.warrantyType.where((e) => e.value != 'under-warranty'),
+        // );
+
+        warrantyType.assignAll(responseDetail.warrantyType);
+        filterWarrantyType.assignAll(responseDetail.warrantyType);
 
         // warrantyType.assignAll(responseDetail.warrantyType);
         // filterWarrantyType.assignAll(responseDetail.warrantyType);
