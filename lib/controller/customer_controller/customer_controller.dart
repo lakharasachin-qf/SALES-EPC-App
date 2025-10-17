@@ -686,7 +686,11 @@ class CustomerScreenController extends GetxController {
 
       if (endDate != null &&
           now.isAfter(endDate) &&
-          formattedWarrantyType != "amc") {
+          formattedWarrantyType == "non_amc") {
+        formattedWarrantyType = formattedWarrantyType.capitalize.toString();
+      } else if (endDate != null &&
+          now.isAfter(endDate) &&
+          formattedWarrantyType == "amc") {
         formattedWarrantyType = "Not In AMC";
       } else {
         formattedWarrantyType = formattedWarrantyType.capitalize.toString();
