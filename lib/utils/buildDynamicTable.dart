@@ -15,6 +15,7 @@ Widget buildDynamicTable<T>({
   /// - a global bool (applied to all rows)
   /// - or a function returning bool per item
   required dynamic isRejected,
+  required isEditVisible,
 }) {
   List<DataRow> rows = [];
 
@@ -50,19 +51,20 @@ Widget buildDynamicTable<T>({
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    width: 4.h,
-                    height: 4.h,
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      icon: Icon(Icons.edit, color: rejected ? grey : null),
-                      onPressed: rejected
-                          ? null
-                          : () {
-                              if (onEdit != null) onEdit(i, item);
-                            },
+                  if (isEditVisible == true)
+                    SizedBox(
+                      width: 4.h,
+                      height: 4.h,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        icon: Icon(Icons.edit, color: rejected ? grey : null),
+                        onPressed: rejected
+                            ? null
+                            : () {
+                                if (onEdit != null) onEdit(i, item);
+                              },
+                      ),
                     ),
-                  ),
                   SizedBox(
                     width: 4.h,
                     height: 4.h,

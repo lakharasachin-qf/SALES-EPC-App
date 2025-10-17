@@ -804,20 +804,21 @@ getCommonLableWithButton(
           ),
         ),
       ),
-      if (isAddShow == true)
-        Container(
-          margin: EdgeInsets.only(right: 2.w),
-          child: IconButton(
-            icon: Icon(
-              Icons.add_circle_rounded,
-              color: primaryColor,
-              size: 20.sp,
-            ),
-            onPressed: () {
-              if (onClick != null) onClick();
-            },
-          ),
-        ),
+      isAddShow == true
+          ? Container(
+              margin: EdgeInsets.only(right: 2.w),
+              child: IconButton(
+                icon: Icon(
+                  Icons.add_circle_rounded,
+                  color: primaryColor,
+                  size: 20.sp,
+                ),
+                onPressed: () {
+                  if (onClick != null) onClick();
+                },
+              ),
+            )
+          : Container(padding: EdgeInsets.only(bottom: 4.h)),
     ],
   );
 }

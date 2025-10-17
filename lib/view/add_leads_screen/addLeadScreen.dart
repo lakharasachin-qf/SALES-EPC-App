@@ -16,6 +16,7 @@ import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/controller/leads_controller/add_leads_controller.dart';
+import 'package:sales_app/utils/AppPermissions.dart';
 import 'package:sales_app/utils/buildDynamicTable.dart';
 import 'package:sales_app/utils/custom_stepper_widget.dart';
 import 'package:sales_app/utils/helper.dart';
@@ -1841,6 +1842,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                     isRejected:
                                         controller.isLeadRejectedMode.value ||
                                         controller.iswonShow.value,
+                                    isEditVisible: true,
                                   ),
                                 );
                               }),
@@ -1857,11 +1859,10 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   );
                                 },
                                 isAddShow:
-                                    controller.isLeadRejectedMode.value ==
-                                            true ||
-                                        controller.iswonShow.value == true
-                                    ? false
-                                    : true,
+                                    AppPermissions().canUploadFiles == true
+                                    ? !(controller.isLeadRejectedMode.value ||
+                                          controller.iswonShow.value)
+                                    : false,
                               ),
                               Obx(() {
                                 if (controller.fileList.isEmpty) {
@@ -1877,7 +1878,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       displayFileName(file),
                                       formatText(file.category.toString()),
                                     ],
-                                    
+
                                     onEdit: (i, file) {
                                       controller.addUploadFile(
                                         context,
@@ -1899,6 +1900,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                             false) || // disable edit/delete if cannot manage
                                         controller.isLeadRejectedMode.value ||
                                         controller.iswonShow.value,
+                                    isEditVisible: false,
                                   ),
                                 );
                               }),

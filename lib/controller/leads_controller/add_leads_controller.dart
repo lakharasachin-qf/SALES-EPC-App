@@ -191,13 +191,11 @@ class AddLeadsController extends GetxController {
 
   void updateLoad(int index, LoadElement element) {
     productDetailList[index] = element;
-    validateStep3();
     update();
   }
 
   void deleteLoad(int index) {
     productDetailList.removeAt(index);
-    validateStep3();
     update();
   }
 
