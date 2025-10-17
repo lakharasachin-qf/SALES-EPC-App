@@ -165,10 +165,13 @@ Widget getDashboardDrawer(
       getDynamicSizedBox(height: 2.h),
       getappLine(),
       getDynamicSizedBox(height: 1.h),
-      buildDrawerItem(Asset.dashboard2, HomeScreenConst.dashboard, () {
-        ctr.scaffoldKey.currentState?.closeDrawer();
-        logcat("onTap", "Done");
-      }),
+
+      AppPermissions().canAccessDashboard == true
+          ? buildDrawerItem(Asset.dashboard2, HomeScreenConst.dashboard, () {
+              ctr.scaffoldKey.currentState?.closeDrawer();
+              logcat("onTap", "Done");
+            })
+          : SizedBox.shrink(),
       // getDynamicSizedBox(height: 1.h),
       AppPermissions().isLeadManagement
           ? buildDrawerItem(Asset.compass, HomeScreenConst.leads, () {

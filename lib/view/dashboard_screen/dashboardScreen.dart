@@ -11,6 +11,7 @@ import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/dashboard_controller/dashboard_controller.dart';
+import 'package:sales_app/utils/AppPermissions.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sales_app/utils/log.dart';
 import 'package:sales_app/view/dashboard_screen/widgets/dashboard_widgets.dart';
@@ -57,6 +58,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             onClick: () {
               ctr.openFilterBottomSheet(context: context);
             },
+            showFilterOption: AppPermissions().canAccessDashboard == true
+                ? true
+                : false,
           ),
           Expanded(
             child: SmartRefresher(
@@ -92,7 +96,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                       return ctr.isSceenloaderShow.value
                           ? SizedBox.shrink()
-                          : Align(
+                          : AppPermissions().canAccessDashboard == true
+                          ? Align(
                               alignment: Alignment.centerRight,
                               child: Container(
                                 padding: EdgeInsets.symmetric(horizontal: 6.w),
@@ -105,13 +110,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ),
                                 ),
                               ),
-                            );
+                            )
+                          : SizedBox.shrink();
                     }),
                     getDynamicSizedBox(height: 2.h),
                     Obx(() {
                       return ctr.isSceenloaderShow.value
                           ? screnLoader(Device.height / 1.35)
-                          : SizedBox(
+                          : AppPermissions().canAccessDashboard == true
+                          ? SizedBox(
                               child: Column(
                                 children: [
                                   Container(
@@ -331,6 +338,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     ),
                                   ),
                                 ],
+                              ),
+                            )
+                          : SizedBox(
+                              height: Device.height / 1.5,
+                              child: Center(
+                                child: Container(
+                                  width: Device.width,
+                                  margin: EdgeInsets.symmetric(
+                                    horizontal: 4.w,
+                                    vertical: 3.h,
+                                  ),
+                                  padding: EdgeInsets.all(4.w),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Text(
+                                    "You don't have permission to view dashboard",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontFamily: plusJakartaSansBold,
+                                      color: primaryColor,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
                               ),
                             );
                     }),

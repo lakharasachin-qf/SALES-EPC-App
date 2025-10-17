@@ -27,7 +27,7 @@ Widget getLogo() {
   );
 }
 
-Widget dashboardToolbar({Function? onClick}) {
+Widget dashboardToolbar({Function? onClick, showFilterOption = true}) {
   return SizedBox(
     height: 6.h,
     child: Row(
@@ -57,15 +57,17 @@ Widget dashboardToolbar({Function? onClick}) {
         ),
 
         /// Right: Filter button (optional)
-        Container(
-          margin: EdgeInsets.only(right: 2.w),
-          child: IconButton(
-            icon: Icon(Icons.filter_alt, color: primaryColor),
-            onPressed: () {
-              if (onClick != null) onClick();
-            },
-          ),
-        ),
+        showFilterOption == true
+            ? Container(
+                margin: EdgeInsets.only(right: 2.w),
+                child: IconButton(
+                  icon: Icon(Icons.filter_alt, color: primaryColor),
+                  onPressed: () {
+                    if (onClick != null) onClick();
+                  },
+                ),
+              )
+            : Container(margin: EdgeInsets.only(right: 12.w)),
       ],
     ),
   );
