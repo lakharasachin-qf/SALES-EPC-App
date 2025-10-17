@@ -2961,6 +2961,7 @@ class AddLeadsController extends GetxController {
                                           path: selectedFilePath.value,
                                           // category: uploadCategoryCtr.text,
                                           category: categoryValue.value,
+                                          canManage: true,
                                         );
                                         if (index == null) {
                                           addFile(newFile);
@@ -5090,18 +5091,48 @@ class AddLeadsController extends GetxController {
                   if (f.path != null && f.path!.contains('.')) {
                     extension = f.path!.split('.').last;
                   }
+
+                  // ✅ Default permission false
+                  bool canManage = false;
+
+                  // ✅ Conditions for each permission group
+                  if (AppPermissions().canManageFiles == true &&
+                      (f.category == 'hand_sketch_installation_area' ||
+                          f.category == 'map_marked_screenshot' ||
+                          f.category == 'equipment_photo')) {
+                    canManage = true;
+                  } else if (AppPermissions().canManageFinanceDocuments ==
+                          true &&
+                      f.category == 'finance_document') {
+                    canManage = true;
+                  } else if (AppPermissions().canManageProposals == true &&
+                      (f.category == 'technical_proposal' ||
+                          f.category == 'commercial_proposal')) {
+                    canManage = true;
+                  }
+
+                  // ✅ Build and return UploadedFile
                   return UploadedFile(
                     id: f.id,
+                    relatedModelId: f.relatedModelId,
+                    relatedModelType: f.relatedModelType,
                     path: f.tag != null && f.tag!.isNotEmpty
                         ? "${f.tag}_${f.category}.$extension"
                         : "${f.category}.$extension",
                     category: f.tag != null && f.tag!.isNotEmpty
                         ? "${f.tag}_${f.category}"
                         : f.category,
+                    tag: f.tag,
+                    fileUploadedAt: f.fileUploadedAt,
+                    createdAt: f.createdAt,
+                    updatedAt: f.updatedAt,
+                    canManage: canManage, // ✅ dynamically assigned
                   );
                 }).toList() ??
                 [],
           );
+
+        print('canManage flags: ${fileList.map((f) => f.canManage).toList()}');
 
         validateAll();
         update();
