@@ -60,6 +60,7 @@ class CustomerScreenController extends GetxController {
   RxBool isTextEmpty = false.obs;
   var warrantyType = <LabelValue>[].obs;
   var customerStatus = <LabelValue>[].obs;
+  var cusotmerUpdateWarrantyType = <LabelValue>[].obs;
   var filterWarrantyType = <LabelValue>[].obs;
   var filterCustomerStatus = <LabelValue>[].obs;
 
@@ -517,12 +518,16 @@ class CustomerScreenController extends GetxController {
         // warrantyType.assignAll(
         //   responseDetail.warrantyType.where((e) => e.value != 'under-warranty'),
         // );
-        // filterWarrantyType.assignAll(
-        //   responseDetail.warrantyType.where((e) => e.value != 'under-warranty'),
-        // );
-
         warrantyType.assignAll(responseDetail.warrantyType);
-        filterWarrantyType.assignAll(responseDetail.warrantyType);
+        cusotmerUpdateWarrantyType.assignAll(
+          responseDetail.warrantyType.where((e) => e.value != 'under-warranty'),
+        );
+        filterWarrantyType.assignAll(
+          responseDetail.warrantyType.where((e) => e.value != 'under-warranty'),
+        );
+
+        // warrantyType.assignAll(responseDetail.warrantyType);
+        // filterWarrantyType.assignAll(responseDetail.warrantyType);
 
         // warrantyType.assignAll(responseDetail.warrantyType);
         // filterWarrantyType.assignAll(responseDetail.warrantyType);
@@ -684,19 +689,42 @@ class CustomerScreenController extends GetxController {
       final formattedWarrantyEndDate = formatDate(e.warrantyEndDate);
 
       // Determine warranty type
-      String formattedWarrantyType = e.warrantyType.toLowerCase();
+      // String formattedWarrantyType = e.warrantyType.toLowerCase();
+      // final endDate = parseDate(e.warrantyEndDate);
+
+      // if (endDate != null &&
+      //     now.isAfter(endDate) &&
+      //     formattedWarrantyType == "non_amc") {
+      //   formattedWarrantyType = formattedWarrantyType.capitalize.toString();
+      // } else if (endDate != null &&
+      //     now.isAfter(endDate) &&
+      //     formattedWarrantyType == "amc") {
+      //   formattedWarrantyType = "Not In AMC";
+      // } else {
+      //   formattedWarrantyType = formattedWarrantyType.capitalize.toString();
+      // }
+
+      // Normalize and map warranty type
+      String warrantyType = e.warrantyType.toLowerCase().trim();
       final endDate = parseDate(e.warrantyEndDate);
 
-      if (endDate != null &&
-          now.isAfter(endDate) &&
-          formattedWarrantyType == "non_amc") {
-        formattedWarrantyType = formattedWarrantyType.capitalize.toString();
-      } else if (endDate != null &&
-          now.isAfter(endDate) &&
-          formattedWarrantyType == "amc") {
-        formattedWarrantyType = "Not In AMC";
+      if (warrantyType == "non_amc") {
+        warrantyType = "Non-AMC";
+      } else if (warrantyType == "under-warranty") {
+        warrantyType = "Under-Warranty";
+      } else if (warrantyType == "amc") {
+        warrantyType = "AMC";
       } else {
-        formattedWarrantyType = formattedWarrantyType.capitalize.toString();
+        warrantyType = warrantyType.capitalize.toString();
+      }
+
+      // Check if warranty expired
+      if (endDate != null && now.isAfter(endDate)) {
+        if (e.warrantyType.toLowerCase() == "non_amc") {
+          warrantyType = "Non-AMC";
+        } else if (e.warrantyType.toLowerCase() == "amc") {
+          warrantyType = "Not In AMC";
+        }
       }
 
       return [
@@ -706,7 +734,9 @@ class CustomerScreenController extends GetxController {
         e.contactPersonMobile,
         e.customerStatus.capitalize.toString(),
         formattedLiveAt,
-        formatText(formattedWarrantyType),
+        // formatText(formattedWarrantyType),
+        // formatText(warrantyType),
+        warrantyType,
         formattedWarrantyEndDate,
         "",
       ];
@@ -1441,7 +1471,7 @@ class CustomerScreenController extends GetxController {
                 update();
                 if (updateWarrantyCtr.text.toString().isNotEmpty) {
                   filterWarrantyType.clear();
-                  filterWarrantyType.addAll(warrantyType);
+                  filterWarrantyType.addAll(cusotmerUpdateWarrantyType);
                 }
                 validateUpdateButton();
                 Get.back();
@@ -1472,10 +1502,10 @@ class CustomerScreenController extends GetxController {
 
   void applyFilterForWarrantyType(String keyword) {
     if (keyword.isEmpty) {
-      filterWarrantyType.assignAll(warrantyType);
+      filterWarrantyType.assignAll(cusotmerUpdateWarrantyType);
     } else {
       filterWarrantyType.assignAll(
-        warrantyType
+        cusotmerUpdateWarrantyType
             .where(
               (item) =>
                   item.label.toLowerCase().contains(keyword.toLowerCase()),
