@@ -275,5 +275,5 @@ void showErrorDialog(BuildContext context, Map<String, dynamic> data) {
     errorMessage = data['message'].toString();
   }
 
-  showDialogForScreen(context, 'Error', errorMessage, callback: () {});
+  showDialogForScreen(context, 'Add Lead', errorMessage, callback: () {});
 }

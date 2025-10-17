@@ -3243,18 +3243,45 @@ class AddLeadsController extends GetxController {
             },
           );
         }
-      } else {
+      }
+      // else {
+      //   showErrorDialog(context, data);
+      // }
+      else if (response.statusCode == 422) {
         logcat('AddLeadApi Error', response.body);
-        showDialogForScreen(
-          context,
-          'Error',
-          data['message']?.toString() ??
-              data['errors']?.values.first[0]?.toString() ??
-              'Server error',
-          callback: () {
-            return;
-          },
-        );
+
+        String errorMessage = 'Validation failed';
+
+        // ✅ Handle multiple possible error response formats
+        if (data['message'] != null && data['message'].toString().isNotEmpty) {
+          errorMessage = data['message'].toString();
+        }
+
+        // Check for Laravel-style "errors"
+        if (data['errors'] != null &&
+            data['errors'] is Map &&
+            data['errors'].isNotEmpty) {
+          try {
+            final firstErrorList = (data['errors'] as Map).values.first;
+            if (firstErrorList is List && firstErrorList.isNotEmpty) {
+              errorMessage = firstErrorList.first.toString();
+            }
+          } catch (_) {}
+        }
+        // ✅ Handle your new API format: "result"
+        else if (data['result'] != null &&
+            data['result'] is Map &&
+            data['result'].isNotEmpty) {
+          try {
+            final firstErrorList = (data['result'] as Map).values.first;
+            if (firstErrorList is List && firstErrorList.isNotEmpty) {
+              errorMessage = firstErrorList.first.toString();
+            }
+          } catch (_) {}
+        }
+
+        showDialogForScreen(context, 'Add Lead', errorMessage, callback: () {});
+
         message.value = "Failed to add lead (${response.statusCode})";
       }
     } catch (e) {
@@ -3533,10 +3560,42 @@ class AddLeadsController extends GetxController {
         } else {
           showErrorDialog(context, data);
         }
-      } else {
-        logcat('UpdateLeadApi Error', response.body);
-        showErrorDialog(context, data);
-        message.value = "Failed to update lead (${response.statusCode})";
+      } else if (response.statusCode == 422) {
+        logcat('AddLeadApi Error', response.body);
+
+        String errorMessage = 'Validation failed';
+
+        // ✅ Handle multiple possible error response formats
+        if (data['message'] != null && data['message'].toString().isNotEmpty) {
+          errorMessage = data['message'].toString();
+        }
+
+        // Check for Laravel-style "errors"
+        if (data['errors'] != null &&
+            data['errors'] is Map &&
+            data['errors'].isNotEmpty) {
+          try {
+            final firstErrorList = (data['errors'] as Map).values.first;
+            if (firstErrorList is List && firstErrorList.isNotEmpty) {
+              errorMessage = firstErrorList.first.toString();
+            }
+          } catch (_) {}
+        }
+        // ✅ Handle your new API format: "result"
+        else if (data['result'] != null &&
+            data['result'] is Map &&
+            data['result'].isNotEmpty) {
+          try {
+            final firstErrorList = (data['result'] as Map).values.first;
+            if (firstErrorList is List && firstErrorList.isNotEmpty) {
+              errorMessage = firstErrorList.first.toString();
+            }
+          } catch (_) {}
+        }
+
+        showDialogForScreen(context, 'Add Lead', errorMessage, callback: () {});
+
+        message.value = "Failed to add lead (${response.statusCode})";
       }
     } catch (e) {
       loadingIndicator.hide(context);
@@ -3553,16 +3612,16 @@ class AddLeadsController extends GetxController {
   }
 
   // Helper to keep error handling DRY
-  void showErrorDialog(BuildContext context, Map<String, dynamic> data) {
-    showDialogForScreen(
-      context,
-      'Error',
-      data['message']?.toString() ??
-          data['errors']?.values?.first?[0]?.toString() ??
-          'Server error',
-      callback: () => Get.back(),
-    );
-  }
+  // void showErrorDialog(BuildContext context, Map<String, dynamic> data) {
+  //   showDialogForScreen(
+  //     context,
+  //     'Error',
+  //     data['message']?.toString() ??
+  //         data['errors']?.values?.first?[0]?.toString() ??
+  //         'Server error',
+  //     callback: () => Get.back(),
+  //   );
+  // }
   // Future<void> getLocation(BuildContext context, bool isLoading) async {
   //   var loadingIndicator = LoadingProgressDialog();
 
