@@ -735,7 +735,7 @@ class CustomerScreenController extends GetxController {
         e.customerStatus.capitalize.toString(),
         formattedLiveAt,
         // formatText(formattedWarrantyType),
-        // formatText(warrantyType),
+        // formatText(formattedWarrantyType),
         warrantyType,
         formattedWarrantyEndDate,
         "",
@@ -870,6 +870,7 @@ class CustomerScreenController extends GetxController {
     if (customer.customerStatus == "open") {
       updateWarrantyCtr.text = "Under-Warranty";
       selectedWarrantyTypeValue.value = "under-warranty";
+      warrantyPeriodCtr.clear();
     } else {
       // If not AMC, clear warranty fields
       if (customer.warrantyType.toLowerCase() != "amc") {
@@ -1534,6 +1535,7 @@ class CustomerScreenController extends GetxController {
       minDate: startDate.value.isNotEmpty
           ? dateFormat.parse(startDate.value)
           : null,
+      disablePastDates: true,
       showTimePickers: false,
       onDatePicked: (DateTime date) {
         final formatted = dateFormat.format(date);
