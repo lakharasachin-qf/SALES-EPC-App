@@ -4760,6 +4760,7 @@ class AddLeadsController extends GetxController {
               );
 
               isCommercialProposalMode.value = true;
+
               isFirstComercialluploaded.value = !hasFirst;
               isFinalComercialluploaded.value = !hasFinal;
 
@@ -4768,7 +4769,13 @@ class AddLeadsController extends GetxController {
                 isCommercialProposalMode.value = false;
                 isTechnicalProposalMode.value = false;
               } else {
-                leadStatusList.assignAll(leadStatusCommercialOnlyNoRights);
+                if (AppPermissions().canUploadProposals == true) {
+                  leadStatusList.assignAll(leadStatusCommercialOnlyNoRights);
+                } else {
+                  leadStatusList.assignAll(leadStatusCommercialOnlyNoRights);
+                  isFirstComercialluploaded.value = false;
+                  isFinalComercialluploaded.value = false;
+                }
               }
             }
 
