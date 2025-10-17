@@ -354,7 +354,7 @@ class LeadScreenState extends State<LeadScreen> {
                                                                           ?.toString()
                                                                           .isEmpty ??
                                                                       true
-                                                                  ? '-'
+                                                                  ? "No Action"
                                                                   : cell.value
                                                                         .toString(),
                                                               style: TextStyle(

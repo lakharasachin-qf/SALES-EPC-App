@@ -2624,7 +2624,7 @@ class AddLeadsController extends GetxController {
                                       double value = double.parse(val);
                                       if (value < 0 || value > 24) {
                                         model!.error =
-                                            "Grid Availability must be between 0 and 24";
+                                            "Usage hours must be between 0 and 24";
                                         model.isValidate = false;
                                       } else {
                                         model!.error = null;
