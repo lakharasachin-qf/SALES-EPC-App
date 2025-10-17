@@ -317,9 +317,9 @@ class DashboardController extends GetxController {
       context,
       title: "Filter",
       onClosing: () {
-        resetForm();
-        getFillterOptions(context, showLoader: false);
-        getDashboardData(context, isFirstTime: true);
+        // resetForm();
+        // getFillterOptions(context, showLoader: false);
+        // getDashboardData(context, isFirstTime: true);
       },
       widget: addFilterSheetWidget(
         context,

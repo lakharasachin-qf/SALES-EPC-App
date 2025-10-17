@@ -3392,10 +3392,22 @@ class AddLeadsController extends GetxController {
     );
 
     logcat("filepAth:::", jsonEncode(fileList));
+
+    logcat('fileList.length', fileList.length);
+    logcat('fileList.toString isss', fileList.map((f) => f.link).toList());
     for (int i = 0; i < fileList.length; i++) {
       final file = fileList[i];
+
+      // ✅ Skip files that already have a link (remote files)
+      if (file.link != null && file.link!.startsWith('http')) {
+        logcat("Skipped remote file", file.link);
+        continue;
+      }
+
+      // ✅ Proceed only if local file path is valid
       if (file.path != null && file.path!.isNotEmpty) {
         final fileToUpload = File(file.path!);
+
         if (await fileToUpload.exists()) {
           request.files.add(
             await http.MultipartFile.fromPath(
@@ -3403,10 +3415,10 @@ class AddLeadsController extends GetxController {
               fileToUpload.path,
             ),
           );
-          logcat("fileToUpload", "Step-");
+          logcat("fileToUpload", "Added ${fileToUpload.path}");
+
           // Attach category for this file
           request.fields['uploaded_files[$i][category]'] = file.category ?? '';
-          // request.fields['uploaded_files[$i][category]'] = "equipment_photo";
         } else {
           logcat("File not found:", fileToUpload.path);
         }
