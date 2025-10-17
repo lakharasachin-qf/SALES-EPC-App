@@ -743,26 +743,29 @@ class LeadScreenState extends State<LeadScreen> {
                       //   }),
                       // ),
                       getDynamicSizedBox(height: 2.h),
-                      getFormButton(
-                        context,
-                        () async {
-                          final result = await Get.to(
-                            AddLeadScreen(isEdit: false),
-                          );
 
-                          if (result == true) {
-                            ctr.getLeadList(
-                              context: context,
-                              isInitialLoad: true,
-                              page: 1,
-                              hideLoading: false,
-                            );
-                            ctr.getFillterOptions(context);
-                          }
-                        },
-                        'Add Lead',
-                        validate: true,
-                      ),
+                      AppPermissions().canAddLead
+                          ? getFormButton(
+                              context,
+                              () async {
+                                final result = await Get.to(
+                                  AddLeadScreen(isEdit: false),
+                                );
+
+                                if (result == true) {
+                                  ctr.getLeadList(
+                                    context: context,
+                                    isInitialLoad: true,
+                                    page: 1,
+                                    hideLoading: false,
+                                  );
+                                  ctr.getFillterOptions(context);
+                                }
+                              },
+                              'Add Lead',
+                              validate: true,
+                            )
+                          : SizedBox.shrink(),
                       getDynamicSizedBox(height: 12.h),
                     ],
                   ),
