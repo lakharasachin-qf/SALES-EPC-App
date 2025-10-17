@@ -563,6 +563,7 @@ class AddLeadsController extends GetxController {
     totalProjectCostCtr = TextEditingController();
     balanceAmonutCtr = TextEditingController();
     financialTypeCtr = TextEditingController();
+    fullpaymentamountCtr = TextEditingController();
 
     financialOMCPartnerCtr = TextEditingController();
     financeDocumentCtr = TextEditingController();
@@ -698,6 +699,7 @@ class AddLeadsController extends GetxController {
     finalCommercialProposal2Ctr.dispose();
 
     tokenAmountCtr.dispose();
+    fullpaymentamountCtr.dispose();
     totalProjectCostCtr.dispose();
     balanceAmonutCtr.dispose();
     financialTypeCtr.dispose();
@@ -3943,7 +3945,8 @@ class AddLeadsController extends GetxController {
   RxBool isLeadPaymentMode = false.obs;
   late TextEditingController tokenAmountCtr,
       totalProjectCostCtr,
-      balanceAmonutCtr;
+      balanceAmonutCtr,
+      fullpaymentamountCtr;
 
   late FocusNode tokenAmountNode, totalProjectCostNode, balanceAmonutNode;
 
@@ -3964,6 +3967,7 @@ class AddLeadsController extends GetxController {
     isLeadPaymentMode.value = false;
     tokenAmountCtr.clear();
     totalProjectCostCtr.clear();
+    fullpaymentamountCtr.clear();
     balanceAmonutCtr.clear();
     tokenAmountModel.value = ValidationModel(null, null, isValidate: false);
     totalProjectCostModel.value = ValidationModel(
@@ -4488,19 +4492,21 @@ class AddLeadsController extends GetxController {
                     return;
                   }
 
-                  isOMCPartnerMode.value = true;
-                  omcParternerListDropdown.assignAll(
-                    financingProgressStatusMode,
-                  );
-                  financialOMCPartnerCtr.text =
-                      omcParternerListDropdown.first.label;
-                  selectedfinancingProgressStatusMode.value =
-                      omcParternerListDropdown.first.value;
+                  if (iswonShow.value == false) {
+                    isOMCPartnerMode.value = true;
+                    isOMCFinanceDocumentShown.value = true;
+                    omcParternerListDropdown.assignAll(
+                      financingProgressStatusMode,
+                    );
+                    financialOMCPartnerCtr.text =
+                        omcParternerListDropdown.first.label;
+                    selectedfinancingProgressStatusMode.value =
+                        omcParternerListDropdown.first.value;
+                  }
 
                   isFullPaymentAmountMode.value = false;
                   validateOMCProgressStatus(financialOMCPartnerCtr.text);
                   validateFullPaymentProject(balanceAmonutCtr.text);
-                  isOMCFinanceDocumentShown.value = true;
                 } else if (selectedfinanicalStatusvalue.value == "bank") {
                   isFullPaymentAmountMode.value = true;
                   isOMCPartnerMode.value = false;
@@ -4600,6 +4606,8 @@ class AddLeadsController extends GetxController {
       );
     });
   }
+
+  RxBool isFullPaymentReceived = false.obs;
 
   Future<void> getLeadDataByIdList(
     BuildContext context,
@@ -4851,6 +4859,12 @@ class AddLeadsController extends GetxController {
               );
 
               if (result.payment != null &&
+                  result.payment!.isFullPaymentReceived == true) {
+                isFullPaymentReceived.value = true;
+                fullpaymentamountCtr.text = '0';
+              }
+
+              if (result.payment != null &&
                   result.payment!.financingProgressStatus ==
                       "documents_sent_to_partner") {
                 ispaymentReceivedShow.value = true;
@@ -4926,6 +4940,11 @@ class AddLeadsController extends GetxController {
             validateTokenAmountt(tokenAmountCtr.text);
             validateTotalProject(totalProjectCostCtr.text);
 
+            if (result.payment != null &&
+                result.payment!.isFullPaymentReceived == true) {
+              isFullPaymentReceived.value = true;
+              fullpaymentamountCtr.text = '0';
+            }
             if (result.payment != null &&
                 result.payment!.financingType == "self_finance") {
               financialTypePaymentListDropdown.assignAll(

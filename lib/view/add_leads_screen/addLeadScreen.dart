@@ -1519,7 +1519,13 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         isEnable: false,
                                         isVerified: true,
                                         node: controller.balanceAmonutNode,
-                                        controller: controller.balanceAmonutCtr,
+                                        controller:
+                                            controller
+                                                    .isFullPaymentReceived
+                                                    .value ==
+                                                true
+                                            ? controller.fullpaymentamountCtr
+                                            : controller.balanceAmonutCtr,
                                         hintLabel: "Enter Balance Amount",
                                         onChanged: (val) {
                                           // controller.validateGroundSizeLength(
