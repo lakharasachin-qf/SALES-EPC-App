@@ -5144,7 +5144,7 @@ class AddLeadsController extends GetxController {
     );
   }
 
-  void viewFile(BuildContext context, String filePath) async {
+  void viewFile(BuildContext context, String filePath, {required setState}) {
     if (filePath.isEmpty) return;
 
     // Determine if local or network
@@ -5153,28 +5153,27 @@ class AddLeadsController extends GetxController {
     final String fileName = filePath.split('/').last;
 
     if (extension == 'pdf') {
-      final result = await Get.to(
+      Get.to(
         () => PdfViewerScreen(
           isLocalFile: isLocal,
           title: fileName,
           pdfUrl: filePath,
         ),
-      );
-      if (result == true) {
+      )!.then((value) {
         Statusbar().trasparentStatusbarProfile(false);
-      }
+        setState();
+      });
     } else if (['jpg', 'jpeg', 'png', 'gif'].contains(extension)) {
-      final result = await Get.to(
+      Get.to(
         () => FullScreenImage(
           isLocalFile: isLocal,
           title: fileName,
           imageUrl: filePath,
         ),
-      );
-
-      if (result == true) {
+      )!.then((value) {
         Statusbar().trasparentStatusbarProfile(false);
-      }
+        setState();
+      });
     } else {
       // Optional: show unsupported file type message
       ScaffoldMessenger.of(

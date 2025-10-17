@@ -101,31 +101,77 @@ class _AddLeadScreenState extends State<AddLeadScreen>
   }
 
   void _onStepContinue() {
-    if (_currentStep < _steps.length - 1) {
-      setState(() {
-        _currentStep += 1;
-      });
-    } else {
-      // Submit logic
-      if (controller.isFormValid()) {
-        if (widget.isEdit == true) {
-          controller.updateLeadApi(
-            context,
-            int.tryParse(widget.leadId ?? '') ?? 0,
-          );
-        } else {
-          controller.addLeadApi(context);
-        }
+    bool canProceed = true;
 
-        // Implement submit logic here
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(
-        //     content: Text(
-        //       'Lead ${widget.isEdit ? "Updated" : "Added"} Successfully',
-        //     ),
-        //   ),
-        // );
-        // Get.back();
+    // Step 2: "Site"
+    if (_currentStep == 1 && controller.isTechnicalProposalMode.value) {
+      final firstFile = controller.firstTechnicalProposalFile.value;
+      final finalFile = controller.finalTechnicalProposalFile.value;
+
+      if (firstFile == null && finalFile == null) {
+        // Show error dialog safely
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showDialogForScreen(
+            context,
+            'Lead',
+            'You have to upload at least one technical proposal.',
+            callback: () {
+              controller.validateStep2();
+              controller.isStep2Valid.value = false;
+              controller.update();
+            },
+          );
+        });
+
+        canProceed = false; // Prevent moving to next step
+      } else {
+        canProceed = controller.isStep2Valid.value;
+      }
+    }
+
+    if (_currentStep == 1 && controller.isCommercialProposalMode.value) {
+      final firstFile = controller.firstCommercialProposalFile.value;
+      final finalFile = controller.finalCommercialProposalFile.value;
+
+      if (firstFile == null && finalFile == null) {
+        // Show error dialog safely
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showDialogForScreen(
+            context,
+            'Lead',
+            'You have to upload at least one commercial proposal.',
+            callback: () {
+              controller.validateStep2();
+              controller.isStep2Valid.value = false;
+              controller.update();
+            },
+          );
+        });
+
+        canProceed = false; // Prevent moving to next step
+      } else {
+        canProceed = controller.isStep2Valid.value;
+      }
+    }
+
+    // Proceed if allowed
+    if (canProceed) {
+      if (_currentStep < _steps.length - 1) {
+        setState(() {
+          _currentStep += 1;
+        });
+      } else {
+        // Submit logic
+        if (controller.isFormValid()) {
+          if (widget.isEdit == true) {
+            controller.updateLeadApi(
+              context,
+              int.tryParse(widget.leadId ?? '') ?? 0,
+            );
+          } else {
+            controller.addLeadApi(context);
+          }
+        }
       }
     }
   }
@@ -1182,6 +1228,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
 
                                               print('File path: $filePath');
                                               print('File name: $fileName');
+                                              controller.validateStep2();
                                             },
                                           );
                                         },
@@ -1243,6 +1290,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
 
                                               print('File path: $filePath');
                                               print('File name: $fileName');
+                                              controller.validateStep2();
                                             },
                                           );
                                         },
@@ -1311,6 +1359,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
 
                                               print('File path: $filePath');
                                               print('File name: $fileName');
+                                              controller.validateStep2();
                                             },
                                           );
                                         },
@@ -1372,6 +1421,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
 
                                               print('File path: $filePath');
                                               print('File name: $fileName');
+                                              controller.validateStep2();
                                             },
                                           );
                                         },
@@ -1912,6 +1962,14 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       controller.viewFile(
                                         context,
                                         controller.fileList[i].link ?? '',
+                                        setState: () {
+                                          logcat(
+                                            'setState called',
+                                            'setState ',
+                                          );
+                                          setState(() {});
+                                          // controller.update();
+                                        },
                                       );
                                     },
                                   ),
@@ -1939,10 +1997,12 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   Expanded(
                                     child: Obx(() {
                                       bool isNextEnabled = false;
+
                                       if (_currentStep == 0) {
                                         isNextEnabled =
                                             controller.isStep1Valid.value;
                                       } else if (_currentStep == 1) {
+                                        // Normal step 2 validation
                                         isNextEnabled =
                                             controller.isStep2Valid.value;
                                       } else if (_currentStep == 2) {
@@ -1952,10 +2012,11 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         isNextEnabled = controller
                                             .isFormValid();
                                       }
+
                                       return getFormButton(
                                         context,
                                         () {
-                                          if (isNextEnabled == true) {
+                                          if (isNextEnabled) {
                                             _onStepContinue();
                                           }
                                         },
