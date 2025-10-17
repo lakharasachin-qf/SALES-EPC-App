@@ -302,6 +302,7 @@ class UploadedFile {
   String? createdAt;
   String? updatedAt;
   bool canManage;
+  String link;
 
   UploadedFile({
     this.id,
@@ -314,6 +315,7 @@ class UploadedFile {
     this.createdAt,
     this.updatedAt,
     required this.canManage,
+    required this.link,
   });
 
   factory UploadedFile.fromJson(Map<String, dynamic> json) => UploadedFile(
@@ -326,7 +328,8 @@ class UploadedFile {
     fileUploadedAt: json["file_uploaded_at"],
     createdAt: json["created_at"],
     updatedAt: json["updated_at"],
-    canManage: false, // ✅ default false from backend
+    canManage: false,
+    link: '', // ✅ default false from backend
   );
 
   Map<String, dynamic> toJson() => {

@@ -28,7 +28,7 @@ class FullScreenImage extends StatelessWidget {
               backgroundColor: transparent,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back, color: white),
-                onPressed: () => Get.back(),
+                onPressed: () => Get.back(result: true),
               ),
               title: Text(title, style: const TextStyle(color: white)),
               centerTitle: true,

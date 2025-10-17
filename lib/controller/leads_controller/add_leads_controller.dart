@@ -13,13 +13,16 @@ import 'package:sales_app/api_handle/apiCallingFormate.dart';
 import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/common_date_time_picker.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
+import 'package:sales_app/componant/dialogs/fullscreen.dart';
 import 'package:sales_app/componant/dialogs/loading_indicator.dart';
+import 'package:sales_app/componant/dialogs/pdfviewer_screen.dart';
 import 'package:sales_app/componant/input/custom_text_field.dart';
 import 'package:sales_app/componant/input/form_inputs.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/font_constant.dart';
+import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
 import 'package:sales_app/models/LeadByIdModel.dart';
@@ -2960,6 +2963,7 @@ class AddLeadsController extends GetxController {
                                           // category: uploadCategoryCtr.text,
                                           category: categoryValue.value,
                                           canManage: true,
+                                          link: selectedFilePath.value,
                                         );
                                         if (index == null) {
                                           addFile(newFile);
@@ -5124,7 +5128,8 @@ class AddLeadsController extends GetxController {
                     fileUploadedAt: f.fileUploadedAt,
                     createdAt: f.createdAt,
                     updatedAt: f.updatedAt,
-                    canManage: canManage, // ✅ dynamically assigned
+                    canManage: canManage,
+                    link: f.path ?? '', // ✅ dynamically assigned
                   );
                 }).toList() ??
                 [],
@@ -5137,6 +5142,45 @@ class AddLeadsController extends GetxController {
       },
       networkManager: networkManager,
     );
+  }
+
+  void viewFile(BuildContext context, String filePath) async {
+    if (filePath.isEmpty) return;
+
+    // Determine if local or network
+    final bool isLocal = !filePath.startsWith('http');
+    final String extension = filePath.split('.').last.toLowerCase();
+    final String fileName = filePath.split('/').last;
+
+    if (extension == 'pdf') {
+      final result = await Get.to(
+        () => PdfViewerScreen(
+          isLocalFile: isLocal,
+          title: fileName,
+          pdfUrl: filePath,
+        ),
+      );
+      if (result == true) {
+        Statusbar().trasparentStatusbarProfile(false);
+      }
+    } else if (['jpg', 'jpeg', 'png', 'gif'].contains(extension)) {
+      final result = await Get.to(
+        () => FullScreenImage(
+          isLocalFile: isLocal,
+          title: fileName,
+          imageUrl: filePath,
+        ),
+      );
+
+      if (result == true) {
+        Statusbar().trasparentStatusbarProfile(false);
+      }
+    } else {
+      // Optional: show unsupported file type message
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Unsupported file type')));
+    }
   }
 
   //fallback to this getleadData if in future any problem occures

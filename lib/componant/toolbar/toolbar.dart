@@ -299,6 +299,7 @@ getCommonToolbar(
   bool isFilter = false,
   bool? isLogo,
   BuildContext? context,
+  bool? isViwerScreenOpen = false,
 }) {
   return SafeArea(
     child: Stack(
@@ -311,18 +312,36 @@ getCommonToolbar(
               ? backButtonWidget(onClick)
               : Container(),
         ),
-        Center(
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: plusJakartaSansBold,
-              color: black,
-              fontWeight: FontWeight.bold,
-              fontSize: 18.sp,
-            ),
-          ),
-        ),
+
+        isViwerScreenOpen == true
+            ? Center(
+                child: Container(
+                  width: 50.w,
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: plusJakartaSansBold,
+                      color: black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.sp,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              )
+            : Center(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: plusJakartaSansBold,
+                    color: black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.sp,
+                  ),
+                ),
+              ),
         if (isFilter == true)
           Positioned(
             right: 0,

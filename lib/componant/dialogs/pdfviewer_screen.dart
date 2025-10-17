@@ -44,9 +44,10 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
             getDynamicSizedBox(height: 1.h),
             getCommonToolbar(
               // widget.title,
-              "View Pdf",
+              isViwerScreenOpen: true,
+              widget.title,
               onClick: () {
-                Get.back();
+                Get.back(result: true);
               },
             ),
             getDynamicSizedBox(height: 1.h),

@@ -258,31 +258,31 @@ class CustomerScreenState extends State<Customerscreen> {
                                                                     MainAxisAlignment
                                                                         .center,
                                                                 children: [
-                                                                  AppPermissions()
-                                                                          .canUpdateCustomer
-                                                                      ? SizedBox(
-                                                                          width:
-                                                                              4.h,
-                                                                          height:
-                                                                              4.h,
-                                                                          child: IconButton(
-                                                                            padding:
-                                                                                EdgeInsets.zero,
-                                                                            icon: const Icon(
-                                                                              Icons.visibility,
-                                                                              color: primaryColor,
-                                                                            ),
-                                                                            onPressed: () {
-                                                                              final customerData = ctr.filteredCustomerList[entry.key];
-                                                                              Get.to(
-                                                                                ViewCustomerScreen(
-                                                                                  customerId: customerData.id.toString(),
-                                                                                ),
-                                                                              );
-                                                                            },
+                                                                  SizedBox(
+                                                                    width: 4.h,
+                                                                    height: 4.h,
+                                                                    child: IconButton(
+                                                                      padding:
+                                                                          EdgeInsets
+                                                                              .zero,
+                                                                      icon: const Icon(
+                                                                        Icons
+                                                                            .visibility,
+                                                                        color:
+                                                                            primaryColor,
+                                                                      ),
+                                                                      onPressed: () {
+                                                                        final customerData =
+                                                                            ctr.filteredCustomerList[entry.key];
+                                                                        Get.to(
+                                                                          ViewCustomerScreen(
+                                                                            customerId:
+                                                                                customerData.id.toString(),
                                                                           ),
-                                                                        )
-                                                                      : SizedBox.shrink(),
+                                                                        );
+                                                                      },
+                                                                    ),
+                                                                  ),
                                                                   getDynamicSizedBox(
                                                                     width: 1.w,
                                                                   ),

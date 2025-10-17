@@ -16,6 +16,8 @@ Widget buildDynamicTable<T>({
   /// - or a function returning bool per item
   required dynamic isRejected,
   required isEditVisible,
+  required isEyeButtonShow,
+  void Function(int)? onEyeButtonClick,
 }) {
   List<DataRow> rows = [];
 
@@ -65,6 +67,21 @@ Widget buildDynamicTable<T>({
                               },
                       ),
                     ),
+                  if (isEyeButtonShow == true)
+                    SizedBox(
+                      width: 4.h,
+                      height: 4.h,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        icon: Icon(Icons.visibility),
+                        onPressed: () {
+                          if (onEyeButtonClick != null) {
+                            onEyeButtonClick(i);
+                          }
+                        },
+                      ),
+                    ),
+
                   SizedBox(
                     width: 4.h,
                     height: 4.h,

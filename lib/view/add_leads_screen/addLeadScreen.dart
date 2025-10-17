@@ -1843,6 +1843,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         controller.isLeadRejectedMode.value ||
                                         controller.iswonShow.value,
                                     isEditVisible: true,
+                                    isEyeButtonShow: false,
                                   ),
                                 );
                               }),
@@ -1901,6 +1902,18 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         controller.isLeadRejectedMode.value ||
                                         controller.iswonShow.value,
                                     isEditVisible: false,
+                                    isEyeButtonShow: true,
+                                    onEyeButtonClick: (i) {
+                                      logcat(
+                                        'path name isss',
+                                        controller.fileList[i].link,
+                                      );
+                                      // return;
+                                      controller.viewFile(
+                                        context,
+                                        controller.fileList[i].link ?? '',
+                                      );
+                                    },
                                   ),
                                 );
                               }),
