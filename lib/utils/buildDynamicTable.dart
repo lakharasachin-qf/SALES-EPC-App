@@ -10,16 +10,25 @@ Widget buildDynamicTable<T>({
   required List<String> Function(T) getValues,
   required void Function(int, T)? onEdit,
   required void Function(int)? onDelete,
-  required isRejected,
+
+  /// 🔹 This can now be either:
+  /// - a global bool (applied to all rows)
+  /// - or a function returning bool per item
+  required dynamic isRejected,
 }) {
   List<DataRow> rows = [];
+
   for (var i = 0; i < data.length; i++) {
     final item = data[i];
     final values = getValues(item);
 
+    // 🔹 Support both a global bool or a function(T)
+    final bool rejected = isRejected is bool ? isRejected : isRejected(item);
+
     rows.add(
       DataRow(
         cells: [
+          // Sr. No.
           DataCell(
             Center(
               child: Text(
@@ -33,7 +42,9 @@ Widget buildDynamicTable<T>({
                 ),
               ),
             ),
-          ), // Sr. No.
+          ),
+
+          // 🔹 Action Buttons
           DataCell(
             Center(
               child: Row(
@@ -44,13 +55,12 @@ Widget buildDynamicTable<T>({
                     height: 4.h,
                     child: IconButton(
                       padding: EdgeInsets.zero,
-                      icon: Icon(
-                        Icons.edit,
-                        color: isRejected == true ? grey : null,
-                      ),
-                      onPressed: () {
-                        if (onEdit != null) onEdit(i, item);
-                      },
+                      icon: Icon(Icons.edit, color: rejected ? grey : null),
+                      onPressed: rejected
+                          ? null
+                          : () {
+                              if (onEdit != null) onEdit(i, item);
+                            },
                     ),
                   ),
                   SizedBox(
@@ -58,20 +68,20 @@ Widget buildDynamicTable<T>({
                     height: 4.h,
                     child: IconButton(
                       padding: EdgeInsets.zero,
-                      icon: Icon(
-                        Icons.delete,
-                        color: isRejected == true ? grey : red,
-                      ),
-                      onPressed: () {
-                        if (onDelete != null) onDelete(i);
-                      },
+                      icon: Icon(Icons.delete, color: rejected ? grey : red),
+                      onPressed: rejected
+                          ? null
+                          : () {
+                              if (onDelete != null) onDelete(i);
+                            },
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          // Other dynamic cells
+
+          // 🔹 Other dynamic cells
           ...values.map(
             (val) => DataCell(
               Center(

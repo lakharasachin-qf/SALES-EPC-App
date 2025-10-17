@@ -1876,25 +1876,9 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                     getValues: (file) => [
                                       displayFileName(file),
                                       formatText(file.category.toString()),
-                                      // controller.formatCategory(
-                                      //   file.category,
-                                      //   file.uploadFile,
-                                      // ),
                                     ],
+                                    
                                     onEdit: (i, file) {
-                                      if (controller.isLeadRejectedMode.value ==
-                                              true ||
-                                          controller.iswonShow.value) {
-                                        Get.snackbar(
-                                          'Action Not Allowed',
-                                          'You can’t edit items in Rejected mode',
-                                          snackPosition: SnackPosition.BOTTOM,
-                                          backgroundColor: Colors.red
-                                              .withOpacity(0.1),
-                                          colorText: Colors.redAccent,
-                                        );
-                                        return;
-                                      }
                                       controller.addUploadFile(
                                         context,
                                         fileItem: file,
@@ -1903,25 +1887,16 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       );
                                     },
                                     onDelete: (i) {
-                                      if (controller.isLeadRejectedMode.value ==
-                                              true ||
-                                          controller.iswonShow.value) {
-                                        Get.snackbar(
-                                          'Action Not Allowed',
-                                          'You can’t delete items in Rejected mode',
-                                          snackPosition: SnackPosition.BOTTOM,
-                                          backgroundColor: Colors.red
-                                              .withOpacity(0.1),
-                                          colorText: Colors.redAccent,
-                                        );
-                                        return;
-                                      }
                                       controller.deleteFile(
                                         index: i,
                                         fileId: controller.fileList[i].id ?? 0,
                                       );
                                     },
-                                    isRejected:
+
+                                    // 🔹 Per-file rejection logic
+                                    isRejected: (file) =>
+                                        !(file.canManage ??
+                                            false) || // disable edit/delete if cannot manage
                                         controller.isLeadRejectedMode.value ||
                                         controller.iswonShow.value,
                                   ),
