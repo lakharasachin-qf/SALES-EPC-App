@@ -181,7 +181,7 @@ class AddLeadsController extends GetxController {
     return DataColumn(
       label: Text(
         label,
-        style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
       ),
     );
   }
