@@ -1,5 +1,5 @@
 class AppConstant {
-  static const name = 'SyncIn';
+  static const name = 'EPC';
 }
 
 class SplashScreenConst {
