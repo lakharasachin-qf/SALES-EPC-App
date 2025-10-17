@@ -4298,12 +4298,17 @@ class AddLeadsController extends GetxController {
 
                 validateLeadStatus(leadStatusCtr.text);
                 if (selectedLeadStatusvalue.value == "technical_proposal") {
+                  logcat('going here', '');
                   // Enable technical proposal mode
 
                   if (isCommercialProposalMode.value == true) {
                     isTechnicalProposalMode.value = false;
                   } else {
-                    isTechnicalProposalMode.value = true;
+                    if (AppPermissions().canUploadProposals == true) {
+                      isTechnicalProposalMode.value = true;
+                    } else {
+                      isTechnicalProposalMode.value = false;
+                    }
                   }
 
                   // Reset commercial proposal fields
