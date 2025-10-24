@@ -4808,6 +4808,8 @@ class AddLeadsController extends GetxController {
                 selectedLeadStatusvalue.value = leadStatusList[1].value;
                 validateLeadStatus(leadStatusCtr.text);
                 isTechnicalProposalMode.value = true;
+                isFirstTechincaluploaded.value = true;
+                isFinalTechnicaluploaded.value = true;
               } else {
                 leadStatusList.assignAll(leadStatusTechnicallOnly);
                 leadStatusCtr.text = leadStatusList[0].label;
@@ -5182,6 +5184,28 @@ class AddLeadsController extends GetxController {
                 [],
           );
 
+        final Map<String, int> leadStatusOrderMap = {
+          'new_lead': 1,
+          'technical_proposal': 2,
+          'commercial_proposal': 3,
+          'approved': 4,
+          'payments': 5,
+          'won': 6,
+        };
+
+        /// Map file categories to their corresponding lead stages
+        final Map<String, int> categoryStageMap = {
+          'hand_sketch_installation_area': 1,
+          'map_marked_screenshot': 1,
+          'equipment_photo': 1,
+          'technical_proposal': 2,
+          'commercial_proposal': 3,
+          'finance_document': 5,
+        };
+
+        String currentLeadStatus = result.leadStatus ?? 'new_lead';
+        int currentStage = leadStatusOrderMap[currentLeadStatus] ?? 1;
+
         fileList
           ..clear()
           ..assignAll(
@@ -5191,26 +5215,31 @@ class AddLeadsController extends GetxController {
                     extension = f.path!.split('.').last;
                   }
 
-                  // ✅ Default permission false
                   bool canManage = false;
 
-                  // ✅ Conditions for each permission group
+                  // Determine file’s corresponding stage
+                  int fileStage = categoryStageMap[f.category] ?? 1;
+
+                  // ✅ Allow management ONLY if file's stage > current stage
+                  // Example: if current = commercial_proposal (3)
+                  // → files with stage 4,5,6 allowed; 1–3 not allowed
                   if (AppPermissions().canManageFiles == true &&
                       (f.category == 'hand_sketch_installation_area' ||
                           f.category == 'map_marked_screenshot' ||
                           f.category == 'equipment_photo')) {
                     canManage = true;
-                  } else if (AppPermissions().canManageFinanceDocuments ==
-                          true &&
-                      f.category == 'finance_document') {
-                    canManage = true;
-                  } else if (AppPermissions().canManageProposals == true &&
-                      (f.category == 'technical_proposal' ||
-                          f.category == 'commercial_proposal')) {
-                    canManage = true;
+                  }
+                  if (fileStage >= currentStage) {
+                    if (AppPermissions().canManageFinanceDocuments == true &&
+                        f.category == 'finance_document') {
+                      canManage = true;
+                    } else if (AppPermissions().canManageProposals == true &&
+                        (f.category == 'technical_proposal' ||
+                            f.category == 'commercial_proposal')) {
+                      canManage = true;
+                    }
                   }
 
-                  // ✅ Build and return UploadedFile
                   return UploadedFile(
                     id: f.id,
                     relatedModelId: f.relatedModelId,
@@ -5226,7 +5255,7 @@ class AddLeadsController extends GetxController {
                     createdAt: f.createdAt,
                     updatedAt: f.updatedAt,
                     canManage: canManage,
-                    link: f.path ?? '', // ✅ dynamically assigned
+                    link: f.path ?? '',
                   );
                 }).toList() ??
                 [],
