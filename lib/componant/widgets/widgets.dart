@@ -350,7 +350,7 @@ openBottomtsheetDialog(
                         child: InkWell(
                           onTap: () {
                             if (onClosing != null) {
-                              onClosing(); // 👈 Trigger onClosing when bottom sheet is dismissed
+                              onClosing();
                             }
                             Navigator.pop(context);
                           },

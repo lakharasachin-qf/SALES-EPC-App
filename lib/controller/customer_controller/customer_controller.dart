@@ -140,8 +140,10 @@ class CustomerScreenController extends GetxController {
   final RxString endDate = ''.obs;
   final RxString startDateApi = ''.obs;
   final RxString endDateApi = ''.obs;
-  final DateFormat dateFormat = DateFormat('dd-MM-yyyy');
-  final DateFormat apiDateFormat = DateFormat('dd-MM-yyyy');
+  // final DateFormat dateFormat = DateFormat('dd-MM-yyyy');
+  // final DateFormat apiDateFormat = DateFormat('dd-MM-yyyy');
+  final DateFormat dateFormat = DateFormat('MMMM yyyy');
+  final DateFormat apiDateFormat = DateFormat('yyyy-MM');
 
   RxString selectedDistrictId = ''.obs;
   RxString selectedClusterId = ''.obs;
@@ -327,7 +329,6 @@ class CustomerScreenController extends GetxController {
     }
 
     if (isInitialLoad && !isApplyFilter) {
-      logcat("init", "Done");
       resetForm();
     }
 
@@ -337,7 +338,6 @@ class CustomerScreenController extends GetxController {
           isCustomerLoading(false);
         }
         showDialogForScreen(
-          // ignore: use_build_context_synchronously
           context,
           'Lead Screen',
           Connection.noConnection,

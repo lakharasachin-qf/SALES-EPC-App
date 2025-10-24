@@ -9,6 +9,7 @@ import 'package:sales_app/controller/customer_controller/view_customer_controlle
 import 'package:sales_app/utils/helper.dart';
 import 'package:sizer/sizer.dart';
 
+// ignore: must_be_immutable
 class ViewCustomerScreen extends StatefulWidget {
   ViewCustomerScreen({super.key, required this.customerId});
   String customerId;
@@ -68,7 +69,8 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
                         model: ctr.companynameModel.value,
                         gestureFunction: () {},
                         hint: 'Not Set',
-                        isRequired: true,
+                        isenable: false,
+                        isRequired: false,
                       );
                     }),
                     getDynamicSizedBox(height: 2.h),
@@ -84,7 +86,8 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
                         model: ctr.personNameModel.value,
                         gestureFunction: () {},
                         hint: 'Not Set',
-                        isRequired: true,
+                        isenable: false,
+                        isRequired: false,
                       );
                     }),
                     getDynamicSizedBox(height: 2.h),
@@ -100,7 +103,8 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
                         model: ctr.mobileModel.value,
                         gestureFunction: () {},
                         hint: 'Not Set',
-                        isRequired: true,
+                        isenable: false,
+                        isRequired: false,
                       );
                     }),
                     getDynamicSizedBox(height: 2.h),
@@ -115,7 +119,7 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
                         isenable: false,
                         hint: 'Not Set',
                         isMultipline: true,
-                        isRequired: true,
+                        isRequired: false,
                       );
                     }),
                     getDynamicSizedBox(height: 2.h),
@@ -131,7 +135,7 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
                         model: ctr.countryModel.value,
                         isenable: false,
                         hint: 'Not Set',
-                        isRequired: true,
+                        isRequired: false,
                       );
                     }),
                     getDynamicSizedBox(height: 2.h),
@@ -147,7 +151,7 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
                         model: ctr.stateModel.value,
                         isenable: false,
                         hint: 'Not Set',
-                        isRequired: true,
+                        isRequired: false,
                       );
                     }),
                     getDynamicSizedBox(height: 2.h),
@@ -163,7 +167,7 @@ class _ViewCustomerScreenState extends State<ViewCustomerScreen> {
                         model: ctr.districtModel.value,
                         isenable: false,
                         hint: 'Not Set',
-                        isRequired: true,
+                        isRequired: false,
                       );
                     }),
                     getDynamicSizedBox(height: 2.h),

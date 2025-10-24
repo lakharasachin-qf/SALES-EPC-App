@@ -2918,7 +2918,6 @@ class AddLeadsController extends GetxController {
                               usegesture: true,
                               gestureFunction: () {
                                 logcat('openData', '');
-
                                 commonDropDownDialog(
                                   context,
                                   content: setUploadedCategoryListDialog(),
@@ -5041,7 +5040,7 @@ class AddLeadsController extends GetxController {
           }
         }
 
-        logcat('isLeadRejectedMode.value', isLeadRejectedMode.value);
+        logcat('isLeadRejectedMode::', isLeadRejectedMode.value);
 
         // 🔹 Helper: safely set text controller values
         void setText(TextEditingController ctr, dynamic value) =>

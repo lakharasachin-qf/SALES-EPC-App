@@ -58,7 +58,10 @@ void showUpdatedMultpleSelectionPopup<T>(
                         topRight: Radius.circular(25),
                       ),
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 4.w,
+                      vertical: 0.8.h,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -67,18 +70,55 @@ void showUpdatedMultpleSelectionPopup<T>(
                           style: TextStyle(
                             color: white,
                             fontFamily: plusJakartaSansMedium,
-                            fontSize: 18,
+                            fontSize: 17.sp,
                           ),
                         ),
                         IconButton(
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                          icon: Icon(Icons.close, color: white),
+                          icon: Icon(
+                            Icons.cancel,
+                            color: white,
+                            // size: 22.sp,
+                            size: Device.screenType == ScreenType.mobile
+                                ? 22.sp
+                                : 28.sp,
+                            // weight: 600.sp,
+                          ),
                         ),
                       ],
                     ),
                   ),
+                  // Container(
+                  //   decoration: BoxDecoration(
+                  //     color: primaryColor,
+                  //     borderRadius: BorderRadius.only(
+                  //       topLeft: Radius.circular(25),
+                  //       topRight: Radius.circular(25),
+                  //     ),
+                  //   ),
+                  //   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  //   child: Row(
+                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //     children: [
+                  //       Text(
+                  //         title,
+                  //         style: TextStyle(
+                  //           color: white,
+                  //           fontFamily: plusJakartaSansMedium,
+                  //           fontSize: 18,
+                  //         ),
+                  //       ),
+                  //       IconButton(
+                  //         onPressed: () {
+                  //           Navigator.pop(context);
+                  //         },
+                  //         icon: Icon(Icons.close, color: white),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: getReactiveFormField(
@@ -110,6 +150,7 @@ void showUpdatedMultpleSelectionPopup<T>(
                   else
                     Expanded(
                       child: ListView.builder(
+                        physics: BouncingScrollPhysics(),
                         itemCount: filteredList.length,
                         shrinkWrap: true,
                         padding: EdgeInsets.only(bottom: 3.h),
@@ -120,7 +161,10 @@ void showUpdatedMultpleSelectionPopup<T>(
                           final isSelected = selectedItems.contains(item);
                           return CheckboxListTile(
                             value: isSelected,
-                            title: Text(title),
+                            title: Text(
+                              title,
+                              style: TextStyle(fontSize: 16.sp, color: black),
+                            ),
                             activeColor: primaryColor,
                             onChanged: (val) {
                               setState(() {
@@ -285,16 +329,19 @@ fetchSelectionPopup<T>(
                           style: TextStyle(
                             color: white,
                             fontFamily: plusJakartaSansMedium,
-                            fontSize: 18.sp,
+                            fontSize: 17.sp,
                           ),
                         ),
                         IconButton(
                           onPressed: backBtn,
                           icon: Icon(
-                            Icons.close,
+                            Icons.cancel,
+                            // Icons.close,
                             color: white,
-                            size: 22.sp,
-                            weight: 600.sp,
+                            size: Device.screenType == ScreenType.mobile
+                                ? 22.sp
+                                : 28.sp,
+                            // weight: 600.sp,
                           ),
                         ),
                       ],
@@ -323,6 +370,8 @@ fetchSelectionPopup<T>(
                   Expanded(
                     child: ListView.builder(
                       itemCount: list.length,
+                      physics: BouncingScrollPhysics(),
+                      shrinkWrap: true,
                       padding: EdgeInsets.only(bottom: 10.h),
                       itemBuilder: (context, index) {
                         var data = list[index];
@@ -333,20 +382,27 @@ fetchSelectionPopup<T>(
                                 ? 'Standard :- $displayData'
                                 : displayData,
                             style: TextStyle(
-                              fontSize: 18.sp,
+                              fontSize: 16.sp,
+                              fontFamily: plusJakartaSansMedium,
+                              fontWeight: displayData == selecteddata
+                                  ? FontWeight.w800
+                                  : FontWeight.normal,
                               color: displayData == selecteddata
                                   ? primaryColor
                                   : black,
                             ),
                           ),
                           trailing: displayData == selecteddata
-                              ? Icon(Icons.check, color: primaryColor)
+                              ? Icon(
+                                  Icons.check,
+                                  color: primaryColor,
+                                  size: 20.sp,
+                                )
                               : null,
                           onTap: () {
                             setState(() {
                               selecteddata = displayData;
                             });
-
                             controller.text = displayData;
                             function?.call();
                             onSelected?.call(data);
@@ -413,7 +469,7 @@ Future<Future> commonDropDownDialog(
                         title,
                         style: TextStyle(
                           fontFamily: plusJakartaSansMedium,
-                          fontSize: 18.sp,
+                          fontSize: 17.sp,
                           color: white,
                         ),
                       ),
