@@ -65,6 +65,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Expanded(
             child: SmartRefresher(
               controller: _refreshController,
+              // physics: BouncingScrollPhysics(),
               enablePullDown: true,
               header: const WaterDropMaterialHeader(
                 backgroundColor: primaryColor,
@@ -79,6 +80,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
               child: SingleChildScrollView(
                 padding: EdgeInsets.zero,
+                physics: BouncingScrollPhysics(),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,7 +368,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ),
                             );
                     }),
-                    getDynamicSizedBox(height: 12.h),
+                    getDynamicSizedBox(height: 7.h),
                   ],
                 ),
               ),
