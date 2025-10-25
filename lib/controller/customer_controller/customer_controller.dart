@@ -404,16 +404,20 @@ class CustomerScreenController extends GetxController {
             toItem.value = 0;
           }
         } else {
+          logcat('showing dialog', '');
           message.value = responseData['message'];
           showDialogForScreen(
             // ignore: use_build_context_synchronously
             context,
             'Lead Screen',
             responseData['message'],
-            callback: Get.back,
+            callback: () {
+              Get.back();
+            },
           );
         }
       } else {
+        logcat('showing dialog', '');
         state.value = ScreenState.apiError;
         message.value = APIResponseHandleText.serverError;
         showDialogForScreen(
@@ -1283,10 +1287,25 @@ class CustomerScreenController extends GetxController {
         }
       } else {
         logcat('Error Response', response.body);
+        final data = jsonDecode(response.body);
+        String errorMessage = 'Something went wrong';
+
+        if (data['errors'] != null && data['errors'] is Map) {
+          final firstKey = data['errors'].keys.first;
+          final firstErrorList = data['errors'][firstKey];
+
+          if (firstErrorList is List && firstErrorList.isNotEmpty) {
+            errorMessage =
+                firstErrorList.first; // ✅ get first error dynamically
+          }
+        } else if (data['message'] != null) {
+          errorMessage = data['message'];
+        }
+
         showDialogForScreen(
           context,
           "Update Customer",
-          response.body,
+          errorMessage,
           callback: () => Get.back(),
         );
       }
@@ -1425,6 +1444,8 @@ class CustomerScreenController extends GetxController {
       selectedFile = File(result.files.single.path!);
       uploadFileCtr.text = result.files.single.name;
       uploadFileCtr.addListener(validateUpdateButton);
+
+      validateUpdateButton();
       update();
       print("Picked file path: ${selectedFile!.path}");
       print("Picked file name: ${uploadFileCtr.text}");

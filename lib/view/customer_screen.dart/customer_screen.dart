@@ -637,7 +637,7 @@ class CustomerScreenState extends State<Customerscreen> {
                                           ? () => ctr.getCustomerList(
                                               context: context,
                                               page: ctr.currentPage.value - 1,
-                                              isInitialLoad: true,
+                                              isInitialLoad: false,
                                               hideLoading: false,
                                             )
                                           : null,

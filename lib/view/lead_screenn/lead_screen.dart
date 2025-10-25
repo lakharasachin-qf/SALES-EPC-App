@@ -77,6 +77,7 @@ class LeadScreenState extends State<LeadScreen> {
               onRefresh: () async {
                 await futureDelay(() {
                   ctr.currentPage.value = 1;
+                  ctr.resetForm();
                   ctr.getLeadList(
                     context: context,
                     isInitialLoad: true,
