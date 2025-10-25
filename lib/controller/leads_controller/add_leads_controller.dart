@@ -4802,9 +4802,9 @@ class AddLeadsController extends GetxController {
               validateLeadStatus(leadStatusCtr.text);
             } else {
               if (AppPermissions().canUploadProposals == true) {
-                leadStatusList.assignAll(leadStatusTechnical);
-                leadStatusCtr.text = leadStatusList[1].label;
-                selectedLeadStatusvalue.value = leadStatusList[1].value;
+                leadStatusList.assignAll(leadStatusTechnicallOnly);
+                leadStatusCtr.text = leadStatusList[0].label;
+                selectedLeadStatusvalue.value = leadStatusList[0].value;
                 validateLeadStatus(leadStatusCtr.text);
                 isTechnicalProposalMode.value = true;
                 isFirstTechincaluploaded.value = true;
@@ -5219,23 +5219,38 @@ class AddLeadsController extends GetxController {
                   // Determine file’s corresponding stage
                   int fileStage = categoryStageMap[f.category] ?? 1;
 
-                  // ✅ Allow management ONLY if file's stage > current stage
-                  // Example: if current = commercial_proposal (3)
-                  // → files with stage 4,5,6 allowed; 1–3 not allowed
+                  // 🔒 Check if next available status is one of the restricted ones
+                  bool isNextRestricted =
+                      result.availableNextStatuses?.any(
+                        (status) => [
+                          'commercial_proposal',
+                          'approved',
+                          'rejected',
+                        ].contains(status),
+                      ) ??
+                      false;
+
+                  // ✅ Always allow management of these basic categories if permission allows
                   if (AppPermissions().canManageFiles == true &&
                       (f.category == 'hand_sketch_installation_area' ||
                           f.category == 'map_marked_screenshot' ||
                           f.category == 'equipment_photo')) {
                     canManage = true;
-                  }
-                  if (fileStage >= currentStage) {
-                    if (AppPermissions().canManageFinanceDocuments == true &&
-                        f.category == 'finance_document') {
-                      canManage = true;
-                    } else if (AppPermissions().canManageProposals == true &&
-                        (f.category == 'technical_proposal' ||
-                            f.category == 'commercial_proposal')) {
-                      canManage = true;
+                  } else {
+                    // ✅ For all other files, restrict management when next status is restricted
+                    if (!isNextRestricted) {
+                      if (fileStage >= currentStage) {
+                        if (AppPermissions().canManageFinanceDocuments ==
+                                true &&
+                            f.category == 'finance_document') {
+                          canManage = true;
+                        } else if (AppPermissions().canManageProposals ==
+                                true &&
+                            (f.category == 'technical_proposal' ||
+                                f.category == 'commercial_proposal')) {
+                          canManage = true;
+                        }
+                      }
                     }
                   }
 
