@@ -141,35 +141,36 @@ Widget getDashboardDrawer(
         child: Image.asset(Asset.logoPng),
       ),
       getDynamicSizedBox(height: 2.h),
-      Row(
-        children: [
-          SizedBox(width: 2.w),
-          Icon(Icons.person),
-          SizedBox(width: 3.w),
-          Expanded(
-            child: Obx(() {
-              return Text(
-                ctr.userEmail.value,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontFamily: plusJakartaSansSemiBold,
-                ),
-                softWrap: true,
-                overflow: TextOverflow.visible,
-              );
-            }),
-          ),
-        ],
+      Padding(
+        padding: EdgeInsets.only(left: 2.w, right: 2.w),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.person),
+            SizedBox(width: 1.w),
+            Expanded(
+              child: Obx(() {
+                return Text(
+                  ctr.userEmail.value,
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontFamily: plusJakartaSansSemiBold,
+                  ),
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
+                );
+              }),
+            ),
+          ],
+        ),
       ),
-
       getDynamicSizedBox(height: 2.h),
       getappLine(),
       getDynamicSizedBox(height: 1.h),
-
       AppPermissions().canAccessDashboard == true
           ? buildDrawerItem(Asset.dashboard2, HomeScreenConst.dashboard, () {
               ctr.scaffoldKey.currentState?.closeDrawer();
-              logcat("onTap", "Done");
             })
           : SizedBox.shrink(),
       // getDynamicSizedBox(height: 1.h),
@@ -269,7 +270,7 @@ Widget buildDrawerItem(
             child: Text(
               title,
               style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: 17.sp,
                 color: color,
                 // fontWeight: FontWeight.w500,
                 fontFamily: plusJakartaSansSemiBold,
