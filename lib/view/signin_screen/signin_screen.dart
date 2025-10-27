@@ -9,6 +9,7 @@ import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/signin_controller/signin_controller.dart';
+import 'package:sales_app/utils/CalendarHelper.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sizer/sizer.dart';
 import 'package:sizer/sizer.dart' as sizer;
@@ -22,6 +23,12 @@ class Signinscreen extends StatefulWidget {
 
 class _SigninscreenState extends State<Signinscreen> {
   final Signinscreencontroller ctr = Get.put(Signinscreencontroller());
+
+  @override
+  void initState() {
+    CalendarHelper.checkCalendarPermission();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

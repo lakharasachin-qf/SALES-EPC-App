@@ -393,164 +393,170 @@ Widget addFilterSheetWidget(
   required DashboardController ctr,
   required setStateTrigger,
 }) {
-  return GestureDetector(
-    onTap: () {
-      ctr.unfocusAll();
-    },
-    child: SingleChildScrollView(
-      padding: EdgeInsets.only(bottom: 2.h, left: 6.w, right: 6.w, top: 2.h),
-      child: SizedBox(
-        width: Device.width,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // getCustomDivider(),
-            // getDynamicSizedBox(height: 4.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Obx(() {
-                    return getTextField(
-                      context: context,
-                      wantLabel: true,
-                      label: 'Start Month-Year',
-                      ctr: ctr.startTimeCtr,
-                      node: ctr.startTimeNode,
-                      model: ctr.startTimeModel.value,
-                      isenable: false,
-                      isdropdown: true,
-                      wantsuffix: true,
-                      usegesture: true,
-                      gestureFunction: () {
-                        openDatePickerDash(context, isStart: true, ctr: ctr);
-                      },
-                      hint: 'Select Date',
-                      isRequired: false,
-                    );
-                  }),
-                ),
-                getDynamicSizedBox(width: 4.w),
-                Expanded(
-                  child: Obx(() {
-                    return getTextField(
-                      context: context,
-                      wantLabel: true,
-                      label: 'End Month-Year',
-                      ctr: ctr.endTimeCtr,
-                      node: ctr.endTimeNode,
-                      model: ctr.endTimeModel.value,
-                      isenable: false,
-                      isdropdown: true,
-                      wantsuffix: true,
-                      usegesture: true,
-                      gestureFunction: () {
-                        if (!ctr.isStartDateSelected.value) {
-                          showDialogForScreen(
-                            context,
-                            'Dashboard',
-                            'Please select the start date first.',
-                            callback: () {},
-                          );
-                        } else {
-                          openDatePickerDash(context, isStart: false, ctr: ctr);
-                        }
-                      },
-                      hint: 'Select End Date',
-                      isRequired: false,
-                    );
-                  }),
-                ),
-              ],
-            ),
-            getDynamicSizedBox(height: 1.h),
-
-            /// District
-            Obx(() {
-              return getTextField(
-                context: context,
-                wantLabel: true,
-                label: 'District',
-                ctr: ctr.district,
-                node: ctr.districtNode,
-                model: ctr.districtModel.value,
-                isenable: false,
-                isdropdown: true,
-                wantsuffix: true,
-                usegesture:
-                    (!ctr.isDistrictSelected.value &&
-                        !ctr.isClusterSelected.value) ||
-                    ctr.isDistrictSelected.value,
-                isVerified:
-                    !ctr.isDistrictSelected.value &&
-                    (ctr.isClusterSelected.value),
-                gestureFunction: () {
-                  ctr.showDistrictSelectionPopups(context);
-                },
-                hint: 'Select District',
-              );
-            }),
-            getDynamicSizedBox(height: 1.h),
-
-            /// Clusters
-            Obx(() {
-              return getTextField(
-                context: context,
-                wantLabel: true,
-                label: 'Clusters',
-                ctr: ctr.clusterCtr,
-                node: ctr.clusterNode,
-                model: ctr.clusterModel.value,
-                isenable: false,
-                isdropdown: true,
-                wantsuffix: true,
-                usegesture:
-                    (!ctr.isDistrictSelected.value) ||
-                    ctr.isClusterSelected.value,
-                isVerified:
-                    !ctr.isClusterSelected.value &&
-                    (ctr.isDistrictSelected.value),
-                gestureFunction: () {
-                  ctr.showClusterSelectionPopups(context);
-                },
-                hint: 'Select Clusters',
-              );
-            }),
-
-            getDynamicSizedBox(height: 3.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: getFormButton(
-                    context,
-                    () {
-                      ctr.resetForm();
-                      ctr.isStartDateSelected = false.obs;
-                      ctr.getDashboardData(context, isFirstTime: true);
-                      Get.back();
-                    },
-                    'Clear',
-                    validate: true,
+  return SafeArea(
+    child: GestureDetector(
+      onTap: () {
+        ctr.unfocusAll();
+      },
+      child: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: 0.0, left: 6.w, right: 6.w, top: 2.h),
+        child: SizedBox(
+          width: Device.width,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // getCustomDivider(),
+              // getDynamicSizedBox(height: 4.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Obx(() {
+                      return getTextField(
+                        context: context,
+                        wantLabel: true,
+                        label: 'Start Month-Year',
+                        ctr: ctr.startTimeCtr,
+                        node: ctr.startTimeNode,
+                        model: ctr.startTimeModel.value,
+                        isenable: false,
+                        isdropdown: true,
+                        wantsuffix: true,
+                        usegesture: true,
+                        gestureFunction: () {
+                          openDatePickerDash(context, isStart: true, ctr: ctr);
+                        },
+                        hint: 'Select Date',
+                        isRequired: false,
+                      );
+                    }),
                   ),
-                ),
-                getDynamicSizedBox(width: 3.w),
-                Expanded(
-                  child: getFormButton(
-                    context,
-                    () {
-                      // ctr.makeApiCall(context);
-                      ctr.getDashboardData(context, isApplyFilter: true);
-                      Get.back();
-                    },
-                    'Search',
-                    validate: true,
+                  getDynamicSizedBox(width: 4.w),
+                  Expanded(
+                    child: Obx(() {
+                      return getTextField(
+                        context: context,
+                        wantLabel: true,
+                        label: 'End Month-Year',
+                        ctr: ctr.endTimeCtr,
+                        node: ctr.endTimeNode,
+                        model: ctr.endTimeModel.value,
+                        isenable: false,
+                        isdropdown: true,
+                        wantsuffix: true,
+                        usegesture: true,
+                        gestureFunction: () {
+                          if (!ctr.isStartDateSelected.value) {
+                            showDialogForScreen(
+                              context,
+                              'Dashboard',
+                              'Please select the start date first.',
+                              callback: () {},
+                            );
+                          } else {
+                            openDatePickerDash(
+                              context,
+                              isStart: false,
+                              ctr: ctr,
+                            );
+                          }
+                        },
+                        hint: 'Select End Date',
+                        isRequired: false,
+                      );
+                    }),
                   ),
-                ),
-              ],
-            ),
-            getDynamicSizedBox(height: 4.h),
-          ],
+                ],
+              ),
+              getDynamicSizedBox(height: 1.h),
+
+              /// District
+              Obx(() {
+                return getTextField(
+                  context: context,
+                  wantLabel: true,
+                  label: 'District',
+                  ctr: ctr.district,
+                  node: ctr.districtNode,
+                  model: ctr.districtModel.value,
+                  isenable: false,
+                  isdropdown: true,
+                  wantsuffix: true,
+                  usegesture:
+                      (!ctr.isDistrictSelected.value &&
+                          !ctr.isClusterSelected.value) ||
+                      ctr.isDistrictSelected.value,
+                  isVerified:
+                      !ctr.isDistrictSelected.value &&
+                      (ctr.isClusterSelected.value),
+                  gestureFunction: () {
+                    ctr.showDistrictSelectionPopups(context);
+                  },
+                  hint: 'Select District',
+                );
+              }),
+              getDynamicSizedBox(height: 1.h),
+
+              /// Clusters
+              Obx(() {
+                return getTextField(
+                  context: context,
+                  wantLabel: true,
+                  label: 'Clusters',
+                  ctr: ctr.clusterCtr,
+                  node: ctr.clusterNode,
+                  model: ctr.clusterModel.value,
+                  isenable: false,
+                  isdropdown: true,
+                  wantsuffix: true,
+                  usegesture:
+                      (!ctr.isDistrictSelected.value) ||
+                      ctr.isClusterSelected.value,
+                  isVerified:
+                      !ctr.isClusterSelected.value &&
+                      (ctr.isDistrictSelected.value),
+                  gestureFunction: () {
+                    ctr.showClusterSelectionPopups(context);
+                  },
+                  hint: 'Select Clusters',
+                );
+              }),
+
+              getDynamicSizedBox(height: 3.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: getFormButton(
+                      context,
+                      () {
+                        ctr.resetForm();
+                        ctr.isStartDateSelected = false.obs;
+                        ctr.getDashboardData(context, isFirstTime: true);
+                        Get.back();
+                      },
+                      'Clear',
+                      validate: true,
+                    ),
+                  ),
+                  getDynamicSizedBox(width: 3.w),
+                  Expanded(
+                    child: getFormButton(
+                      context,
+                      () {
+                        // ctr.makeApiCall(context);
+                        ctr.getDashboardData(context, isApplyFilter: true);
+                        Get.back();
+                      },
+                      'Search',
+                      validate: true,
+                    ),
+                  ),
+                ],
+              ),
+              getDynamicSizedBox(height: 3.h),
+            ],
+          ),
         ),
       ),
     ),

@@ -11,6 +11,163 @@ final dateFormat = DateFormat('yyyy-MM-dd');
 
 typedef OnDatePicked = void Function(DateTime pickedDate);
 
+Future<void> showCommonDatePickers({
+  required BuildContext context,
+  required String title,
+  DateTime? initialDate,
+  DateTime? minDate, // Restrict minimum selectable date
+  required OnDatePicked onDatePicked,
+  bool showTimePickers = false,
+  bool disablePastDates = false,
+}) async {
+  // Initialize selectedDate to track new selection
+  DateTime? selectedDate = initialDate;
+  DateTime now = DateTime.now();
+
+  DateTime firstAllowedDate = disablePastDates
+      ? DateTime(now.year, now.month, now.day)
+      : (minDate ?? DateTime(2000));
+
+  // Determine effective initialDate
+  DateTime effectiveInitialDate;
+
+  if (initialDate == null) {
+    // No initial date given
+    effectiveInitialDate = (minDate != null && minDate.isAfter(now))
+        ? minDate
+        : now;
+  } else {
+    // Initial date exists
+    if (minDate != null && initialDate.isBefore(minDate)) {
+      effectiveInitialDate = minDate;
+    } else {
+      effectiveInitialDate = initialDate;
+    }
+  }
+
+  // ✅ Fix: make sure effectiveInitialDate is not before firstAllowedDate
+  if (effectiveInitialDate.isBefore(firstAllowedDate)) {
+    effectiveInitialDate = firstAllowedDate;
+  }
+
+  final DateTime? pickedDate = await showDatePicker(
+    context: context,
+    initialDate: effectiveInitialDate,
+    // firstDate: minDate ?? DateTime(2000),
+    firstDate: firstAllowedDate,
+    lastDate: DateTime(2100),
+    locale: const Locale('en', 'GB'),
+    builder: (BuildContext context, Widget? child) {
+      return Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.light(
+            primary: primaryColor,
+            onPrimary: white,
+            surface: white,
+            onSurface: Colors.black87,
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              foregroundColor: primaryColor,
+              textStyle: TextStyle(
+                fontSize: 16.sp,
+                fontFamily: plusJakartaSansMedium,
+              ),
+            ),
+          ),
+        ),
+        child: Localizations.override(
+          context: context,
+          locale: const Locale('en', 'GB'),
+          child: child,
+        ),
+      );
+    },
+  );
+
+  if (pickedDate != null) {
+    selectedDate = pickedDate;
+
+    if (showTimePickers) {
+      // Show time picker with time from selectedDate or initialDate or 00:00
+      final TimeOfDay? pickedTime = await showTimePicker(
+        // ignore: use_build_context_synchronously
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(selectedDate),
+        helpText: 'Select Time',
+        cancelText: 'Cancel',
+        confirmText: 'OK',
+        builder: (BuildContext context, Widget? child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: ColorScheme.light(
+                primary: primaryColor,
+                onPrimary: white,
+                surface: white,
+                onSurface: Colors.black87,
+              ),
+              textButtonTheme: TextButtonThemeData(
+                style: TextButton.styleFrom(
+                  foregroundColor: primaryColor,
+                  textStyle: TextStyle(
+                    fontSize: 16.sp,
+                    fontFamily: plusJakartaSansMedium,
+                  ),
+                ),
+              ),
+              timePickerTheme: TimePickerThemeData(
+                helpTextStyle: TextStyle(
+                  fontSize: 16.sp,
+                  fontFamily: plusJakartaSansBold,
+                  color: black,
+                ),
+                backgroundColor: white,
+                hourMinuteColor: white,
+                hourMinuteTextColor: black,
+                hourMinuteShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: primaryColor.withOpacity(0.3)),
+                ),
+                dayPeriodColor: primaryColor.withOpacity(0.1),
+                dayPeriodTextColor: black,
+                dialHandColor: primaryColor,
+                dialBackgroundColor: lightGrey.withOpacity(0.2),
+                entryModeIconColor: primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+            child: child!,
+          );
+        },
+      );
+
+      if (pickedTime != null) {
+        // Combine date and time
+        final combinedDateTime = DateTime(
+          selectedDate.year,
+          selectedDate.month,
+          selectedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+        onDatePicked(combinedDateTime);
+      }
+    } else {
+      // Use selected date with time from initialDate or 00:00
+      final combinedDateTime = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        initialDate?.hour ?? 0,
+        initialDate?.minute ?? 0,
+      );
+      onDatePicked(combinedDateTime);
+    }
+  }
+}
+
 Future<void> showCommonDatePicker({
   required BuildContext context,
   required String title,

@@ -40,151 +40,156 @@ void showUpdatedMultpleSelectionPopup<T>(
     builder: (context) {
       return StatefulBuilder(
         builder: (context, setState) {
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: SizedBox(
-              height: (Device.screenType == ScreenType.mobile
-                  ? Device.height / 1.7
-                  : Device.height / 1.9),
-              child: Column(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: primaryColor,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(25),
-                        topRight: Radius.circular(25),
-                      ),
-                    ),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 4.w,
-                      vertical: 0.8.h,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            color: white,
-                            fontFamily: plusJakartaSansMedium,
-                            fontSize: 17.sp,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: Icon(
-                            Icons.cancel,
-                            color: white,
-                            // size: 22.sp,
-                            size: Device.screenType == ScreenType.mobile
-                                ? 22.sp
-                                : 28.sp,
-                            // weight: 600.sp,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Container(
-                  //   decoration: BoxDecoration(
-                  //     color: primaryColor,
-                  //     borderRadius: BorderRadius.only(
-                  //       topLeft: Radius.circular(25),
-                  //       topRight: Radius.circular(25),
-                  //     ),
-                  //   ),
-                  //   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  //   child: Row(
-                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //     children: [
-                  //       Text(
-                  //         title,
-                  //         style: TextStyle(
-                  //           color: white,
-                  //           fontFamily: plusJakartaSansMedium,
-                  //           fontSize: 18,
-                  //         ),
-                  //       ),
-                  //       IconButton(
-                  //         onPressed: () {
-                  //           Navigator.pop(context);
-                  //         },
-                  //         icon: Icon(Icons.close, color: white),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: getReactiveFormField(
-                      node: searchNode,
-                      controller: searchCtr,
-                      hintLabel: 'Search Here',
-                      onChanged: (val) {
-                        filteredList = filterFunction(val!);
-                        setState(() {});
-                      },
-                      inputType: TextInputType.text,
-                      isBorderSideEnable: false,
-                      formType: FieldType.search,
-                    ),
-                  ),
-
-                  if (filteredList.isEmpty)
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          AlertDialogList.emptylist,
-                          style: TextStyle(
-                            fontSize: 4.5.w,
-                            fontFamily: plusJakartaSansBold,
-                          ),
+          return SafeArea(
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: SizedBox(
+                height: (Device.screenType == ScreenType.mobile
+                    ? Device.height / 1.7
+                    : Device.height / 1.9),
+                child: Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(25),
+                          topRight: Radius.circular(25),
                         ),
                       ),
-                    )
-                  else
-                    Expanded(
-                      child: ListView.builder(
-                        physics: BouncingScrollPhysics(),
-                        itemCount: filteredList.length,
-                        shrinkWrap: true,
-                        padding: EdgeInsets.only(bottom: 3.h),
-                        itemBuilder: (context, index) {
-                          final item = filteredList[index];
-                          final title = getTitle(item);
-                          // final id = getId(item);
-                          final isSelected = selectedItems.contains(item);
-                          return CheckboxListTile(
-                            value: isSelected,
-                            title: Text(
-                              title,
-                              style: TextStyle(fontSize: 16.sp, color: black),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 4.w,
+                        vertical: 0.8.h,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              color: white,
+                              fontFamily: plusJakartaSansMedium,
+                              fontSize: 17.sp,
                             ),
-                            activeColor: primaryColor,
-                            onChanged: (val) {
-                              setState(() {
-                                if (val == true) {
-                                  selectedItems.add(item);
-                                } else {
-                                  selectedItems.remove(item);
-                                }
-                                controller.text = selectedItems
-                                    .map((e) => getTitle(e))
-                                    .join(', ');
-                                onSelected(selectedItems);
-                                function();
-                              });
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.pop(context);
                             },
-                          );
-                        },
+                            icon: Icon(
+                              Icons.cancel,
+                              color: white,
+                              // size: 22.sp,
+                              size: Device.screenType == ScreenType.mobile
+                                  ? 22.sp
+                                  : 28.sp,
+                              // weight: 600.sp,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                ],
+                    // Container(
+                    //   decoration: BoxDecoration(
+                    //     color: primaryColor,
+                    //     borderRadius: BorderRadius.only(
+                    //       topLeft: Radius.circular(25),
+                    //       topRight: Radius.circular(25),
+                    //     ),
+                    //   ),
+                    //   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    //   child: Row(
+                    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //     children: [
+                    //       Text(
+                    //         title,
+                    //         style: TextStyle(
+                    //           color: white,
+                    //           fontFamily: plusJakartaSansMedium,
+                    //           fontSize: 18,
+                    //         ),
+                    //       ),
+                    //       IconButton(
+                    //         onPressed: () {
+                    //           Navigator.pop(context);
+                    //         },
+                    //         icon: Icon(Icons.close, color: white),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: getReactiveFormField(
+                        node: searchNode,
+                        controller: searchCtr,
+                        hintLabel: 'Search Here',
+                        onChanged: (val) {
+                          filteredList = filterFunction(val!);
+                          setState(() {});
+                        },
+                        inputType: TextInputType.text,
+                        isBorderSideEnable: false,
+                        formType: FieldType.search,
+                      ),
+                    ),
+
+                    if (filteredList.isEmpty)
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            AlertDialogList.emptylist,
+                            style: TextStyle(
+                              fontSize: 4.5.w,
+                              fontFamily: plusJakartaSansBold,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: ListView.builder(
+                          physics: BouncingScrollPhysics(),
+                          itemCount: filteredList.length,
+                          shrinkWrap: true,
+                          padding: EdgeInsets.only(bottom: 3.h),
+                          itemBuilder: (context, index) {
+                            final item = filteredList[index];
+                            final title = getTitle(item);
+                            // final id = getId(item);
+                            final isSelected = selectedItems.contains(item);
+                            return CheckboxListTile(
+                              value: isSelected,
+                              title: Text(
+                                title,
+                                style: TextStyle(fontSize: 16.sp, color: black),
+                              ),
+                              activeColor: primaryColor,
+                              onChanged: (val) {
+                                setState(() {
+                                  if (val == true) {
+                                    selectedItems.add(item);
+                                  } else {
+                                    selectedItems.remove(item);
+                                  }
+                                  controller.text = selectedItems
+                                      .map((e) => getTitle(e))
+                                      .join(', ');
+                                  onSelected(selectedItems);
+                                  function();
+                                });
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           );
@@ -292,6 +297,7 @@ fetchSelectionPopup<T>(
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     backgroundColor: Colors.transparent,
     builder: (context) {
       return StatefulBuilder(
@@ -347,7 +353,6 @@ fetchSelectionPopup<T>(
                       ],
                     ),
                   ),
-
                   getDynamicSizedBox(height: 1.h),
                   // Search field
                   Padding(
@@ -368,48 +373,50 @@ fetchSelectionPopup<T>(
 
                   // List
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: list.length,
-                      physics: BouncingScrollPhysics(),
-                      shrinkWrap: true,
-                      padding: EdgeInsets.only(bottom: 10.h),
-                      itemBuilder: (context, index) {
-                        var data = list[index];
-                        String displayData = getTitle(data);
-                        return ListTile(
-                          title: Text(
-                            isStandard
-                                ? 'Standard :- $displayData'
-                                : displayData,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontFamily: plusJakartaSansMedium,
-                              fontWeight: displayData == selecteddata
-                                  ? FontWeight.w800
-                                  : FontWeight.normal,
-                              color: displayData == selecteddata
-                                  ? primaryColor
-                                  : black,
+                    child: SafeArea(
+                      child: ListView.builder(
+                        itemCount: list.length,
+                        physics: BouncingScrollPhysics(),
+                        shrinkWrap: true,
+                        padding: EdgeInsets.only(bottom: 5.h),
+                        itemBuilder: (context, index) {
+                          var data = list[index];
+                          String displayData = getTitle(data);
+                          return ListTile(
+                            title: Text(
+                              isStandard
+                                  ? 'Standard :- $displayData'
+                                  : displayData,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontFamily: plusJakartaSansMedium,
+                                fontWeight: displayData == selecteddata
+                                    ? FontWeight.w800
+                                    : FontWeight.normal,
+                                color: displayData == selecteddata
+                                    ? primaryColor
+                                    : black,
+                              ),
                             ),
-                          ),
-                          trailing: displayData == selecteddata
-                              ? Icon(
-                                  Icons.check,
-                                  color: primaryColor,
-                                  size: 20.sp,
-                                )
-                              : null,
-                          onTap: () {
-                            setState(() {
-                              selecteddata = displayData;
-                            });
-                            controller.text = displayData;
-                            function?.call();
-                            onSelected?.call(data);
-                            backBtn();
-                          },
-                        );
-                      },
+                            trailing: displayData == selecteddata
+                                ? Icon(
+                                    Icons.check,
+                                    color: primaryColor,
+                                    size: 20.sp,
+                                  )
+                                : null,
+                            onTap: () {
+                              setState(() {
+                                selecteddata = displayData;
+                              });
+                              controller.text = displayData;
+                              function?.call();
+                              onSelected?.call(data);
+                              backBtn();
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ],

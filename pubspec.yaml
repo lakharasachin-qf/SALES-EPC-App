@@ -38,6 +38,8 @@ dependencies:
   syncfusion_flutter_pdfviewer: ^30.2.7
   geolocator: ^14.0.2
   geocoding: ^4.0.0
+  device_calendar: ^4.3.3
+  add_2_calendar: ^3.0.1
 
 dev_dependencies:
   flutter_test:

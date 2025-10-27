@@ -12,12 +12,14 @@ void openCustomerDatePicker(
 }) {
   ctr.isStartDateActive.value = isStart;
 
-  final String selected = isStart ? ctr.startDate.value : ctr.endDate.value;
+  final String selected = isStart
+      ? ctr.filterStartDate.value
+      : ctr.filterEndDate.value;
   DateTime? initialDate;
   if (selected.isNotEmpty) {
     try {
       // Try parsing with the new display format (MMMM yyyy)
-      initialDate = ctr.dateFormat.parse(selected);
+      initialDate = ctr.filterDateFormat.parse(selected);
     } catch (e) {
       try {
         // Fallback to legacy format (dd-MM-yyyy) for backward compatibility
@@ -30,9 +32,9 @@ void openCustomerDatePicker(
 
   // Determine minDate for end date selection
   DateTime? minDate;
-  if (!isStart && ctr.startDate.value.isNotEmpty) {
+  if (!isStart && ctr.filterStartDate.value.isNotEmpty) {
     try {
-      minDate = ctr.dateFormat.parse(ctr.startDate.value);
+      minDate = ctr.filterDateFormat.parse(ctr.filterStartDate.value);
       // Set minDate to the first of the start month
       minDate = DateTime(minDate.year, minDate.month, 1);
     } catch (e) {

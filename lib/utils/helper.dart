@@ -168,6 +168,21 @@ String formatDate(String? date) {
   return DateFormat('dd-MM-yyyy').format(parsedDate);
 }
 
+String formatCustomerScheduleDate(String? scheduledDate) {
+  if (scheduledDate == null || scheduledDate.isEmpty) return '';
+  try {
+    // Parse input in dd-MM-yyyy format
+    final inputFormat = DateFormat('dd-MM-yyyy');
+    final date = inputFormat.parse(scheduledDate);
+    // Convert to yyyy-MM-dd format
+    final outputFormat = DateFormat('yyyy-MM-dd');
+    return outputFormat.format(date);
+  } catch (e) {
+    // If parsing fails, just return the original
+    return scheduledDate;
+  }
+}
+
 Future<void> fetchLocationTracking(
   context,
   Function onClick, {

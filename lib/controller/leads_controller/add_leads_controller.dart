@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sales_app/api_handle/Repository.dart';
 import 'package:sales_app/api_handle/apiCallingFormate.dart';
+import 'package:sales_app/componant/CustomSnakbar.dart';
 import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/common_date_time_picker.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
@@ -33,6 +34,7 @@ import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
 import 'package:sales_app/preference/UserPreference.dart';
 import 'package:sales_app/utils/AppPermissions.dart';
+import 'package:sales_app/utils/CalendarHelper.dart';
 import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sales_app/utils/log.dart';
@@ -156,6 +158,8 @@ class AddLeadsController extends GetxController {
   var filterRoofNatureList = <DgSyncRequired>[].obs;
   var filterFinancingTypeList = <DgSyncRequired>[].obs;
   RxList<ExistingFile> existingFiles = <ExistingFile>[].obs;
+
+  DateTime selectedScheduleMeeting = DateTime.now();
 
   // RxList<Cluster> districtList = <Cluster>[].obs;
 
@@ -2386,11 +2390,24 @@ class AddLeadsController extends GetxController {
           ? DateTime.parse(startDate.value)
           : null,
       showTimePickers: showTimePickers,
-      onDatePicked: (DateTime date) {
+      onDatePicked: (DateTime date) async {
         final formatted = date.toString();
+        selectedScheduleMeeting = date;
         dateRx.value = formatted;
         controller.text = formatted;
         validateScheduleMeeting(controller.text);
+        //Add event to mobile calendar
+        // await CalendarHelper.addEvent(
+        //   title: 'Lead Meeting',
+        //   description: 'Reminder: You have a meeting with the customer.',
+        //   start: date,
+        //   end: date.add(const Duration(hours: 1)),
+        //   location: '${latitudeCtr.text},${longitudeCtr.text}',
+        // );
+        // CustomSnackBar().showErrorSnackbar(
+        //   'Lead Meeting',
+        //   'Meeting added to your calendar',
+        // );
       },
     );
   }
@@ -3149,50 +3166,6 @@ class AddLeadsController extends GetxController {
     // ✅ Add uploaded files
     logcat("fileList::", jsonEncode(fileList));
 
-    // final directory = await getApplicationDocumentsDirectory();
-
-    // for (int i = 0; i < fileList.length; i++) {
-    //   final file = fileList[i];
-
-    //   if (file.path != null && file.path!.isNotEmpty) {
-    //     final fileToUpload = File(file.path!);
-    //     logcat("fileToUpload", "Step-1 => ${file.path}");
-
-    //     if (await fileToUpload.exists()) {
-    //       // Copy file to persistent storage
-    //       final fileName =
-    //           'uploaded_${DateTime.now().millisecondsSinceEpoch}_${file.path!.split('/').last}';
-    //       final newPath = '${directory.path}/$fileName';
-    //       await fileToUpload.copy(newPath);
-    //       final copiedFile = File(newPath);
-
-    //       if (await copiedFile.exists()) {
-    //         logcat("Copied file path:", newPath);
-
-    //         // Attach the copied file
-    //         final multipartFile = await http.MultipartFile.fromPath(
-    //           'uploaded_files[$i][file]',
-    //           copiedFile.path,
-    //         );
-    //         request.files.add(multipartFile);
-
-    //         // Attach category for this file
-    //         request.fields['uploaded_files[$i][category]'] =
-    //             file.category ?? '';
-
-    //         logcat(
-    //           "✅ File Added",
-    //           "uploaded_files[$i][file] => ${copiedFile.path}",
-    //         );
-    //       } else {
-    //         logcat("⚠️ Copied file not found:", newPath);
-    //       }
-    //     } else {
-    //       logcat("⚠️ File not found:", fileToUpload.path);
-    //     }
-    //   }
-    // }
-
     // ✅ Add uploaded files (main fix here)
     logcat("filepAth:::", jsonEncode(fileList));
     for (int i = 0; i < fileList.length; i++) {
@@ -3225,14 +3198,24 @@ class AddLeadsController extends GetxController {
       // ✅ Send the request
       var streamedResponse = await request.send();
       var response = await http.Response.fromStream(streamedResponse);
-
       loadingIndicator.hide(context);
-
       state.value = ScreenState.apiSuccess;
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        logcat('AddLeadApi Response', data.toString());
+        logcat('AddLeadResponse:', data.toString());
         if (data['status']?.toString().toLowerCase() == 'success') {
+          //Add event to mobile calendar
+          await CalendarHelper.addEvent(
+            title: 'Lead Meeting',
+            description: 'Reminder: You have a meeting with the customer.',
+            start: selectedScheduleMeeting,
+            end: selectedScheduleMeeting.add(const Duration(hours: 1)),
+            location: '${latitudeCtr.text},${longitudeCtr.text}',
+          );
+          // CustomSnackBar().showErrorSnackbar(
+          //   'Lead Meeting',
+          //   'Meeting added to your calendar',
+          // );
           showDialogForScreen(
             context,
             "Add Lead",
@@ -3241,16 +3224,12 @@ class AddLeadsController extends GetxController {
               Get.back(result: true);
             },
           );
+        } else {
+          showErrorDialog(context, data);
         }
-      }
-      // else {
-      //   showErrorDialog(context, data);
-      // }
-      else if (response.statusCode == 422) {
+      } else if (response.statusCode == 422) {
         logcat('AddLeadApi Error', response.body);
-
         String errorMessage = 'Validation failed';
-
         // ✅ Handle multiple possible error response formats
         if (data['message'] != null && data['message'].toString().isNotEmpty) {
           errorMessage = data['message'].toString();
@@ -3278,9 +3257,7 @@ class AddLeadsController extends GetxController {
             }
           } catch (_) {}
         }
-
         showDialogForScreen(context, 'Add Lead', errorMessage, callback: () {});
-
         message.value = "Failed to add lead (${response.statusCode})";
       }
     } catch (e) {

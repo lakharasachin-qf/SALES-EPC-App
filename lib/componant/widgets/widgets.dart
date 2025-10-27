@@ -355,7 +355,10 @@ openBottomtsheetDialog(
                             Navigator.pop(context);
                           },
                           child: Container(
-                            padding: const EdgeInsets.only(left: 10, right: 10),
+                            padding: const EdgeInsets.only(
+                              left: 10,
+                              right: 10,
+                            ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [

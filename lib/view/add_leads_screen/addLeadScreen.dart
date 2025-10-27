@@ -17,6 +17,7 @@ import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/statusbar.dart';
 import 'package:sales_app/controller/leads_controller/add_leads_controller.dart';
 import 'package:sales_app/utils/AppPermissions.dart';
+import 'package:sales_app/utils/CalendarHelper.dart';
 import 'package:sales_app/utils/buildDynamicTable.dart';
 import 'package:sales_app/utils/custom_stepper_widget.dart';
 import 'package:sales_app/utils/helper.dart';
@@ -86,7 +87,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
   @override
   void initState() {
     super.initState();
-
+    CalendarHelper.checkCalendarPermission();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       logcat("IsEdit::", widget.isEdit.toString());
       initAllData();
@@ -1781,7 +1782,6 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   return const SizedBox.shrink();
                                 }
                               }),
-
                               widget.isEdit
                                   ? const SizedBox.shrink()
                                   : getLable(
@@ -1808,7 +1808,6 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                             controller:
                                                 controller.scheduleMeetingCtr,
                                             dateRx: controller.startDate,
-
                                             model:
                                                 controller.scheduleMeeeingModel,
                                           );
