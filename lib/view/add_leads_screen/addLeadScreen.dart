@@ -45,11 +45,11 @@ class _AddLeadScreenState extends State<AddLeadScreen>
   // Define steps for the stepper
   final List<String> _steps = ['Info', 'Site', 'Load Element', 'Files'];
   // Callback to handle step tap
-  void _onStepTapped(int index) {
-    setState(() {
-      _currentStep = index;
-    });
-  }
+  // void _onStepTapped(int index) {
+  //   setState(() {
+  //     _currentStep = index;
+  //   });
+  // }
 
   Future<void> initAllData() async {
     final loadingIndicator = LoadingProgressDialog();
@@ -216,7 +216,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
               activeColor: primaryColor,
               inactiveColor: Colors.grey[300]!,
               onStepTapped: (val) {
-                _onStepTapped(val);
+                // _onStepTapped(val);
               },
             ),
             getDynamicSizedBox(height: 2.h),

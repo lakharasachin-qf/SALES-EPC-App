@@ -1200,7 +1200,7 @@ class CustomerScreenController extends GetxController {
       }
       logcat("customerUpdatePassingParams::", body);
 
-      return;
+      // return;
 
       // 🔹 Call your common multipart function
       final streamedResponse = await Repository.multiPartPost(

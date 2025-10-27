@@ -2385,7 +2385,7 @@ class AddLeadsController extends GetxController {
       disablePastDates: true,
       initialDate: dateRx.value.isNotEmpty
           ? DateTime.parse(dateRx.value)
-          : null,
+          : DateTime.now(),
       minDate: isEndDate && startDate.value.isNotEmpty
           ? DateTime.parse(startDate.value)
           : null,
