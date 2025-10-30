@@ -39,7 +39,13 @@ dependencies:
   geolocator: ^14.0.2
   geocoding: ^4.0.0
   device_calendar: ^4.3.3
-  add_2_calendar: ^3.0.1
+  google_maps_flutter: ^2.13.1
+  google_maps_drawing_tools: ^0.0.6
+  location: ^8.0.1
+  screenshot: ^3.0.0
+  # geodesy: ^0.10.2
+  maps_toolkit: ^3.1.0
+  # add_2_calendar: ^3.0.1
 
 dev_dependencies:
   flutter_test:

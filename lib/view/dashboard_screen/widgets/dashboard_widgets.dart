@@ -14,6 +14,7 @@ import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/preference/UserPreference.dart';
 import 'package:sales_app/utils/AppPermissions.dart';
 import 'package:sales_app/utils/log.dart';
+import 'package:sales_app/view/MapDrawingScreen.dart';
 import 'package:sales_app/view/customer_screen.dart/customer_screen.dart';
 import 'package:sales_app/view/lead_screenn/lead_screen.dart';
 import 'package:sales_app/view/meetings_calendar_screen/meetings_calendar_screen.dart';
@@ -219,6 +220,10 @@ Widget getDashboardDrawer(
               },
             )
           : SizedBox.shrink(),
+      buildDrawerItem(Asset.leads, HomeScreenConst.leadMap, () {
+        ctr.scaffoldKey.currentState?.closeDrawer();
+        Get.to(MapDrawingScreen());
+      }),
       buildDrawerItem(Asset.logout, 'Logout', () async {
         ctr.scaffoldKey.currentState?.closeDrawer();
         getpopup(

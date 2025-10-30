@@ -11,6 +11,7 @@ class HomeScreenConst {
   static const leads = 'Leads';
   static const customers = 'Customers';
   static const meetingsCalendar = 'Meetings Calendar';
+  static const leadMap = 'Lead Map';
   static const tileLeads = 'Meetings Calendar';
   static const conversion = 'CONVERSION';
   static const leadsCategory = 'LEADS CATEGORIES';

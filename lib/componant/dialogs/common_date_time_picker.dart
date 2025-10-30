@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sales_app/componant/CustomSnakbar.dart';
 import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/font_constant.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
@@ -11,7 +12,7 @@ final dateFormat = DateFormat('yyyy-MM-dd');
 
 typedef OnDatePicked = void Function(DateTime pickedDate);
 
-Future<void> showCommonDatePickers({
+Future<void> showCommonDatePicker({
   required BuildContext context,
   required String title,
   DateTime? initialDate,
@@ -89,59 +90,69 @@ Future<void> showCommonDatePickers({
     selectedDate = pickedDate;
 
     if (showTimePickers) {
-      // Show time picker with time from selectedDate or initialDate or 00:00
-      final TimeOfDay? pickedTime = await showTimePicker(
-        // ignore: use_build_context_synchronously
+      final TimeOfDay? pickedTime = await showRestrictedTimePicker(
         context: context,
-        initialTime: TimeOfDay.fromDateTime(selectedDate),
-        helpText: 'Select Time',
-        cancelText: 'Cancel',
-        confirmText: 'OK',
-        builder: (BuildContext context, Widget? child) {
-          return Theme(
-            data: Theme.of(context).copyWith(
-              colorScheme: ColorScheme.light(
-                primary: primaryColor,
-                onPrimary: white,
-                surface: white,
-                onSurface: Colors.black87,
-              ),
-              textButtonTheme: TextButtonThemeData(
-                style: TextButton.styleFrom(
-                  foregroundColor: primaryColor,
-                  textStyle: TextStyle(
-                    fontSize: 16.sp,
-                    fontFamily: plusJakartaSansMedium,
-                  ),
-                ),
-              ),
-              timePickerTheme: TimePickerThemeData(
-                helpTextStyle: TextStyle(
-                  fontSize: 16.sp,
-                  fontFamily: plusJakartaSansBold,
-                  color: black,
-                ),
-                backgroundColor: white,
-                hourMinuteColor: white,
-                hourMinuteTextColor: black,
-                hourMinuteShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: primaryColor.withOpacity(0.3)),
-                ),
-                dayPeriodColor: primaryColor.withOpacity(0.1),
-                dayPeriodTextColor: black,
-                dialHandColor: primaryColor,
-                dialBackgroundColor: lightGrey.withOpacity(0.2),
-                entryModeIconColor: primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-            ),
-            child: child!,
-          );
-        },
+        selectedDate: selectedDate,
+        primaryColor: primaryColor,
+        white: white,
+        black: black,
+        lightGrey: lightGrey,
+        plusJakartaSansMedium: plusJakartaSansMedium,
+        plusJakartaSansBold: plusJakartaSansBold,
       );
+      // Show time picker with time from selectedDate or initialDate or 00:00
+      // final TimeOfDay? pickedTime = await showTimePicker(
+      //   // ignore: use_build_context_synchronously
+      //   context: context,
+      //   initialTime: TimeOfDay.fromDateTime(selectedDate),
+      //   helpText: 'Select Time',
+      //   cancelText: 'Cancel',
+      //   confirmText: 'OK',
+      //   builder: (BuildContext context, Widget? child) {
+      //     return Theme(
+      //       data: Theme.of(context).copyWith(
+      //         colorScheme: ColorScheme.light(
+      //           primary: primaryColor,
+      //           onPrimary: white,
+      //           surface: white,
+      //           onSurface: Colors.black87,
+      //         ),
+      //         textButtonTheme: TextButtonThemeData(
+      //           style: TextButton.styleFrom(
+      //             foregroundColor: primaryColor,
+      //             textStyle: TextStyle(
+      //               fontSize: 16.sp,
+      //               fontFamily: plusJakartaSansMedium,
+      //             ),
+      //           ),
+      //         ),
+      //         timePickerTheme: TimePickerThemeData(
+      //           helpTextStyle: TextStyle(
+      //             fontSize: 16.sp,
+      //             fontFamily: plusJakartaSansBold,
+      //             color: black,
+      //           ),
+      //           backgroundColor: white,
+      //           hourMinuteColor: white,
+      //           hourMinuteTextColor: black,
+      //           hourMinuteShape: RoundedRectangleBorder(
+      //             borderRadius: BorderRadius.circular(12),
+      //             side: BorderSide(color: primaryColor.withOpacity(0.3)),
+      //           ),
+      //           dayPeriodColor: primaryColor.withOpacity(0.1),
+      //           dayPeriodTextColor: black,
+      //           dialHandColor: primaryColor,
+      //           dialBackgroundColor: lightGrey.withOpacity(0.2),
+      //           entryModeIconColor: primaryColor,
+      //           shape: RoundedRectangleBorder(
+      //             borderRadius: BorderRadius.circular(20),
+      //           ),
+      //         ),
+      //       ),
+      //       child: child!,
+      //     );
+      //   },
+      // );
 
       if (pickedTime != null) {
         // Combine date and time
@@ -168,7 +179,116 @@ Future<void> showCommonDatePickers({
   }
 }
 
-Future<void> showCommonDatePicker({
+Future<TimeOfDay?> showRestrictedTimePicker({
+  required BuildContext context,
+  required DateTime selectedDate,
+  required Color primaryColor,
+  required Color white,
+  required Color black,
+  required Color lightGrey,
+  required String plusJakartaSansMedium,
+  required String plusJakartaSansBold,
+}) async {
+  final now = DateTime.now();
+  final isToday =
+      selectedDate.year == now.year &&
+      selectedDate.month == now.month &&
+      selectedDate.day == now.day;
+
+  // Default time: current time if today, else 9:00 AM
+  TimeOfDay initialTime = isToday
+      ? TimeOfDay.fromDateTime(DateTime.now().add(const Duration(minutes: 10)))
+      : TimeOfDay(hour: now.hour, minute: now.minute);
+
+  TimeOfDay? pickedTime = await showTimePicker(
+    context: context,
+    // initialTime: initialTime,
+    initialTime: initialTime,
+    helpText: 'Select Time',
+    cancelText: 'Cancel',
+    confirmText: 'OK',
+    builder: (BuildContext context, Widget? child) {
+      return Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.light(
+            primary: primaryColor,
+            onPrimary: white,
+            surface: white,
+            onSurface: Colors.black87,
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              foregroundColor: primaryColor,
+              textStyle: TextStyle(
+                fontSize: 16,
+                fontFamily: plusJakartaSansMedium,
+              ),
+            ),
+          ),
+          timePickerTheme: TimePickerThemeData(
+            helpTextStyle: TextStyle(
+              fontSize: 16,
+              fontFamily: plusJakartaSansBold,
+              color: black,
+            ),
+            backgroundColor: white,
+            hourMinuteColor: white,
+            hourMinuteTextColor: black,
+            hourMinuteShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: primaryColor.withOpacity(0.3)),
+            ),
+            dayPeriodColor: primaryColor.withOpacity(0.1),
+            dayPeriodTextColor: black,
+            dialHandColor: primaryColor,
+            dialBackgroundColor: lightGrey.withOpacity(0.2),
+            entryModeIconColor: primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+        ),
+        child: child!,
+      );
+    },
+  );
+
+  // Validate: prevent past time if today
+  if (isToday && pickedTime != null) {
+    final selectedDateTime = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+
+    if (selectedDateTime.isBefore(now)) {
+      CustomSnackBar().showErrorSnackbar(
+        'Time',
+        'Please select a future time.',
+      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text(""), duration: Duration(seconds: 2)),
+      // );
+      // Reopen picker politely
+      return await showRestrictedTimePicker(
+        context: context,
+        selectedDate: selectedDate,
+        primaryColor: primaryColor,
+        white: white,
+        black: black,
+        lightGrey: lightGrey,
+        plusJakartaSansMedium: plusJakartaSansMedium,
+        plusJakartaSansBold: plusJakartaSansBold,
+      );
+    }
+  }
+
+  return pickedTime;
+}
+
+Future<void> showCommonDatePickers({
   required BuildContext context,
   required String title,
   DateTime? initialDate,

@@ -15,6 +15,7 @@
         </intent>
     </queries>
 
+
     <application android:label="EPC" android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity android:name=".MainActivity" android:exported="true"
@@ -30,10 +31,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <meta-data android:name="flutterEmbedding" android:value="2" />
         <activity android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Ucrop.CropTheme" />
+
+        <meta-data
+        android:name="com.google.android.geo.API_KEY"
+        android:value="AIzaSyDp5o-2dsM59s2wBbXyY3vU05J17dw6Qkc"/>
     </application>
     <queries>
         <intent>
