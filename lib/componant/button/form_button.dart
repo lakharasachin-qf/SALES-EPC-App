@@ -85,7 +85,7 @@ getFormButton(
             : grey,
         boxShadow: [
           // BoxShadow(
-          //   color: validate ? black.withOpacity(0.2) : grey.withOpacity(0.2),
+          //   color: validate ? black.withValues(alpha:0.2) : grey.withValues(alpha:0.2),
           //   blurRadius: 10.0,
           //   offset: const Offset(0, 1),
           //   spreadRadius: 3.0,
@@ -99,7 +99,8 @@ getFormButton(
           fontFamily: plusJakartaSansRegular,
           fontSize: Device.screenType == ScreenType.mobile
               // ignore: unnecessary_type_check
-              ? (fontsize is double ? fontsize.sp : (fontsize.toDouble()).sp)
+              // ? (fontsize is double ? fontsize.sp : (fontsize.toDouble()).sp)
+              ? fontsize.sp
               : 9.sp,
         ),
       ),
@@ -124,7 +125,7 @@ getMiniButton(Function fun, str, {bool? icon}) {
         color: primaryColor,
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.2),
+            color: primaryColor.withValues(alpha: 0.2),
             blurRadius: 10.0,
             offset: const Offset(0, 1),
             spreadRadius: 3.0,
@@ -234,8 +235,8 @@ getButton(str, Function fun, {required bool isvalidate}) {
         boxShadow: [
           BoxShadow(
             color: isvalidate == true
-                ? primaryColor.withOpacity(0.3)
-                : Colors.grey.withOpacity(0.2),
+                ? primaryColor.withValues(alpha: 0.3)
+                : grey.withValues(alpha: 0.2),
             blurRadius: 10.0,
             offset: const Offset(0, 1),
             spreadRadius: 3.0,
@@ -243,8 +244,8 @@ getButton(str, Function fun, {required bool isvalidate}) {
         ],
         gradient: LinearGradient(
           colors: isvalidate == true
-              ? [primaryColor, primaryColor.withOpacity(0.5)]
-              : [Colors.grey, Colors.grey],
+              ? [primaryColor, primaryColor.withValues(alpha: 0.5)]
+              : [grey, grey],
           begin: const FractionalOffset(0.0, 0.0),
           end: const FractionalOffset(1.0, 0.0),
           stops: const [0.0, 1.0],
@@ -279,9 +280,9 @@ commonBtn(str, Function fun, {required bool isvalidate}) {
         borderRadius: BorderRadius.circular(1.7.h),
         boxShadow: [
           BoxShadow(
-            color: isvalidate == true
-                ? primaryColor.withOpacity(0.3)
-                : Colors.grey.withOpacity(0.2),
+            color:
+                isvalidate == true ? primaryColor.withValues(alpha: 0.3) : grey
+                  ..withValues(alpha: 0.2),
             blurRadius: 10.0,
             offset: const Offset(0, 1),
             spreadRadius: 3.0,
@@ -289,8 +290,8 @@ commonBtn(str, Function fun, {required bool isvalidate}) {
         ],
         gradient: LinearGradient(
           colors: isvalidate == true
-              ? [primaryColor, primaryColor.withOpacity(0.5)]
-              : [Colors.grey, Colors.grey],
+              ? [primaryColor, primaryColor.withValues(alpha: 0.5)]
+              : [grey, grey],
           begin: const FractionalOffset(0.0, 0.0),
           end: const FractionalOffset(1.0, 0.0),
           stops: const [0.0, 1.0],

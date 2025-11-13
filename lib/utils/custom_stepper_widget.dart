@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sales_app/configs/colors_constant.dart';
 
 class CustomLinearStepper extends StatefulWidget {
   final int currentStep;
@@ -151,7 +152,7 @@ class CustomLinearStepperState extends State<CustomLinearStepper> {
                         widget.steps[index],
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: isActive ? widget.activeColor : Colors.grey,
+                          color: isActive ? widget.activeColor : grey,
                           fontWeight: isActive
                               ? FontWeight.w600
                               : FontWeight.normal,

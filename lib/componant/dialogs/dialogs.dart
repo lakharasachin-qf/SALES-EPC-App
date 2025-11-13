@@ -6,6 +6,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:sales_app/componant/input/custom_text_field.dart';
 import 'package:sales_app/componant/input/form_inputs.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
+import 'package:sales_app/utils/log.dart';
 import 'package:sizer/sizer.dart';
 import '../../configs/colors_constant.dart';
 import '../../configs/font_constant.dart';
@@ -206,7 +207,7 @@ Future<Object?> popupDialogs(
   Function onClick,
 ) {
   return showGeneralDialog(
-    barrierColor: black.withOpacity(0.6),
+    barrierColor: black.withValues(alpha: 0.6),
     transitionBuilder: (context, a1, a2, widget) {
       final curvedValue = Curves.easeInOut.transform(a1.value);
       return Transform.translate(
@@ -575,7 +576,7 @@ getDividerForShowDialog() {
     indent: 0.1.h,
     endIndent: 0.1.h,
     thickness: 1,
-    color: primaryColor.withOpacity(0.5),
+    color: primaryColor.withValues(alpha: 0.5),
   );
 }
 
@@ -726,7 +727,7 @@ Widget getRadioButton({
                   isSelected = false;
                   enableFunction(groupvalue);
                   notifyListeners();
-                  print(groupvalue.toString());
+                  logcat("groupvalue:", groupvalue.toString());
                 },
               ),
               GestureDetector(
@@ -736,7 +737,7 @@ Widget getRadioButton({
                   isSelected = false;
                   enableFunction(groupvalue);
                   notifyListeners();
-                  print(groupvalue.toString());
+                  logcat("groupvalue:", groupvalue.toString());
                 },
                 child: Text(
                   firstText,
@@ -752,7 +753,7 @@ Widget getRadioButton({
                   isSelected = false;
                   enableFunction(groupvalue);
                   notifyListeners();
-                  print(groupvalue.toString());
+                  logcat("groupvalue:", groupvalue.toString());
                 },
               ),
               GestureDetector(
@@ -881,7 +882,7 @@ Future<Object?> selectImageFromCameraOrGallery(
   Function? galleryClick,
 }) {
   return showGeneralDialog(
-    barrierColor: black.withOpacity(0.6),
+    barrierColor: black.withValues(alpha: 0.6),
     transitionBuilder: (context, a1, a2, widget) {
       return Transform.scale(
         scale: a1.value,
@@ -1054,7 +1055,7 @@ Future getpopup(
     context: context,
     barrierDismissible: false,
     barrierLabel: "Dialog",
-    barrierColor: Colors.black.withOpacity(0.6),
+    barrierColor: Colors.black.withValues(alpha: 0.6),
     transitionDuration: const Duration(milliseconds: 350),
     pageBuilder: (context, _, __) => const SizedBox(),
     transitionBuilder: (context, anim, _, child) {
@@ -1077,7 +1078,7 @@ Future getpopup(
                   boxShadow: [
                     BoxShadow(
                       blurRadius: 25,
-                      color: black.withOpacity(0.2),
+                      color: black.withValues(alpha: 0.2),
                       offset: const Offset(0, 8),
                     ),
                   ],
@@ -1121,7 +1122,7 @@ Future getpopup(
                             child: OutlinedButton(
                               style: OutlinedButton.styleFrom(
                                 side: BorderSide(
-                                  color: secondaryColor.withOpacity(0.6),
+                                  color: secondaryColor.withValues(alpha: 0.6),
                                 ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),

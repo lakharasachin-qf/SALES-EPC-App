@@ -1,14 +1,11 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:sales_app/api_handle/apiCallingFormate.dart';
 import 'package:sales_app/componant/dialogs/loading_indicator.dart';
 import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
 import 'package:sales_app/models/ViewCustomerModel.dart';
-import 'package:sales_app/models/customer_model_wo_p.dart';
 import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
 import 'package:sales_app/preference/UserPreference.dart';

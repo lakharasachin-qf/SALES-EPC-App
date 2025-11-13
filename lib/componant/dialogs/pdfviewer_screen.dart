@@ -1,12 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
-import 'package:sales_app/componant/widgets/widgets.dart';
-import 'package:sales_app/configs/assets_constant.dart';
 import 'package:sales_app/configs/colors_constant.dart';
-import 'package:sales_app/configs/font_constant.dart';
 import 'package:sizer/sizer.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
@@ -28,9 +24,9 @@ class PdfViewerScreen extends StatefulWidget {
 
 class _PdfViewerScreenState extends State<PdfViewerScreen> {
   final PdfViewerController _controller = PdfViewerController();
-  int _pages = 0;
-  int _currentPage = 0;
-  bool _isReady = false;
+  int pages = 0;
+  int currentPage = 0;
+  bool isReady = false;
 
   @override
   Widget build(BuildContext context) {
@@ -95,13 +91,13 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
                       controller: _controller,
                       onDocumentLoaded: (details) {
                         setState(() {
-                          _pages = details.document.pages.count;
-                          _isReady = true;
+                          pages = details.document.pages.count;
+                          isReady = true;
                         });
                       },
                       onPageChanged: (details) {
                         setState(() {
-                          _currentPage = details.newPageNumber;
+                          currentPage = details.newPageNumber;
                         });
                       },
                       onDocumentLoadFailed: (details) {
@@ -117,13 +113,13 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
                       controller: _controller,
                       onDocumentLoaded: (details) {
                         setState(() {
-                          _pages = details.document.pages.count;
-                          _isReady = true;
+                          pages = details.document.pages.count;
+                          isReady = true;
                         });
                       },
                       onPageChanged: (details) {
                         setState(() {
-                          _currentPage = details.newPageNumber;
+                          currentPage = details.newPageNumber;
                         });
                       },
                       onDocumentLoadFailed: (details) {

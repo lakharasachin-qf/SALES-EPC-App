@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:sales_app/api_handle/apiCallingFormate.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
-import 'package:sales_app/componant/dialogs/loading_indicator.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
 import 'package:sales_app/controller/master_controller/Master_Controller.dart';
@@ -381,10 +380,10 @@ class DashboardController extends GetxController {
 
   void makeApiCall(context) {
     getDashboardData(context, issearch: true);
-    print('API Start Date: ${startDateApi.value}');
-    print('API End Date: ${endDateApi.value}');
-    print('Selected District IDs: ${selectedDistrictId.value}');
-    print('Selected Cluster IDs: ${selectedClusterId.value}');
+    logcat("API Start Date:", startDateApi.value);
+    logcat("API End Date:", endDateApi.value);
+    logcat("Selected District IDs", selectedDistrictId.value);
+    logcat("Selected Cluster IDs:", selectedClusterId.value);
   }
 
   void filterFetchData<T>(

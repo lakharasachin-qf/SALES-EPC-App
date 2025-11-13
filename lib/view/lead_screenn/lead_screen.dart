@@ -569,7 +569,7 @@ class LeadScreenState extends State<LeadScreen> {
                       //                   padding: EdgeInsets.symmetric(
                       //                       horizontal: 2.w, vertical: 0.4.h),
                       //                   decoration: BoxDecoration(
-                      //                     color: Colors.blue.withOpacity(0.1),
+                      //                     color: Colors.blue.withValues(alpha:0.1),
                       //                     borderRadius: BorderRadius.circular(6),
                       //                   ),
                       //                   child: Text(
@@ -598,7 +598,7 @@ class LeadScreenState extends State<LeadScreen> {
                       //                   style: ElevatedButton.styleFrom(
                       //                     backgroundColor: ctr.currentPage.value > 1
                       //                         ? Colors.blue
-                      //                         : Colors.grey.shade300,
+                      //                         : grey.shade300,
                       //                     minimumSize: const Size(36, 36),
                       //                     shape: const CircleBorder(),
                       //                     padding: EdgeInsets.zero,
@@ -625,7 +625,7 @@ class LeadScreenState extends State<LeadScreen> {
                       //                     backgroundColor: ctr.currentPage.value <
                       //                             ctr.lastPage.value
                       //                         ? Colors.blue
-                      //                         : Colors.grey.shade300,
+                      //                         : grey.shade300,
                       //                     minimumSize: const Size(36, 36),
                       //                     shape: const CircleBorder(),
                       //                     padding: EdgeInsets.zero,
@@ -690,7 +690,7 @@ class LeadScreenState extends State<LeadScreen> {
                       //                     backgroundColor:
                       //                         ctr.currentPage.value > 1
                       //                         ? Colors.blue
-                      //                         : Colors.grey.shade300,
+                      //                         : grey.shade300,
                       //                     minimumSize: Size(36, 36),
                       //                     shape: CircleBorder(),
                       //                     padding: EdgeInsets.zero,
@@ -725,7 +725,7 @@ class LeadScreenState extends State<LeadScreen> {
                       //                         ctr.currentPage.value <
                       //                             ctr.lastPage.value
                       //                         ? Colors.blue
-                      //                         : Colors.grey.shade300,
+                      //                         : grey.shade300,
                       //                     minimumSize: Size(36, 36),
                       //                     shape: CircleBorder(),
                       //                     padding: EdgeInsets.zero,

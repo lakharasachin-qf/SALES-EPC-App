@@ -137,12 +137,12 @@ Future<void> showCommonDatePicker({
       //           hourMinuteTextColor: black,
       //           hourMinuteShape: RoundedRectangleBorder(
       //             borderRadius: BorderRadius.circular(12),
-      //             side: BorderSide(color: primaryColor.withOpacity(0.3)),
+      //             side: BorderSide(color: primaryColor.withValues(alpha:0.3)),
       //           ),
-      //           dayPeriodColor: primaryColor.withOpacity(0.1),
+      //           dayPeriodColor: primaryColor.withValues(alpha:0.1),
       //           dayPeriodTextColor: black,
       //           dialHandColor: primaryColor,
-      //           dialBackgroundColor: lightGrey.withOpacity(0.2),
+      //           dialBackgroundColor: lightGrey.withValues(alpha:0.2),
       //           entryModeIconColor: primaryColor,
       //           shape: RoundedRectangleBorder(
       //             borderRadius: BorderRadius.circular(20),
@@ -236,12 +236,12 @@ Future<TimeOfDay?> showRestrictedTimePicker({
             hourMinuteTextColor: black,
             hourMinuteShape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: primaryColor.withOpacity(0.3)),
+              side: BorderSide(color: primaryColor.withValues(alpha: 0.3)),
             ),
-            dayPeriodColor: primaryColor.withOpacity(0.1),
+            dayPeriodColor: primaryColor.withValues(alpha: 0.1),
             dayPeriodTextColor: black,
             dialHandColor: primaryColor,
-            dialBackgroundColor: lightGrey.withOpacity(0.2),
+            dialBackgroundColor: lightGrey.withValues(alpha: 0.2),
             entryModeIconColor: primaryColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
@@ -422,13 +422,13 @@ Future<void> showCommonDatePickers({
                           hourMinuteShape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                             side: BorderSide(
-                              color: primaryColor.withOpacity(0.3),
+                              color: primaryColor.withValues(alpha: 0.3),
                             ),
                           ),
-                          dayPeriodColor: primaryColor.withOpacity(0.1),
+                          dayPeriodColor: primaryColor.withValues(alpha: 0.1),
                           dayPeriodTextColor: Colors.black,
                           dialHandColor: primaryColor,
-                          dialBackgroundColor: lightGrey.withOpacity(0.2),
+                          dialBackgroundColor: lightGrey.withValues(alpha: 0.2),
                           entryModeIconColor: primaryColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
@@ -521,12 +521,12 @@ Future<void> showCommonTimePicker({
             hourMinuteTextColor: Colors.black,
             hourMinuteShape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: primaryColor.withOpacity(0.3)),
+              side: BorderSide(color: primaryColor.withValues(alpha: 0.3)),
             ),
-            dayPeriodColor: primaryColor.withOpacity(0.1),
+            dayPeriodColor: primaryColor.withValues(alpha: 0.1),
             dayPeriodTextColor: Colors.black,
             dialHandColor: primaryColor,
-            dialBackgroundColor: lightGrey.withOpacity(0.2),
+            dialBackgroundColor: lightGrey.withValues(alpha: 0.2),
             entryModeIconColor: primaryColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),

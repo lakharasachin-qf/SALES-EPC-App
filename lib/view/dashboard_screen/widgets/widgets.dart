@@ -9,7 +9,6 @@ import 'package:sales_app/controller/dashboard_controller/dashboard_controller.d
 import 'package:sales_app/models/dashboard1_model.dart';
 import 'package:sizer/sizer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'dart:math' show max;
 
 Widget buildCircularChart({required LeadsStatusDistribution? data}) {
   if (data == null ||

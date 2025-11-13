@@ -11,7 +11,7 @@ Future<Object?> popupDialogs(
   Function onClick,
 ) {
   return showGeneralDialog(
-    barrierColor: black.withOpacity(0.6),
+    barrierColor: black.withValues(alpha: 0.6),
     transitionBuilder: (context, a1, a2, widget) {
       final curvedValue = Curves.easeInOut.transform(a1.value);
       return Transform.translate(

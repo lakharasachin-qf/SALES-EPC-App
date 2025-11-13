@@ -10,7 +10,6 @@ import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/dashboard_controller/dashboard_controller.dart';
-import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/preference/UserPreference.dart';
 import 'package:sales_app/utils/AppPermissions.dart';
 import 'package:sales_app/utils/log.dart';

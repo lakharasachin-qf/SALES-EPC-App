@@ -26,7 +26,7 @@ setSearchBar(
               ),
               boxShadow: [
                 BoxShadow(
-                  color: black.withOpacity(0.05),
+                  color: black.withValues(alpha: 0.05),
                   blurRadius: 10.0,
                   offset: const Offset(0, 5),
                 ),
@@ -52,7 +52,7 @@ setSearchBar(
               style: styleTextFormFieldText(isWhite: true),
               textAlignVertical: TextAlignVertical.center,
               decoration: InputDecoration(
-                fillColor: white.withOpacity(0.1),
+                fillColor: white.withValues(alpha: 0.1),
                 prefixIcon: Icon(
                   Icons.search,
                   color: black,

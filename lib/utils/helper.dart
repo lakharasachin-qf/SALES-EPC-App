@@ -1,18 +1,25 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sales_app/componant/CustomSnakbar.dart';
 import 'package:sales_app/componant/dialogs/customDialog.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart'
     show showDialogForScreen;
 import 'package:sales_app/componant/dialogs/fullscreen.dart';
+import 'package:sales_app/componant/dialogs/loading_indicator.dart';
 import 'package:sales_app/componant/dialogs/pdfviewer_screen.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/utils/log.dart';
 import 'package:sales_app/view/signin_screen/signin_screen.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 
 void navigateToDashboardByRights(List<String> rights) {
   Get.to(() => Signinscreen());
@@ -291,4 +298,41 @@ void showErrorDialog(BuildContext context, Map<String, dynamic> data) {
   }
 
   showDialogForScreen(context, 'Add Lead', errorMessage, callback: () {});
+}
+
+Future<void> captureAndSaveMap(
+  BuildContext context,
+  ScreenshotController screenshotController,
+) async {
+  try {
+    var loadingIndicator = LoadingProgressDialog();
+    loadingIndicator.show(context, '');
+
+    final imageBytes = await screenshotController.capture(
+      pixelRatio: 5.0, // Increase resolution (default is 1.0)
+    );
+
+    if (imageBytes == null) {
+      debugPrint('Failed to capture screenshot.');
+      return;
+    }
+
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath =
+        '${directory.path}/map_capture_${DateTime.now().millisecondsSinceEpoch}.png';
+
+    // Save to file
+    final file = File(filePath);
+    await file.writeAsBytes(imageBytes);
+
+    debugPrint('Map image saved: $filePath');
+    loadingIndicator.hide(context);
+    await SharePlus.instance.share(
+      ShareParams(text: "Map capture", files: [XFile(filePath)]),
+    );
+    CustomSnackBar().showErrorSnackbar('Time', 'Map image saved successfully!');
+  } catch (e, st) {
+    debugPrint('Error capturing map: $e\n$st');
+    CustomSnackBar().showErrorSnackbar('Error capturing:', '$e\n$st');
+  }
 }

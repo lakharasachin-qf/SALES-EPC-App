@@ -292,7 +292,7 @@ class CustomerScreenState extends State<MeetingsCalendarScreen> {
                                                                         onPressed: () {
                                                                           Get.to(
                                                                             MeetingsHistoryScreen(
-                                                                              meetingId: ctr.filteredMeetingsList[entry.key]!.id!.toString(),
+                                                                              meetingId: ctr.filteredMeetingsList[entry.key].id!.toString(),
                                                                             ),
                                                                           );
                                                                         },

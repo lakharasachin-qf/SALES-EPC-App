@@ -355,10 +355,7 @@ openBottomtsheetDialog(
                             Navigator.pop(context);
                           },
                           child: Container(
-                            padding: const EdgeInsets.only(
-                              left: 10,
-                              right: 10,
-                            ),
+                            padding: const EdgeInsets.only(left: 10, right: 10),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
@@ -407,7 +404,7 @@ Widget getCommonFormButton(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         padding: const EdgeInsets.symmetric(vertical: 12),
         elevation: 5,
-        shadowColor: primaryColor.withOpacity(0.3),
+        shadowColor: primaryColor.withValues(alpha: 0.3),
       ),
       onPressed: () => fun(),
       child: Center(

@@ -10,7 +10,7 @@ class LoadingProgressDialog {
     showDialog(
       context: buildContext,
       barrierDismissible: false,
-      barrierColor: black.withOpacity(0.6),
+      barrierColor: black.withValues(alpha: 0.6),
       builder: (BuildContext context) {
         return Center(
           child: Material(
@@ -65,7 +65,7 @@ class LoadingProgressDialogs {
           child: Container(
             height: Device.height,
             width: Device.width,
-            color: black.withOpacity(0.3),
+            color: black.withValues(alpha: 0.3),
             child: Center(
               child: Material(
                 color: transparent,

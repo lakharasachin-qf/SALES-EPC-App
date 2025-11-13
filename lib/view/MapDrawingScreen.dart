@@ -2,11 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_drawing_tools/google_maps_drawing_tools.dart';
 import 'package:location/location.dart';
 import 'package:maps_toolkit/maps_toolkit.dart' as mp;
+import 'package:sales_app/componant/input/style.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/configs/colors_constant.dart';
+import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:http/http.dart' as http;
@@ -35,8 +39,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
   final Set<Marker> _vertexMarkers = {};
   DrawMode _mode = DrawMode.polygon;
   MapType _mapType = MapType.satellite;
-  // Indicates if current polygon can be snapped/closed by tapping near first point
-  bool _closable = false;
+  bool closable = false;
   static const String _kGoogleApiKey =
       'AIzaSyDp5o-2dsM59s2wBbXyY3vU05J17dw6Qkc';
   final TextEditingController searchController = TextEditingController();
@@ -44,6 +47,9 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
   Timer? _debounce;
   bool _isSearching = false;
   List<Map<String, String>> _searchResults = [];
+  bool showMyLocation = true;
+  bool showZoomControls = true;
+  bool isFabExpanded = false;
 
   @override
   void initState() {
@@ -68,248 +74,375 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
         top: false,
         child: Scaffold(
           resizeToAvoidBottomInset: false,
-          // appBar: AppBar(
-          //   title: const Text('Draw on Map'),
-          //   actions: <Widget>[
-          //     // IconButton(
-          //     //   icon: const Icon(Icons.center_focus_strong),
-          //     //   onPressed: _recenter,
-          //     //   tooltip: 'Recenter',
-          //     // ),
-          //     IconButton(
-          //       icon: const Icon(Icons.download_for_offline_rounded),
-          //       onPressed: _captureAndUploadMap,
-          //       tooltip: 'Capture & Upload',
-          //     ),
-          //   ],
-          // ),
-          body: Screenshot(
-            controller: _screenshotController,
-            child: Stack(
-              children: [
-                DrawingMapWidget(
-                  initialCameraPosition: CameraPosition(
-                    target: _currentLatLng!,
-                    zoom: 16,
-                  ),
-                  mapType: _mapType,
-                  controller: _drawingController,
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: false,
-                  indoorViewEnabled: true,
-                  markers: {..._markers, ..._vertexMarkers},
-                  polylines: _polylines,
-                  buildingsEnabled: true,
-                  polygons: _polygons,
-                  onMapCreated: (GoogleMapController controller) {
-                    _mapController.complete(controller);
-                  },
-                  onTap: _onMapTap,
-                ),
-                // Animated measurement chip
-                Positioned(
-                  top: 13.h,
-                  left: 3.5.w,
-                  right: 3.5.w,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 220),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    transitionBuilder: (child, anim) => SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, -0.15),
-                        end: Offset.zero,
-                      ).animate(anim),
-                      child: FadeTransition(opacity: anim, child: child),
-                    ),
-                    child:
-                        ((_mode == DrawMode.polyline &&
-                                _tempPoints.length >= 2) ||
-                            (_mode == DrawMode.polygon &&
-                                _tempPoints.length >= 2))
-                        ? Align(
-                            alignment: Alignment.topCenter,
-                            key: const ValueKey('measure-chip'),
-                            child: buildMeasurementChip(_liveMeasurementText()),
-                          )
-                        : const SizedBox.shrink(
-                            key: ValueKey('measure-chip-empty'),
-                          ),
-                  ),
-                ),
-                // if ((_mode == DrawMode.polyline || _mode == DrawMode.polygon) &&
-                //     _tempPoints.isEmpty)
-                //   Positioned(
-                //     top: 13.h,
-                //     left: 12,
-                //     right: 12,
-                //     child: Align(
-                //       alignment: Alignment.topCenter,
-                //       child: _HintBanner(
-                //         text: _mode == DrawMode.polyline
-                //             ? 'Tip: Tap to add points. Drag vertices to adjust. Press Finish when done.'
-                //             : 'Tip: Tap to add vertices. Drag to adjust. Tap near first point to close.',
-                //       ),
-                //     ),
-                //   ),
-                Positioned(
-                  left: 3.w,
-                  right: 3.w,
-                  top: 5.h,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Material(
-                        elevation: 5,
-                        borderRadius: BorderRadius.circular(14),
-                        clipBehavior: Clip.antiAlias,
-                        child: TextField(
-                          controller: searchController,
-                          focusNode: _searchFocus,
-                          autofocus: false,
-                          cursorColor: primaryColor,
-                          stylusHandwritingEnabled: true,
-                          textInputAction: TextInputAction.search,
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(
-                              Icons.search,
-                              color: primaryColor,
-                            ),
-                            hintText: 'Search place, address...',
-                            filled: true,
-                            fillColor: white,
-                            suffixIcon: _isSearching
-                                ? const Padding(
-                                    padding: EdgeInsets.all(12.0),
-                                    child: SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                                  )
-                                : (searchController.text.isNotEmpty
-                                      ? IconButton(
-                                          icon: const Icon(Icons.clear),
-                                          onPressed: () {
-                                            searchController.clear();
-                                            setState(() => _searchResults = []);
-                                          },
-                                        )
-                                      : null),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                          onSubmitted: (v) => _fetchAutocomplete(v),
-                        ),
+          body: Stack(
+            children: [
+              Screenshot(
+                controller: _screenshotController,
+                child: Stack(
+                  children: [
+                    DrawingMapWidget(
+                      initialCameraPosition: CameraPosition(
+                        target: _currentLatLng!,
+                        zoom: 16,
                       ),
-                      getDynamicSizedBox(height: 2.h),
-                      AnimatedSwitcher(
+                      mapType: _mapType,
+                      controller: _drawingController,
+                      myLocationEnabled: showMyLocation,
+                      myLocationButtonEnabled: false,
+                      zoomControlsEnabled: showZoomControls,
+                      // zoomGesturesEnabled: true,
+                      indoorViewEnabled: true,
+                      markers: {..._markers, ..._vertexMarkers},
+                      polylines: _polylines,
+                      buildingsEnabled: true,
+                      polygons: _polygons,
+                      onMapCreated: (GoogleMapController controller) {
+                        _mapController.complete(controller);
+                      },
+                      onTap: _onMapTap,
+                    ),
+                    // Animated measurement chip
+                    Positioned(
+                      top: 13.h,
+                      left: 3.5.w,
+                      right: 3.5.w,
+                      child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 220),
                         switchInCurve: Curves.easeOut,
                         switchOutCurve: Curves.easeIn,
-                        child: _searchResults.isNotEmpty
-                            ? Material(
-                                key: const ValueKey('results'),
-                                elevation: 6,
-                                borderRadius: BorderRadius.circular(12),
-                                clipBehavior: Clip.antiAlias,
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    maxHeight: 280,
-                                  ),
-                                  child: ListView.separated(
-                                    shrinkWrap: true,
-                                    padding: EdgeInsets.all(0),
-                                    itemCount: _searchResults.length,
-                                    separatorBuilder: (_, __) =>
-                                        const Divider(height: 1),
-                                    itemBuilder: (ctx, i) {
-                                      final it = _searchResults[i];
-                                      return buildSearchResultTile(
-                                        description: it['description'] ?? '',
-                                        onTap: () async {
-                                          final desc = it['description'] ?? '';
-                                          setState(() {
-                                            searchController.text = "";
-                                            _searchResults = [];
-                                            _isSearching = false;
-                                          });
-                                          _searchFocus.unfocus();
-                                          await _goToPlace(
-                                            it['place_id']!,
-                                            desc,
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
+                        transitionBuilder: (child, anim) => SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0, -0.15),
+                            end: Offset.zero,
+                          ).animate(anim),
+                          child: FadeTransition(opacity: anim, child: child),
+                        ),
+                        child:
+                            ((_mode == DrawMode.polyline &&
+                                    _tempPoints.length >= 2) ||
+                                (_mode == DrawMode.polygon &&
+                                    _tempPoints.length >= 2))
+                            ? Align(
+                                alignment: Alignment.topCenter,
+                                key: const ValueKey('measure-chip'),
+                                child: buildMeasurementChip(
+                                  _liveMeasurementText(),
                                 ),
                               )
                             : const SizedBox.shrink(
-                                key: ValueKey('no-results'),
+                                key: ValueKey('measure-chip-empty'),
                               ),
                       ),
-                    ],
-                  ),
+                    ),
+                    // if ((_mode == DrawMode.polyline || _mode == DrawMode.polygon) &&
+                    //     _tempPoints.isEmpty)
+                    //   Positioned(
+                    //     top: 13.h,
+                    //     left: 12,
+                    //     right: 12,
+                    //     child: Align(
+                    //       alignment: Alignment.topCenter,
+                    //       child: _HintBanner(
+                    //         text: _mode == DrawMode.polyline
+                    //             ? 'Tip: Tap to add points. Drag vertices to adjust. Press Finish when done.'
+                    //             : 'Tip: Tap to add vertices. Drag to adjust. Tap near first point to close.',
+                    //       ),
+                    //     ),
+                    //   ),
+                  ],
                 ),
-                // Right-side floating buttons
-                Positioned(
-                  right: 2.w,
-                  bottom: 15.h,
-                  child: Column(
-                    children: [
-                      buildRoundFab(
-                        icon: Icons.layers_outlined,
-                        tooltip: 'Map type',
-                        onTap: () => _showMapTypeDialog(),
-                      ),
-                      const SizedBox(height: 10),
-                      buildRoundFab(
-                        icon: Icons.my_location,
-                        tooltip: 'Recenter',
-                        onTap: _recenter,
-                      ),
-                      const SizedBox(height: 10),
-                      buildRoundFab(
-                        icon: Icons.add,
-                        tooltip: 'Recenter',
-                        onTap: _showModePicker,
-                      ),
-                    ],
-                  ),
+              ),
+              Positioned(
+                left: 3.w,
+                right: 3.w,
+                top: 5.h,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        backMapButtonWidget(() {
+                          Get.back();
+                        }, isWhiteText: true),
+                        getDynamicSizedBox(width: 3.w),
+                        // getCommonToolbar(
+                        //           "Customer List",
+                        //           onClick: () {
+                        //             Get.back();
+                        //           },
+                        //           isFilter: true,
+                        //           onFilterClick: () {
+                        //             ctr.openFilterBottomSheet(context: context);
+                        //           },
+                        //           context: context,
+                        //         ),
+                        Expanded(
+                          child: Material(
+                            elevation: 5,
+                            borderRadius: BorderRadius.circular(14),
+                            clipBehavior: Clip.antiAlias,
+                            child: TextField(
+                              controller: searchController,
+                              focusNode: _searchFocus,
+                              autofocus: false,
+                              cursorColor: primaryColor,
+                              cursorErrorColor: primaryColor,
+                              stylusHandwritingEnabled: true,
+                              textInputAction: TextInputAction.search,
+                              style: styleTextFormFieldText(isWhite: true),
+                              decoration: InputDecoration(
+                                prefixIcon: const Icon(
+                                  Icons.search,
+                                  color: primaryColor,
+                                ),
+                                hintText: 'Search place, address...',
+                                filled: true,
+                                hintStyle: styleTextHintFieldLabel(
+                                  isWhite: true,
+                                ),
+                                fillColor: white,
+                                suffixIcon: _isSearching
+                                    ? const Padding(
+                                        padding: EdgeInsets.all(12.0),
+                                        child: SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: primaryColor,
+                                          ),
+                                        ),
+                                      )
+                                    : (searchController.text.isNotEmpty
+                                          ? IconButton(
+                                              icon: const Icon(Icons.clear),
+                                              onPressed: () {
+                                                searchController.clear();
+                                                setState(
+                                                  () => _searchResults = [],
+                                                );
+                                              },
+                                            )
+                                          : null),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              onSubmitted: (v) => _fetchAutocomplete(v),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    getDynamicSizedBox(height: 2.h),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 220),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      child: _searchResults.isNotEmpty
+                          ? Material(
+                              key: const ValueKey('results'),
+                              elevation: 6,
+                              borderRadius: BorderRadius.circular(12),
+                              clipBehavior: Clip.antiAlias,
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxHeight: 280,
+                                ),
+                                child: ListView.separated(
+                                  shrinkWrap: true,
+                                  physics: BouncingScrollPhysics(),
+                                  padding: EdgeInsets.all(0),
+                                  itemCount: _searchResults.length,
+                                  separatorBuilder: (_, __) =>
+                                      const Divider(height: 1),
+                                  itemBuilder: (ctx, i) {
+                                    final it = _searchResults[i];
+                                    return buildSearchResultTile(
+                                      description: it['description'] ?? '',
+                                      onTap: () async {
+                                        final desc = it['description'] ?? '';
+                                        setState(() {
+                                          searchController.text = "";
+                                          _searchResults = [];
+                                          _isSearching = false;
+                                        });
+                                        _searchFocus.unfocus();
+                                        await _goToPlace(it['place_id']!, desc);
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(key: ValueKey('no-results')),
+                    ),
+                  ],
                 ),
-                Positioned(
-                  left: 12,
-                  right: 12,
-                  bottom: 20,
-                  child: AnimatedSlide(
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOut,
-                    offset: _mode != DrawMode.none
-                        ? Offset.zero
-                        : const Offset(0, 0.3),
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 180),
-                      opacity: _mode != DrawMode.none ? 1 : 0,
-                      child: buildBottomActionsBar(
-                        context: context,
-                        mode: _mode,
-                        onPin: () => _setMode(DrawMode.pin),
-                        onPolyline: () => _setMode(DrawMode.polyline),
-                        onPolygon: () => _setMode(DrawMode.polygon),
-                        onUndo: _undoLastPoint,
-                        onFinish: _finishShape,
-                        onClear: _clearAll,
+              ),
+
+              Positioned(
+                right: 2.w,
+                bottom: 15.h,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    AnimatedSlide(
+                      duration: const Duration(milliseconds: 200),
+                      offset: isFabExpanded
+                          ? Offset.zero
+                          : const Offset(0, 0.2),
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 200),
+                        opacity: isFabExpanded ? 1 : 0,
+                        child: Column(
+                          children: [
+                            buildRoundFab(
+                              icon: Icons.download,
+                              tooltip: 'Download Map',
+                              onTap: () async {
+                                setState(() {
+                                  showMyLocation = false;
+                                  showZoomControls = false;
+                                });
+                                await Future.delayed(
+                                  const Duration(milliseconds: 300),
+                                );
+                                await captureAndSaveMap(
+                                  context,
+                                  _screenshotController,
+                                );
+                                setState(() {
+                                  showMyLocation = true;
+                                  showZoomControls = true;
+                                });
+                              },
+                            ),
+                            getDynamicSizedBox(height: 1.h),
+                            buildRoundFab(
+                              icon: Icons.layers_outlined,
+                              tooltip: 'Map type',
+                              onTap: _showMapTypeDialog,
+                            ),
+                            getDynamicSizedBox(height: 1.h),
+                            buildRoundFab(
+                              icon: Icons.my_location,
+                              tooltip: 'Recenter',
+                              onTap: _recenter,
+                            ),
+                            getDynamicSizedBox(height: 1.h),
+                            buildRoundFab(
+                              icon: Icons.gesture_rounded,
+                              tooltip: 'Mode',
+                              onTap: _showModePicker,
+                            ),
+                            getDynamicSizedBox(height: 1.h),
+                          ],
+                        ),
                       ),
+                    ),
+                    AnimatedScale(
+                      scale: isFabExpanded ? 1.1 : 1.0,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutBack,
+                      child: AnimatedRotation(
+                        turns: isFabExpanded ? 0.25 : 0,
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeOut,
+                        child: buildRoundFab(
+                          icon: isFabExpanded ? Icons.close : Icons.add,
+                          tooltip: isFabExpanded ? 'Close' : 'More Options',
+                          onTap: () {
+                            setState(() => isFabExpanded = !isFabExpanded);
+                          },
+                        ),
+                      ),
+                    ),
+                    // buildRoundFab(
+                    //   icon: isFabExpanded ? Icons.close : Icons.add,
+                    //   tooltip: isFabExpanded ? 'Close' : 'More Options',
+                    //   onTap: () {
+                    //     setState(() => isFabExpanded = !isFabExpanded);
+                    //   },
+                    // ),
+                  ],
+                ),
+              ),
+              // Positioned(
+              //   right: 2.w,
+              //   bottom: 15.h,
+              //   child: Column(
+              //     children: [
+              //       buildRoundFab(
+              //         icon: Icons.download,
+              //         tooltip: 'Download Map',
+              //         onTap: () async {
+              //           setState(() {
+              //             showMyLocation = false;
+              //             showZoomControls = false;
+              //           });
+              //           await Future.delayed(const Duration(milliseconds: 300));
+              //           await captureAndSaveMap(context, _screenshotController);
+              //           setState(() {
+              //             showMyLocation = true;
+              //             showZoomControls = true;
+              //           });
+              //           // captureAndSaveMap(context, _screenshotController);
+              //         },
+              //       ),
+              //       getDynamicSizedBox(height: 1.h),
+              //       buildRoundFab(
+              //         icon: Icons.layers_outlined,
+              //         tooltip: 'Map type',
+              //         onTap: () => _showMapTypeDialog(),
+              //       ),
+              //       getDynamicSizedBox(height: 1.h),
+              //       buildRoundFab(
+              //         icon: Icons.my_location,
+              //         tooltip: 'Recenter',
+              //         onTap: _recenter,
+              //       ),
+              //       getDynamicSizedBox(height: 1.h),
+              //       buildRoundFab(
+              //         icon: Icons.add,
+              //         tooltip: 'Recenter',
+              //         onTap: _showModePicker,
+              //       ),
+              //     ],
+              //   ),
+              // ),
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 20,
+                child: AnimatedSlide(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOut,
+                  offset: _mode != DrawMode.none
+                      ? Offset.zero
+                      : const Offset(0, 0.3),
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 180),
+                    opacity: _mode != DrawMode.none ? 1 : 0,
+                    child: buildBottomActionsBar(
+                      context: context,
+                      mode: _mode,
+                      canUndo: _tempPoints.isNotEmpty,
+                      onPin: () => _setMode(DrawMode.pin),
+                      onPolyline: () => _setMode(DrawMode.polyline),
+                      onPolygon: () => _setMode(DrawMode.polygon),
+                      onUndo: _undoLastPoint,
+                      onFinish: _finishShape,
+                      onClear: _clearAll,
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -317,82 +450,73 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
   }
 
   Future<void> _showModePicker() async {
-    await showModalBottomSheet<void>(
+    DrawMode tmp = _mode;
+    await showDialog(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Choose Mode',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // _ModePickTile(
-                    //   icon: Icons.place,
-                    //   label: 'Pin',
-                    //   selected: _mode == DrawMode.pin,
-                    //   onTap: () {
-                    //     Navigator.pop(ctx);
-                    //     _setMode(DrawMode.pin);
-                    //   },
-                    // ),
-                    buildModePickTile(
-                      context: context,
-                      icon: Icons.show_chart,
-                      label: 'Polyline',
-                      selected: _mode == DrawMode.polyline,
-                      onTap: () {
-                        Navigator.pop(ctx);
-                        _setMode(DrawMode.polyline);
-                      },
-                    ),
-                    buildModePickTile(
-                      context: context,
-                      icon: Icons.gesture,
-                      label: 'Polygon',
-                      selected: _mode == DrawMode.polygon,
-                      onTap: () {
-                        Navigator.pop(ctx);
-                        _setMode(DrawMode.polygon);
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      foregroundColor: white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
+      barrierDismissible: true,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: white,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        child: StatefulBuilder(
+          builder: (ctx, setS) {
+            return Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Select Drawing Mode",
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontFamily: plusJakartaSansExtraBold,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () => Navigator.pop(ctx),
                       ),
-                    ),
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Close'),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+                  getDynamicSizedBox(height: 3.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      buildMapTypeTile(
+                        icon: Icons.timeline_rounded,
+                        label: 'Polyline',
+                        selected: tmp == DrawMode.polyline,
+                        onTap: () => setS(() => tmp = DrawMode.polyline),
+                      ),
+                      getDynamicSizedBox(width: 2.w),
+                      buildMapTypeTile(
+                        icon: Icons.change_history_rounded,
+                        label: 'Polygon',
+                        selected: tmp == DrawMode.polygon,
+                        onTap: () => setS(() => tmp = DrawMode.polygon),
+                      ),
+                    ],
+                  ),
+                  getDynamicSizedBox(height: 4.h),
+                  buildActionButton(ctx, () {
+                    setState(() => _mode = tmp);
+                    Navigator.pop(ctx);
+                  }),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
     ).whenComplete(() {
       futureDelay(() {
         FocusScope.of(context).unfocus();
@@ -442,7 +566,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
   }
 
   Future<void> _fetchAutocomplete(String input) async {
-    if (_kGoogleApiKey == 'AIzaSyDp5o-2dsM59s2wBbXyY3vU05J17dw6Qkc') {
+    if (_kGoogleApiKey.isNotEmpty) {
       // return; // guard if key not set
       try {
         setState(() => _isSearching = true);
@@ -546,50 +670,6 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
     }
   }
 
-  // void _onMapTap(LatLng pos) {
-  //   if (_mode == DrawMode.pin) {
-  //     final id = 'm_${_idSeed++}';
-  //     setState(() {
-  //       _markers.add(Marker(markerId: MarkerId(id), position: pos));
-  //     });
-  //   } else if (_mode == DrawMode.polyline) {
-  //     setState(() {
-  //       _tempPoints.add(pos);
-  //       _polylines.removeWhere((p) => p.polylineId.value == 'pl_temp');
-  //       _polylines.add(
-  //         Polyline(
-  //           polylineId: const PolylineId('pl_temp'),
-  //           points: List.of(_tempPoints),
-  //           width: 4,
-  //           color: Colors.blue,
-  //         ),
-  //       );
-  //       _rebuildVertexMarkers();
-  //     });
-  //   } else if (_mode == DrawMode.polygon) {
-  //     if (_tempPoints.isNotEmpty &&
-  //         _tempPoints.length >= 3 &&
-  //         _isNear(pos, _tempPoints.first, 12)) {
-  //       _finishShape();
-  //       return;
-  //     }
-  //     setState(() {
-  //       _tempPoints.add(pos);
-  //       _polygons.removeWhere((p) => p.polygonId.value == 'pg_temp');
-  //       _polygons.add(
-  //         Polygon(
-  //           polygonId: const PolygonId('pg_temp'),
-  //           points: List.of(_tempPoints),
-  //           strokeWidth: 3,
-  //           strokeColor: primaryColor,
-  //           fillColor: primaryColor.withOpacity(0.15),
-  //         ),
-  //       );
-  //       _rebuildVertexMarkers();
-  //     });
-  //   }
-  // }
-
   void _onMapTap(LatLng pos) {
     // Check if the tap is near an existing vertex marker
     int? tappedVertexIndex;
@@ -640,7 +720,6 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
             draggable: true,
             flat: true,
             onTap: () {
-              // Update marker icon to indicate selection
               setState(() {
                 _vertexMarkers.removeWhere((m) => m.markerId.value == id);
                 _vertexMarkers.add(
@@ -649,7 +728,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                     position: point,
                     draggable: true,
                     flat: true,
-                    onTap: () {}, // Prevent recursive tap handling
+                    onTap: () {},
                     onDrag: (newPos) {
                       _tempPoints[i] = newPos;
                       _updatePreviewShapes(triggerSetState: true);
@@ -658,12 +737,11 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                       setState(() {
                         _tempPoints[i] = newPos;
                         _updatePreviewShapes();
-                        // Reset icon after drag ends
                         _rebuildVertexMarkers();
                       });
                     },
                     icon: BitmapDescriptor.defaultMarkerWithHue(
-                      BitmapDescriptor.hueBlue, // Highlight selected vertex
+                      BitmapDescriptor.hueBlue,
                     ),
                   ),
                 );
@@ -677,7 +755,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
               setState(() {
                 _tempPoints[i] = newPos;
                 _updatePreviewShapes();
-                _rebuildVertexMarkers(); // Reset icons after drag
+                _rebuildVertexMarkers();
               });
             },
             icon: BitmapDescriptor.defaultMarkerWithHue(
@@ -719,15 +797,15 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
         final canClose =
             _tempPoints.length >= 3 &&
             _isNear(_tempPoints.last, _tempPoints.first, 12);
-        _closable = canClose;
+        closable = canClose;
         _polygons.add(
           Polygon(
             polygonId: const PolygonId('pg_temp'),
             points: List.of(_tempPoints),
             strokeWidth: 3,
             strokeColor: canClose ? Colors.green : primaryColor,
-            fillColor: (canClose ? Colors.green : primaryColor).withOpacity(
-              0.15,
+            fillColor: (canClose ? Colors.green : primaryColor).withValues(
+              alpha: 0.15,
             ),
           ),
         );
@@ -752,7 +830,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
               points: points,
               strokeWidth: 3,
               strokeColor: primaryColor,
-              fillColor: primaryColor.withOpacity(0.15),
+              fillColor: primaryColor.withValues(alpha: 0.15),
             ),
           );
         } else {
@@ -932,7 +1010,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
         ),
       );
     } catch (e, stack) {
-      debugPrint("❌ Recenter error: $e");
+      debugPrint("Recenter error: $e");
       debugPrint(stack.toString());
     }
   }
@@ -963,14 +1041,12 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
+                          fontFamily: plusJakartaSansBold,
                           color: Colors.black87,
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(
-                          Icons.close_rounded,
-                          color: Colors.grey,
-                        ),
+                        icon: const Icon(Icons.close_rounded, color: grey),
                         onPressed: () => Navigator.pop(ctx),
                       ),
                     ],
@@ -1001,39 +1077,11 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 25),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.grey[700],
-                          textStyle: TextStyle(fontSize: 15.sp),
-                        ),
-                        child: const Text("Cancel"),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() => _mapType = tmp);
-                          Navigator.pop(ctx);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
-                          foregroundColor: white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text("Apply"),
-                      ),
-                    ],
-                  ),
+                  getDynamicSizedBox(height: 4.h),
+                  buildActionButton(ctx, () {
+                    setState(() => _mapType = tmp);
+                    Navigator.pop(ctx);
+                  }),
                 ],
               ),
             );
@@ -1047,6 +1095,55 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
     });
   }
 
+  Widget buildActionButton(BuildContext ctx, Function calback) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.grey[700],
+            textStyle: TextStyle(fontSize: 15.sp),
+          ),
+          child: Text(
+            "Cancel",
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w700,
+              fontFamily: plusJakartaSansMedium,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        ElevatedButton(
+          onPressed: () {
+            calback();
+          },
+          // onPressed: () {
+          //   setState(() => _mapType = tmp);
+          //   Navigator.pop(ctx);
+          // },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primaryColor,
+            foregroundColor: white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: Text(
+            "Apply",
+            style: TextStyle(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w700,
+              fontFamily: plusJakartaSansBold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget buildMapTypeTile({
     required String label,
     required IconData icon,
@@ -1056,7 +1153,8 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
     return Expanded(
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 90,
+        width: 13.h,
+        height: 13.h,
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: selected ? primaryColor : white,
@@ -1068,8 +1166,8 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
           boxShadow: [
             BoxShadow(
               color: selected
-                  ? primaryColor.withOpacity(0.15)
-                  : Colors.grey.withOpacity(0.08),
+                  ? primaryColor.withValues(alpha: 0.15)
+                  : grey.withValues(alpha: 0.08),
               blurRadius: 6,
               offset: const Offset(0, 3),
             ),
@@ -1081,12 +1179,19 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 28, color: selected ? white : Colors.grey[700]),
-              const SizedBox(height: 8),
+              Icon(
+                icon,
+                size: 3.5.h,
+                color: selected ? white : Colors.grey[700],
+              ),
+              getDynamicSizedBox(height: 2.h),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 16.sp,
+                  fontFamily: selected
+                      ? plusJakartaSansBold
+                      : plusJakartaSansMedium,
                   fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                   color: selected ? white : Colors.grey[800],
                 ),
@@ -1094,81 +1199,6 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget buildModePickTile({
-    required BuildContext context,
-    required IconData icon,
-    required String label,
-    required bool selected,
-    required VoidCallback onTap,
-  }) {
-    final primary = Theme.of(context).colorScheme.primary;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Stack(
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            width: 96,
-            height: 96,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: selected
-                    ? [primary.withOpacity(0.12), primary.withOpacity(0.04)]
-                    : [white, white],
-              ),
-              border: Border.all(
-                color: selected ? primary : Colors.black26,
-                width: selected ? 2 : 1.2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
-                  blurRadius: 10,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  size: 26,
-                  color: selected ? primary : Colors.black87,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: selected ? primary : Colors.black87,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (selected)
-            Positioned(
-              right: 8,
-              top: 8,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: primary,
-                  shape: BoxShape.circle,
-                ),
-                padding: const EdgeInsets.all(4),
-                child: const Icon(Icons.check, size: 14, color: white),
-              ),
-            ),
-        ],
       ),
     );
   }
@@ -1196,17 +1226,24 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
   Widget buildIconTextButton({
     required IconData icon,
     required String text,
-    required VoidCallback onTap,
+    required VoidCallback? onTap,
   }) {
+    final isDisabled = onTap == null;
     return TextButton.icon(
       onPressed: onTap,
       style: TextButton.styleFrom(
-        foregroundColor: primaryColor,
+        foregroundColor: isDisabled ? grey : primaryColor,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
-      icon: Icon(icon),
-      label: Text(text),
+      icon: Icon(icon, color: isDisabled ? grey : primaryColor),
+      label: Text(
+        text,
+        style: TextStyle(
+          color: isDisabled ? grey : primaryColor,
+          fontFamily: plusJakartaSansBold,
+        ),
+      ),
     );
   }
 
@@ -1218,7 +1255,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: black.withOpacity(0.08),
+            color: black.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1246,16 +1283,25 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
   }) {
     return ListTile(
       leading: Container(
-        width: 34,
-        height: 34,
+        width: 4.h,
+        height: 4.h,
         decoration: BoxDecoration(
-          color: primaryColor.withOpacity(0.1),
+          color: primaryColor.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(Icons.place_outlined, color: primaryColor),
+        child: Icon(Icons.place_outlined, size: 3.h, color: primaryColor),
       ),
-      title: Text(description, maxLines: 2, overflow: TextOverflow.ellipsis),
-      trailing: const Icon(Icons.chevron_right),
+      title: Text(
+        description,
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontFamily: plusJakartaSansMedium,
+          fontSize: 16.sp,
+          color: black,
+        ),
+      ),
+      trailing: Icon(Icons.chevron_right, size: 3.h, color: primaryColor),
       onTap: onTap,
     );
   }
@@ -1263,6 +1309,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
   Widget buildBottomActionsBar({
     required BuildContext context,
     required DrawMode mode,
+    required bool canUndo,
     required VoidCallback onPin,
     required VoidCallback onPolyline,
     required VoidCallback onPolygon,
@@ -1279,11 +1326,11 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: white.withOpacity(0.9),
+            color: white.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: black.withOpacity(0.08),
+                color: black.withValues(alpha: 0.08),
                 blurRadius: 14,
                 offset: const Offset(0, 8),
               ),
@@ -1300,7 +1347,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                     buildIconTextButton(
                       icon: Icons.undo,
                       text: 'Undo',
-                      onTap: onUndo,
+                      onTap: canUndo ? onUndo : null,
                     ),
                     buildIconTextButton(
                       icon: Icons.check,
@@ -1315,15 +1362,86 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                   ],
                 ),
               ),
-              Text(
-                mode == DrawMode.pin
-                    ? 'Pin mode'
-                    : mode == DrawMode.polyline
-                    ? 'Polyline mode'
-                    : mode == DrawMode.polygon
-                    ? 'Polygon mode'
-                    : 'No mode',
-                style: theme.textTheme.bodySmall,
+              // Container(
+              //   padding: const EdgeInsets.symmetric(
+              //     horizontal: 14,
+              //     vertical: 8,
+              //   ),
+              //   decoration: BoxDecoration(
+              //     color: Colors.grey.shade100.withOpacity(0.9),
+              //     borderRadius: BorderRadius.circular(12),
+              //     border: Border.all(color: Colors.grey.shade300, width: 1),
+              //     boxShadow: [
+              //       BoxShadow(
+              //         color: Colors.black.withOpacity(0.04),
+              //         blurRadius: 8,
+              //         offset: const Offset(0, 2),
+              //       ),
+              //     ],
+              //   ),
+              //   child:
+              // Row(
+              //     mainAxisSize: MainAxisSize.min,
+              //     children: [
+              //       Icon(
+              //         mode == DrawMode.pin
+              //             ? Icons.location_on_rounded
+              //             : mode == DrawMode.polyline
+              //             ? Icons.timeline_rounded
+              //             : mode == DrawMode.polygon
+              //             ? Icons.change_history_rounded
+              //             : Icons.help_outline_rounded,
+              //         size: 20,
+              //         color: primaryColor,
+              //       ),
+              //       const SizedBox(width: 8),
+              //       Text(
+              //         mode == DrawMode.pin
+              //             ? 'Pin Mode'
+              //             : mode == DrawMode.polyline
+              //             ? 'Polyline Mode'
+              //             : mode == DrawMode.polygon
+              //             ? 'Polygon Mode'
+              //             : 'No Mode Selected',
+              //         style: theme.textTheme.bodyMedium?.copyWith(
+              //           fontWeight: FontWeight.w600,
+              //           color: primaryColor,
+              //           letterSpacing: 0.3,
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    mode == DrawMode.pin
+                        ? Icons.location_on_rounded
+                        : mode == DrawMode.polyline
+                        ? Icons.timeline_rounded
+                        : mode == DrawMode.polygon
+                        ? Icons.change_history_rounded
+                        : Icons.help_outline_rounded,
+                    size: 20,
+                    color: primaryColor,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    mode == DrawMode.pin
+                        ? 'Pin Mode'
+                        : mode == DrawMode.polyline
+                        ? 'Polyline Mode'
+                        : mode == DrawMode.polygon
+                        ? 'Polygon Mode'
+                        : 'No Mode Selected',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: primaryColor,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -1425,7 +1543,7 @@ extension on MapDrawingScreenState {
   //           points: points,
   //           strokeWidth: 3,
   //           strokeColor: Colors.red,
-  //           fillColor: Colors.redAccent.withOpacity(0.15),
+  //           fillColor: Colors.redAccent.withValues(alpha:0.15),
   //         ),
   //       );
   //       _tempPoints.clear();
@@ -1484,7 +1602,7 @@ extension on MapDrawingScreenState {
   //           points: points,
   //           strokeWidth: 3,
   //           strokeColor: Colors.red,
-  //           fillColor: Colors.redAccent.withOpacity(0.15),
+  //           fillColor: Colors.redAccent.withValues(alpha:0.15),
   //         ),
   //       );
   //       _tempPoints.clear();
@@ -1522,7 +1640,7 @@ extension on MapDrawingScreenState {
   //                   width: 50,
   //                   height: 4,
   //                   decoration: BoxDecoration(
-  //                     color: Colors.grey[400],
+  //                     color: grey[400],
   //                     borderRadius: BorderRadius.circular(10),
   //                   ),
   //                 ),

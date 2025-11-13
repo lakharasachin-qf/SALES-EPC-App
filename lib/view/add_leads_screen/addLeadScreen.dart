@@ -1227,8 +1227,6 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                                       .text =
                                                   fileName;
 
-                                              print('File path: $filePath');
-                                              print('File name: $fileName');
                                               controller.validateStep2();
                                             },
                                           );
@@ -1289,8 +1287,6 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                                       .text =
                                                   fileName;
 
-                                              print('File path: $filePath');
-                                              print('File name: $fileName');
                                               controller.validateStep2();
                                             },
                                           );
@@ -1358,8 +1354,6 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                                       .text =
                                                   fileName;
 
-                                              print('File path: $filePath');
-                                              print('File name: $fileName');
                                               controller.validateStep2();
                                             },
                                           );
@@ -1420,8 +1414,6 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                                       .text =
                                                   fileName;
 
-                                              print('File path: $filePath');
-                                              print('File name: $fileName');
                                               controller.validateStep2();
                                             },
                                           );
@@ -1867,7 +1859,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                           'You can’t edit items in Rejected mode',
                                           snackPosition: SnackPosition.BOTTOM,
                                           backgroundColor: Colors.red
-                                              .withOpacity(0.1),
+                                              .withValues(alpha: 0.1),
                                           colorText: Colors.redAccent,
                                         );
                                         return;
@@ -1887,7 +1879,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                           'You can’t delete items in Rejected mode',
                                           snackPosition: SnackPosition.BOTTOM,
                                           backgroundColor: Colors.red
-                                              .withOpacity(0.1),
+                                              .withValues(alpha: 0.1),
                                           colorText: Colors.redAccent,
                                         );
                                         return;
@@ -1966,7 +1958,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       // return;
                                       controller.viewFile(
                                         context,
-                                        controller.fileList[i].link ?? '',
+                                        controller.fileList[i].link,
                                         setState: () {
                                           logcat(
                                             'setState called',

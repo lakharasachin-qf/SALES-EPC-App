@@ -11,11 +11,10 @@ import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sales_app/utils/log.dart';
 import 'package:sizer/sizer.dart';
-import '../../models/MeetingCalendarModel.dart';
 
 class MeetingsHistoryScreen extends StatefulWidget {
   final String meetingId;
-  MeetingsHistoryScreen({super.key, required this.meetingId});
+  const MeetingsHistoryScreen({super.key, required this.meetingId});
 
   @override
   State<MeetingsHistoryScreen> createState() => CustomerScreenState();

@@ -15,7 +15,6 @@ import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/configs/apicall_constant.dart';
 import 'package:sales_app/configs/colors_constant.dart';
-import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/configs/string_constant.dart';
 import 'package:sales_app/controller/internet_controller/internet_controller.dart';
 import 'package:sales_app/models/CustomerListModel.dart';
@@ -1403,10 +1402,9 @@ class CustomerScreenController extends GetxController {
 
       validateUpdateButton();
       update();
-      print("Picked file path: ${selectedFile!.path}");
-      print("Picked file name: ${uploadFileCtr.text}");
+      logcat("Picked file name:", uploadFileCtr.text);
     } else {
-      print("No file selected");
+      logcat("Error picking file:", "No file selected");
     }
   }
 
@@ -1895,7 +1893,7 @@ class CustomerScreenController extends GetxController {
       }).toList();
     }
 
-    logcat("filteredData::", jsonEncode(filteredData.value));
+    logcat("filteredData::", jsonEncode(filteredData));
     update();
   }
 

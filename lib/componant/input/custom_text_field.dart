@@ -265,7 +265,7 @@ class _CustomFormFieldState extends State<CustomFormField> {
                                 : 50,
                             fit: BoxFit.scaleDown,
                           ),
-                          color: black.withOpacity(0.2),
+                          color: black.withValues(alpha: 0.2),
                         ),
                         widget.isAdd == true
                             ? SizedBox(
@@ -405,7 +405,7 @@ class _CustomFormFieldState extends State<CustomFormField> {
                           size: Device.screenType == ScreenType.mobile
                               ? 30
                               : 40,
-                          color: black.withOpacity(0.2),
+                          color: black.withValues(alpha: 0.2),
                         ),
                       ),
                     )

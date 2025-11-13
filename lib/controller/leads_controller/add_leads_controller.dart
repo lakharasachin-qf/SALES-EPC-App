@@ -7,10 +7,8 @@ import 'package:get/get.dart' hide ScreenType;
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sales_app/api_handle/Repository.dart';
 import 'package:sales_app/api_handle/apiCallingFormate.dart';
-import 'package:sales_app/componant/CustomSnakbar.dart';
 import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/common_date_time_picker.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
@@ -29,7 +27,6 @@ import 'package:sales_app/controller/internet_controller/internet_controller.dar
 import 'package:sales_app/models/LeadByIdModel.dart';
 import 'package:sales_app/models/LeadDropDownListModel.dart';
 import 'package:sales_app/models/LoadElement.dart';
-import 'package:sales_app/models/LocationModel.dart';
 import 'package:sales_app/models/login_model.dart';
 import 'package:sales_app/models/sign_in_form_validation.dart';
 import 'package:sales_app/preference/UserPreference.dart';
@@ -3296,7 +3293,7 @@ class AddLeadsController extends GetxController {
     request.headers.addAll({
       'Accept': 'application/json',
       'X-USER-EMAIL': user?.email ?? '',
-      'X-USER-PASSWORD': password ?? '',
+      'X-USER-PASSWORD': password,
     });
 
     // ---------- Scalar form fields ----------
@@ -3402,7 +3399,7 @@ class AddLeadsController extends GetxController {
       final file = fileList[i];
 
       // ✅ Skip files that already have a link (remote files)
-      if (file.link != null && file.link!.startsWith('http')) {
+      if (file.link != null && file.link.startsWith('http')) {
         logcat("Skipped remote file", file.link);
         continue;
       }
@@ -4532,7 +4529,7 @@ class AddLeadsController extends GetxController {
                     //   'Action Not Allowed',
                     //   'You do not have right to upload finance documents.',
                     //   snackPosition: SnackPosition.BOTTOM,
-                    //   backgroundColor: Colors.red.withOpacity(0.1),
+                    //   backgroundColor: Colors.red.withValues(alpha:0.1),
                     //   colorText: Colors.redAccent,
                     // );
                     // Get.back();

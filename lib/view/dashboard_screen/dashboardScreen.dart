@@ -216,7 +216,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         borderRadius: BorderRadius.circular(10),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: black.withOpacity(0.05),
+                                            color: black.withValues(
+                                              alpha: 0.05,
+                                            ),
                                             offset: const Offset(0, 2),
                                             blurRadius: 4,
                                             spreadRadius: 0,
@@ -241,7 +243,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         borderRadius: BorderRadius.circular(10),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: black.withOpacity(0.05),
+                                            color: black.withValues(
+                                              alpha: 0.05,
+                                            ),
                                             offset: const Offset(0, 2),
                                             blurRadius: 4,
                                             spreadRadius: 0,
@@ -266,7 +270,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         borderRadius: BorderRadius.circular(10),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: black.withOpacity(0.05),
+                                            color: black.withValues(
+                                              alpha: 0.05,
+                                            ),
                                             offset: const Offset(0, 2),
                                             blurRadius: 4,
                                             spreadRadius: 0,
@@ -321,7 +327,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         borderRadius: BorderRadius.circular(10),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: black.withOpacity(0.05),
+                                            color: black.withValues(
+                                              alpha: 0.05,
+                                            ),
                                             offset: const Offset(0, 2),
                                             blurRadius: 4,
                                             spreadRadius: 0,

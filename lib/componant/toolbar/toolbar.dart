@@ -1,4 +1,3 @@
-import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:sales_app/configs/assets_constant.dart';
@@ -71,11 +70,6 @@ Widget dashboardToolbar({Function? onClick, showFilterOption = true}) {
       ],
     ),
   );
-}
-
-/*Debug*/
-void printing() {
-  print('print');
 }
 
 /*Debug*/
@@ -237,7 +231,7 @@ getdivider() {
     indent: 0.1.h,
     endIndent: 0.1.h,
     thickness: 1,
-    color: primaryColor.withOpacity(0.5),
+    color: primaryColor.withValues(alpha: 0.5),
   );
 }
 
@@ -271,6 +265,26 @@ Widget backButtonWidget(callback, {bool isWhiteText = false}) {
       padding: EdgeInsets.zero, // removes default padding
       constraints: const BoxConstraints(), // prevents extra space
       splashRadius: 24, // gives a better ripple size
+    ),
+  );
+}
+
+Widget backMapButtonWidget(VoidCallback callback, {bool isWhiteText = false}) {
+  return Material(
+    color: white,
+    shape: const CircleBorder(),
+    elevation: 3,
+    child: InkWell(
+      customBorder: const CircleBorder(),
+      onTap: callback,
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: SvgPicture.asset(
+          Asset.arrowBack,
+          color: black, // icon color
+          height: Device.screenType == ScreenType.mobile ? 3.h : 2.8.h,
+        ),
+      ),
     ),
   );
 }
@@ -317,7 +331,7 @@ getCommonToolbar(
 
         isViwerScreenOpen == true
             ? Center(
-                child: Container(
+                child: SizedBox(
                   width: 50.w,
                   child: Text(
                     title,

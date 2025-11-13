@@ -20,7 +20,10 @@ Widget getSvgDropdownButton({
         svgAssetPath,
         height: iconSize,
         width: iconSize,
-        colorFilter: ColorFilter.mode(black.withOpacity(0.6), BlendMode.srcIn),
+        colorFilter: ColorFilter.mode(
+          black.withValues(alpha: 0.6),
+          BlendMode.srcIn,
+        ),
       ),
 
       /// Dropdown menu items
@@ -53,7 +56,7 @@ Widget getSvgDropdownButton({
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: grey.withOpacity(0.2),
+              color: grey.withValues(alpha: 0.2),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -120,7 +123,7 @@ Widget getReactiveDropdown({
           borderRadius: BorderRadius.circular(2.h),
           boxShadow: [
             BoxShadow(
-              color: grey.withOpacity(0.2),
+              color: grey.withValues(alpha: 0.2),
               blurRadius: 10.0,
               offset: const Offset(0, 1),
               spreadRadius: 3.0,
@@ -135,7 +138,7 @@ Widget getReactiveDropdown({
         icon: Icon(
           Icons.keyboard_arrow_down_rounded,
           size: Device.screenType == ScreenType.mobile ? 30 : 40,
-          color: black.withOpacity(0.2),
+          color: black.withValues(alpha: 0.2),
         ),
       ),
     ),
