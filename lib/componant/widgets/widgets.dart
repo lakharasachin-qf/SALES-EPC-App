@@ -19,7 +19,7 @@ import 'package:path/path.dart' as p;
 import '../../models/LeadByIdModel.dart';
 
 String displayFileName(UploadedFile file) {
-  logcat('uploaded fole', file.toJson());
+  logcat('uploaded file', file.toJson());
   final path = file.path ?? '';
   if (path.isEmpty) return '';
   logcat(file.path.toString(), 'data');

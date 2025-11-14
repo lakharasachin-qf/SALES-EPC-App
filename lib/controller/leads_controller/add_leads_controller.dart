@@ -35,6 +35,7 @@ import 'package:sales_app/utils/CalendarHelper.dart';
 import 'package:sales_app/utils/enum.dart';
 import 'package:sales_app/utils/helper.dart';
 import 'package:sales_app/utils/log.dart';
+import 'package:sales_app/view/MapDrawingScreen.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../configs/apicall_constant.dart';
@@ -266,6 +267,7 @@ class AddLeadsController extends GetxController {
       buildingHeightCtr,
       roofSizeLengthCtr,
       roofSizeBreadthCtr,
+      installationareaCtr,
       roofNatureCtr,
       ageOfMetalSheetCtr,
       groundSizeLengthCtr,
@@ -311,6 +313,7 @@ class AddLeadsController extends GetxController {
       buildHeightNode,
       roofSizeLengthNode,
       roofSizeBreadthNode,
+      installationareaNode,
       roofNatureNode,
       ageOfMetalSheetNode,
       groundSizeLengthNode,
@@ -392,6 +395,11 @@ class AddLeadsController extends GetxController {
   var roofSizeLengthModel = ValidationModel(null, null, isValidate: false).obs;
   var roofSizeBreadthModel = ValidationModel(null, null, isValidate: false).obs;
   var roofNatureModel = ValidationModel(null, null, isValidate: false).obs;
+  var installationAreaModel = ValidationModel(
+    null,
+    null,
+    isValidate: false,
+  ).obs;
   var ageOfMetalSheetModel = ValidationModel(null, null, isValidate: false).obs;
   var groundSizeLengthModel = ValidationModel(
     null,
@@ -487,6 +495,7 @@ class AddLeadsController extends GetxController {
   RxString selectedFinancingTypeLabel = ''.obs;
   RxString selectedPurposeOfSolarisationValue = ''.obs;
   RxString selectedPurposeOfSolarisationLabel = ''.obs;
+  RxDouble installationAreaPath = 0.0.obs;
 
   @override
   void onInit() {
@@ -529,6 +538,8 @@ class AddLeadsController extends GetxController {
     groundSizeBreadthCtr = TextEditingController();
     otherRemarksCtr = TextEditingController();
     scheduleMeetingCtr = TextEditingController();
+    //
+    installationareaCtr = TextEditingController();
 
     searchLeadCategoryCtr = TextEditingController();
     searchRequiredSolutionTypeCtr = TextEditingController();
@@ -603,6 +614,8 @@ class AddLeadsController extends GetxController {
     roofSizeLengthNode = FocusNode();
     roofSizeBreadthNode = FocusNode();
     roofNatureNode = FocusNode();
+    //
+    installationareaNode = FocusNode();
     ageOfMetalSheetNode = FocusNode();
     groundSizeLengthNode = FocusNode();
     groundSizeBreadthNode = FocusNode();
@@ -641,146 +654,146 @@ class AddLeadsController extends GetxController {
     super.onInit();
   }
 
-  @override
-  void dispose() {
-    scrollController.dispose();
-    // Dispose controllers
-    companyNameCtr.dispose();
-    addressCtr.dispose();
-    countryCtr.dispose();
-    countrySearchCtr.dispose();
-    stateCtr.dispose();
-    stateSearchCtr.dispose();
-    districtCtr.dispose();
-    districtSearchCtr.dispose();
-    personNameCtr.dispose();
-    personMobileCtr.dispose();
-    latitudeCtr.dispose();
-    longitudeCtr.dispose();
-    requiredSolutionTypeCtr.dispose();
-    requiredSolutionCtr.dispose();
-    leadCategoryCtr.dispose();
-    dgCapacityCtr.dispose();
-    dgSyncCtr.dispose();
-    installedSolarCapCtr.dispose();
-    sanctionedLoadCtr.dispose();
-    vfdCtr.dispose();
-    gridAvailabilityCtr.dispose();
-    peakMonthlyEnergyCtr.dispose();
-    requiredSolarCapCtr.dispose();
-    distanceToTransformerCtr.dispose();
-    ratingOfTransformerCtr.dispose();
-    purposeOfSolarizationCtr.dispose();
-    distInverterACDBCtr.dispose();
-    distSolarACDBCtr.dispose();
-    buildingHeightCtr.dispose();
-    roofSizeLengthCtr.dispose();
-    roofSizeBreadthCtr.dispose();
-    roofNatureCtr.dispose();
-    ageOfMetalSheetCtr.dispose();
-    groundSizeLengthCtr.dispose();
-    groundSizeBreadthCtr.dispose();
-    otherRemarksCtr.dispose();
-    scheduleMeetingCtr.dispose();
-    deviceNameCtr.dispose();
-    categoryCtr.dispose();
-    powerCtr.dispose();
-    usageHrsCtr.dispose();
-    energyWhCtr.dispose();
-    energyKWhCtr.dispose();
-    uploadFileCtr.dispose();
-    uploadCategoryCtr.dispose();
-    searchUploadCategoryCtr.dispose();
-    //edit lead status
-    leadStatusCtr.dispose();
+  // @override
+  // void dispose() {
+  //   scrollController.dispose();
+  //   // Dispose controllers
+  //   companyNameCtr.dispose();
+  //   addressCtr.dispose();
+  //   countryCtr.dispose();
+  //   countrySearchCtr.dispose();
+  //   stateCtr.dispose();
+  //   stateSearchCtr.dispose();
+  //   districtCtr.dispose();
+  //   districtSearchCtr.dispose();
+  //   personNameCtr.dispose();
+  //   personMobileCtr.dispose();
+  //   latitudeCtr.dispose();
+  //   longitudeCtr.dispose();
+  //   requiredSolutionTypeCtr.dispose();
+  //   requiredSolutionCtr.dispose();
+  //   leadCategoryCtr.dispose();
+  //   dgCapacityCtr.dispose();
+  //   dgSyncCtr.dispose();
+  //   installedSolarCapCtr.dispose();
+  //   sanctionedLoadCtr.dispose();
+  //   vfdCtr.dispose();
+  //   gridAvailabilityCtr.dispose();
+  //   peakMonthlyEnergyCtr.dispose();
+  //   requiredSolarCapCtr.dispose();
+  //   distanceToTransformerCtr.dispose();
+  //   ratingOfTransformerCtr.dispose();
+  //   purposeOfSolarizationCtr.dispose();
+  //   distInverterACDBCtr.dispose();
+  //   distSolarACDBCtr.dispose();
+  //   buildingHeightCtr.dispose();
+  //   roofSizeLengthCtr.dispose();
+  //   roofSizeBreadthCtr.dispose();
+  //   roofNatureCtr.dispose();
+  //   ageOfMetalSheetCtr.dispose();
+  //   groundSizeLengthCtr.dispose();
+  //   groundSizeBreadthCtr.dispose();
+  //   otherRemarksCtr.dispose();
+  //   scheduleMeetingCtr.dispose();
+  //   deviceNameCtr.dispose();
+  //   categoryCtr.dispose();
+  //   powerCtr.dispose();
+  //   usageHrsCtr.dispose();
+  //   energyWhCtr.dispose();
+  //   energyKWhCtr.dispose();
+  //   uploadFileCtr.dispose();
+  //   uploadCategoryCtr.dispose();
+  //   searchUploadCategoryCtr.dispose();
+  //   //edit lead status
+  //   leadStatusCtr.dispose();
 
-    firstTechnicalProposal1Ctr.dispose();
-    finalTechnicalProposal2Ctr.dispose();
-    firstCommercialProposal1Ctr.dispose();
-    finalCommercialProposal2Ctr.dispose();
+  //   firstTechnicalProposal1Ctr.dispose();
+  //   finalTechnicalProposal2Ctr.dispose();
+  //   firstCommercialProposal1Ctr.dispose();
+  //   finalCommercialProposal2Ctr.dispose();
 
-    tokenAmountCtr.dispose();
-    fullpaymentamountCtr.dispose();
-    totalProjectCostCtr.dispose();
-    balanceAmonutCtr.dispose();
-    financialTypeCtr.dispose();
+  //   tokenAmountCtr.dispose();
+  //   fullpaymentamountCtr.dispose();
+  //   totalProjectCostCtr.dispose();
+  //   balanceAmonutCtr.dispose();
+  //   financialTypeCtr.dispose();
 
-    financialOMCPartnerCtr.dispose();
-    financeDocumentCtr.dispose();
+  //   financialOMCPartnerCtr.dispose();
+  //   financeDocumentCtr.dispose();
 
-    // Dispose focus nodes
-    companyNameNode.dispose();
-    addressNode.dispose();
-    countryNode.dispose();
-    countrySearchNode.dispose();
-    stateNode.dispose();
-    stateSearchNode.dispose();
-    districtNode.dispose();
-    districtSearchNode.dispose();
-    personNameNode.dispose();
-    personMobileNode.dispose();
-    latitudeNode.dispose();
-    longitudeNode.dispose();
-    requiredSolutionTypeNode.dispose();
-    requiredSolutionNode.dispose();
-    leadCategoryNode.dispose();
-    dgCapacityNode.dispose();
-    dgSyncNode.dispose();
-    installedSolarCapNode.dispose();
-    sanctionedLoadNode.dispose();
-    vfdNode.dispose();
-    gridAvailabilityNode.dispose();
-    peakMonthlyEnergyNode.dispose();
-    requiredSolarCapNode.dispose();
-    distanceToTransformerNode.dispose();
-    ratingOfTransformerNode.dispose();
-    purposeOfSolarizationNode.dispose();
-    searchPurposeOfSolarizationNode.dispose();
-    distInverterACDBNode.dispose();
-    distSolarACDBNode.dispose();
-    buildHeightNode.dispose();
-    roofSizeLengthNode.dispose();
-    roofSizeBreadthNode.dispose();
-    roofNatureNode.dispose();
-    ageOfMetalSheetNode.dispose();
-    groundSizeLengthNode.dispose();
-    groundSizeBreadthNode.dispose();
-    otherRemarksNode.dispose();
-    scheduleMeetingNode.dispose();
-    deviceNameNode.dispose();
-    categorysNode.dispose();
-    powerNode.dispose();
-    usageHrsNode.dispose();
-    energyWhNode.dispose();
-    energyKWhNode.dispose();
-    uploadFileNode.dispose();
-    uploadCategoryNode.dispose();
-    searchUploadCategoryNode.dispose();
+  //   // Dispose focus nodes
+  //   companyNameNode.dispose();
+  //   addressNode.dispose();
+  //   countryNode.dispose();
+  //   countrySearchNode.dispose();
+  //   stateNode.dispose();
+  //   stateSearchNode.dispose();
+  //   districtNode.dispose();
+  //   districtSearchNode.dispose();
+  //   personNameNode.dispose();
+  //   personMobileNode.dispose();
+  //   latitudeNode.dispose();
+  //   longitudeNode.dispose();
+  //   requiredSolutionTypeNode.dispose();
+  //   requiredSolutionNode.dispose();
+  //   leadCategoryNode.dispose();
+  //   dgCapacityNode.dispose();
+  //   dgSyncNode.dispose();
+  //   installedSolarCapNode.dispose();
+  //   sanctionedLoadNode.dispose();
+  //   vfdNode.dispose();
+  //   gridAvailabilityNode.dispose();
+  //   peakMonthlyEnergyNode.dispose();
+  //   requiredSolarCapNode.dispose();
+  //   distanceToTransformerNode.dispose();
+  //   ratingOfTransformerNode.dispose();
+  //   purposeOfSolarizationNode.dispose();
+  //   searchPurposeOfSolarizationNode.dispose();
+  //   distInverterACDBNode.dispose();
+  //   distSolarACDBNode.dispose();
+  //   buildHeightNode.dispose();
+  //   roofSizeLengthNode.dispose();
+  //   roofSizeBreadthNode.dispose();
+  //   roofNatureNode.dispose();
+  //   ageOfMetalSheetNode.dispose();
+  //   groundSizeLengthNode.dispose();
+  //   groundSizeBreadthNode.dispose();
+  //   otherRemarksNode.dispose();
+  //   scheduleMeetingNode.dispose();
+  //   deviceNameNode.dispose();
+  //   categorysNode.dispose();
+  //   powerNode.dispose();
+  //   usageHrsNode.dispose();
+  //   energyWhNode.dispose();
+  //   energyKWhNode.dispose();
+  //   uploadFileNode.dispose();
+  //   uploadCategoryNode.dispose();
+  //   searchUploadCategoryNode.dispose();
 
-    searchLeadCategoryCtr.dispose();
-    searchRequiredSolutionTypeCtr.dispose();
-    searchRequiredSolutionCtr.dispose();
-    searchRoofNatureCtr.dispose();
+  //   searchLeadCategoryCtr.dispose();
+  //   searchRequiredSolutionTypeCtr.dispose();
+  //   searchRequiredSolutionCtr.dispose();
+  //   searchRoofNatureCtr.dispose();
 
-    searchLeadCategoryNode.dispose();
-    searchRequiredSolutionTypeNode.dispose();
-    searchRequiredSolutionNode.dispose();
-    searchRoofNatureNode.dispose();
-    //edit lead status
-    leadStatusNode.dispose();
-    firstTechnicalProposal1Node.dispose();
-    finalTechnicalProposal2Node.dispose();
-    firstCommercialProposal1Node.dispose();
-    finalCommercialProposal2Node.dispose();
-    tokenAmountNode.dispose();
-    totalProjectCostNode.dispose();
-    balanceAmonutNode.dispose();
-    financialNode.dispose();
+  //   searchLeadCategoryNode.dispose();
+  //   searchRequiredSolutionTypeNode.dispose();
+  //   searchRequiredSolutionNode.dispose();
+  //   searchRoofNatureNode.dispose();
+  //   //edit lead status
+  //   leadStatusNode.dispose();
+  //   firstTechnicalProposal1Node.dispose();
+  //   finalTechnicalProposal2Node.dispose();
+  //   firstCommercialProposal1Node.dispose();
+  //   finalCommercialProposal2Node.dispose();
+  //   tokenAmountNode.dispose();
+  //   totalProjectCostNode.dispose();
+  //   balanceAmonutNode.dispose();
+  //   financialNode.dispose();
 
-    financialOMCPartnerNode.dispose();
-    financeDocumentNode.dispose();
-    super.dispose();
-  }
+  //   financialOMCPartnerNode.dispose();
+  //   financeDocumentNode.dispose();
+  //   super.dispose();
+  // }
 
   Future<void> getLatLongData(
     BuildContext context,
@@ -1241,11 +1254,79 @@ class AddLeadsController extends GetxController {
               ),
               horizontalTitleGap: null,
               minLeadingWidth: 5,
-              onTap: () {
+              onTap: () async {
                 uploadCategoryCtr.text = selectedItem.label;
                 categoryValue.value = selectedItem.value.toString();
                 validateUploadCategory(uploadCategoryCtr.text);
                 update();
+
+                if (categoryValue.value == "map_marked_screenshot") {
+                  logcat('Go to map screeen', 'MapDrawingScreen');
+
+                  await Future.delayed(Duration(milliseconds: 200));
+                  final result = await Get.to(MapDrawingScreen())!.then((
+                    value,
+                  ) {
+                    Get.back();
+                    return value; // IMPORTANT
+                  });
+
+                  if (result != null) {
+                    // ⭐ Store into local variables
+                    final String imagePath = result["imagePath"];
+                    final double roofBreadthFeet = result["roofBreadthFeet"];
+                    final double installationAreaSqFt =
+                        result["installationAreaSqFt"];
+                    final double roofLengthFeet = result["roofLengthFeet"];
+
+                    selectedFilePath.value = imagePath;
+                    uploadFileCtr.text = imagePath;
+
+                    installationAreaPath.value = installationAreaSqFt
+                        .toDouble();
+                    installationareaCtr.text = installationAreaSqFt
+                        .toDouble()
+                        .toString();
+                    roofSizeLengthCtr.text = roofLengthFeet.toString();
+                    roofSizeBreadthCtr.text = roofBreadthFeet.toString();
+                    validateUploadFile(uploadFileCtr.text);
+
+                    // ⭐ Correct & clean PRINT LOGS
+                    print("================= MAP RESULT =================");
+                    print(
+                      "📌 Image Path               : ${uploadFileCtr.text}",
+                    );
+                    print(
+                      "📐 Roof Length (ft)         : ${roofLengthFeet.toStringAsFixed(2)}",
+                    );
+                    print(
+                      "📏 Roof Breadth (ft)        : ${roofBreadthFeet.toStringAsFixed(2)}",
+                    );
+                    print(
+                      "📦 Installation Area (sq ft): ${installationAreaSqFt.toStringAsFixed(2)}",
+                    );
+                    print("----------------------------------------------");
+                    print(
+                      "selectedFilePath.value      : ${selectedFilePath.value}",
+                    );
+                    print(
+                      "uploadFileCtr.text          : ${uploadFileCtr.text}",
+                    );
+                    print(
+                      "roofSizeLengthCtr.text      : ${roofSizeLengthCtr.text}",
+                    );
+                    print(
+                      "roofSizeBreadthCtr.text     : ${roofSizeBreadthCtr.text}",
+                    );
+                    print(
+                      "installationAreaPath.value  : ${installationAreaPath.value}",
+                    );
+                    print("===============================================");
+
+                    // Now you can use these variables anywhere inside this block
+                  }
+                  return;
+                }
 
                 logcat(
                   'uploadFileModel.value.isValidate',
@@ -2209,8 +2290,8 @@ class AddLeadsController extends GetxController {
     if (!districtModel.value.isValidate) isValid = false;
     if (!personNameModel.value.isValidate) isValid = false;
     if (!personMobileModel.value.isValidate) isValid = false;
-    if (!requiredSolutionTypeModel.value.isValidate) isValid = false;
-    if (!requiredSolutionModel.value.isValidate) isValid = false;
+    // if (!requiredSolutionTypeModel.value.isValidate) isValid = false;
+    // if (!requiredSolutionModel.value.isValidate) isValid = false;
     if (!leadCategoryModel.value.isValidate) isValid = false;
     isStep1Valid.value = isValid;
     update();
@@ -2902,26 +2983,6 @@ class AddLeadsController extends GetxController {
                             return getTextField(
                               context: context,
                               wantLabel: true,
-                              label: 'Choose File',
-                              ctr: uploadFileCtr,
-                              node: uploadFileNode,
-                              model: uploadFileModel.value,
-                              isenable: false,
-                              isdropdown: true,
-                              wantsuffix: false,
-                              usegesture: true,
-                              gestureFunction: () async {
-                                await pickAnyFile(isEdit: isEdit);
-                              },
-                              hint: 'Select File',
-                              isRequired: true,
-                            );
-                          }),
-                          getDynamicSizedBox(height: 1.h),
-                          Obx(() {
-                            return getTextField(
-                              context: context,
-                              wantLabel: true,
                               label: 'Category',
                               ctr: uploadCategoryCtr,
                               node: uploadCategoryNode,
@@ -2945,6 +3006,28 @@ class AddLeadsController extends GetxController {
                               isRequired: true,
                             );
                           }),
+                          getDynamicSizedBox(height: 1.h),
+
+                          Obx(() {
+                            return getTextField(
+                              context: context,
+                              wantLabel: true,
+                              label: 'Choose File',
+                              ctr: uploadFileCtr,
+                              node: uploadFileNode,
+                              model: uploadFileModel.value,
+                              isenable: false,
+                              isdropdown: true,
+                              wantsuffix: false,
+                              usegesture: true,
+                              gestureFunction: () async {
+                                await pickAnyFile(isEdit: isEdit);
+                              },
+                              hint: 'Select File',
+                              isRequired: true,
+                            );
+                          }),
+
                           getDynamicSizedBox(height: 3.h),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -3082,10 +3165,210 @@ class AddLeadsController extends GetxController {
     update();
   }
 
+  // Future<void> addLeadApi(BuildContext context) async {
+  //   var loadingIndicator = LoadingProgressDialog();
+  //   User? user = await UserPreferences().getSignInInfo();
+  //   String? password = await UserPreferences().getPassword();
+
+  //   logcat('first step process', 'step-1');
+
+  //   if (networkManager.connectionType.value == 0) {
+  //     loadingIndicator.hide(context);
+  //     showDialogForScreen(
+  //       context,
+  //       "Add Lead",
+  //       Connection.noConnection,
+  //       callback: () {
+  //         Get.back();
+  //       },
+  //     );
+  //     return;
+  //   }
+
+  //   logcat('step process', 'step-2');
+  //   var request = http.MultipartRequest(
+  //     'POST',
+  //     Repository.buildUrl(ApiUrl.addLead),
+  //   );
+
+  //   request.headers.addAll({
+  //     'X-USER-EMAIL': user?.email ?? '',
+  //     'X-USER-PASSWORD': password,
+  //   });
+
+  //   logcat('step process', 'step-3');
+  //   // ✅ Add form fields
+  //   request.fields.addAll({
+  //     'company_name': companyNameCtr.text.trim(),
+  //     'address': addressCtr.text.trim(),
+  //     'country': selectedCountryId.value.toString(),
+  //     'state': selectedStateId.value.toString(),
+  //     'district': selectedDistrictId.value.toString(),
+  //     'contact_person_name': personNameCtr.text.trim(),
+  //     'contact_person_mobile': personMobileCtr.text.trim(),
+  //     'latitude': latitudeCtr.text.trim(),
+  //     'longitude': longitudeCtr.text.trim(),
+  //     'required_solution_type': selectedRequiredSolutionTypeValue.value,
+  //     'required_solution': selectedRequiredSolutionValue.value,
+  //     'lead_category': selectedLeadCategoryValue.value,
+  //     'dg_capacity_kva': dgCapacityCtr.text.trim(),
+  //     'dg_sync_required': selectedDgSyncValue.value == 'Yes' ? '1' : '0',
+  //     'curr_inst_solar_cap_kwp': installedSolarCapCtr.text.trim(),
+  //     'sanctioned_load_kva': sanctionedLoadCtr.text.trim(),
+  //     'vfd_required': selectedVfdValue.value == 'Yes' ? '1' : '0',
+  //     'grid_availability_hrs': gridAvailabilityCtr.text.trim(),
+  //     'peak_monthly_energy_cons_kwh': peakMonthlyEnergyCtr.text.trim(),
+  //     'required_solar_cap_kwp': requiredSolarCapCtr.text.trim(),
+  //     'dist_to_nearest_transformer': distanceToTransformerCtr.text.trim(),
+  //     'rating_of_nearest_transformer_kva': ratingOfTransformerCtr.text.trim(),
+  //     'purpose_of_solarisation': selectedPurposeOfSolarisationValue.value,
+  //     'dist_btw_inverter_acdb_panel_mtrs': distInverterACDBCtr.text.trim(),
+  //     'dist_btw_solar_acdb_panel_mtrs': distSolarACDBCtr.text.trim(),
+  //     'building_height': buildingHeightCtr.text.trim(),
+  //     'roof_size_length_ft': roofSizeLengthCtr.text.trim(),
+  //     'roof_size_breadth_ft': roofSizeBreadthCtr.text.trim(),
+  //     'roof_nature': selectedRoofNatureValue.value,
+  //     'age_of_metal_sheet': ageOfMetalSheetCtr.text.trim(),
+  //     'ground_size_length_ft': groundSizeLengthCtr.text.trim(),
+  //     'ground_size_breadth_ft': groundSizeBreadthCtr.text.trim(),
+  //     'other_remarks': otherRemarksCtr.text.trim(),
+  //     'schedule_meeting': formatScheduleDate(scheduleMeetingCtr.text.trim()),
+  //     'user_id': user != null ? user.userId.toString() : '',
+  //     'installation_area': installationAreaPath.value.toDouble().toString(),
+
+  //     // 'installation_area': installationAreaPath.value,
+  //   });
+
+  //   logcat('step process', 'step-4');
+
+  //   // ✅ Add load elements
+  //   for (int i = 0; i < productDetailList.length; i++) {
+  //     final product = productDetailList[i];
+  //     request.fields.addAll({
+  //       'load_elements[$i][device_name]': product.deviceName,
+  //       'load_elements[$i][category]': product.category,
+  //       'load_elements[$i][power_rating_w]': product.power,
+  //       'load_elements[$i][daily_usage_hrs]': product.usageHrs,
+  //     });
+  //   }
+
+  //   // ✅ Add uploaded files
+  //   logcat("fileList::", jsonEncode(fileList));
+
+  //   // ✅ Add uploaded files (main fix here)
+  //   logcat("filepAth:::", jsonEncode(fileList));
+  //   for (int i = 0; i < fileList.length; i++) {
+  //     final file = fileList[i];
+  //     if (file.path != null && file.path!.isNotEmpty) {
+  //       final fileToUpload = File(file.path!);
+  //       if (await fileToUpload.exists()) {
+  //         request.files.add(
+  //           await http.MultipartFile.fromPath(
+  //             'uploaded_files[$i][file]',
+  //             fileToUpload.path,
+  //           ),
+  //         );
+  //         logcat("fileToUpload", "Step-");
+  //         // Attach category for this file
+  //         request.fields['uploaded_files[$i][category]'] = file.category ?? '';
+  //         // request.fields['uploaded_files[$i][category]'] = "equipment_photo";
+  //       } else {
+  //         logcat("File not found:", fileToUpload.path);
+  //       }
+  //     }
+  //   }
+  //   // ✅ Log all fields
+  //   logcat("Form Fields:", jsonEncode(request.fields));
+
+  //   logcat('step process', 'step-5');
+
+  //   // try {
+  //   loadingIndicator.show(context, '');
+  //   state.value = ScreenState.apiLoading;
+
+  //   logcat('step process', 'step-6');
+
+  //   // ✅ Send the request
+  //   var streamedResponse = await request.send();
+  //   var response = await http.Response.fromStream(streamedResponse);
+  //   loadingIndicator.hide(context);
+  //   state.value = ScreenState.apiSuccess;
+  //   var data = jsonDecode(response.body);
+  //   logcat('step process', 'step-7');
+  //   if (response.statusCode == 200) {
+  //     var data = jsonDecode(response.body);
+  //     logcat('step process', 'step-8');
+  //     logcat('AddLeadResponse:', data.toString());
+  //     logcat('installationAreaPath:', installationAreaPath);
+  //     if (data['status']?.toString().toLowerCase() == 'success') {
+  //       //Add event to mobile calendar
+  //       await CalendarHelper.addEvent(
+  //         title: 'Lead Meeting',
+  //         description: 'Reminder: You have a meeting with the customer.',
+  //         start: selectedScheduleMeeting,
+  //         end: selectedScheduleMeeting.add(const Duration(hours: 1)),
+  //         location: '${latitudeCtr.text},${longitudeCtr.text}',
+  //       );
+  //       // CustomSnackBar().showErrorSnackbar(
+  //       //   'Lead Meeting',
+  //       //   'Meeting added to your calendar',
+  //       // );
+  //       showDialogForScreen(
+  //         context,
+  //         "Add Lead",
+  //         data['message'],
+  //         callback: () {
+  //           Get.back(result: true);
+  //         },
+  //       );
+  //     } else {
+  //       showErrorDialog(context, data);
+  //     }
+  //   } else if (response.statusCode == 422) {
+  //     logcat('AddLeadApi Error', response.body);
+  //     String errorMessage = 'Validation failed';
+  //     // ✅ Handle multiple possible error response formats
+  //     if (data['message'] != null && data['message'].toString().isNotEmpty) {
+  //       errorMessage = data['message'].toString();
+  //     }
+
+  //     // Check for Laravel-style "errors"
+  //     if (data['errors'] != null &&
+  //         data['errors'] is Map &&
+  //         data['errors'].isNotEmpty) {
+  //       try {
+  //         final firstErrorList = (data['errors'] as Map).values.first;
+  //         if (firstErrorList is List && firstErrorList.isNotEmpty) {
+  //           errorMessage = firstErrorList.first.toString();
+  //         }
+  //       } catch (_) {}
+  //     }
+  //     // ✅ Handle your new API format: "result"
+  //     else if (data['result'] != null &&
+  //         data['result'] is Map &&
+  //         data['result'].isNotEmpty) {
+  //       try {
+  //         final firstErrorList = (data['result'] as Map).values.first;
+  //         if (firstErrorList is List && firstErrorList.isNotEmpty) {
+  //           errorMessage = firstErrorList.first.toString();
+  //         }
+  //       } catch (_) {}
+  //     }
+  //     showDialogForScreen(context, 'Add Lead', errorMessage, callback: () {});
+  //     message.value = "Failed to add lead (${response.statusCode})";
+  //   } else {
+  //     logcat('step process', response.statusCode);
+  //     logcat('step process response', response.body);
+
+  //     logcat('step process', 'step-8');
+  //   }
+  // }
   Future<void> addLeadApi(BuildContext context) async {
     var loadingIndicator = LoadingProgressDialog();
     User? user = await UserPreferences().getSignInInfo();
     String? password = await UserPreferences().getPassword();
+
+    logcat('first step process', 'step-1');
 
     if (networkManager.connectionType.value == 0) {
       loadingIndicator.hide(context);
@@ -3100,6 +3383,8 @@ class AddLeadsController extends GetxController {
       return;
     }
 
+    logcat('step process', 'step-2');
+
     var request = http.MultipartRequest(
       'POST',
       Repository.buildUrl(ApiUrl.addLead),
@@ -3110,7 +3395,11 @@ class AddLeadsController extends GetxController {
       'X-USER-PASSWORD': password,
     });
 
-    // ✅ Add form fields
+    logcat('step process', 'step-3');
+
+    // ========================== //
+    //     ADD NORMAL FIELDS
+    // ========================== //
     request.fields.addAll({
       'company_name': companyNameCtr.text.trim(),
       'address': addressCtr.text.trim(),
@@ -3147,9 +3436,14 @@ class AddLeadsController extends GetxController {
       'other_remarks': otherRemarksCtr.text.trim(),
       'schedule_meeting': formatScheduleDate(scheduleMeetingCtr.text.trim()),
       'user_id': user != null ? user.userId.toString() : '',
+      'installation_area': installationAreaPath.value.toDouble().toString(),
     });
 
-    // ✅ Add load elements
+    logcat('step process', 'step-4');
+
+    // ========================== //
+    //     ADD LOAD ELEMENTS
+    // ========================== //
     for (int i = 0; i < productDetailList.length; i++) {
       final product = productDetailList[i];
       request.fields.addAll({
@@ -3160,11 +3454,9 @@ class AddLeadsController extends GetxController {
       });
     }
 
-    // ✅ Add uploaded files
-    logcat("fileList::", jsonEncode(fileList));
-
-    // ✅ Add uploaded files (main fix here)
-    logcat("filepAth:::", jsonEncode(fileList));
+    // ========================== //
+    //       ADD FILES
+    // ========================== //
     for (int i = 0; i < fileList.length; i++) {
       final file = fileList[i];
       if (file.path != null && file.path!.isNotEmpty) {
@@ -3176,94 +3468,142 @@ class AddLeadsController extends GetxController {
               fileToUpload.path,
             ),
           );
-          logcat("fileToUpload", "Step-");
-          // Attach category for this file
-          request.fields['uploaded_files[$i][category]'] = file.category ?? '';
-          // request.fields['uploaded_files[$i][category]'] = "equipment_photo";
-        } else {
-          logcat("File not found:", fileToUpload.path);
+          request.fields['uploaded_files[$i][category]'] = file.category ?? "";
         }
       }
     }
-    // ✅ Log all fields
-    logcat("Form Fields:", jsonEncode(request.fields));
 
-    try {
-      loadingIndicator.show(context, '');
-      state.value = ScreenState.apiLoading;
-
-      // ✅ Send the request
-      var streamedResponse = await request.send();
-      var response = await http.Response.fromStream(streamedResponse);
-      loadingIndicator.hide(context);
-      state.value = ScreenState.apiSuccess;
-      var data = jsonDecode(response.body);
-      if (response.statusCode == 200) {
-        logcat('AddLeadResponse:', data.toString());
-        if (data['status']?.toString().toLowerCase() == 'success') {
-          //Add event to mobile calendar
-          await CalendarHelper.addEvent(
-            title: 'Lead Meeting',
-            description: 'Reminder: You have a meeting with the customer.',
-            start: selectedScheduleMeeting,
-            end: selectedScheduleMeeting.add(const Duration(hours: 1)),
-            location: '${latitudeCtr.text},${longitudeCtr.text}',
-          );
-          // CustomSnackBar().showErrorSnackbar(
-          //   'Lead Meeting',
-          //   'Meeting added to your calendar',
-          // );
-          showDialogForScreen(
-            context,
-            "Add Lead",
-            data['message'],
-            callback: () {
-              Get.back(result: true);
+    // ========================== //
+    //   DEBUG: PRINT FULL JSON
+    // ========================== //
+    final fullJson = {
+      'company_name': companyNameCtr.text.trim(),
+      'address': addressCtr.text.trim(),
+      'country': selectedCountryId.value.toString(),
+      'state': selectedStateId.value.toString(),
+      'district': selectedDistrictId.value.toString(),
+      'contact_person_name': personNameCtr.text.trim(),
+      'contact_person_mobile': personMobileCtr.text.trim(),
+      'latitude': latitudeCtr.text.trim(),
+      'longitude': longitudeCtr.text.trim(),
+      'required_solution_type': selectedRequiredSolutionTypeValue.value,
+      'required_solution': selectedRequiredSolutionValue.value,
+      'lead_category': selectedLeadCategoryValue.value,
+      'dg_capacity_kva': dgCapacityCtr.text.trim(),
+      'dg_sync_required': selectedDgSyncValue.value == 'Yes' ? '1' : '0',
+      'curr_inst_solar_cap_kwp': installedSolarCapCtr.text.trim(),
+      'sanctioned_load_kva': sanctionedLoadCtr.text.trim(),
+      'vfd_required': selectedVfdValue.value == 'Yes' ? '1' : '0',
+      'grid_availability_hrs': gridAvailabilityCtr.text.trim(),
+      'peak_monthly_energy_cons_kwh': peakMonthlyEnergyCtr.text.trim(),
+      'required_solar_cap_kwp': requiredSolarCapCtr.text.trim(),
+      'dist_to_nearest_transformer': distanceToTransformerCtr.text.trim(),
+      'rating_of_nearest_transformer_kva': ratingOfTransformerCtr.text.trim(),
+      'purpose_of_solarisation': selectedPurposeOfSolarisationValue.value,
+      'dist_btw_inverter_acdb_panel_mtrs': distInverterACDBCtr.text.trim(),
+      'dist_btw_solar_acdb_panel_mtrs': distSolarACDBCtr.text.trim(),
+      'building_height': buildingHeightCtr.text.trim(),
+      'roof_size_length_ft': roofSizeLengthCtr.text.trim(),
+      'roof_size_breadth_ft': roofSizeBreadthCtr.text.trim(),
+      'roof_nature': selectedRoofNatureValue.value,
+      'age_of_metal_sheet': ageOfMetalSheetCtr.text.trim(),
+      'ground_size_length_ft': groundSizeLengthCtr.text.trim(),
+      'ground_size_breadth_ft': groundSizeBreadthCtr.text.trim(),
+      'other_remarks': otherRemarksCtr.text.trim(),
+      'schedule_meeting': formatScheduleDate(scheduleMeetingCtr.text.trim()),
+      'user_id': user != null ? user.userId.toString() : '',
+      'installation_area': installationAreaPath.toDouble().toString(),
+      'uploaded_files': fileList
+          .map((f) => {"category": f.category, "file": f.path})
+          .toList(),
+      'load_elements': productDetailList
+          .map(
+            (p) => {
+              "device_name": p.deviceName,
+              "category": p.category,
+              "power_rating_w": p.power,
+              "daily_usage_hrs": p.usageHrs,
             },
-          );
-        } else {
-          showErrorDialog(context, data);
-        }
-      } else if (response.statusCode == 422) {
-        logcat('AddLeadApi Error', response.body);
-        String errorMessage = 'Validation failed';
-        // ✅ Handle multiple possible error response formats
-        if (data['message'] != null && data['message'].toString().isNotEmpty) {
-          errorMessage = data['message'].toString();
-        }
+          )
+          .toList(),
+    };
+    void printLongLog(String tag, String text) {
+      const int chunkSize = 500;
 
-        // Check for Laravel-style "errors"
-        if (data['errors'] != null &&
-            data['errors'] is Map &&
-            data['errors'].isNotEmpty) {
-          try {
-            final firstErrorList = (data['errors'] as Map).values.first;
-            if (firstErrorList is List && firstErrorList.isNotEmpty) {
-              errorMessage = firstErrorList.first.toString();
-            }
-          } catch (_) {}
-        }
-        // ✅ Handle your new API format: "result"
-        else if (data['result'] != null &&
-            data['result'] is Map &&
-            data['result'].isNotEmpty) {
-          try {
-            final firstErrorList = (data['result'] as Map).values.first;
-            if (firstErrorList is List && firstErrorList.isNotEmpty) {
-              errorMessage = firstErrorList.first.toString();
-            }
-          } catch (_) {}
-        }
-        showDialogForScreen(context, 'Add Lead', errorMessage, callback: () {});
-        message.value = "Failed to add lead (${response.statusCode})";
+      for (int i = 0; i < text.length; i += chunkSize) {
+        String part = text.substring(
+          i,
+          i + chunkSize > text.length ? text.length : i + chunkSize,
+        );
+        logcat("$tag (part ${i ~/ chunkSize})", part);
       }
-    } catch (e) {
-      loadingIndicator.hide(context);
-      state.value = ScreenState.apiError;
-      message.value = "Error: $e";
-      logcat("Exception", e.toString());
+    }
+
+    printLongLog("FULL_JSON_FOR_POSTMAN", jsonEncode(fullJson));
+    // ===================================== //
+
+    logcat('step process', 'step-5');
+
+    loadingIndicator.show(context, '');
+    state.value = ScreenState.apiLoading;
+
+    // SEND REQUEST
+    // return;
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
+
+    loadingIndicator.hide(context);
+    state.value = ScreenState.apiSuccess;
+
+    var data = jsonDecode(response.body);
+    logcat('step process', 'step-7');
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      logcat('AddLeadResponse:', data.toString());
+
+      if (data['status']?.toString().toLowerCase() == 'success') {
+        showDialogForScreen(
+          context,
+          "Add Lead",
+          data['message'],
+          callback: () {
+            Get.back(result: true);
+          },
+        );
+      } else {
+        showErrorDialog(context, data);
+      }
+    } else if (response.statusCode == 422) {
+      logcat('AddLeadApi Error', response.body);
+      String errorMessage = 'Validation failed';
+
+      if (data['message'] != null) {
+        errorMessage = data['message'].toString();
+      }
+
+      if (data['errors'] != null && data['errors'] is Map) {
+        try {
+          final firstErrorList = (data['errors'] as Map).values.first;
+          if (firstErrorList is List && firstErrorList.isNotEmpty) {
+            errorMessage = firstErrorList.first.toString();
+          }
+        } catch (_) {}
+      }
+
+      showDialogForScreen(context, 'Add Lead', errorMessage, callback: () {});
+    } else {
+      logcat('AddLead Failed', response.body);
     }
   }
+
+  //   catch (e) {
+  //     loadingIndicator.hide(context);
+  //     state.value = ScreenState.apiError;
+  //     message.value = "Error: $e";
+  //     logcat("Exception", e.toString());
+  //   }
+  // }
 
   RxBool isPaymentReceived = false.obs;
   Future<void> updateLeadApi(BuildContext context, int leadId) async {
@@ -3339,6 +3679,7 @@ class AddLeadsController extends GetxController {
       'financing_progress_status': selectedfinancingProgressStatusMode.value,
       'balance_amount': balanceAmonutCtr.text.trim(),
       'full_payment_amount': balanceAmonutCtr.text.trim(),
+      'installation_area': installationAreaPath.value.toDouble().toString(),
     });
 
     if (isPaymentReceived.value == true) {
@@ -5059,6 +5400,10 @@ class AddLeadsController extends GetxController {
         setText(otherRemarksCtr, result.otherRemarks);
         setText(scheduleMeetingCtr, result.meeting?.scheduledAt);
 
+        installationAreaPath.value =
+            double.tryParse(result.installationArea.toString()) ?? 0.0;
+
+        installationareaCtr.text = result.installationArea.toString();
         // ==========================================================
         // 🔹 DROPDOWN VALUE → LABEL USING getLabelFromValue
         // ==========================================================
@@ -6047,8 +6392,8 @@ class AddLeadsController extends GetxController {
     validatePersonName(personNameCtr.text);
     validatePersonMobile(personMobileCtr.text);
 
-    validateRequiredSolutionType(selectedRequiredSolutionTypeValue.value);
-    validateRequiredSolution(selectedRequiredSolutionValue.value);
+    // validateRequiredSolutionType(selectedRequiredSolutionTypeValue.value);
+    // validateRequiredSolution(selectedRequiredSolutionValue.value);
     validateLeadCategory(selectedLeadCategoryValue.value);
 
     validateRoofNature(selectedRoofNatureValue.value);

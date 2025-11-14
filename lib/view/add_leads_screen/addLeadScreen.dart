@@ -441,7 +441,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                               getDynamicSizedBox(height: 2.h),
                               getLable(
                                 "Required Solution Type",
-                                isRequired: true,
+                                // isRequired: false,
                               ),
                               Obx(() {
                                 return getReactiveFormField(
@@ -484,7 +484,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable("Required Solution", isRequired: true),
+                              getLable("Required Solution"),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.requiredSolutionNode,
@@ -1020,6 +1020,29 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                       .error,
                                 );
                               }),
+                              if (widget.isEdit == true)
+                                getLable("Installation Area (sq ft)"),
+
+                              if (widget.isEdit == true)
+                                Obx(() {
+                                  return getReactiveFormField(
+                                    node: controller.installationareaNode,
+                                    controller: controller.installationareaCtr,
+                                    hintLabel: "Enter Installation Area",
+                                    onChanged: (val) {
+                                      controller.installationAreaPath.value =
+                                          double.tryParse(val!) ?? 0.0;
+                                      // controller.validateRoofSizeBreadth(val);
+                                    },
+                                    inputType: TextInputType.number,
+                                    formType: FieldType.text,
+                                    wantSuffix: false,
+                                    errorText: controller
+                                        .installationAreaModel
+                                        .value
+                                        .error,
+                                  );
+                                }),
                               getDynamicSizedBox(height: 2.h),
                               getLable("Roof Nature", isRequired: true),
                               Obx(() {

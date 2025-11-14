@@ -51,26 +51,35 @@ class LeadData {
   String? distBtwInverterAcdbPanelMtrs;
   String? distBtwSolarAcdbPanelMtrs;
   String? requiredSolution;
-  int? buildingHeight; // ✅ Changed from dynamic to int?
+  int? buildingHeight;
   String? roofSizeLengthFt;
   String? roofSizeBreadthFt;
+
+  // ⭐ UPDATED BASED ON JSON
+  String? installationArea; // "100"
+  int? installationUnits; // 1
+
   String? roofNature;
-  int? ageOfMetalSheet; // ✅ Changed from dynamic to int?
+  int? ageOfMetalSheet;
   String? groundSizeLengthFt;
   String? groundSizeBreadthFt;
+
   String? leadCategory;
   String? leadStatus;
   String? otherRemarks;
   String? source;
   String? createdAt;
   String? updatedAt;
+
   List<LoadElementDetail>? loadElementDetails;
   List<UploadedFile>? uploadedFiles;
   Payment? payment;
   Meeting? meeting;
+
   List<String>? availableNextStatuses;
   String? scheduledAt;
   String? rescheduleReason;
+
   String? countryName;
   String? stateName;
   String? districtName;
@@ -104,10 +113,16 @@ class LeadData {
     this.buildingHeight,
     this.roofSizeLengthFt,
     this.roofSizeBreadthFt,
+
+    // ⭐ UPDATED FIELDS
+    this.installationArea,
+    this.installationUnits,
+
     this.roofNature,
     this.ageOfMetalSheet,
     this.groundSizeLengthFt,
     this.groundSizeBreadthFt,
+
     this.leadCategory,
     this.leadStatus,
     this.otherRemarks,
@@ -131,8 +146,8 @@ class LeadData {
     country: json["country"],
     state: json["state"],
     district: json["district"],
-    address: json["address"] ?? '',
-    companyName: json["company_name"] ?? '',
+    address: json["address"],
+    companyName: json["company_name"],
     contactPersonName: json["contact_person_name"],
     contactPersonMobile: json["contact_person_mobile"],
     latitude: json["latitude"],
@@ -152,20 +167,25 @@ class LeadData {
     distBtwInverterAcdbPanelMtrs: json["dist_btw_inverter_acdb_panel_mtrs"],
     distBtwSolarAcdbPanelMtrs: json["dist_btw_solar_acdb_panel_mtrs"],
     requiredSolution: json["required_solution"],
-    buildingHeight: json["building_height"], // ✅ No change needed in parsing
+    buildingHeight: json["building_height"],
     roofSizeLengthFt: json["roof_size_length_ft"],
     roofSizeBreadthFt: json["roof_size_breadth_ft"],
+
+    installationArea: json["installation_area"], // ⭐ correct type
+    installationUnits: json["installation_units"], // ⭐ correct type
+
     roofNature: json["roof_nature"],
-    ageOfMetalSheet:
-        json["age_of_metal_sheet"], // ✅ No change needed in parsing
+    ageOfMetalSheet: json["age_of_metal_sheet"],
     groundSizeLengthFt: json["ground_size_length_ft"],
     groundSizeBreadthFt: json["ground_size_breadth_ft"],
+
     leadCategory: json["lead_category"],
     leadStatus: json["lead_status"],
     otherRemarks: json["other_remarks"],
     source: json["source"],
     createdAt: json["created_at"],
     updatedAt: json["updated_at"],
+
     loadElementDetails: json["load_element_details"] == null
         ? []
         : List<LoadElementDetail>.from(
@@ -173,16 +193,20 @@ class LeadData {
               (x) => LoadElementDetail.fromJson(x),
             ),
           ),
+
     uploadedFiles: json["uploaded_files"] == null
         ? []
         : List<UploadedFile>.from(
             json["uploaded_files"].map((x) => UploadedFile.fromJson(x)),
           ),
+
     payment: json["payment"] != null ? Payment.fromJson(json["payment"]) : null,
     meeting: json["meeting"] != null ? Meeting.fromJson(json["meeting"]) : null,
+
     availableNextStatuses: json["available_next_statuses"] == null
         ? []
         : List<String>.from(json["available_next_statuses"].map((x) => x)),
+
     scheduledAt: json["scheduled_at"],
     rescheduleReason: json["reschedule_reason"],
     countryName: json["country_name"],
@@ -219,23 +243,32 @@ class LeadData {
     "building_height": buildingHeight,
     "roof_size_length_ft": roofSizeLengthFt,
     "roof_size_breadth_ft": roofSizeBreadthFt,
+
+    "installation_area": installationArea,
+    "installation_units": installationUnits,
+
     "roof_nature": roofNature,
     "age_of_metal_sheet": ageOfMetalSheet,
     "ground_size_length_ft": groundSizeLengthFt,
     "ground_size_breadth_ft": groundSizeBreadthFt,
+
     "lead_category": leadCategory,
     "lead_status": leadStatus,
     "other_remarks": otherRemarks,
     "source": source,
     "created_at": createdAt,
     "updated_at": updatedAt,
+
     "load_element_details": loadElementDetails?.map((x) => x.toJson()).toList(),
     "uploaded_files": uploadedFiles?.map((x) => x.toJson()).toList(),
+
     "payment": payment?.toJson(),
     "meeting": meeting?.toJson(),
-    "available_next_statuses": availableNextStatuses ?? [],
+
+    "available_next_statuses": availableNextStatuses,
     "scheduled_at": scheduledAt,
     "reschedule_reason": rescheduleReason,
+
     "country_name": countryName,
     "state_name": stateName,
     "district_name": districtName,
@@ -301,6 +334,7 @@ class UploadedFile {
   String? fileUploadedAt;
   String? createdAt;
   String? updatedAt;
+
   bool canManage;
   String link;
 
@@ -314,8 +348,8 @@ class UploadedFile {
     this.fileUploadedAt,
     this.createdAt,
     this.updatedAt,
-    required this.canManage,
-    required this.link,
+    this.canManage = false,
+    this.link = "",
   });
 
   factory UploadedFile.fromJson(Map<String, dynamic> json) => UploadedFile(
@@ -329,7 +363,7 @@ class UploadedFile {
     createdAt: json["created_at"],
     updatedAt: json["updated_at"],
     canManage: false,
-    link: '', // ✅ default false from backend
+    link: "",
   );
 
   Map<String, dynamic> toJson() => {
@@ -357,7 +391,7 @@ class Payment {
   String? financingProgressStatus;
   String? totalProjectCost;
   String? fullPaymentAmount;
-  int? balanceAmount; // ✅ Changed from String? to int?
+  int? balanceAmount;
   bool? isFullPaymentReceived;
   String? fullPaymentReceivedDate;
   String? createdAt;
@@ -400,7 +434,7 @@ class Payment {
     financingProgressStatus: json["financing_progress_status"],
     totalProjectCost: json["total_project_cost"],
     fullPaymentAmount: json["full_payment_amount"],
-    balanceAmount: json["balance_amount"], // ✅ Removed .toString()
+    balanceAmount: json["balance_amount"],
     isFullPaymentReceived: json["is_full_payment_received"],
     fullPaymentReceivedDate: json["full_payment_received_date"],
     createdAt: json["created_at"],

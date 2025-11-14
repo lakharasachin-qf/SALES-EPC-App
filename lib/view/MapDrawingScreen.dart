@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +13,7 @@ import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/configs/colors_constant.dart';
 import 'package:sales_app/configs/font_constant.dart';
 import 'package:sales_app/utils/helper.dart';
+import 'package:sales_app/utils/log.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:http/http.dart' as http;
 import 'package:sizer/sizer.dart';
@@ -31,6 +33,8 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
   final ScreenshotController _screenshotController = ScreenshotController();
   LatLng? _currentLatLng;
   bool isDrawingMode = false;
+  final Set<Polygon> _finishedPolygons = {}; // NEW
+  final Set<Polyline> _finishedPolylines = {}; // NEW
   final Set<Marker> _markers = {};
   final Set<Polyline> _polylines = {};
   final Set<Polygon> _polygons = {};
@@ -55,6 +59,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
   void initState() {
     super.initState();
     _requestAndSetLocation();
+
     searchController.addListener(_onSearchChanged);
   }
 
@@ -98,6 +103,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                       polygons: _polygons,
                       onMapCreated: (GoogleMapController controller) {
                         _mapController.complete(controller);
+                        _recenter();
                       },
                       onTap: _onMapTap,
                     ),
@@ -301,28 +307,54 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                         opacity: isFabExpanded ? 1 : 0,
                         child: Column(
                           children: [
-                            buildRoundFab(
-                              icon: Icons.download,
-                              tooltip: 'Download Map',
-                              onTap: () async {
-                                setState(() {
-                                  showMyLocation = false;
-                                  showZoomControls = false;
-                                });
-                                await Future.delayed(
-                                  const Duration(milliseconds: 300),
-                                );
-                                await captureAndSaveMap(
-                                  context,
-                                  _screenshotController,
-                                );
-                                setState(() {
-                                  showMyLocation = true;
-                                  showZoomControls = true;
-                                });
-                              },
-                            ),
-                            getDynamicSizedBox(height: 1.h),
+                            // buildRoundFab(
+                            //   icon: Icons.download,
+                            //   tooltip: 'Download Map',
+                            //   onTap: () async {
+                            //     setState(() {
+                            //       showMyLocation = false;
+                            //       showZoomControls = false;
+                            //     });
+                            //     await Future.delayed(
+                            //       const Duration(milliseconds: 300),
+                            //     );
+                            //     // await captureAndSaveMap(
+                            //     //   context,
+                            //     //   _screenshotController,
+                            //     // );
+                            //     final filePath = await captureAndSaveMap(
+                            //       context,
+                            //       _screenshotController,
+                            //     );
+
+                            //     if (filePath != null) {
+                            //       File imageFile = File(
+                            //         filePath,
+                            //       ); // <-- this is your image
+                            //       _showImageSavedBottomSheet(
+                            //         message: 'Map image saved successfully!',
+                            //         onSave: () {
+                            //           Get.back(
+                            //             result: {
+                            //               "imagePath": imageFile.path,
+                            //               "roofBreadthFeet": roofBreadthFeet,
+                            //               "roofLengthFeet": roofLengthFeet,
+                            //               "installationAreaSqFt":
+                            //                   installationAreaSqFt,
+                            //             },
+                            //           );
+                            //         },
+                            //         onCancel: () {},
+                            //       );
+                            //       logcat('capture image is', imageFile.path);
+                            //     }
+                            //     setState(() {
+                            //       showMyLocation = true;
+                            //       showZoomControls = true;
+                            //     });
+                            //   },
+                            // ),
+                            // getDynamicSizedBox(height: 1.h),
                             buildRoundFab(
                               icon: Icons.layers_outlined,
                               tooltip: 'Map type',
@@ -335,11 +367,11 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                               onTap: _recenter,
                             ),
                             getDynamicSizedBox(height: 1.h),
-                            buildRoundFab(
-                              icon: Icons.gesture_rounded,
-                              tooltip: 'Mode',
-                              onTap: _showModePicker,
-                            ),
+                            // buildRoundFab(
+                            //   icon: Icons.gesture_rounded,
+                            //   tooltip: 'Mode',
+                            //   onTap: _showModePicker,
+                            // ),
                             getDynamicSizedBox(height: 1.h),
                           ],
                         ),
@@ -431,13 +463,15 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                     child: buildBottomActionsBar(
                       context: context,
                       mode: _mode,
-                      canUndo: _tempPoints.isNotEmpty,
+
                       onPin: () => _setMode(DrawMode.pin),
                       onPolyline: () => _setMode(DrawMode.polyline),
                       onPolygon: () => _setMode(DrawMode.polygon),
                       onUndo: _undoLastPoint,
                       onFinish: _finishShape,
                       onClear: _clearAll,
+                      canUndo: _tempPoints.isNotEmpty,
+                      canFinish: _tempPoints.length >= 3,
                     ),
                   ),
                 ),
@@ -446,6 +480,101 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showImageSavedBottomSheet({
+    required String message,
+    required VoidCallback onSave,
+    required VoidCallback onCancel,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: white,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Center(
+                child: Container(
+                  width: 50,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              /// Title
+              const Text(
+                "Success",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// Message
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+
+              const SizedBox(height: 25),
+
+              /// Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        onCancel();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: BorderSide(color: primaryColor),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text("Cancel"),
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        onSave();
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text("Save"),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -814,19 +943,71 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
     _rebuildVertexMarkers();
   }
 
+  double roofBreadthFeet = 0.0;
+  double installationAreaSqFt = 0.0;
+  double roofLengthFeet = 0.0;
+
   void _finishShape() {
+    // ---- PIN -------------------------------------------------
+    if (_mode == DrawMode.pin && _tempPoints.isNotEmpty) {
+      final point = _tempPoints.first;
+      setState(() {
+        _markers.add(
+          Marker(markerId: MarkerId('m_${_idSeed++}'), position: point),
+        );
+        // keep the preview (temp point) – we will clear it only on “Clear”
+        // _tempPoints.clear();   // removed
+        _mode = DrawMode.none;
+      });
+
+      _showMeasurementBottomSheet(
+        title: "Pin Location",
+        rows: [
+          {"label": "Latitude", "value": point.latitude.toStringAsFixed(6)},
+          {"label": "Longitude", "value": point.longitude.toStringAsFixed(6)},
+        ],
+      );
+      return;
+    }
+
+    // ---- POLYLINE / POLYGON ---------------------------------
     if ((_mode == DrawMode.polyline && _tempPoints.length >= 2) ||
         (_mode == DrawMode.polygon && _tempPoints.length >= 3)) {
       final isPolygon = _mode == DrawMode.polygon;
       final id = '${isPolygon ? 'pg' : 'pl'}_${_idSeed++}';
       final points = List.of(_tempPoints);
 
+      // 1. Move the **preview** to the *finished* collection
       setState(() {
+        // ---- 1. Add the **finished** shape (permanent) ----
+        if (isPolygon) {
+          _finishedPolygons.add(
+            Polygon(
+              polygonId: PolygonId(id),
+              points: points,
+              strokeWidth: 3,
+              strokeColor: primaryColor,
+              fillColor: primaryColor.withValues(alpha: 0.15),
+            ),
+          );
+        } else {
+          _finishedPolylines.add(
+            Polyline(
+              polylineId: PolylineId(id),
+              points: points,
+              width: 4,
+              color: Colors.blue,
+            ),
+          );
+        }
+
+        // ---- 2. **Keep the temporary preview** (so you can still edit) ----
+        // We *remove* the old temp only to replace it with the exact same shape
         if (isPolygon) {
           _polygons.removeWhere((p) => p.polygonId.value == 'pg_temp');
           _polygons.add(
             Polygon(
-              polygonId: PolygonId(id),
+              polygonId: const PolygonId('pg_temp'),
               points: points,
               strokeWidth: 3,
               strokeColor: primaryColor,
@@ -837,7 +1018,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
           _polylines.removeWhere((p) => p.polylineId.value == 'pl_temp');
           _polylines.add(
             Polyline(
-              polylineId: PolylineId(id),
+              polylineId: const PolylineId('pl_temp'),
               points: points,
               width: 4,
               color: Colors.blue,
@@ -845,12 +1026,13 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
           );
         }
 
-        _tempPoints.clear();
-        _mode = DrawMode.none;
-        _vertexMarkers.clear();
+        // ---- 3. **Keep every vertex marker** (draggable) ----
+        _rebuildVertexMarkers(); // <-- IMPORTANT
+
+        _mode = DrawMode.none; // exit drawing mode
       });
 
-      // ✅ Calculate measurements
+      // ---- CALCULATIONS (unchanged) -------------------------
       final measurePoints = points
           .map((e) => mp.LatLng(e.latitude, e.longitude))
           .toList();
@@ -864,13 +1046,59 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
               measurePoints.first,
             ])
           : mp.SphericalUtil.computeLength(measurePoints);
+
       final areaInSqKm = area / 1e6;
       final areaInAcre = area / 4046.85642;
       final perimeterInKm = perimeter / 1000;
 
+      // 1️⃣ Installation Area (sq ft)
+      installationAreaSqFt = double.parse((area * 10.7639).toStringAsFixed(2));
+
+      // 2️⃣ Roof Breadth (ft) = maximum distance between ANY two points
+      double maxDistMeters = 0.0;
+      for (int i = 0; i < measurePoints.length; i++) {
+        for (int j = i + 1; j < measurePoints.length; j++) {
+          final d = mp.SphericalUtil.computeDistanceBetween(
+            measurePoints[i],
+            measurePoints[j],
+          );
+          if (d > maxDistMeters) maxDistMeters = d.toDouble();
+        }
+      }
+      roofBreadthFeet = double.parse(
+        (maxDistMeters * 3.28084).toStringAsFixed(2),
+      );
+
+      // 3️⃣ Roof Length (ft) = Longest polygon side
+      double longestSideMeters = 0.0;
+      if (isPolygon) {
+        for (int i = 0; i < measurePoints.length; i++) {
+          final next = measurePoints[(i + 1) % measurePoints.length];
+          final current = measurePoints[i];
+
+          final seg = mp.SphericalUtil.computeDistanceBetween(current, next);
+          if (seg > longestSideMeters) longestSideMeters = seg.toDouble();
+        }
+      }
+      roofLengthFeet = double.parse(
+        (longestSideMeters * 3.28084).toStringAsFixed(2),
+      );
+
       _showMeasurementBottomSheet(
         title: isPolygon ? "Polygon Measurement" : "Polyline Measurement",
         rows: [
+          {
+            "label": "Roof Breadth (ft)",
+            "value": roofBreadthFeet.toStringAsFixed(2),
+          },
+          {
+            "label": "Roof Length (ft)",
+            "value": roofLengthFeet.toStringAsFixed(2),
+          },
+          {
+            "label": "Installation Area (sq ft)",
+            "value": installationAreaSqFt.toStringAsFixed(2),
+          },
           {"label": "Area (m²)", "value": area.toStringAsFixed(2)},
           {"label": "Area (km²)", "value": areaInSqKm.toStringAsFixed(4)},
           {"label": "Area (acres)", "value": areaInAcre.toStringAsFixed(4)},
@@ -881,26 +1109,119 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
           },
         ],
       );
-    } else if (_mode == DrawMode.pin && _tempPoints.length == 1) {
-      final point = _tempPoints.first;
-      setState(() {
-        _markers.add(
-          Marker(markerId: MarkerId('m_${_idSeed++}'), position: point),
-        );
-        _tempPoints.clear();
-        _mode = DrawMode.none;
-      });
-
-      // ✅ Show coordinates
-      _showMeasurementBottomSheet(
-        title: "Pin Location",
-        rows: [
-          {"label": "Latitude", "value": point.latitude.toStringAsFixed(6)},
-          {"label": "Longitude", "value": point.longitude.toStringAsFixed(6)},
-        ],
-      );
     }
   }
+  // void _finishShape() {
+  //   if ((_mode == DrawMode.polyline && _tempPoints.length >= 2) ||
+  //       (_mode == DrawMode.polygon && _tempPoints.length >= 3)) {
+  //     final isPolygon = _mode == DrawMode.polygon;
+  //     final id = '${isPolygon ? 'pg' : 'pl'}_${_idSeed++}';
+  //     final points = List.of(_tempPoints);
+
+  //     setState(() {
+  //       if (isPolygon) {
+  //         _polygons.removeWhere((p) => p.polygonId.value == 'pg_temp');
+  //         _polygons.add(
+  //           Polygon(
+  //             polygonId: PolygonId(id),
+  //             points: points,
+  //             strokeWidth: 3,
+  //             strokeColor: primaryColor,
+  //             fillColor: primaryColor.withValues(alpha: 0.15),
+  //           ),
+  //         );
+  //       } else {
+  //         _polylines.removeWhere((p) => p.polylineId.value == 'pl_temp');
+  //         _polylines.add(
+  //           Polyline(
+  //             polylineId: PolylineId(id),
+  //             points: points,
+  //             width: 4,
+  //             color: Colors.blue,
+  //           ),
+  //         );
+  //       }
+
+  //       _tempPoints.clear();
+  //       _mode = DrawMode.none;
+  //       _vertexMarkers.clear();
+  //     });
+
+  //     // ✅ Calculate measurements
+  //     final measurePoints = points
+  //         .map((e) => mp.LatLng(e.latitude, e.longitude))
+  //         .toList();
+
+  //     final area = isPolygon
+  //         ? mp.SphericalUtil.computeArea(measurePoints)
+  //         : 0.0;
+  //     final perimeter = isPolygon
+  //         ? mp.SphericalUtil.computeLength([
+  //             ...measurePoints,
+  //             measurePoints.first,
+  //           ])
+  //         : mp.SphericalUtil.computeLength(measurePoints);
+  //     final areaInSqKm = area / 1e6;
+  //     final areaInAcre = area / 4046.85642;
+  //     final perimeterInKm = perimeter / 1000;
+  //     // 1️⃣ Installation Area (sq ft)
+  //     installationAreaSqFt = (area * 10.7639).toDouble();
+
+  //     // 2️⃣ Roof Breadth (ft)
+  //     double maxDistMeters = 0;
+  //     for (int i = 0; i < measurePoints.length; i++) {
+  //       for (int j = i + 1; j < measurePoints.length; j++) {
+  //         final double d = mp.SphericalUtil.computeDistanceBetween(
+  //           measurePoints[i],
+  //           measurePoints[j],
+  //         ).toDouble();
+  //         if (d > maxDistMeters) maxDistMeters = d;
+  //       }
+  //     }
+  //     roofBreadthFeet = (maxDistMeters * 3.28084).toDouble();
+
+  //     _showMeasurementBottomSheet(
+  //       title: isPolygon ? "Polygon Measurement" : "Polyline Measurement",
+  //       rows: [
+  //         {
+  //           "label": "Roof Breadth (ft)",
+  //           "value": roofBreadthFeet.toStringAsFixed(2),
+  //         },
+  //         {
+  //           "label": "Installation Area (sq ft)",
+  //           "value": installationAreaSqFt.toStringAsFixed(2),
+  //         },
+
+  //         {"label": "Area (m²)", "value": area.toStringAsFixed(2)},
+  //         {"label": "Area (km²)", "value": areaInSqKm.toStringAsFixed(4)},
+  //         {"label": "Area (acres)", "value": areaInAcre.toStringAsFixed(4)},
+  //         {"label": "Perimeter (m)", "value": perimeter.toStringAsFixed(2)},
+  //         {
+  //           "label": "Perimeter (km)",
+  //           "value": perimeterInKm.toStringAsFixed(3),
+  //         },
+  //       ],
+  //     );
+  //   } else if (_mode == DrawMode.pin && _tempPoints.length == 1) {
+  //     final point = _tempPoints.first;
+  //     setState(() {
+  //       _markers.add(
+  //         Marker(markerId: MarkerId('m_${_idSeed++}'), position: point),
+  //       );
+  //       _tempPoints.clear();
+  //       _mode = DrawMode.none;
+  //     });
+
+  //     // ✅ Show coordinates
+  //     _showMeasurementBottomSheet(
+  //       title: "Pin Location",
+  //       rows: [
+  //         {"label": "Latitude", "value": point.latitude.toStringAsFixed(6)},
+  //         {"label": "Longitude", "value": point.longitude.toStringAsFixed(6)},
+  //       ],
+  //     );
+  //   }
+  // }
 
   void _showMeasurementBottomSheet({
     required String title,
@@ -941,33 +1262,102 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
               const SizedBox(height: 10),
               ...rows.map((r) => _buildInfoRow(r["label"]!, r["value"]!)),
               const SizedBox(height: 15),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _clearAll();
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        setState(() {
+                          _mode = DrawMode.polygon;
+                        });
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text("Close"),
                     ),
                   ),
-                  child: const Text("Close"),
-                ),
+                  getDynamicSizedBox(width: 2.w),
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () async {
+                        setState(() {
+                          showMyLocation = false;
+                          showZoomControls = false;
+                        });
+                        await Future.delayed(const Duration(milliseconds: 300));
+                        // await captureAndSaveMap(
+                        //   context,
+                        //   _screenshotController,
+                        // );
+                        final filePath = await captureAndSaveMap(
+                          context,
+                          _screenshotController,
+                        );
+
+                        if (filePath != null) {
+                          File imageFile = File(
+                            filePath,
+                          ); // <-- this is your image
+                          _showImageSavedBottomSheet(
+                            message: 'Map image saved successfully!',
+                            onSave: () {
+                              Get.back();
+                              Get.back(
+                                result: {
+                                  "imagePath": imageFile.path,
+                                  "roofBreadthFeet": roofBreadthFeet,
+                                  "roofLengthFeet": roofLengthFeet,
+                                  "installationAreaSqFt": installationAreaSqFt,
+                                },
+                              );
+                            },
+                            onCancel: () {},
+                          );
+                          logcat('capture image is', imageFile.path);
+                        }
+                        setState(() {
+                          showMyLocation = true;
+                          showZoomControls = true;
+                        });
+                        // Navigator.pop(context);
+                        // setState(() {
+                        //   _mode = DrawMode.polygon;
+                        // });
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text("Save"),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         );
       },
     ).whenComplete(() {
-      _clearAll();
+      setState(() {
+        _mode = DrawMode.polygon;
+      });
     });
   }
 
@@ -1310,6 +1700,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
     required BuildContext context,
     required DrawMode mode,
     required bool canUndo,
+    required bool canFinish,
     required VoidCallback onPin,
     required VoidCallback onPolyline,
     required VoidCallback onPolygon,
@@ -1352,7 +1743,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                     buildIconTextButton(
                       icon: Icons.check,
                       text: 'Finish',
-                      onTap: onFinish,
+                      onTap: canFinish ? onFinish : null,
                     ),
                     buildIconTextButton(
                       icon: Icons.clear_all,
@@ -1464,27 +1855,55 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
 extension on MapDrawingScreenState {
   String _liveMeasurementText() {
     if (_tempPoints.length < 2) return '';
+
     final pts = _tempPoints
         .map((e) => mp.LatLng(e.latitude, e.longitude))
         .toList();
-    if (_mode == DrawMode.polyline) {
-      final d = mp.SphericalUtil.computeLength(pts);
-      return d >= 1000
-          ? 'Length: ${(d / 1000).toStringAsFixed(3)} km'
-          : 'Length: ${d.toStringAsFixed(2)} m';
+
+    // If not drawing polygon → no measurements
+    if (_mode != DrawMode.polygon) return '';
+
+    // ---------------- 1️⃣ Installation Area (sq ft) ----------------
+    double? liveAreaSqFt;
+    if (_tempPoints.length >= 3) {
+      final areaMeters = mp.SphericalUtil.computeArea(pts); // m²
+      liveAreaSqFt = areaMeters * 10.7639; // sq ft
     }
-    if (_mode == DrawMode.polygon) {
-      final per = mp.SphericalUtil.computeLength(
-        pts.length >= 2 ? [...pts, pts.first] : pts,
-      );
-      if (_tempPoints.length >= 3) {
-        final area = mp.SphericalUtil.computeArea(pts);
-        final areaKm = area / 1e6;
-        return 'Area: ${area.toStringAsFixed(2)} m² • ${areaKm.toStringAsFixed(4)} km² • Perimeter: ${per.toStringAsFixed(2)} m';
+
+    // ---------------- 2️⃣ Roof Breadth (ft) ----------------
+    double maxDistMeters = 0;
+    for (int i = 0; i < pts.length; i++) {
+      for (int j = i + 1; j < pts.length; j++) {
+        final d = mp.SphericalUtil.computeDistanceBetween(pts[i], pts[j]);
+        if (d > maxDistMeters) maxDistMeters = d.toDouble();
       }
-      return 'Perimeter: ${per.toStringAsFixed(2)} m';
     }
-    return '';
+    double liveRoofBreadthFt = maxDistMeters * 3.28084;
+
+    // ---------------- 3️⃣ Roof Length (ft) ----------------
+    double longestSideMeters = 0;
+    if (_tempPoints.length >= 3) {
+      for (int i = 0; i < pts.length; i++) {
+        final next = pts[(i + 1) % pts.length];
+        final seg = mp.SphericalUtil.computeDistanceBetween(pts[i], next);
+        if (seg > longestSideMeters) longestSideMeters = seg.toDouble();
+      }
+    }
+    double liveRoofLengthFt = longestSideMeters * 3.28084;
+
+    // ---------------- OUTPUT RULES ----------------
+    if (_tempPoints.length < 3) {
+      return '''
+Roof Breadth: ${liveRoofBreadthFt.toStringAsFixed(2)} ft
+''';
+    }
+
+    // ---------------- FINAL OUTPUT ----------------
+    return '''
+Roof Breadth: ${liveRoofBreadthFt.toStringAsFixed(2)} ft
+Roof Length: ${liveRoofLengthFt.toStringAsFixed(2)} ft
+Installation Area: ${liveAreaSqFt!.toStringAsFixed(2)} sq ft
+''';
   }
 
   bool _isNear(LatLng a, LatLng b, double meters) {
@@ -1495,6 +1914,41 @@ extension on MapDrawingScreenState {
     return d <= meters;
   }
 }
+
+// extension on MapDrawingScreenState {
+//   String _liveMeasurementText() {
+//     if (_tempPoints.length < 2) return '';
+//     final pts = _tempPoints
+//         .map((e) => mp.LatLng(e.latitude, e.longitude))
+//         .toList();
+//     if (_mode == DrawMode.polyline) {
+//       final d = mp.SphericalUtil.computeLength(pts);
+//       return d >= 1000
+//           ? 'Length: ${(d / 1000).toStringAsFixed(3)} km'
+//           : 'Length: ${d.toStringAsFixed(2)} m';
+//     }
+//     if (_mode == DrawMode.polygon) {
+//       final per = mp.SphericalUtil.computeLength(
+//         pts.length >= 2 ? [...pts, pts.first] : pts,
+//       );
+//       if (_tempPoints.length >= 3) {
+//         final area = mp.SphericalUtil.computeArea(pts);
+//         final areaKm = area / 1e6;
+//         return 'Area: ${area.toStringAsFixed(2)} m² • ${areaKm.toStringAsFixed(4)} km² • Perimeter: ${per.toStringAsFixed(2)} m';
+//       }
+//       return 'Perimeter: ${per.toStringAsFixed(2)} m';
+//     }
+//     return '';
+//   }
+
+//   bool _isNear(LatLng a, LatLng b, double meters) {
+//     final d = mp.SphericalUtil.computeDistanceBetween(
+//       mp.LatLng(a.latitude, a.longitude),
+//       mp.LatLng(b.latitude, b.longitude),
+//     );
+//     return d <= meters;
+//   }
+// }
 
 // void _finishShape() {
   //   if (_mode == DrawMode.polyline && _tempPoints.length >= 2) {

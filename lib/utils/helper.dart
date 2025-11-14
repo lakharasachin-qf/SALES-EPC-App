@@ -300,7 +300,7 @@ void showErrorDialog(BuildContext context, Map<String, dynamic> data) {
   showDialogForScreen(context, 'Add Lead', errorMessage, callback: () {});
 }
 
-Future<void> captureAndSaveMap(
+Future<String?> captureAndSaveMap(
   BuildContext context,
   ScreenshotController screenshotController,
 ) async {
@@ -308,31 +308,72 @@ Future<void> captureAndSaveMap(
     var loadingIndicator = LoadingProgressDialog();
     loadingIndicator.show(context, '');
 
-    final imageBytes = await screenshotController.capture(
-      pixelRatio: 5.0, // Increase resolution (default is 1.0)
-    );
+    final imageBytes = await screenshotController.capture(pixelRatio: 5.0);
 
     if (imageBytes == null) {
       debugPrint('Failed to capture screenshot.');
-      return;
+      loadingIndicator.hide(context);
+      return null;
     }
 
     final directory = await getApplicationDocumentsDirectory();
     final filePath =
         '${directory.path}/map_capture_${DateTime.now().millisecondsSinceEpoch}.png';
 
-    // Save to file
     final file = File(filePath);
     await file.writeAsBytes(imageBytes);
 
-    debugPrint('Map image saved: $filePath');
     loadingIndicator.hide(context);
-    await SharePlus.instance.share(
-      ShareParams(text: "Map capture", files: [XFile(filePath)]),
-    );
-    CustomSnackBar().showErrorSnackbar('Time', 'Map image saved successfully!');
+
+    debugPrint('Map image saved: $filePath');
+
+    // CustomSnackBar().showErrorSnackbar(
+    //   'Success',
+    //   'Map image saved successfully!',
+    // );
+
+    /// 🔥 Return the file path so you can upload it to API
+    return filePath;
   } catch (e, st) {
     debugPrint('Error capturing map: $e\n$st');
     CustomSnackBar().showErrorSnackbar('Error capturing:', '$e\n$st');
+    return null;
   }
 }
+
+// Future<void> captureAndSaveMap(
+//   BuildContext context,
+//   ScreenshotController screenshotController,
+// ) async {
+//   try {
+//     var loadingIndicator = LoadingProgressDialog();
+//     loadingIndicator.show(context, '');
+
+//     final imageBytes = await screenshotController.capture(
+//       pixelRatio: 5.0, // Increase resolution (default is 1.0)
+//     );
+
+//     if (imageBytes == null) {
+//       debugPrint('Failed to capture screenshot.');
+//       return;
+//     }
+
+//     final directory = await getApplicationDocumentsDirectory();
+//     final filePath =
+//         '${directory.path}/map_capture_${DateTime.now().millisecondsSinceEpoch}.png';
+
+//     // Save to file
+//     final file = File(filePath);
+//     await file.writeAsBytes(imageBytes);
+
+//     debugPrint('Map image saved: $filePath');
+//     loadingIndicator.hide(context);
+//     await SharePlus.instance.share(
+//       ShareParams(text: "Map capture", files: [XFile(filePath)]),
+//     );
+//     CustomSnackBar().showErrorSnackbar('Time', 'Map image saved successfully!');
+//   } catch (e, st) {
+//     debugPrint('Error capturing map: $e\n$st');
+//     CustomSnackBar().showErrorSnackbar('Error capturing:', '$e\n$st');
+//   }
+// }
