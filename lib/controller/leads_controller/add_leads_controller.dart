@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:sales_app/api_handle/Repository.dart';
 import 'package:sales_app/api_handle/apiCallingFormate.dart';
+import 'package:sales_app/componant/CustomSnakbar.dart';
 import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/common_date_time_picker.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
@@ -268,6 +269,7 @@ class AddLeadsController extends GetxController {
       roofSizeLengthCtr,
       roofSizeBreadthCtr,
       installationareaCtr,
+      installationCapacityCtr,
       roofNatureCtr,
       ageOfMetalSheetCtr,
       groundSizeLengthCtr,
@@ -314,6 +316,7 @@ class AddLeadsController extends GetxController {
       roofSizeLengthNode,
       roofSizeBreadthNode,
       installationareaNode,
+      installationCapacityNode,
       roofNatureNode,
       ageOfMetalSheetNode,
       groundSizeLengthNode,
@@ -540,6 +543,7 @@ class AddLeadsController extends GetxController {
     scheduleMeetingCtr = TextEditingController();
     //
     installationareaCtr = TextEditingController();
+    installationCapacityCtr = TextEditingController();
 
     searchLeadCategoryCtr = TextEditingController();
     searchRequiredSolutionTypeCtr = TextEditingController();
@@ -616,6 +620,8 @@ class AddLeadsController extends GetxController {
     roofNatureNode = FocusNode();
     //
     installationareaNode = FocusNode();
+    installationCapacityNode = FocusNode();
+
     ageOfMetalSheetNode = FocusNode();
     groundSizeLengthNode = FocusNode();
     groundSizeBreadthNode = FocusNode();
@@ -1225,6 +1231,10 @@ class AddLeadsController extends GetxController {
     update();
   }
 
+  // Temporary map values (only for map_marked_screenshot)
+  RxDouble tempRoofLength = 0.0.obs;
+  RxDouble tempRoofBreadth = 0.0.obs;
+  RxDouble tempInstallationArea = 0.0.obs;
   Widget setUploadedCategoryListDialog() {
     return Obx(() {
       if (isResoltuinSolutonTypeApiCallLoading.value) {
@@ -1261,41 +1271,55 @@ class AddLeadsController extends GetxController {
                 update();
 
                 if (categoryValue.value == "map_marked_screenshot") {
-                  logcat('Go to map screeen', 'MapDrawingScreen');
+                  Get.back();
+                  await Future.delayed(const Duration(milliseconds: 150));
 
-                  await Future.delayed(Duration(milliseconds: 200));
-                  final result = await Get.to(MapDrawingScreen())!.then((
-                    value,
-                  ) {
-                    Get.back();
-                    return value; // IMPORTANT
-                  });
+                  try {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const MapDrawingScreen(),
+                      ),
+                    );
+                    logcat("Map result:", result.toString());
+                    if (result == null) {
+                      logcat("Map result:", "User cancelled");
+                      return;
+                    }
 
-                  if (result != null) {
-                    // ⭐ Store into local variables
-                    final String imagePath = result["imagePath"];
-                    final double roofBreadthFeet = result["roofBreadthFeet"];
+                    final String imagePath = result["imagePath"] ?? "";
+                    final double roofBreadthFeet =
+                        (result["roofBreadthFeet"] ?? 0).toDouble();
                     final double installationAreaSqFt =
-                        result["installationAreaSqFt"];
-                    final double roofLengthFeet = result["roofLengthFeet"];
+                        (result["installationAreaSqFt"] ?? 0).toDouble();
+                    final double roofLengthFeet =
+                        (result["roofLengthFeet"] ?? 0).toDouble();
 
+                    // // Update UI fields
+                    // selectedFilePath.value = imagePath;
+                    // uploadFileCtr.text = imagePath;
+
+                    // installationAreaPath.value = installationAreaSqFt;
+                    // installationareaCtr.text = installationAreaSqFt.toString();
+                    // roofSizeLengthCtr.text = roofLengthFeet.toString();
+                    // roofSizeBreadthCtr.text = roofBreadthFeet.toString();
+
+                    /// STORE TEMP VALUES (NOT ADD FILE)
                     selectedFilePath.value = imagePath;
-                    uploadFileCtr.text = imagePath;
+                    tempRoofLength.value = roofLengthFeet;
+                    tempRoofBreadth.value = roofBreadthFeet;
+                    tempInstallationArea.value = installationAreaSqFt;
 
-                    installationAreaPath.value = installationAreaSqFt
-                        .toDouble();
-                    installationareaCtr.text = installationAreaSqFt
-                        .toDouble()
-                        .toString();
+                    /// Update UI fields
+                    uploadFileCtr.text = imagePath;
+                    installationareaCtr.text = installationAreaSqFt.toString();
                     roofSizeLengthCtr.text = roofLengthFeet.toString();
                     roofSizeBreadthCtr.text = roofBreadthFeet.toString();
                     validateUploadFile(uploadFileCtr.text);
 
-                    // ⭐ Correct & clean PRINT LOGS
+                    // ⭐ Logs
                     print("================= MAP RESULT =================");
-                    print(
-                      "📌 Image Path               : ${uploadFileCtr.text}",
-                    );
+                    print("📌 Image Path               : $imagePath");
                     print(
                       "📐 Roof Length (ft)         : ${roofLengthFeet.toStringAsFixed(2)}",
                     );
@@ -1305,25 +1329,14 @@ class AddLeadsController extends GetxController {
                     print(
                       "📦 Installation Area (sq ft): ${installationAreaSqFt.toStringAsFixed(2)}",
                     );
-                    print("----------------------------------------------");
-                    print(
-                      "selectedFilePath.value      : ${selectedFilePath.value}",
-                    );
-                    print(
-                      "uploadFileCtr.text          : ${uploadFileCtr.text}",
-                    );
-                    print(
-                      "roofSizeLengthCtr.text      : ${roofSizeLengthCtr.text}",
-                    );
-                    print(
-                      "roofSizeBreadthCtr.text     : ${roofSizeBreadthCtr.text}",
-                    );
-                    print(
-                      "installationAreaPath.value  : ${installationAreaPath.value}",
-                    );
                     print("===============================================");
-
-                    // Now you can use these variables anywhere inside this block
+                  } catch (e, stack) {
+                    logcat("Map Screen ERROR:", e.toString());
+                    debugPrint(stack.toString());
+                    CustomSnackBar().showErrorSnackbar(
+                      'Error',
+                      'Unable to process map drawing. Please try again.',
+                    );
                   }
                   return;
                 }
@@ -2367,7 +2380,7 @@ class AddLeadsController extends GetxController {
 
     logcat('step1', 'step1');
 
-    if (!roofNatureModel.value.isValidate) isValid = false;
+    // if (!roofNatureModel.value.isValidate) isValid = false;
 
     if (isEditMode.value == false) {
       if (!scheduleMeeeingModel.value.isValidate) isValid = false;
@@ -3056,18 +3069,48 @@ class AddLeadsController extends GetxController {
                                           "selectedFilePath::",
                                           selectedFilePath.value,
                                         );
+
+                                        //Multiple file upload
                                         final newFile = UploadedFile(
                                           path: selectedFilePath.value,
-                                          // category: uploadCategoryCtr.text,
                                           category: categoryValue.value,
                                           canManage: true,
                                           link: selectedFilePath.value,
+
+                                          /// ONLY for map category
+                                          roofSizeLengthFt:
+                                              categoryValue.value ==
+                                                  "map_marked_screenshot"
+                                              ? tempRoofLength.value
+                                              : null,
+                                          roofSizeBreadthFt:
+                                              categoryValue.value ==
+                                                  "map_marked_screenshot"
+                                              ? tempRoofBreadth.value
+                                              : null,
+                                          installationAreaSqFt:
+                                              categoryValue.value ==
+                                                  "map_marked_screenshot"
+                                              ? tempInstallationArea.value
+                                              : null,
                                         );
+                                        // final newFile = UploadedFile(
+                                        //   path: selectedFilePath.value,
+                                        //   // category: uploadCategoryCtr.text,
+                                        //   category: categoryValue.value,
+                                        //   canManage: true,
+                                        //   link: selectedFilePath.value,
+                                        // );
                                         if (index == null) {
                                           addFile(newFile);
                                         } else {
                                           updateFile(index, newFile);
                                         }
+
+                                        /// After adding clear temp values
+                                        tempRoofLength.value = 0;
+                                        tempRoofBreadth.value = 0;
+                                        tempInstallationArea.value = 0;
                                         Get.back();
                                       }
                                     },
@@ -3363,6 +3406,7 @@ class AddLeadsController extends GetxController {
   //     logcat('step process', 'step-8');
   //   }
   // }
+
   Future<void> addLeadApi(BuildContext context) async {
     var loadingIndicator = LoadingProgressDialog();
     User? user = await UserPreferences().getSignInInfo();
@@ -3457,18 +3501,91 @@ class AddLeadsController extends GetxController {
     // ========================== //
     //       ADD FILES
     // ========================== //
+    //Old
+    // for (int i = 0; i < fileList.length; i++) {
+    //   final file = fileList[i];
+    //   if (file.path != null && file.path!.isNotEmpty) {
+    //     final fileToUpload = File(file.path!);
+    //     if (await fileToUpload.exists()) {
+    //       request.files.add(
+    //         await http.MultipartFile.fromPath(
+    //           'uploaded_files[$i][file]',
+    //           fileToUpload.path,
+    //         ),
+    //       );
+    //       request.fields['uploaded_files[$i][category]'] = file.category ?? "";
+    //     }
+    //   }
+    // }
+
     for (int i = 0; i < fileList.length; i++) {
       final file = fileList[i];
+
+      // If already remote (link) — include as existing remote reference (server expects only file index sometimes)
+      if (file.link != null &&
+          file.link.isNotEmpty &&
+          file.link.startsWith("http")) {
+        // server already has this file — we still may want to send category (depends on API)
+        // If your API expects only new files under 'uploaded_files', you can skip adding remote here
+        logcat("Skipped remote file at index $i", file.link);
+        continue;
+      }
+
+      // If local path present → upload
       if (file.path != null && file.path!.isNotEmpty) {
         final fileToUpload = File(file.path!);
         if (await fileToUpload.exists()) {
+          // add file
+          final fieldName = 'uploaded_files[$i][file]';
           request.files.add(
-            await http.MultipartFile.fromPath(
-              'uploaded_files[$i][file]',
-              fileToUpload.path,
-            ),
+            await http.MultipartFile.fromPath(fieldName, fileToUpload.path),
           );
-          request.fields['uploaded_files[$i][category]'] = file.category ?? "";
+          logcat("fileToUpload", "Added ${fileToUpload.path} as $fieldName");
+
+          // always include category
+          request.fields['uploaded_files[$i][category]'] = file.category ?? '';
+
+          // map-specific extra fields
+          if (file.category == 'map_marked_screenshot') {
+            // send roof size and installation area if available
+            if (file.roofSizeLengthFt != null) {
+              request.fields['uploaded_files[$i][roof_size_length_ft]'] = file
+                  .roofSizeLengthFt!
+                  .toString();
+            }
+            if (file.roofSizeBreadthFt != null) {
+              request.fields['uploaded_files[$i][roof_size_breadth_ft]'] = file
+                  .roofSizeBreadthFt!
+                  .toString();
+            }
+            if (file.installationAreaSqFt != null) {
+              request.fields['uploaded_files[$i][installation_area]'] = file
+                  .installationAreaSqFt!
+                  .toString();
+            }
+          }
+
+          // debug print
+          print("========== FILE ${i + 1} ==========");
+          print("Name     : ${fileToUpload.uri.pathSegments.last}");
+          print("Path     : ${fileToUpload.path}");
+          print("Category : ${file.category ?? ''}");
+          if (file.category == 'map_marked_screenshot') {
+            print("RoofLen  : ${file.roofSizeLengthFt}");
+            print("RoofBread: ${file.roofSizeBreadthFt}");
+            print("InstallA : ${file.installationAreaSqFt}");
+          }
+          print("====================================");
+        } else {
+          logcat("File not found:", fileToUpload.path);
+        }
+      } else {
+        // If there's no local path and no remote link, still send category maybe
+        if ((file.link?.isNotEmpty ?? false) == false) {
+          logcat(
+            "Skipping empty file entry at index $i",
+            jsonEncode(file.toJson()),
+          );
         }
       }
     }
@@ -3542,68 +3659,84 @@ class AddLeadsController extends GetxController {
     printLongLog("FULL_JSON_FOR_POSTMAN", jsonEncode(fullJson));
     // ===================================== //
 
-    logcat('step process', 'step-5');
+    try {
+      loadingIndicator.show(context, '');
+      state.value = ScreenState.apiLoading;
 
-    loadingIndicator.show(context, '');
-    state.value = ScreenState.apiLoading;
+      // SEND REQUEST
+      // return;
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
 
-    // SEND REQUEST
-    // return;
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
+      loadingIndicator.hide(context);
+      state.value = ScreenState.apiSuccess;
 
-    loadingIndicator.hide(context);
-    state.value = ScreenState.apiSuccess;
-
-    var data = jsonDecode(response.body);
-    logcat('step process', 'step-7');
-
-    if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      logcat('AddLeadResponse:', data.toString());
+      logcat('step process', 'step-7');
 
-      if (data['status']?.toString().toLowerCase() == 'success') {
-        showDialogForScreen(
-          context,
-          "Add Lead",
-          data['message'],
-          callback: () {
-            Get.back(result: true);
-          },
-        );
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        logcat('AddLeadResponse:', data.toString());
+
+        if (data['status']?.toString().toLowerCase() == 'success') {
+          //Add event to mobile calendar
+          await CalendarHelper.addEvent(
+            title: 'Lead Meeting',
+            description: 'Reminder: You have a meeting with the customer.',
+            start: selectedScheduleMeeting,
+            end: selectedScheduleMeeting.add(const Duration(hours: 1)),
+            location: '${latitudeCtr.text},${longitudeCtr.text}',
+          );
+          showDialogForScreen(
+            context,
+            "Add Lead",
+            data['message'],
+            callback: () {
+              Get.back(result: true);
+            },
+          );
+        } else {
+          showErrorDialog(context, data);
+        }
+      } else if (response.statusCode == 422) {
+        logcat('AddLeadApi Error', response.body);
+        String errorMessage = 'Validation failed';
+
+        if (data['message'] != null) {
+          errorMessage = data['message'].toString();
+        }
+
+        if (data['errors'] != null && data['errors'] is Map) {
+          try {
+            final firstErrorList = (data['errors'] as Map).values.first;
+            if (firstErrorList is List && firstErrorList.isNotEmpty) {
+              errorMessage = firstErrorList.first.toString();
+            }
+          } catch (_) {}
+        }
+        // ✅ Handle your new API format: "result"
+        else if (data['result'] != null &&
+            data['result'] is Map &&
+            data['result'].isNotEmpty) {
+          try {
+            final firstErrorList = (data['result'] as Map).values.first;
+            if (firstErrorList is List && firstErrorList.isNotEmpty) {
+              errorMessage = firstErrorList.first.toString();
+            }
+          } catch (_) {}
+        }
+
+        showDialogForScreen(context, 'Add Lead', errorMessage, callback: () {});
       } else {
-        showErrorDialog(context, data);
+        logcat('AddLead Failed', response.body);
       }
-    } else if (response.statusCode == 422) {
-      logcat('AddLeadApi Error', response.body);
-      String errorMessage = 'Validation failed';
-
-      if (data['message'] != null) {
-        errorMessage = data['message'].toString();
-      }
-
-      if (data['errors'] != null && data['errors'] is Map) {
-        try {
-          final firstErrorList = (data['errors'] as Map).values.first;
-          if (firstErrorList is List && firstErrorList.isNotEmpty) {
-            errorMessage = firstErrorList.first.toString();
-          }
-        } catch (_) {}
-      }
-
-      showDialogForScreen(context, 'Add Lead', errorMessage, callback: () {});
-    } else {
-      logcat('AddLead Failed', response.body);
+    } catch (e) {
+      loadingIndicator.hide(context);
+      state.value = ScreenState.apiError;
+      message.value = "Error: $e";
+      logcat("Exception", e.toString());
     }
   }
-
-  //   catch (e) {
-  //     loadingIndicator.hide(context);
-  //     state.value = ScreenState.apiError;
-  //     message.value = "Error: $e";
-  //     logcat("Exception", e.toString());
-  //   }
-  // }
 
   RxBool isPaymentReceived = false.obs;
   Future<void> updateLeadApi(BuildContext context, int leadId) async {
@@ -3703,7 +3836,7 @@ class AddLeadsController extends GetxController {
 
     // ---------- Proposal files (single files) ----------
     // Helper to add a file if it exists
-    Future<void> _addFileIfExists(String fieldName, File? file) async {
+    Future<void> addFileIfExists(String fieldName, File? file) async {
       if (file != null && await file.exists()) {
         request.files.add(
           await http.MultipartFile.fromPath(fieldName, file.path),
@@ -3715,19 +3848,19 @@ class AddLeadsController extends GetxController {
     }
 
     // Add single-file proposals using reactive variables
-    await _addFileIfExists(
+    await addFileIfExists(
       'first_technical_proposal',
       firstTechnicalProposalFile.value,
     );
-    await _addFileIfExists(
+    await addFileIfExists(
       'final_technical_proposal',
       finalTechnicalProposalFile.value,
     );
-    await _addFileIfExists(
+    await addFileIfExists(
       'first_commercial_proposal',
       firstCommercialProposalFile.value,
     );
-    await _addFileIfExists(
+    await addFileIfExists(
       'final_commercial_proposal',
       finalCommercialProposalFile.value,
     );
@@ -3736,32 +3869,94 @@ class AddLeadsController extends GetxController {
 
     logcat('fileList.length', fileList.length);
     logcat('fileList.toString isss', fileList.map((f) => f.link).toList());
+    // for (int i = 0; i < fileList.length; i++) {
+    //   final file = fileList[i];
+
+    //   // ✅ Skip files that already have a link (remote files)
+    //   // For update: skip files that are already remote links (they exist on server)
+    //   if (file.link != null &&
+    //       file.link.isNotEmpty &&
+    //       file.link.startsWith('http')) {
+    //     logcat("Skipped remote file at index $i", file.link);
+    //     continue;
+    //   }
+
+    //   // ✅ Proceed only if local file path is valid
+    //   if (file.path != null && file.path!.isNotEmpty) {
+    //     final fileToUpload = File(file.path!);
+
+    //     if (await fileToUpload.exists()) {
+    //       request.files.add(
+    //         await http.MultipartFile.fromPath(
+    //           'uploaded_files[$i][file]',
+    //           fileToUpload.path,
+    //         ),
+    //       );
+    //       logcat("fileToUpload", "Added ${fileToUpload.path}");
+
+    //       // Attach category for this file
+    //       request.fields['uploaded_files[$i][category]'] = file.category ?? '';
+    //     } else {
+    //       logcat("File not found:", fileToUpload.path);
+    //     }
+    //   }
+    // }
+
+    // ---------- Files: upload only local files, attach map extras ----------
+    int uploadIndex = 0;
     for (int i = 0; i < fileList.length; i++) {
       final file = fileList[i];
 
-      // ✅ Skip files that already have a link (remote files)
-      if (file.link != null && file.link.startsWith('http')) {
-        logcat("Skipped remote file", file.link);
+      // For update: skip files that are already remote links (they exist on server)
+      if (file.link != null &&
+          file.link.isNotEmpty &&
+          file.link.startsWith('http')) {
+        logcat("Skipped remote file at index $i", file.link);
         continue;
       }
 
-      // ✅ Proceed only if local file path is valid
       if (file.path != null && file.path!.isNotEmpty) {
-        final fileToUpload = File(file.path!);
-
-        if (await fileToUpload.exists()) {
+        final localFile = File(file.path!);
+        if (await localFile.exists()) {
+          final fieldName = 'uploaded_files[$uploadIndex][file]';
           request.files.add(
-            await http.MultipartFile.fromPath(
-              'uploaded_files[$i][file]',
-              fileToUpload.path,
-            ),
+            await http.MultipartFile.fromPath(fieldName, localFile.path),
           );
-          logcat("fileToUpload", "Added ${fileToUpload.path}");
 
-          // Attach category for this file
-          request.fields['uploaded_files[$i][category]'] = file.category ?? '';
+          // category
+          request.fields['uploaded_files[$uploadIndex][category]'] =
+              file.category ?? '';
+
+          // map-specific extras
+          if (file.category == 'map_marked_screenshot') {
+            if (file.roofSizeLengthFt != null) {
+              request.fields['uploaded_files[$uploadIndex][roof_size_length_ft]'] =
+                  file.roofSizeLengthFt!.toString();
+            }
+            if (file.roofSizeBreadthFt != null) {
+              request.fields['uploaded_files[$uploadIndex][roof_size_breadth_ft]'] =
+                  file.roofSizeBreadthFt!.toString();
+            }
+            if (file.installationAreaSqFt != null) {
+              request.fields['uploaded_files[$uploadIndex][installation_area]'] =
+                  file.installationAreaSqFt!.toString();
+            }
+          }
+
+          print("========== UPLOAD FILE $uploadIndex ==========");
+          print("Name     : ${localFile.uri.pathSegments.last}");
+          print("Path     : ${localFile.path}");
+          print("Category : ${file.category ?? ''}");
+          if (file.category == 'map_marked_screenshot') {
+            print("RoofLen  : ${file.roofSizeLengthFt}");
+            print("RoofBread: ${file.roofSizeBreadthFt}");
+            print("InstallA : ${file.installationAreaSqFt}");
+          }
+          print("====================================");
+
+          uploadIndex++;
         } else {
-          logcat("File not found:", fileToUpload.path);
+          logcat("File not found:", localFile.path);
         }
       }
     }
@@ -5404,6 +5599,7 @@ class AddLeadsController extends GetxController {
             double.tryParse(result.installationArea.toString()) ?? 0.0;
 
         installationareaCtr.text = result.installationArea.toString();
+        installationCapacityCtr.text = result.installationCapacity.toString();
         // ==========================================================
         // 🔹 DROPDOWN VALUE → LABEL USING getLabelFromValue
         // ==========================================================
@@ -6221,7 +6417,7 @@ class AddLeadsController extends GetxController {
           value.trim().toLowerCase(),
       orElse: () => DgSyncRequired(label: "", value: ""),
     );
-    return match?.label ?? value;
+    return match.label;
   }
 
   String formatCategory(String category, String? tag) {
@@ -6396,7 +6592,7 @@ class AddLeadsController extends GetxController {
     // validateRequiredSolution(selectedRequiredSolutionValue.value);
     validateLeadCategory(selectedLeadCategoryValue.value);
 
-    validateRoofNature(selectedRoofNatureValue.value);
+    // validateRoofNature(selectedRoofNatureValue.value);
 
     validateScheduleMeeting(scheduleMeetingCtr.text);
 

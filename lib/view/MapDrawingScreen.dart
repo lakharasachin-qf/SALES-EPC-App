@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_drawing_tools/google_maps_drawing_tools.dart';
 import 'package:location/location.dart';
@@ -33,8 +32,8 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
   final ScreenshotController _screenshotController = ScreenshotController();
   LatLng? _currentLatLng;
   bool isDrawingMode = false;
-  final Set<Polygon> _finishedPolygons = {}; // NEW
-  final Set<Polyline> _finishedPolylines = {}; // NEW
+  final Set<Polygon> _finishedPolygons = {};
+  final Set<Polyline> _finishedPolylines = {};
   final Set<Marker> _markers = {};
   final Set<Polyline> _polylines = {};
   final Set<Polygon> _polygons = {};
@@ -59,8 +58,17 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
   void initState() {
     super.initState();
     _requestAndSetLocation();
-
     searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    searchController.removeListener(_onSearchChanged);
+    searchController.dispose();
+    _searchFocus.dispose();
+    _drawingController.dispose();
+    super.dispose();
   }
 
   @override
@@ -289,164 +297,168 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                   ],
                 ),
               ),
-
-              Positioned(
-                right: 2.w,
-                bottom: 15.h,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    AnimatedSlide(
-                      duration: const Duration(milliseconds: 200),
-                      offset: isFabExpanded
-                          ? Offset.zero
-                          : const Offset(0, 0.2),
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 200),
-                        opacity: isFabExpanded ? 1 : 0,
-                        child: Column(
-                          children: [
-                            // buildRoundFab(
-                            //   icon: Icons.download,
-                            //   tooltip: 'Download Map',
-                            //   onTap: () async {
-                            //     setState(() {
-                            //       showMyLocation = false;
-                            //       showZoomControls = false;
-                            //     });
-                            //     await Future.delayed(
-                            //       const Duration(milliseconds: 300),
-                            //     );
-                            //     // await captureAndSaveMap(
-                            //     //   context,
-                            //     //   _screenshotController,
-                            //     // );
-                            //     final filePath = await captureAndSaveMap(
-                            //       context,
-                            //       _screenshotController,
-                            //     );
-
-                            //     if (filePath != null) {
-                            //       File imageFile = File(
-                            //         filePath,
-                            //       ); // <-- this is your image
-                            //       _showImageSavedBottomSheet(
-                            //         message: 'Map image saved successfully!',
-                            //         onSave: () {
-                            //           Get.back(
-                            //             result: {
-                            //               "imagePath": imageFile.path,
-                            //               "roofBreadthFeet": roofBreadthFeet,
-                            //               "roofLengthFeet": roofLengthFeet,
-                            //               "installationAreaSqFt":
-                            //                   installationAreaSqFt,
-                            //             },
-                            //           );
-                            //         },
-                            //         onCancel: () {},
-                            //       );
-                            //       logcat('capture image is', imageFile.path);
-                            //     }
-                            //     setState(() {
-                            //       showMyLocation = true;
-                            //       showZoomControls = true;
-                            //     });
-                            //   },
-                            // ),
-                            // getDynamicSizedBox(height: 1.h),
-                            buildRoundFab(
-                              icon: Icons.layers_outlined,
-                              tooltip: 'Map type',
-                              onTap: _showMapTypeDialog,
-                            ),
-                            getDynamicSizedBox(height: 1.h),
-                            buildRoundFab(
-                              icon: Icons.my_location,
-                              tooltip: 'Recenter',
-                              onTap: _recenter,
-                            ),
-                            getDynamicSizedBox(height: 1.h),
-                            // buildRoundFab(
-                            //   icon: Icons.gesture_rounded,
-                            //   tooltip: 'Mode',
-                            //   onTap: _showModePicker,
-                            // ),
-                            getDynamicSizedBox(height: 1.h),
-                          ],
-                        ),
-                      ),
-                    ),
-                    AnimatedScale(
-                      scale: isFabExpanded ? 1.1 : 1.0,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOutBack,
-                      child: AnimatedRotation(
-                        turns: isFabExpanded ? 0.25 : 0,
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeOut,
-                        child: buildRoundFab(
-                          icon: isFabExpanded ? Icons.close : Icons.add,
-                          tooltip: isFabExpanded ? 'Close' : 'More Options',
-                          onTap: () {
-                            setState(() => isFabExpanded = !isFabExpanded);
-                          },
-                        ),
-                      ),
-                    ),
-                    // buildRoundFab(
-                    //   icon: isFabExpanded ? Icons.close : Icons.add,
-                    //   tooltip: isFabExpanded ? 'Close' : 'More Options',
-                    //   onTap: () {
-                    //     setState(() => isFabExpanded = !isFabExpanded);
-                    //   },
-                    // ),
-                  ],
-                ),
-              ),
               // Positioned(
               //   right: 2.w,
               //   bottom: 15.h,
               //   child: Column(
+              //     mainAxisSize: MainAxisSize.min,
+              //     crossAxisAlignment: CrossAxisAlignment.end,
               //     children: [
-              //       buildRoundFab(
-              //         icon: Icons.download,
-              //         tooltip: 'Download Map',
-              //         onTap: () async {
-              //           setState(() {
-              //             showMyLocation = false;
-              //             showZoomControls = false;
-              //           });
-              //           await Future.delayed(const Duration(milliseconds: 300));
-              //           await captureAndSaveMap(context, _screenshotController);
-              //           setState(() {
-              //             showMyLocation = true;
-              //             showZoomControls = true;
-              //           });
-              //           // captureAndSaveMap(context, _screenshotController);
-              //         },
+              //       AnimatedSlide(
+              //         duration: const Duration(milliseconds: 200),
+              //         offset: isFabExpanded
+              //             ? Offset.zero
+              //             : const Offset(0, 0.2),
+              //         child: AnimatedOpacity(
+              //           duration: const Duration(milliseconds: 200),
+              //           opacity: isFabExpanded ? 1 : 0,
+              //           child: Column(
+              //             children: [
+              //               // buildRoundFab(
+              //               //   icon: Icons.download,
+              //               //   tooltip: 'Download Map',
+              //               //   onTap: () async {
+              //               //     setState(() {
+              //               //       showMyLocation = false;
+              //               //       showZoomControls = false;
+              //               //     });
+              //               //     await Future.delayed(
+              //               //       const Duration(milliseconds: 300),
+              //               //     );
+              //               //     // await captureAndSaveMap(
+              //               //     //   context,
+              //               //     //   _screenshotController,
+              //               //     // );
+              //               //     final filePath = await captureAndSaveMap(
+              //               //       context,
+              //               //       _screenshotController,
+              //               //     );
+
+              //               //     if (filePath != null) {
+              //               //       File imageFile = File(
+              //               //         filePath,
+              //               //       ); // <-- this is your image
+              //               //       _showImageSavedBottomSheet(
+              //               //         message: 'Map image saved successfully!',
+              //               //         onSave: () {
+              //               //           Get.back(
+              //               //             result: {
+              //               //               "imagePath": imageFile.path,
+              //               //               "roofBreadthFeet": roofBreadthFeet,
+              //               //               "roofLengthFeet": roofLengthFeet,
+              //               //               "installationAreaSqFt":
+              //               //                   installationAreaSqFt,
+              //               //             },
+              //               //           );
+              //               //         },
+              //               //         onCancel: () {},
+              //               //       );
+              //               //       logcat('capture image is', imageFile.path);
+              //               //     }
+              //               //     setState(() {
+              //               //       showMyLocation = true;
+              //               //       showZoomControls = true;
+              //               //     });
+              //               //   },
+              //               // ),
+              //               // getDynamicSizedBox(height: 1.h),
+              //               buildRoundFab(
+              //                 icon: Icons.layers_outlined,
+              //                 tooltip: 'Map type',
+              //                 onTap: _showMapTypeDialog,
+              //               ),
+              //               getDynamicSizedBox(height: 1.h),
+              //               buildRoundFab(
+              //                 icon: Icons.my_location,
+              //                 tooltip: 'Recenter',
+              //                 onTap: _recenter,
+              //               ),
+              //               getDynamicSizedBox(height: 1.h),
+              //               // buildRoundFab(
+              //               //   icon: Icons.gesture_rounded,
+              //               //   tooltip: 'Mode',
+              //               //   onTap: _showModePicker,
+              //               // ),
+              //               getDynamicSizedBox(height: 1.h),
+              //             ],
+              //           ),
+              //         ),
               //       ),
-              //       getDynamicSizedBox(height: 1.h),
-              //       buildRoundFab(
-              //         icon: Icons.layers_outlined,
-              //         tooltip: 'Map type',
-              //         onTap: () => _showMapTypeDialog(),
+              //       AnimatedScale(
+              //         scale: isFabExpanded ? 1.1 : 1.0,
+              //         duration: const Duration(milliseconds: 200),
+              //         curve: Curves.easeOutBack,
+              //         child: AnimatedRotation(
+              //           turns: isFabExpanded ? 0.25 : 0,
+              //           duration: const Duration(milliseconds: 250),
+              //           curve: Curves.easeOut,
+              //           child: buildRoundFab(
+              //             icon: isFabExpanded ? Icons.close : Icons.add,
+              //             tooltip: isFabExpanded ? 'Close' : 'More Options',
+              //             onTap: () {
+              //               setState(() => isFabExpanded = !isFabExpanded);
+              //             },
+              //           ),
+              //         ),
               //       ),
-              //       getDynamicSizedBox(height: 1.h),
-              //       buildRoundFab(
-              //         icon: Icons.my_location,
-              //         tooltip: 'Recenter',
-              //         onTap: _recenter,
-              //       ),
-              //       getDynamicSizedBox(height: 1.h),
-              //       buildRoundFab(
-              //         icon: Icons.add,
-              //         tooltip: 'Recenter',
-              //         onTap: _showModePicker,
-              //       ),
+              //       // buildRoundFab(
+              //       //   icon: isFabExpanded ? Icons.close : Icons.add,
+              //       //   tooltip: isFabExpanded ? 'Close' : 'More Options',
+              //       //   onTap: () {
+              //       //     setState(() => isFabExpanded = !isFabExpanded);
+              //       //   },
+              //       // ),
               //     ],
               //   ),
               // ),
+              Positioned(
+                right: 2.w,
+                bottom: 15.h,
+                child: buildRoundFab(
+                  icon: Icons.my_location,
+                  tooltip: 'Recenter',
+                  onTap: _recenter,
+                ),
+                //  Column(
+                //   children: [
+                //     buildRoundFab(
+                //       icon: Icons.download,
+                //       tooltip: 'Download Map',
+                //       onTap: () async {
+                //         setState(() {
+                //           showMyLocation = false;
+                //           showZoomControls = false;
+                //         });
+                //         await Future.delayed(const Duration(milliseconds: 300));
+                //         await captureAndSaveMap(context, _screenshotController);
+                //         setState(() {
+                //           showMyLocation = true;
+                //           showZoomControls = true;
+                //         });
+                //         // captureAndSaveMap(context, _screenshotController);
+                //       },
+                //     ),
+                //     getDynamicSizedBox(height: 1.h),
+                //     buildRoundFab(
+                //       icon: Icons.layers_outlined,
+                //       tooltip: 'Map type',
+                //       onTap: () => _showMapTypeDialog(),
+                //     ),
+                //     getDynamicSizedBox(height: 1.h),
+                //     buildRoundFab(
+                //       icon: Icons.my_location,
+                //       tooltip: 'Recenter',
+                //       onTap: _recenter,
+                //     ),
+                //     getDynamicSizedBox(height: 1.h),
+                //     buildRoundFab(
+                //       icon: Icons.add,
+                //       tooltip: 'Recenter',
+                //       onTap: _showModePicker,
+                //     ),
+                //   ],
+                // ),
+              ),
               Positioned(
                 left: 12,
                 right: 12,
@@ -463,7 +475,6 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                     child: buildBottomActionsBar(
                       context: context,
                       mode: _mode,
-
                       onPin: () => _setMode(DrawMode.pin),
                       onPolyline: () => _setMode(DrawMode.polyline),
                       onPolygon: () => _setMode(DrawMode.polygon),
@@ -504,32 +515,38 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
             children: [
               Center(
                 child: Container(
-                  width: 50,
-                  height: 4,
+                  width: 15.w,
+                  height: 0.5.h,
                   decoration: BoxDecoration(
                     color: Colors.grey[400],
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
-
-              /// Title
-              const Text(
-                "Success",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              getDynamicSizedBox(height: 1.5.h),
+              Center(
+                child: Text(
+                  "Success",
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: plusJakartaSansBold,
+                  ),
+                ),
               ),
-
-              const SizedBox(height: 10),
+              getDynamicSizedBox(height: 1.h),
 
               /// Message
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16, color: Colors.black87),
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: black,
+                  fontFamily: plusJakartaSansMedium,
+                ),
               ),
-
-              const SizedBox(height: 25),
+              getDynamicSizedBox(height: 2.5.h),
 
               /// Buttons
               Row(
@@ -542,16 +559,23 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                         onCancel();
                       },
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: EdgeInsets.symmetric(vertical: 1.2.h),
                         side: BorderSide(color: primaryColor),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text("Cancel"),
+                      child: Text(
+                        "Cancel",
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: black,
+                          fontFamily: plusJakartaSansMedium,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 15),
+                  getDynamicSizedBox(width: 5.w),
                   Expanded(
                     child: TextButton(
                       onPressed: () {
@@ -561,12 +585,19 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
                       style: TextButton.styleFrom(
                         backgroundColor: primaryColor,
                         foregroundColor: white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: EdgeInsets.symmetric(vertical: 1.2.h),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text("Save"),
+                      child: Text(
+                        "Save",
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: white,
+                          fontFamily: plusJakartaSansBold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -654,6 +685,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
   }
 
   Future<void> _requestAndSetLocation() async {
+    logcat("_requestAndSetLocation", "Done");
     final location = Location();
     bool serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
@@ -1029,7 +1061,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
         // ---- 3. **Keep every vertex marker** (draggable) ----
         _rebuildVertexMarkers(); // <-- IMPORTANT
 
-        _mode = DrawMode.none; // exit drawing mode
+        _mode = DrawMode.polygon; // exit drawing mode
       });
 
       // ---- CALCULATIONS (unchanged) -------------------------
@@ -1236,121 +1268,145 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
       ),
       builder: (_) {
         return Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 50,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[400],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 15),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              ...rows.map((r) => _buildInfoRow(r["label"]!, r["value"]!)),
-              const SizedBox(height: 15),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        setState(() {
-                          _mode = DrawMode.polygon;
-                        });
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: primaryColor,
-                        foregroundColor: white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text("Close"),
+          padding: EdgeInsets.all(5.5.w),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 15.w,
+                    height: 0.5.h,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[400],
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  getDynamicSizedBox(width: 2.w),
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () async {
-                        setState(() {
-                          showMyLocation = false;
-                          showZoomControls = false;
-                        });
-                        await Future.delayed(const Duration(milliseconds: 300));
-                        // await captureAndSaveMap(
-                        //   context,
-                        //   _screenshotController,
-                        // );
-                        final filePath = await captureAndSaveMap(
-                          context,
-                          _screenshotController,
-                        );
-
-                        if (filePath != null) {
-                          File imageFile = File(
-                            filePath,
-                          ); // <-- this is your image
-                          _showImageSavedBottomSheet(
-                            message: 'Map image saved successfully!',
-                            onSave: () {
-                              Get.back();
-                              Get.back(
-                                result: {
-                                  "imagePath": imageFile.path,
-                                  "roofBreadthFeet": roofBreadthFeet,
-                                  "roofLengthFeet": roofLengthFeet,
-                                  "installationAreaSqFt": installationAreaSqFt,
-                                },
-                              );
-                            },
-                            onCancel: () {},
+                ),
+                getDynamicSizedBox(height: 1.5.h),
+                Center(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: plusJakartaSansBold,
+                    ),
+                  ),
+                ),
+                getDynamicSizedBox(height: 2.h),
+                ...rows.map((r) => _buildInfoRow(r["label"]!, r["value"]!)),
+                const SizedBox(height: 15),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          setState(() {
+                            _mode = DrawMode.polygon;
+                          });
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(
+                          "Close",
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: white,
+                            fontFamily: plusJakartaSansBold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    getDynamicSizedBox(width: 2.w),
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () async {
+                          setState(() {
+                            showMyLocation = false;
+                            showZoomControls = false;
+                            Navigator.pop(context);
+                            _mode = DrawMode.polygon;
+                          });
+                          await Future.delayed(
+                            const Duration(milliseconds: 300),
                           );
-                          logcat('capture image is', imageFile.path);
-                        }
-                        setState(() {
-                          showMyLocation = true;
-                          showZoomControls = true;
-                        });
-                        // Navigator.pop(context);
-                        // setState(() {
-                        //   _mode = DrawMode.polygon;
-                        // });
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: primaryColor,
-                        foregroundColor: white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
+                          // await captureAndSaveMap(
+                          //   context,
+                          //   _screenshotController,
+                          // );
+                          final filePath = await captureAndSaveMap(
+                            context,
+                            _screenshotController,
+                          );
+
+                          if (filePath != null) {
+                            File imageFile = File(
+                              filePath,
+                            ); // <-- this is your image
+                            _showImageSavedBottomSheet(
+                              message: 'Map image saved successfully!',
+                              onSave: () {
+                                // Get.back();
+                                Get.back(
+                                  result: {
+                                    "imagePath": imageFile.path,
+                                    "roofBreadthFeet": roofBreadthFeet,
+                                    "roofLengthFeet": roofLengthFeet,
+                                    "installationAreaSqFt":
+                                        installationAreaSqFt,
+                                  },
+                                );
+                              },
+                              onCancel: () {},
+                            );
+                            logcat('capture image is', imageFile.path);
+                          }
+                          setState(() {
+                            showMyLocation = true;
+                            showZoomControls = true;
+                          });
+                          // Navigator.pop(context);
+                          // setState(() {
+                          //   _mode = DrawMode.polygon;
+                          // });
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                        child: Text(
+                          "Save",
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: white,
+                            fontFamily: plusJakartaSansBold,
+                          ),
                         ),
                       ),
-                      child: const Text("Save"),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -1363,12 +1419,27 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: EdgeInsets.symmetric(vertical: 0.4.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontSize: 16)),
-          Text(value, style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 16.sp,
+              color: black,
+              fontFamily: plusJakartaSansMedium,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: black,
+              fontFamily: plusJakartaSansBold,
+            ),
+          ),
         ],
       ),
     );
@@ -1639,7 +1710,7 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
 
   Widget buildMeasurementChip(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 0.7.h),
       decoration: BoxDecoration(
         color: white,
         borderRadius: BorderRadius.circular(12),
@@ -1654,12 +1725,15 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.straighten, size: 18, color: Colors.black87),
+          Icon(Icons.straighten, size: 18.sp, color: black),
           SizedBox(width: 3.w),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                fontWeight: FontWeight.w200,
+                fontFamily: plusJakartaSansBold,
+              ),
             ),
           ),
         ],
@@ -1840,16 +1914,6 @@ class MapDrawingScreenState extends State<MapDrawingScreen> {
       ),
     );
   }
-
-  @override
-  void dispose() {
-    _debounce?.cancel();
-    searchController.removeListener(_onSearchChanged);
-    searchController.dispose();
-    _searchFocus.dispose();
-    _drawingController.dispose();
-    super.dispose();
-  }
 }
 
 extension on MapDrawingScreenState {
@@ -1860,17 +1924,32 @@ extension on MapDrawingScreenState {
         .map((e) => mp.LatLng(e.latitude, e.longitude))
         .toList();
 
-    // If not drawing polygon → no measurements
-    if (_mode != DrawMode.polygon) return '';
+    // Polyline drawing → only show length
+    if (_mode == DrawMode.polyline) {
+      double maxDistMeters = 0;
 
-    // ---------------- 1️⃣ Installation Area (sq ft) ----------------
-    double? liveAreaSqFt;
-    if (_tempPoints.length >= 3) {
-      final areaMeters = mp.SphericalUtil.computeArea(pts); // m²
-      liveAreaSqFt = areaMeters * 10.7639; // sq ft
+      for (int i = 0; i < pts.length; i++) {
+        for (int j = i + 1; j < pts.length; j++) {
+          final d = mp.SphericalUtil.computeDistanceBetween(pts[i], pts[j]);
+          if (d > maxDistMeters) maxDistMeters = d.toDouble();
+        }
+      }
+
+      final ft = maxDistMeters * 3.28084;
+      return ft > 0 ? "Length: ${ft.toStringAsFixed(2)} ft" : "";
     }
 
-    // ---------------- 2️⃣ Roof Breadth (ft) ----------------
+    // Must have polygon
+    if (_mode != DrawMode.polygon) return "";
+
+    // ---------- AREA ----------
+    double? areaSqFt;
+    if (_tempPoints.length >= 3) {
+      final areaM2 = mp.SphericalUtil.computeArea(pts);
+      areaSqFt = areaM2 * 10.7639;
+    }
+
+    // ---------- BREADTH ----------
     double maxDistMeters = 0;
     for (int i = 0; i < pts.length; i++) {
       for (int j = i + 1; j < pts.length; j++) {
@@ -1878,32 +1957,31 @@ extension on MapDrawingScreenState {
         if (d > maxDistMeters) maxDistMeters = d.toDouble();
       }
     }
-    double liveRoofBreadthFt = maxDistMeters * 3.28084;
+    double breadthFt = maxDistMeters * 3.28084;
 
-    // ---------------- 3️⃣ Roof Length (ft) ----------------
+    // ---------- LENGTH ----------
     double longestSideMeters = 0;
     if (_tempPoints.length >= 3) {
       for (int i = 0; i < pts.length; i++) {
         final next = pts[(i + 1) % pts.length];
-        final seg = mp.SphericalUtil.computeDistanceBetween(pts[i], next);
-        if (seg > longestSideMeters) longestSideMeters = seg.toDouble();
+        final seg = mp.SphericalUtil.computeDistanceBetween(
+          pts[i],
+          next,
+        ).toDouble();
+        if (seg > longestSideMeters) longestSideMeters = seg;
       }
     }
-    double liveRoofLengthFt = longestSideMeters * 3.28084;
+    double lengthFt = longestSideMeters * 3.28084;
 
-    // ---------------- OUTPUT RULES ----------------
+    // ---------- RETURN SHORT VALUES ----------
     if (_tempPoints.length < 3) {
-      return '''
-Roof Breadth: ${liveRoofBreadthFt.toStringAsFixed(2)} ft
-''';
+      return "Roof Breadth: ${breadthFt.toStringAsFixed(2)} ft";
     }
 
-    // ---------------- FINAL OUTPUT ----------------
-    return '''
-Roof Breadth: ${liveRoofBreadthFt.toStringAsFixed(2)} ft
-Roof Length: ${liveRoofLengthFt.toStringAsFixed(2)} ft
-Installation Area: ${liveAreaSqFt!.toStringAsFixed(2)} sq ft
-''';
+    // ---------- FINAL OUTPUT (NO EXTRA NEWLINES) ----------
+    return "Roof Breadth: ${breadthFt.toStringAsFixed(2)} ft\n"
+        "Roof Length: ${lengthFt.toStringAsFixed(2)} ft\n"
+        "Installation Area: ${areaSqFt!.toStringAsFixed(2)} sq ft";
   }
 
   bool _isNear(LatLng a, LatLng b, double meters) {

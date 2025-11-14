@@ -37,7 +37,7 @@ class AddLeadScreen extends StatefulWidget {
 
 class _AddLeadScreenState extends State<AddLeadScreen>
     with WidgetsBindingObserver {
-  final AddLeadsController controller = Get.isRegistered<AddLeadsController>()
+  var controller = Get.isRegistered<AddLeadsController>()
       ? Get.find<AddLeadsController>()
       : Get.put(AddLeadsController());
   int _currentStep = 0;
@@ -1021,6 +1021,8 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                 );
                               }),
                               if (widget.isEdit == true)
+                                getDynamicSizedBox(height: 2.h),
+                              if (widget.isEdit == true)
                                 getLable("Installation Area (sq ft)"),
 
                               if (widget.isEdit == true)
@@ -1043,15 +1045,44 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         .error,
                                   );
                                 }),
+
+                              if (widget.isEdit == true)
+                                getDynamicSizedBox(height: 2.h),
+                              if (widget.isEdit == true)
+                                getLable(
+                                  "Installation Capacity (Kwp)",
+                                  isVerified: true,
+                                ),
+
+                              if (widget.isEdit == true)
+                                Obx(() {
+                                  return getReactiveFormField(
+                                    node: controller.installationCapacityNode,
+                                    controller:
+                                        controller.installationCapacityCtr,
+                                    hintLabel:
+                                        "Enter Installation Capacity (Kwp)",
+                                    onChanged: (val) {},
+                                    inputType: TextInputType.number,
+                                    isEnable: false,
+                                    isVerified: true,
+                                    formType: FieldType.text,
+                                    wantSuffix: false,
+                                    errorText: controller
+                                        .installationAreaModel
+                                        .value
+                                        .error,
+                                  );
+                                }),
                               getDynamicSizedBox(height: 2.h),
-                              getLable("Roof Nature", isRequired: true),
+                              getLable("Roof Nature", isRequired: false),
                               Obx(() {
                                 return getReactiveFormField(
                                   node: controller.roofNatureNode,
                                   controller: controller.roofNatureCtr,
                                   hintLabel: "Select Roof Nature",
                                   onChanged: (val) {
-                                    controller.validateRoofNature(val);
+                                    // controller.validateRoofNature(val);
                                   },
                                   onTap: () {
                                     controller.searchRoofNatureCtr.text = "";
@@ -1183,7 +1214,7 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                         isReadOnly: true,
                                         inputType: TextInputType.none,
                                         errorText: controller
-                                            .roofNatureModel
+                                            .leadStatusModel
                                             .value
                                             .error,
                                       ),

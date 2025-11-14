@@ -292,7 +292,6 @@ fetchSelectionPopup<T>(
   required String Function(T) getTitle,
   Function(T)? onSelected,
   required backBtn,
-  bool isStandard = false,
 }) {
   String selecteddata = controller.text;
   showModalBottomSheet(
@@ -372,54 +371,65 @@ fetchSelectionPopup<T>(
                     ),
                   ),
 
-                  // List
-                  Expanded(
-                    child: SafeArea(
-                      child: ListView.builder(
-                        itemCount: list.length,
-                        physics: BouncingScrollPhysics(),
-                        shrinkWrap: true,
-                        padding: EdgeInsets.only(bottom: 5.h),
-                        itemBuilder: (context, index) {
-                          var data = list[index];
-                          String displayData = getTitle(data);
-                          return ListTile(
-                            title: Text(
-                              isStandard
-                                  ? 'Standard :- $displayData'
-                                  : displayData,
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontFamily: plusJakartaSansMedium,
-                                fontWeight: displayData == selecteddata
-                                    ? FontWeight.w800
-                                    : FontWeight.normal,
-                                color: displayData == selecteddata
-                                    ? primaryColor
-                                    : black,
+                  if (list.isEmpty)
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          AlertDialogList.emptylist,
+                          style: TextStyle(
+                            fontSize: 4.5.w,
+                            fontFamily: plusJakartaSansBold,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    // List
+                    Expanded(
+                      child: SafeArea(
+                        child: ListView.builder(
+                          itemCount: list.length,
+                          physics: BouncingScrollPhysics(),
+                          shrinkWrap: true,
+                          padding: EdgeInsets.only(bottom: 5.h),
+                          itemBuilder: (context, index) {
+                            var data = list[index];
+                            String displayData = getTitle(data);
+                            return ListTile(
+                              title: Text(
+                                displayData,
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontFamily: plusJakartaSansMedium,
+                                  fontWeight: displayData == selecteddata
+                                      ? FontWeight.w800
+                                      : FontWeight.normal,
+                                  color: displayData == selecteddata
+                                      ? primaryColor
+                                      : black,
+                                ),
                               ),
-                            ),
-                            trailing: displayData == selecteddata
-                                ? Icon(
-                                    Icons.check,
-                                    color: primaryColor,
-                                    size: 20.sp,
-                                  )
-                                : null,
-                            onTap: () {
-                              setState(() {
-                                selecteddata = displayData;
-                              });
-                              controller.text = displayData;
-                              function?.call();
-                              onSelected?.call(data);
-                              backBtn();
-                            },
-                          );
-                        },
+                              trailing: displayData == selecteddata
+                                  ? Icon(
+                                      Icons.check,
+                                      color: primaryColor,
+                                      size: 20.sp,
+                                    )
+                                  : null,
+                              onTap: () {
+                                setState(() {
+                                  selecteddata = displayData;
+                                });
+                                controller.text = displayData;
+                                function?.call();
+                                onSelected?.call(data);
+                                backBtn();
+                              },
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),

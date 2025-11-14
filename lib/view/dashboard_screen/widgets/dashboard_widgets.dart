@@ -219,10 +219,10 @@ Widget getDashboardDrawer(
               },
             )
           : SizedBox.shrink(),
-      buildDrawerItem(Asset.leads, HomeScreenConst.leadMap, () {
-        ctr.scaffoldKey.currentState?.closeDrawer();
-        Get.to(MapDrawingScreen());
-      }),
+      // buildDrawerItem(Asset.leads, HomeScreenConst.leadMap, () {
+      //   ctr.scaffoldKey.currentState?.closeDrawer();
+      //   Get.to(MapDrawingScreen());
+      // }),
       buildDrawerItem(Asset.logout, 'Logout', () async {
         ctr.scaffoldKey.currentState?.closeDrawer();
         getpopup(

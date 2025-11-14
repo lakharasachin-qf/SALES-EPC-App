@@ -57,6 +57,7 @@ class LeadData {
 
   // ⭐ UPDATED BASED ON JSON
   String? installationArea; // "100"
+  String? installationCapacity; // "100"
   int? installationUnits; // 1
 
   String? roofNature;
@@ -116,6 +117,7 @@ class LeadData {
 
     // ⭐ UPDATED FIELDS
     this.installationArea,
+    this.installationCapacity,
     this.installationUnits,
 
     this.roofNature,
@@ -171,7 +173,8 @@ class LeadData {
     roofSizeLengthFt: json["roof_size_length_ft"],
     roofSizeBreadthFt: json["roof_size_breadth_ft"],
 
-    installationArea: json["installation_area"], // ⭐ correct type
+    installationArea: json["installation_area"] ?? '', // ⭐ correct type
+    installationCapacity: json["installation_capacity"] ?? '', // ⭐ correct type
     installationUnits: json["installation_units"], // ⭐ correct type
 
     roofNature: json["roof_nature"],
@@ -245,6 +248,7 @@ class LeadData {
     "roof_size_breadth_ft": roofSizeBreadthFt,
 
     "installation_area": installationArea,
+    "installation_capacity": installationCapacity,
     "installation_units": installationUnits,
 
     "roof_nature": roofNature,
@@ -338,6 +342,11 @@ class UploadedFile {
   bool canManage;
   String link;
 
+  // NEW map-specific fields
+  double? roofSizeLengthFt;
+  double? roofSizeBreadthFt;
+  double? installationAreaSqFt;
+
   UploadedFile({
     this.id,
     this.relatedModelId,
@@ -350,6 +359,9 @@ class UploadedFile {
     this.updatedAt,
     this.canManage = false,
     this.link = "",
+    this.roofSizeLengthFt,
+    this.roofSizeBreadthFt,
+    this.installationAreaSqFt,
   });
 
   factory UploadedFile.fromJson(Map<String, dynamic> json) => UploadedFile(
@@ -363,7 +375,16 @@ class UploadedFile {
     createdAt: json["created_at"],
     updatedAt: json["updated_at"],
     canManage: false,
-    link: "",
+    link: json["link"] ?? "",
+    roofSizeLengthFt: (json["roof_size_length_ft"] != null)
+        ? double.tryParse(json["roof_size_length_ft"].toString())
+        : null,
+    roofSizeBreadthFt: (json["roof_size_breadth_ft"] != null)
+        ? double.tryParse(json["roof_size_breadth_ft"].toString())
+        : null,
+    installationAreaSqFt: (json["installation_area"] != null)
+        ? double.tryParse(json["installation_area"].toString())
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -376,8 +397,67 @@ class UploadedFile {
     "file_uploaded_at": fileUploadedAt,
     "created_at": createdAt,
     "updated_at": updatedAt,
+    "link": link,
+    "roof_size_length_ft": roofSizeLengthFt,
+    "roof_size_breadth_ft": roofSizeBreadthFt,
+    "installation_area": installationAreaSqFt,
   };
 }
+
+// class UploadedFile {
+//   int? id;
+//   int? relatedModelId;
+//   String? relatedModelType;
+//   String? category;
+//   String? tag;
+//   String? path;
+//   String? fileUploadedAt;
+//   String? createdAt;
+//   String? updatedAt;
+
+//   bool canManage;
+//   String link;
+
+//   UploadedFile({
+//     this.id,
+//     this.relatedModelId,
+//     this.relatedModelType,
+//     this.category,
+//     this.tag,
+//     this.path,
+//     this.fileUploadedAt,
+//     this.createdAt,
+//     this.updatedAt,
+//     this.canManage = false,
+//     this.link = "",
+//   });
+
+//   factory UploadedFile.fromJson(Map<String, dynamic> json) => UploadedFile(
+//     id: json["id"],
+//     relatedModelId: json["related_model_id"],
+//     relatedModelType: json["related_model_type"],
+//     category: json["category"],
+//     tag: json["tag"],
+//     path: json["path"],
+//     fileUploadedAt: json["file_uploaded_at"],
+//     createdAt: json["created_at"],
+//     updatedAt: json["updated_at"],
+//     canManage: false,
+//     link: "",
+//   );
+
+//   Map<String, dynamic> toJson() => {
+//     "id": id,
+//     "related_model_id": relatedModelId,
+//     "related_model_type": relatedModelType,
+//     "category": category,
+//     "tag": tag,
+//     "path": path,
+//     "file_uploaded_at": fileUploadedAt,
+//     "created_at": createdAt,
+//     "updated_at": updatedAt,
+//   };
+// }
 
 class Payment {
   int? id;
