@@ -479,6 +479,7 @@ class Payment {
   String? warrantyStartDate;
   String? warrantyEndDate;
   String? warrantyPeriod;
+  String? loiAmount;
 
   Payment({
     this.id,
@@ -500,6 +501,7 @@ class Payment {
     this.warrantyStartDate,
     this.warrantyEndDate,
     this.warrantyPeriod,
+    this.loiAmount,
   });
 
   factory Payment.fromJson(Map<String, dynamic> json) => Payment(
@@ -522,6 +524,7 @@ class Payment {
     warrantyStartDate: json["warranty_start_date"],
     warrantyEndDate: json["warranty_end_date"],
     warrantyPeriod: json["warranty_period"],
+    loiAmount: json["loi_amount"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -544,6 +547,7 @@ class Payment {
     "warranty_start_date": warrantyStartDate,
     "warranty_end_date": warrantyEndDate,
     "warranty_period": warrantyPeriod,
+    "loi_amount": loiAmount, // ADD THIS
   };
 }
 

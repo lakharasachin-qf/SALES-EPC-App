@@ -280,7 +280,8 @@ class AddLeadsController extends GetxController {
       searchRequiredSolutionTypeCtr,
       searchRequiredSolutionCtr,
       searchRoofNatureCtr,
-      leadStatusCtr;
+      leadStatusCtr,
+      loiAmoutCtr;
 
   // FocusNodes
   late FocusNode companyNameNode,
@@ -327,7 +328,8 @@ class AddLeadsController extends GetxController {
       searchRequiredSolutionTypeNode,
       searchRequiredSolutionNode,
       searchRoofNatureNode,
-      leadStatusNode;
+      leadStatusNode,
+      loiAmoutNode;
 
   // Validation Models
   var companyNameModel = ValidationModel(null, null, isValidate: false).obs;
@@ -416,6 +418,7 @@ class AddLeadsController extends GetxController {
   ).obs;
   var otherRemarksModel = ValidationModel(null, null, isValidate: false).obs;
   var scheduleMeeeingModel = ValidationModel(null, null, isValidate: false).obs;
+  var loiAmountModel = ValidationModel(null, null, isValidate: false).obs;
 
   //edit
   var leadStatusModel = ValidationModel(null, null, isValidate: false).obs;
@@ -503,6 +506,7 @@ class AddLeadsController extends GetxController {
   @override
   void onInit() {
     // Initialize Controllers
+    loiAmoutCtr = TextEditingController();
     companyNameCtr = TextEditingController();
     addressCtr = TextEditingController();
     countryCtr = TextEditingController();
@@ -585,6 +589,7 @@ class AddLeadsController extends GetxController {
     financeDocumentCtr = TextEditingController();
 
     // FocusNodes
+    loiAmoutNode = FocusNode();
     companyNameNode = FocusNode();
     addressNode = FocusNode();
     countryNode = FocusNode();
@@ -1507,6 +1512,17 @@ class AddLeadsController extends GetxController {
                 leadCategoryCtr.text = selectedItem.label;
                 selectedLeadCategoryLabel.value = selectedItem.label;
                 selectedLeadCategoryValue.value = selectedItem.value;
+
+                logcat(
+                  'selectedLeadCategoryValue',
+                  selectedLeadCategoryValue.value,
+                );
+
+                if (selectedLeadCategoryValue.value == 'hot') {
+                  isloiTextFiledShow.value = true;
+                } else {
+                  isloiTextFiledShow.value = false;
+                }
                 validateLeadCategory(selectedItem.value);
                 if (leadCategoryCtr.text.toString().isNotEmpty) {
                   filterLeadCategoryList.clear();
@@ -1898,6 +1914,25 @@ class AddLeadsController extends GetxController {
       }
     });
     validateStep1();
+  }
+
+  void validateLOIAmount(String? val) {
+    loiAmountModel.update((model) {
+      if (val == null || val.trim().isEmpty) {
+        model!.error = "LOI Amount is required";
+        model.isValidate = false;
+      } else {
+        model!.error = null;
+        model.isValidate = true;
+      }
+    });
+
+    if (isEditMode.value == true) {
+      validateStep2();
+      calculateBalanceAmount();
+    } else {
+      validateStep1();
+    }
   }
 
   void validateLatitude(String? val) {
@@ -2306,6 +2341,10 @@ class AddLeadsController extends GetxController {
     // if (!requiredSolutionTypeModel.value.isValidate) isValid = false;
     // if (!requiredSolutionModel.value.isValidate) isValid = false;
     if (!leadCategoryModel.value.isValidate) isValid = false;
+
+    if (isloiTextFiledShow.value == true) {
+      if (!loiAmountModel.value.isValidate) isValid = false;
+    }
     isStep1Valid.value = isValid;
     update();
   }
@@ -2385,6 +2424,10 @@ class AddLeadsController extends GetxController {
     if (isEditMode.value == false) {
       if (!scheduleMeeeingModel.value.isValidate) isValid = false;
     } else {
+      if (isloiTextFiledShow.value == true) {
+        if (!loiAmountModel.value.isValidate) isValid = false;
+      }
+
       if (!leadStatusModel.value.isValidate) isValid = false;
 
       if (isLeadPaymentMode.value == true) {
@@ -3483,6 +3526,10 @@ class AddLeadsController extends GetxController {
       'installation_area': installationAreaPath.value.toDouble().toString(),
     });
 
+    if (isloiTextFiledShow.value) {
+      request.fields['loi_amount'] = loiAmoutCtr.text.trim();
+    }
+
     logcat('step process', 'step-4');
 
     // ========================== //
@@ -3814,7 +3861,9 @@ class AddLeadsController extends GetxController {
       'full_payment_amount': balanceAmonutCtr.text.trim(),
       'installation_area': installationAreaPath.value.toDouble().toString(),
     });
-
+    if (isloiTextFiledShow.value) {
+      request.fields['loi_amount'] = loiAmoutCtr.text.trim();
+    }
     if (isPaymentReceived.value == true) {
       logcat('isPaymentReceived', isPaymentReceived.value);
       request.fields.addAll({
@@ -4370,6 +4419,7 @@ class AddLeadsController extends GetxController {
 
   //dropdown
   RxBool isEditMode = false.obs;
+  RxBool isloiTextFiledShow = false.obs;
 
   //technical proposal
 
@@ -4622,12 +4672,18 @@ class AddLeadsController extends GetxController {
 
   void calculateBalanceAmount() {
     final tokenText = tokenAmountCtr.text.trim();
-    final totalText = totalProjectCostCtr.text.trim();
+    final loiText = loiAmoutCtr.text.trim();
 
     final token = double.tryParse(tokenText) ?? 0;
+    final loi = double.tryParse(loiText) ?? 0;
+
+    final addition = token + loi;
+
+    final totalText = totalProjectCostCtr.text.trim();
+
     final total = double.tryParse(totalText) ?? 0;
 
-    double balance = total - token;
+    double balance = total - addition;
 
     // Avoid negative or invalid balance
     if (balance < 0) balance = 0;
@@ -5213,6 +5269,7 @@ class AddLeadsController extends GetxController {
       onResponse: (data) {
         final response = LeadByIdModel.fromJson(data);
         final result = response.result;
+        final payment = response.result?.payment;
         if (result == null) return;
 
         logcat("onResponse::", jsonEncode(result));
@@ -5406,6 +5463,8 @@ class AddLeadsController extends GetxController {
             validateLeadStatus(leadStatusCtr.text);
             validateTokenAmountt(tokenAmountCtr.text);
             validateTotalProject(totalProjectCostCtr.text);
+            validateLOIAmount(loiAmoutCtr.text);
+
             calculateBalanceAmount();
 
             // handle finance document / OMC Partner logic
@@ -5518,6 +5577,7 @@ class AddLeadsController extends GetxController {
             tokenAmountCtr.text = result.payment?.tokenAmount ?? '';
             totalProjectCostCtr.text = result.payment?.totalProjectCost ?? '';
             calculateBalanceAmount();
+            validateLOIAmount(loiAmoutCtr.text);
             validateLeadStatus(leadStatusCtr.text);
             validateTokenAmountt(tokenAmountCtr.text);
             validateTotalProject(totalProjectCostCtr.text);
@@ -5573,6 +5633,8 @@ class AddLeadsController extends GetxController {
         setText(latitudeCtr, result.latitude);
         setText(longitudeCtr, result.longitude);
 
+        setText(loiAmoutCtr, payment?.loiAmount ?? '');
+        isloiTextFiledShow.value = true;
         // 🔹 Power & Energy
         setText(dgCapacityCtr, result.dgCapacityKva);
         setText(installedSolarCapCtr, result.currInstSolarCapKwp);
@@ -6587,6 +6649,8 @@ class AddLeadsController extends GetxController {
     validateDistrict(districtCtr.text);
     validatePersonName(personNameCtr.text);
     validatePersonMobile(personMobileCtr.text);
+
+    validateLOIAmount(loiAmoutCtr.text);
 
     // validateRequiredSolutionType(selectedRequiredSolutionTypeValue.value);
     // validateRequiredSolution(selectedRequiredSolutionValue.value);

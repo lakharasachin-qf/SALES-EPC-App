@@ -552,6 +552,62 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                 );
                               }),
                               getDynamicSizedBox(height: 2.h),
+
+                              widget.isEdit == false
+                                  ? Obx(() {
+                                      return controller
+                                                  .isloiTextFiledShow
+                                                  .value ==
+                                              true
+                                          ? getLable(
+                                              "LOI Amount",
+                                              isRequired: true,
+                                            )
+                                          : SizedBox.shrink();
+                                    })
+                                  : SizedBox.shrink(),
+                              widget.isEdit == false
+                                  ? Obx(() {
+                                      return controller
+                                                  .isloiTextFiledShow
+                                                  .value ==
+                                              true
+                                          ? getReactiveFormField(
+                                              node: controller.loiAmoutNode,
+                                              controller:
+                                                  controller.loiAmoutCtr,
+                                              hintLabel: "Enter LOI Amount",
+                                              onChanged: (val) {
+                                                controller.validateLOIAmount(
+                                                  val,
+                                                );
+                                              },
+                                              inputType: TextInputType.phone,
+                                              formType: FieldType.mobile,
+                                              inputFormatters: [
+                                                // LengthLimitingTextInputFormatter(10),
+                                              ],
+
+                                              wantSuffix: false,
+                                              errorText: controller
+                                                  .loiAmountModel
+                                                  .value
+                                                  .error,
+                                            )
+                                          : SizedBox.shrink();
+                                    })
+                                  : SizedBox.shrink(),
+                              widget.isEdit == false
+                                  ? Obx(() {
+                                      return controller
+                                                  .isloiTextFiledShow
+                                                  .value ==
+                                              true
+                                          ? getDynamicSizedBox(height: 2.h)
+                                          : SizedBox.shrink();
+                                    })
+                                  : SizedBox.shrink(),
+
                               getLable("DG Capacity (KVA)"),
                               Obx(() {
                                 return getReactiveFormField(
@@ -1224,6 +1280,77 @@ class _AddLeadScreenState extends State<AddLeadScreen>
                                   return const SizedBox.shrink();
                                 }
                               }),
+
+                              widget.isEdit == true
+                                  ? Obx(() {
+                                      return controller
+                                                  .isloiTextFiledShow
+                                                  .value ==
+                                              true
+                                          ? getDynamicSizedBox(height: 2.h)
+                                          : SizedBox.shrink();
+                                    })
+                                  : SizedBox.shrink(),
+                              widget.isEdit == true
+                                  ? Obx(() {
+                                      return controller
+                                                  .isloiTextFiledShow
+                                                  .value ==
+                                              true
+                                          ? getLable(
+                                              "LOI Amount",
+                                              isRequired: true,
+                                              isVerified:
+                                                  controller.iswonShow.value ==
+                                                      true
+                                                  ? true
+                                                  : false,
+                                            )
+                                          : SizedBox.shrink();
+                                    })
+                                  : SizedBox.shrink(),
+
+                              widget.isEdit == true
+                                  ? Obx(() {
+                                      return controller
+                                                  .isloiTextFiledShow
+                                                  .value ==
+                                              true
+                                          ? getReactiveFormField(
+                                              isEnable:
+                                                  controller.iswonShow.value ==
+                                                      true
+                                                  ? false
+                                                  : true,
+                                              isVerified:
+                                                  controller.iswonShow.value ==
+                                                      true
+                                                  ? true
+                                                  : false,
+                                              node: controller.loiAmoutNode,
+                                              controller:
+                                                  controller.loiAmoutCtr,
+                                              hintLabel: "Enter LOI Amount",
+                                              onChanged: (val) {
+                                                controller.validateLOIAmount(
+                                                  val,
+                                                );
+                                              },
+                                              inputType: TextInputType.phone,
+                                              formType: FieldType.mobile,
+                                              inputFormatters: [
+                                                // LengthLimitingTextInputFormatter(10),
+                                              ],
+
+                                              wantSuffix: false,
+                                              errorText: controller
+                                                  .loiAmountModel
+                                                  .value
+                                                  .error,
+                                            )
+                                          : SizedBox.shrink();
+                                    })
+                                  : SizedBox.shrink(),
 
                               Obx(() {
                                 return controller
