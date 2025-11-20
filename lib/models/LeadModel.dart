@@ -63,39 +63,60 @@ class LeadData {
   String companyName;
   String contactPersonName;
   String contactPersonMobile;
-  dynamic latitude;
-  dynamic longitude;
-  dynamic dgCapacityKva;
+
+  String? latitude;
+  String? longitude;
+
+  String? dgCapacityKva;
   bool dgSyncRequired;
-  dynamic currInstSolarCapKwp;
-  dynamic distToNearestTransformer;
-  dynamic ratingOfNearestTransformerKva;
-  dynamic sanctionedLoadKva;
-  String requiredSolutionType;
+
+  String? currInstSolarCapKwp;
+  String? distToNearestTransformer;
+  String? ratingOfNearestTransformerKva;
+  String? sanctionedLoadKva;
+
+  String? requiredSolutionType;
   bool vfdRequired;
-  dynamic gridAvailabilityHrs;
-  dynamic peakMonthlyEnergyConsKwh;
-  String requiredSolarCapKwp;
-  dynamic purposeOfSolarisation;
-  dynamic distBtwInverterAcdbPanelMtrs;
-  dynamic distBtwSolarAcdbPanelMtrs;
-  String requiredSolution;
+
+  String? gridAvailabilityHrs;
+  String? peakMonthlyEnergyConsKwh;
+  String? requiredSolarCapKwp;
+
+  String? purposeOfSolarisation;
+
+  String? distBtwInverterAcdbPanelMtrs;
+  String? distBtwSolarAcdbPanelMtrs;
+
+  String? requiredSolution;
+
   dynamic buildingHeight;
-  dynamic roofSizeLengthFt;
-  dynamic roofSizeBreadthFt;
-  String roofNature;
+
+  String? roofSizeLengthFt;
+  String? roofSizeBreadthFt;
+
+  String? installationArea;
+  String installationCapacity;
+
+  String? roofNature;
   dynamic ageOfMetalSheet;
-  dynamic groundSizeLengthFt;
-  dynamic groundSizeBreadthFt;
+
+  String? groundSizeLengthFt;
+  String? groundSizeBreadthFt;
+
   String leadCategory;
   String leadStatus;
-  dynamic otherRemarks;
+
+  String? otherRemarks;
   String source;
+
   DateTime createdAt;
   DateTime updatedAt;
+
   String countryName;
   String stateName;
   String districtName;
+
+  bool canInstallation;
 
   LeadData({
     required this.id,
@@ -126,6 +147,8 @@ class LeadData {
     required this.buildingHeight,
     required this.roofSizeLengthFt,
     required this.roofSizeBreadthFt,
+    required this.installationArea,
+    required this.installationCapacity,
     required this.roofNature,
     required this.ageOfMetalSheet,
     required this.groundSizeLengthFt,
@@ -139,6 +162,7 @@ class LeadData {
     required this.countryName,
     required this.stateName,
     required this.districtName,
+    required this.canInstallation,
   });
 
   factory LeadData.fromJson(Map<String, dynamic> json) => LeadData(
@@ -150,41 +174,63 @@ class LeadData {
     companyName: json["company_name"] ?? "",
     contactPersonName: json["contact_person_name"] ?? "",
     contactPersonMobile: json["contact_person_mobile"] ?? "",
-    latitude: json["latitude"],
-    longitude: json["longitude"],
-    dgCapacityKva: json["dg_capacity_kva"] ?? 0,
+
+    latitude: json["latitude"]?.toString(),
+    longitude: json["longitude"]?.toString(),
+
+    dgCapacityKva: json["dg_capacity_kva"]?.toString(),
     dgSyncRequired: json["dg_sync_required"] ?? false,
-    currInstSolarCapKwp: json["curr_inst_solar_cap_kwp"] ?? 0,
-    distToNearestTransformer: json["dist_to_nearest_transformer"] ?? 0,
-    ratingOfNearestTransformerKva:
-        json["rating_of_nearest_transformer_kva"] ?? 0,
-    sanctionedLoadKva: json["sanctioned_load_kva"] ?? 0,
-    requiredSolutionType: json["required_solution_type"] ?? "",
+
+    currInstSolarCapKwp: json["curr_inst_solar_cap_kwp"]?.toString(),
+    distToNearestTransformer: json["dist_to_nearest_transformer"]?.toString(),
+    ratingOfNearestTransformerKva: json["rating_of_nearest_transformer_kva"]
+        ?.toString(),
+    sanctionedLoadKva: json["sanctioned_load_kva"]?.toString(),
+
+    requiredSolutionType: json["required_solution_type"]?.toString(),
     vfdRequired: json["vfd_required"] ?? false,
-    gridAvailabilityHrs: json["grid_availability_hrs"] ?? 0,
-    peakMonthlyEnergyConsKwh: json["peak_monthly_energy_cons_kwh"] ?? 0,
-    requiredSolarCapKwp: json["required_solar_cap_kwp"] ?? "",
-    purposeOfSolarisation: json["purpose_of_solarisation"] ?? "",
-    distBtwInverterAcdbPanelMtrs:
-        json["dist_btw_inverter_acdb_panel_mtrs"] ?? 0,
-    distBtwSolarAcdbPanelMtrs: json["dist_btw_solar_acdb_panel_mtrs"] ?? 0,
-    requiredSolution: json["required_solution"] ?? "",
-    buildingHeight: json["building_height"] ?? 0,
-    roofSizeLengthFt: json["roof_size_length_ft"] ?? 0,
-    roofSizeBreadthFt: json["roof_size_breadth_ft"] ?? 0,
-    roofNature: json["roof_nature"] ?? "",
-    ageOfMetalSheet: json["age_of_metal_sheet"] ?? "",
-    groundSizeLengthFt: json["ground_size_length_ft"] ?? 0,
-    groundSizeBreadthFt: json["ground_size_breadth_ft"] ?? 0,
+
+    gridAvailabilityHrs: json["grid_availability_hrs"]?.toString(),
+    peakMonthlyEnergyConsKwh: json["peak_monthly_energy_cons_kwh"]?.toString(),
+    requiredSolarCapKwp: json["required_solar_cap_kwp"]?.toString(),
+
+    purposeOfSolarisation: json["purpose_of_solarisation"]?.toString(),
+
+    distBtwInverterAcdbPanelMtrs: json["dist_btw_inverter_acdb_panel_mtrs"]
+        ?.toString(),
+    distBtwSolarAcdbPanelMtrs: json["dist_btw_solar_acdb_panel_mtrs"]
+        ?.toString(),
+
+    requiredSolution: json["required_solution"]?.toString(),
+
+    buildingHeight: json["building_height"],
+
+    roofSizeLengthFt: json["roof_size_length_ft"]?.toString(),
+    roofSizeBreadthFt: json["roof_size_breadth_ft"]?.toString(),
+
+    installationArea: json["installation_area"]?.toString(),
+    installationCapacity: json["installation_capacity"]?.toString() ?? "0",
+
+    roofNature: json["roof_nature"]?.toString(),
+    ageOfMetalSheet: json["age_of_metal_sheet"],
+
+    groundSizeLengthFt: json["ground_size_length_ft"]?.toString(),
+    groundSizeBreadthFt: json["ground_size_breadth_ft"]?.toString(),
+
     leadCategory: json["lead_category"] ?? "",
     leadStatus: json["lead_status"] ?? "",
-    otherRemarks: json["other_remarks"] ?? "",
+    otherRemarks: json["other_remarks"]?.toString(),
+
     source: json["source"] ?? "",
+
     createdAt: DateTime.tryParse(json["created_at"] ?? "") ?? DateTime.now(),
     updatedAt: DateTime.tryParse(json["updated_at"] ?? "") ?? DateTime.now(),
+
     countryName: json["country_name"] ?? "",
     stateName: json["state_name"] ?? "",
     districtName: json["district_name"] ?? "",
+
+    canInstallation: json["can_installation"] ?? false,
   );
 
   Map<String, dynamic> toJson() => {
@@ -216,6 +262,8 @@ class LeadData {
     "building_height": buildingHeight,
     "roof_size_length_ft": roofSizeLengthFt,
     "roof_size_breadth_ft": roofSizeBreadthFt,
+    "installation_area": installationArea,
+    "installation_capacity": installationCapacity,
     "roof_nature": roofNature,
     "age_of_metal_sheet": ageOfMetalSheet,
     "ground_size_length_ft": groundSizeLengthFt,
@@ -229,6 +277,7 @@ class LeadData {
     "country_name": countryName,
     "state_name": stateName,
     "district_name": districtName,
+    "can_installation": canInstallation,
   };
 }
 

@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide ScreenType;
 import 'package:intl/intl.dart';
@@ -7,6 +9,7 @@ import 'package:sales_app/componant/button/form_button.dart';
 import 'package:sales_app/componant/dialogs/common_date_time_picker.dart';
 import 'package:sales_app/componant/dialogs/dialogs.dart';
 import 'package:sales_app/componant/dialogs/loading_indicator.dart';
+import 'package:sales_app/componant/input/form_inputs.dart';
 import 'package:sales_app/componant/toolbar/toolbar.dart';
 import 'package:sales_app/componant/widgets/widgets.dart';
 import 'package:sales_app/configs/apicall_constant.dart';
@@ -75,6 +78,24 @@ class LeadController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    // ---------------------- TEXT CONTROLLERS ----------------------
+    expectedDateCtr = TextEditingController();
+    uploadFileCtr = TextEditingController();
+    searchUpdateWarrantyTypeCtr = TextEditingController();
+
+    updateWarrantyCtr = TextEditingController();
+    warrantyPeriodCtr = TextEditingController();
+    amountCtr = TextEditingController();
+
+    // ---------------------- FOCUS NODES ---------------------------
+    dateNode = FocusNode();
+    uploadFileNode = FocusNode();
+    searchWarrantyTypeNode = FocusNode();
+
+    updateWarrantyNode = FocusNode();
+    warrantyPeriodNode = FocusNode();
+    amountNode = FocusNode();
 
     startTimeNode = FocusNode();
     endTimeNode = FocusNode();
@@ -559,6 +580,374 @@ class LeadController extends GetxController {
     }
 
     return queryParams.join('&');
+  }
+
+  final RxString expectedDate = ''.obs;
+  File? selectedFile;
+  Future<void> pickAnyFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'], // ✅ Only allow PDFs
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      selectedFile = File(result.files.single.path!);
+      uploadFileCtr.text = result.files.single.name;
+      uploadFileCtr.addListener(validateUpdateButton);
+
+      validateUpdateButton();
+      update();
+      logcat("Picked file name:", uploadFileCtr.text);
+    } else {
+      logcat("Error picking file:", "No file selected");
+    }
+  }
+
+  final DateFormat expectedDateFormat = DateFormat('dd-MM-yyyy');
+  late TextEditingController expectedDateCtr;
+  late TextEditingController uploadFileCtr;
+  late TextEditingController searchUpdateWarrantyTypeCtr;
+
+  late TextEditingController updateWarrantyCtr;
+  late TextEditingController warrantyPeriodCtr;
+  late TextEditingController amountCtr;
+  late FocusNode dateNode;
+  late FocusNode uploadFileNode;
+
+  late FocusNode updateWarrantyNode;
+  late FocusNode warrantyPeriodNode;
+  late FocusNode amountNode;
+  late FocusNode searchWarrantyTypeNode;
+
+  var dateModel = ValidationModel(null, null, isValidate: false).obs;
+  var uploadFileModel = ValidationModel(null, null, isValidate: false).obs;
+
+  var warrantyModel = ValidationModel(null, null, isValidate: false).obs;
+  var warrantyPeriodModel = ValidationModel(null, null, isValidate: false).obs;
+  var amountModel = ValidationModel(null, null, isValidate: false).obs;
+
+  void validateUpdateButton() {
+    // Final validation
+    isUpdateEnabled.value = true;
+  }
+
+  var filterWarrantyType = <LabelValue>[].obs;
+  var cusotmerUpdateWarrantyType = <LabelValue>[].obs;
+
+  RxBool isWarrantyTypeListApiCallLoading = false.obs;
+  RxString selectedWarrantyTypeValue = ''.obs;
+  RxString selectedWarrantyTypeLabel = ''.obs;
+  Widget setWarrantyTypeListDialog() {
+    return Obx(() {
+      if (isWarrantyTypeListApiCallLoading.value) {
+        return setDropDownContent(
+          [].obs,
+          const Text(SearchScreenConstant.loading),
+          isApiIsLoading: isWarrantyTypeListApiCallLoading.value,
+        );
+      }
+      return setDropDownContent(
+        filterWarrantyType,
+        controller: updateWarrantyCtr,
+        noDataLable: "No Warranty Type",
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: filterWarrantyType.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              dense: true,
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              contentPadding: const EdgeInsets.only(
+                left: 0.0,
+                right: 0.0,
+                top: 0.0,
+              ),
+              horizontalTitleGap: null,
+              minLeadingWidth: 5,
+              onTap: () {
+                final selectedItem = filterWarrantyType[index];
+                updateWarrantyCtr.text = selectedItem.label;
+                selectedWarrantyTypeLabel.value = selectedItem.label;
+                selectedWarrantyTypeValue.value = selectedItem.value;
+                update();
+                if (updateWarrantyCtr.text.toString().isNotEmpty) {
+                  filterWarrantyType.clear();
+                  filterWarrantyType.addAll(cusotmerUpdateWarrantyType);
+                }
+                validateUpdateButton();
+                Get.back();
+              },
+              // selectedRequiredSolutionTypeLabel.value
+              title: buildSelectableRow(
+                filterWarrantyType[index].label,
+                filterWarrantyType[index].value.trim() ==
+                    selectedWarrantyTypeValue.value,
+              ),
+            );
+          },
+        ),
+        searchcontent: getReactiveFormField(
+          node: searchWarrantyTypeNode,
+          controller: searchUpdateWarrantyTypeCtr,
+          hintLabel: SearchScreenConstant.hint,
+          onChanged: (val) {
+            applyFilterForWarrantyType(val.toString());
+          },
+          isSearch: true,
+          inputType: TextInputType.text,
+          errorText: warrantyModel.value.error,
+        ),
+      );
+    });
+  }
+
+  void applyFilterForWarrantyType(String keyword) {
+    if (keyword.isEmpty) {
+      filterWarrantyType.assignAll(cusotmerUpdateWarrantyType);
+    } else {
+      filterWarrantyType.assignAll(
+        cusotmerUpdateWarrantyType
+            .where(
+              (item) =>
+                  item.label.toLowerCase().contains(keyword.toLowerCase()),
+            )
+            .toList(),
+      );
+    }
+    update();
+  }
+
+  RxBool isUpdateEnabled = true.obs;
+  void updateCustomer(context) async {
+    var result = await showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      useSafeArea: true,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(13.w)),
+      ),
+      isScrollControlled: true,
+      constraints: BoxConstraints(maxWidth: Device.width),
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: SingleChildScrollView(
+                reverse: true,
+                physics: const BouncingScrollPhysics(),
+                child: Container(
+                  color: white,
+                  child: Wrap(
+                    children: [
+                      buildHeader(context, "Lead Installation Details"),
+                      SafeArea(
+                        child: Container(
+                          margin: EdgeInsets.only(
+                            left: 5.w,
+                            right: 5.w,
+                            top: 1.5.h,
+                            // bottom: 3.h,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Expected Date of Delivery
+                              Obx(
+                                () => getTextField(
+                                  context: context,
+                                  wantLabel: true,
+                                  label: 'Expected Date of Delivery',
+                                  ctr: expectedDateCtr,
+                                  node: dateNode,
+                                  model: dateModel.value,
+                                  isRequired: true,
+                                  usegesture: true,
+                                  isdate: true,
+                                  isenable: false,
+                                  wantsuffix: true,
+                                  gestureFunction: () async {
+                                    openDatePicker(
+                                      context: context,
+                                      title: 'Select Start Date',
+                                      controller: expectedDateCtr,
+                                      dateRx: expectedDate,
+                                      model: dateModel,
+                                      showTimePickers: false,
+                                    );
+                                    // final picked = await showDatePicker(
+                                    //   context: context,
+                                    //   initialDate: DateTime.now(),
+                                    //   firstDate: DateTime(2000),
+                                    //   lastDate: DateTime(2100),
+                                    // );
+                                    // if (picked != null) {
+                                    //   dateCtr.text =
+                                    //       "${picked.day}-${picked.month}-${picked.year}";
+                                    // }
+                                  },
+                                  useOnChanged: true,
+                                  function: (val) {
+                                    expectedDateCtr.addListener(
+                                      validateUpdateButton,
+                                    );
+                                  },
+                                  hint: 'Select Date',
+                                ),
+                              ),
+
+                              Obx(() {
+                                return getTextField(
+                                  context: context,
+                                  wantLabel: true,
+                                  label: 'Installation Certificate (PDF)',
+                                  ctr: uploadFileCtr,
+                                  node: uploadFileNode,
+                                  model: uploadFileModel.value,
+                                  isdropdown: true,
+                                  wantsuffix: false,
+                                  isenable: false,
+                                  usegesture: true,
+                                  gestureFunction: () {
+                                    pickAnyFile();
+                                  },
+                                  hint: 'Select File',
+                                  isRequired: true,
+                                );
+                              }),
+                              getDynamicSizedBox(height: 1.h),
+                              Obx(() {
+                                return getTextField(
+                                  context: context,
+                                  wantLabel: true,
+                                  label: 'Warranty',
+                                  ctr: updateWarrantyCtr,
+                                  node: updateWarrantyNode,
+                                  model: warrantyModel.value,
+                                  isenable: false,
+                                  isdropdown: true,
+                                  wantsuffix: true,
+                                  usegesture: false,
+
+                                  isRequired: true,
+                                  gestureFunction: () {
+                                    commonDropDownDialog(
+                                      context,
+                                      content: setWarrantyTypeListDialog(),
+                                      title: "Warranty Type",
+                                      onCloseClick: () {
+                                        applyFilterForWarrantyType('');
+                                      },
+                                    ).then((_) {});
+                                    // showWarrantyTypeSelectionPopups(
+                                    //   context,
+                                    //   customer.warrantyType,
+                                    // );
+                                  },
+                                  useOnChanged: true,
+                                  function: (val) {
+                                    warrantyPeriodCtr.addListener(
+                                      validateUpdateButton,
+                                    );
+                                  },
+                                  hint: 'Select Warranty',
+                                );
+                              }),
+                              getDynamicSizedBox(height: 1.h),
+
+                              /// Contact Person Name
+                              Obx(() {
+                                return getTextField(
+                                  context: context,
+                                  wantLabel: true,
+                                  label: 'Warranty Period (Years)',
+                                  ctr: warrantyPeriodCtr,
+                                  node: warrantyPeriodNode,
+                                  model: warrantyPeriodModel.value,
+                                  hint: 'Enter Warranty Period',
+                                  isNumber: true,
+                                  useOnChanged: true,
+                                  function: (val) {
+                                    validateUpdateButton();
+                                  },
+                                  isRequired: true,
+                                );
+                              }),
+                              getDynamicSizedBox(height: 1.h),
+
+                              // if (selectedWarrantyTypeValue.value != "non_amc" &&
+                              //     selectedWarrantyTypeValue.value !=
+                              //         'under-warranty')
+                              /// Contact Person Name
+                              // Obx(() {
+                              //   return getTextField(
+                              //     context: context,
+                              //     wantLabel: true,
+                              //     label: 'Amount',
+                              //     ctr: amountCtr,
+                              //     node: amountNode,
+                              //     model: amountModel.value,
+                              //     useOnChanged: true,
+                              //     hint: 'Enter Amount',
+                              //     isNumber: true,
+                              //     function: (val) {
+                              //       amountCtr.addListener(validateUpdateButton);
+                              //     },
+                              //     isRequired: true,
+                              //   );
+                              // }),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: getFormButton(
+                                      context,
+                                      () {
+                                        Get.back();
+                                      },
+                                      'Cancle',
+                                      validate: true,
+                                    ),
+                                  ),
+                                  getDynamicSizedBox(width: 3.w),
+                                  Expanded(
+                                    child: Obx(() {
+                                      return getFormButton(
+                                        context,
+                                        () {
+                                          if (isUpdateEnabled.value == true) {}
+                                        },
+                                        "Update",
+                                        // validate: true,
+                                        validate: isUpdateEnabled.value,
+                                      );
+                                    }),
+                                  ),
+                                ],
+                              ),
+                              getDynamicSizedBox(height: 3.h),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+    // Check if the bottom sheet was dismissed by pressing submit button
+    if (result != null && result == true) {
+      logcat("DismissDialog", 'DONE');
+    }
   }
 
   Future<void> getLeadList({

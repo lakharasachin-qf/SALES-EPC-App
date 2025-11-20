@@ -232,6 +232,9 @@ class LeadScreenState extends State<LeadScreen> {
                                                                 "Action" &&
                                                             AppPermissions()
                                                                 .canUpdateLead) {
+                                                          final leadShowwing =
+                                                              ctr.filteredLeadList[entry
+                                                                  .key];
                                                           // Custom UI for Action column
                                                           return DataCell(
                                                             Center(
@@ -240,6 +243,59 @@ class LeadScreenState extends State<LeadScreen> {
                                                                     MainAxisAlignment
                                                                         .center,
                                                                 children: [
+                                                                  leadShowwing.canInstallation ==
+                                                                          true
+                                                                      ? SizedBox(
+                                                                          width:
+                                                                              4.h,
+                                                                          height:
+                                                                              4.h,
+                                                                          child: IconButton(
+                                                                            padding:
+                                                                                EdgeInsets.zero,
+                                                                            icon: const Icon(
+                                                                              Icons.date_range,
+                                                                              color: primaryColor,
+                                                                            ),
+                                                                            onPressed: () async {
+                                                                              ctr.updateCustomer(
+                                                                                context,
+                                                                                
+                                                                              );
+                                                                              // final lead =
+                                                                              //     ctr.filteredLeadList[entry.key];
+                                                                              // final result = await Get.to(
+                                                                              //   AddLeadScreen(
+                                                                              //     isEdit:
+                                                                              //         true,
+                                                                              //     leadId:
+                                                                              //         lead.id.toString(),
+                                                                              //   ),
+                                                                              // );
+
+                                                                              // if (result ==
+                                                                              //     true) {
+                                                                              //   ctr.getLeadList(
+                                                                              //     context:
+                                                                              //         context,
+                                                                              //     isInitialLoad:
+                                                                              //         true,
+                                                                              //     page:
+                                                                              //         1,
+                                                                              //     hideLoading:
+                                                                              //         false,
+                                                                              //   );
+                                                                              //   ctr.getFillterOptions(
+                                                                              //     context,
+                                                                              //   );
+                                                                              // }
+                                                                            },
+                                                                          ),
+                                                                        )
+                                                                      : SizedBox.shrink(),
+                                                                  getDynamicSizedBox(
+                                                                    width: 1.w,
+                                                                  ),
                                                                   SizedBox(
                                                                     width: 4.h,
                                                                     height: 4.h,
