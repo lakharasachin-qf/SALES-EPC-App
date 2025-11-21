@@ -1275,76 +1275,77 @@ class AddLeadsController extends GetxController {
                 validateUploadCategory(uploadCategoryCtr.text);
                 update();
 
-                if (categoryValue.value == "map_marked_screenshot") {
-                  Get.back();
-                  await Future.delayed(const Duration(milliseconds: 150));
+                //uncommnent whole if condition if you want to use map module
+                // if (categoryValue.value == "map_marked_screenshot") {
+                //   Get.back();
+                //   await Future.delayed(const Duration(milliseconds: 150));
 
-                  try {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const MapDrawingScreen(),
-                      ),
-                    );
-                    logcat("Map result:", result.toString());
-                    if (result == null) {
-                      logcat("Map result:", "User cancelled");
-                      return;
-                    }
+                //   try {
+                //     final result = await Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //         builder: (_) => const MapDrawingScreen(),
+                //       ),
+                //     );
+                //     logcat("Map result:", result.toString());
+                //     if (result == null) {
+                //       logcat("Map result:", "User cancelled");
+                //       return;
+                //     }
 
-                    final String imagePath = result["imagePath"] ?? "";
-                    final double roofBreadthFeet =
-                        (result["roofBreadthFeet"] ?? 0).toDouble();
-                    final double installationAreaSqFt =
-                        (result["installationAreaSqFt"] ?? 0).toDouble();
-                    final double roofLengthFeet =
-                        (result["roofLengthFeet"] ?? 0).toDouble();
+                //     final String imagePath = result["imagePath"] ?? "";
+                //     final double roofBreadthFeet =
+                //         (result["roofBreadthFeet"] ?? 0).toDouble();
+                //     final double installationAreaSqFt =
+                //         (result["installationAreaSqFt"] ?? 0).toDouble();
+                //     final double roofLengthFeet =
+                //         (result["roofLengthFeet"] ?? 0).toDouble();
 
-                    // // Update UI fields
-                    // selectedFilePath.value = imagePath;
-                    // uploadFileCtr.text = imagePath;
+                //     // // Update UI fields
+                //     // selectedFilePath.value = imagePath;
+                //     // uploadFileCtr.text = imagePath;
 
-                    // installationAreaPath.value = installationAreaSqFt;
-                    // installationareaCtr.text = installationAreaSqFt.toString();
-                    // roofSizeLengthCtr.text = roofLengthFeet.toString();
-                    // roofSizeBreadthCtr.text = roofBreadthFeet.toString();
+                //     // installationAreaPath.value = installationAreaSqFt;
+                //     // installationareaCtr.text = installationAreaSqFt.toString();
+                //     // roofSizeLengthCtr.text = roofLengthFeet.toString();
+                //     // roofSizeBreadthCtr.text = roofBreadthFeet.toString();
 
-                    /// STORE TEMP VALUES (NOT ADD FILE)
-                    selectedFilePath.value = imagePath;
-                    tempRoofLength.value = roofLengthFeet;
-                    tempRoofBreadth.value = roofBreadthFeet;
-                    tempInstallationArea.value = installationAreaSqFt;
+                //     /// STORE TEMP VALUES (NOT ADD FILE)
+                //     selectedFilePath.value = imagePath;
+                //     tempRoofLength.value = roofLengthFeet;
+                //     tempRoofBreadth.value = roofBreadthFeet;
+                //     tempInstallationArea.value = installationAreaSqFt;
 
-                    /// Update UI fields
-                    uploadFileCtr.text = imagePath;
-                    installationareaCtr.text = installationAreaSqFt.toString();
-                    roofSizeLengthCtr.text = roofLengthFeet.toString();
-                    roofSizeBreadthCtr.text = roofBreadthFeet.toString();
-                    validateUploadFile(uploadFileCtr.text);
+                //     /// Update UI fields
+                //     uploadFileCtr.text = imagePath;
+                //     installationareaCtr.text = installationAreaSqFt.toString();
+                //     roofSizeLengthCtr.text = roofLengthFeet.toString();
+                //     roofSizeBreadthCtr.text = roofBreadthFeet.toString();
+                //     validateUploadFile(uploadFileCtr.text);
 
-                    // ⭐ Logs
-                    print("================= MAP RESULT =================");
-                    print("📌 Image Path               : $imagePath");
-                    print(
-                      "📐 Roof Length (ft)         : ${roofLengthFeet.toStringAsFixed(2)}",
-                    );
-                    print(
-                      "📏 Roof Breadth (ft)        : ${roofBreadthFeet.toStringAsFixed(2)}",
-                    );
-                    print(
-                      "📦 Installation Area (sq ft): ${installationAreaSqFt.toStringAsFixed(2)}",
-                    );
-                    print("===============================================");
-                  } catch (e, stack) {
-                    logcat("Map Screen ERROR:", e.toString());
-                    debugPrint(stack.toString());
-                    CustomSnackBar().showErrorSnackbar(
-                      'Error',
-                      'Unable to process map drawing. Please try again.',
-                    );
-                  }
-                  return;
-                }
+                //     // ⭐ Logs
+                //     print("================= MAP RESULT =================");
+                //     print("📌 Image Path               : $imagePath");
+                //     print(
+                //       "📐 Roof Length (ft)         : ${roofLengthFeet.toStringAsFixed(2)}",
+                //     );
+                //     print(
+                //       "📏 Roof Breadth (ft)        : ${roofBreadthFeet.toStringAsFixed(2)}",
+                //     );
+                //     print(
+                //       "📦 Installation Area (sq ft): ${installationAreaSqFt.toStringAsFixed(2)}",
+                //     );
+                //     print("===============================================");
+                //   } catch (e, stack) {
+                //     logcat("Map Screen ERROR:", e.toString());
+                //     debugPrint(stack.toString());
+                //     CustomSnackBar().showErrorSnackbar(
+                //       'Error',
+                //       'Unable to process map drawing. Please try again.',
+                //     );
+                //   }
+                //   return;
+                // }
 
                 logcat(
                   'uploadFileModel.value.isValidate',
@@ -1518,18 +1519,58 @@ class AddLeadsController extends GetxController {
                   selectedLeadCategoryValue.value,
                 );
 
-                if (selectedLeadCategoryValue.value == 'hot') {
-                  isloiTextFiledShow.value = true;
+                // use case-insensitive compare and trim safety
+                final isHot =
+                    selectedLeadCategoryValue.value
+                        ?.toString()
+                        .trim()
+                        .toLowerCase() ==
+                    'hot';
+                isloiTextFiledShow.value = isHot;
+
+                // If LOI is visible, validate it; otherwise mark it valid so it doesn't block validation
+                if (isHot) {
+                  validateLOIAmount(loiAmoutCtr.text);
                 } else {
-                  isloiTextFiledShow.value = false;
+                  loiAmountModel.update((m) {
+                    m!.error = null;
+                    m.isValidate = true;
+                  });
                 }
-                validateLeadCategory(selectedItem.value);
+
+                // re-run combined validations so UI updates immediately
+                validateStep2();
+                // validateAll();
+
                 if (leadCategoryCtr.text.toString().isNotEmpty) {
                   filterLeadCategoryList.clear();
                   filterLeadCategoryList.addAll(leadCategoryList);
                 }
                 Get.back();
               },
+              // onTap: () {
+              //   final selectedItem = filterLeadCategoryList[index];
+              //   leadCategoryCtr.text = selectedItem.label;
+              //   selectedLeadCategoryLabel.value = selectedItem.label;
+              //   selectedLeadCategoryValue.value = selectedItem.value;
+
+              //   logcat(
+              //     'selectedLeadCategoryValue',
+              //     selectedLeadCategoryValue.value,
+              //   );
+
+              //   if (selectedLeadCategoryValue.value == 'hot') {
+              //     isloiTextFiledShow.value = true;
+              //   } else {
+              //     isloiTextFiledShow.value = false;
+              //   }
+              //   validateLeadCategory(selectedItem.value);
+              //   if (leadCategoryCtr.text.toString().isNotEmpty) {
+              //     filterLeadCategoryList.clear();
+              //     filterLeadCategoryList.addAll(leadCategoryList);
+              //   }
+              //   Get.back();
+              // },
               title: buildSelectableRow(
                 filterLeadCategoryList[index].label,
                 filterLeadCategoryList[index].label.trim() ==
@@ -1928,6 +1969,7 @@ class AddLeadsController extends GetxController {
     });
 
     if (isEditMode.value == true) {
+      logcat('isEditModessss', isEditMode.value);
       validateStep2();
       calculateBalanceAmount();
     } else {
@@ -2342,7 +2384,7 @@ class AddLeadsController extends GetxController {
     // if (!requiredSolutionModel.value.isValidate) isValid = false;
     if (!leadCategoryModel.value.isValidate) isValid = false;
 
-    if (isloiTextFiledShow.value == true) {
+    if (isEditMode.value == false && isloiTextFiledShow.value == true) {
       if (!loiAmountModel.value.isValidate) isValid = false;
     }
     isStep1Valid.value = isValid;
@@ -2425,6 +2467,10 @@ class AddLeadsController extends GetxController {
       if (!scheduleMeeeingModel.value.isValidate) isValid = false;
     } else {
       if (isloiTextFiledShow.value == true) {
+        logcat(
+          'loiAmountModel.value.isValidate',
+          loiAmountModel.value.isValidate,
+        );
         if (!loiAmountModel.value.isValidate) isValid = false;
       }
 
@@ -2451,7 +2497,7 @@ class AddLeadsController extends GetxController {
       }
     }
 
-    if (isFinanceThroughOMC.value = false) {
+    if (isFinanceThroughOMC.value == false) {
       logcat('isFinanceThroughOMC', isFinanceThroughOMC.value);
       isStep2Valid.value = false;
     } else {
@@ -5633,8 +5679,7 @@ class AddLeadsController extends GetxController {
         setText(latitudeCtr, result.latitude);
         setText(longitudeCtr, result.longitude);
 
-        setText(loiAmoutCtr, payment?.loiAmount ?? '');
-        isloiTextFiledShow.value = true;
+        // isloiTextFiledShow.value = true;
         // 🔹 Power & Energy
         setText(dgCapacityCtr, result.dgCapacityKva);
         setText(installedSolarCapCtr, result.currInstSolarCapKwp);
@@ -5687,9 +5732,25 @@ class AddLeadsController extends GetxController {
           result.leadCategory ?? '',
         );
         selectedLeadCategoryValue.value = result.leadCategory ?? '';
+
+        logcat(
+          'selectedLeadCategoryValue.value isss',
+          selectedLeadCategoryValue.value,
+        );
         selectedLeadCategoryLabel.value = leadCategoryLabel;
         leadCategoryCtr.text = leadCategoryLabel;
 
+        setText(loiAmoutCtr, payment?.loiAmount ?? '');
+        logcat(
+          'selectedLeadCategoryValue.valueeeee iss',
+          selectedLeadCategoryValue.value,
+        );
+        if (selectedLeadCategoryValue.value == 'hot') {
+          isloiTextFiledShow.value = true;
+        } else {
+          logcat('going in else case', isloiTextFiledShow);
+          isloiTextFiledShow.value = false;
+        }
         final purposeOfSolarisationLabel = getLabelFromValue(
           purposeOfSolarisationList,
           result.purposeOfSolarisation ?? '',
