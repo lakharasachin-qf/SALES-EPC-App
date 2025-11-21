@@ -227,6 +227,9 @@ class LeadScreenState extends State<LeadScreen> {
                                                         final columnName =
                                                             ctr.customerHeaders[cell
                                                                 .key];
+                                                        final filteredLeadList =
+                                                            ctr.filteredLeadList[entry
+                                                                .key];
 
                                                         if (columnName ==
                                                                 "Action" &&
@@ -260,7 +263,7 @@ class LeadScreenState extends State<LeadScreen> {
                                                                             onPressed: () async {
                                                                               ctr.updateCustomer(
                                                                                 context,
-                                                                                
+                                                                                filteredLeadList,
                                                                               );
                                                                               // final lead =
                                                                               //     ctr.filteredLeadList[entry.key];

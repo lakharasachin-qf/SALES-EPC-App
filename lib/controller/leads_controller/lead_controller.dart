@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide ScreenType;
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:sales_app/api_handle/apiCallingFormate.dart';
 import 'package:sales_app/componant/button/form_button.dart';
@@ -307,6 +308,7 @@ class LeadController extends GetxController {
   final RxString startDateApi = ''.obs;
   final RxString endDateApi = ''.obs;
   final DateFormat dateFormat = DateFormat('MMMM yyyy');
+  final DateFormat apiFormatForInstall = DateFormat('yyyy-MM-dd');
   final DateFormat apiDateFormat = DateFormat('yyyy-MM');
   var startTimeModel = ValidationModel(null, null, isValidate: false).obs;
   var endTimeModel = ValidationModel(null, null, isValidate: false).obs;
@@ -466,7 +468,7 @@ class LeadController extends GetxController {
     var loadingIndicator = LoadingProgressDialog();
     commonGetApiCallFormate(
       context,
-      title: 'Dashboard Screen',
+      title: 'Lead Screen',
       apiEndPoint: "${ApiUrl.getfillter}?user_id=${userData?.userId ?? ''}",
       allowHeader: true,
       state: state,
@@ -492,6 +494,30 @@ class LeadController extends GetxController {
         clustersList.addAll(responseDetail.clusters);
         categoryList.addAll(responseDetail.leadCategory);
         statusList.addAll(responseDetail.leadStatus);
+
+        warrantyTypeforFilter.assignAll(responseDetail.warrantyType);
+        cusotmerUpdateWarrantyType.assignAll(
+          responseDetail.warrantyType.where((e) => e.value == 'under-warranty'),
+        );
+        filterWarrantyType.assignAll(
+          responseDetail.warrantyType.where((e) => e.value == 'under-warranty'),
+        );
+
+        // -----------------------------------------------
+        // SET SELECTED WARRANTY TYPE AUTOMATICALLY
+        // -----------------------------------------------
+        if (cusotmerUpdateWarrantyType.isNotEmpty) {
+          final firstItem = cusotmerUpdateWarrantyType.first;
+
+          updateWarrantyCtr.text = firstItem.label ?? "";
+          selectedWarrantyTypeLabel.value = firstItem.label ?? "";
+          selectedWarrantyTypeValue.value = firstItem.value ?? "";
+        } else {
+          // If list is empty ensure fields are cleared
+          updateWarrantyCtr.text = "";
+          selectedWarrantyTypeLabel.value = "";
+          selectedWarrantyTypeValue.value = "";
+        }
 
         logcat('District List', districtList.length.toString());
         logcat('Clusters List', clustersList.length.toString());
@@ -626,9 +652,19 @@ class LeadController extends GetxController {
   var warrantyPeriodModel = ValidationModel(null, null, isValidate: false).obs;
   var amountModel = ValidationModel(null, null, isValidate: false).obs;
 
+  // void validateUpdateButton() {
+  //   // Final validation
+  //   isUpdateEnabled.value = true;
+  // }
+
   void validateUpdateButton() {
-    // Final validation
-    isUpdateEnabled.value = true;
+    final bool isValid =
+        expectedDateCtr.text.trim().isNotEmpty &&
+        uploadFileCtr.text.trim().isNotEmpty &&
+        updateWarrantyCtr.text.trim().isNotEmpty &&
+        warrantyPeriodCtr.text.trim().isNotEmpty;
+
+    isUpdateEnabled.value = isValid;
   }
 
   var filterWarrantyType = <LabelValue>[].obs;
@@ -637,6 +673,154 @@ class LeadController extends GetxController {
   RxBool isWarrantyTypeListApiCallLoading = false.obs;
   RxString selectedWarrantyTypeValue = ''.obs;
   RxString selectedWarrantyTypeLabel = ''.obs;
+
+  //
+
+  void resetCustomerUpdateFieldsExceptWarranty() {
+    // ❌ Reset expected delivery date
+    expectedDateCtr.clear();
+    expectedDate.value = "";
+    dateModel.value = ValidationModel(null, null);
+
+    // ❌ Reset file picker
+    uploadFileCtr.clear();
+    selectedFile = null;
+    uploadFileModel.value = ValidationModel(null, null);
+
+    // ❌ Reset Amount field (for AMC)
+    amountCtr.clear();
+    amountModel.value = ValidationModel(null, null);
+
+    ///
+    warrantyPeriodCtr.clear();
+    warrantyPeriodModel.value = ValidationModel(null, null);
+
+    // ❌ Reset update button
+    isUpdateEnabled.value = false;
+
+    // ✅ DO NOT RESET WARRANTY FIELDS
+    // warrantyPeriodCtr     → KEEP
+    // updateWarrantyCtr     → KEEP
+    // selectedWarrantyTypeValue → KEEP
+    // warrantyModel         → KEEP
+    // warrantyPeriodModel   → KEEP
+    // amountModel           → KEEP ONLY IF you want; else reset above
+
+    logcat("Reset Done:", "Everything except warranty");
+  }
+
+  Future<void> updateInstallationApi(BuildContext context, int leadId) async {
+    var loadingIndicator = LoadingProgressDialog();
+
+    if (networkManager.connectionType.value == 0) {
+      showDialogForScreen(
+        context,
+        "Installation Update",
+        Connection.noConnection,
+        callback: () => Get.back(),
+      );
+      return;
+    }
+
+    try {
+      loadingIndicator.show(context, '');
+
+      final endPoint = "leads/$leadId/installation";
+
+      // Prepare form fields
+      // -------------------- BODY FIELDS --------------------
+      final body = {
+        'expected_delivery_date': expectedDateCtr.text, // "2025-11-22"
+        'warranty_period': warrantyPeriodCtr.text, // "1"
+      };
+      // Prepare multipart file if exists
+      http.MultipartFile? file;
+      if (uploadFileCtr.text.isNotEmpty && selectedFile?.path != null) {
+        file = await http.MultipartFile.fromPath(
+          'installation_certificate',
+          selectedFile!.path,
+        );
+      }
+      logcat("customerUpdatePassingParams::", body);
+
+      // return;
+
+      // 🔹 Call your common multipart function
+      final streamedResponse = await Repository.multiPartPost(
+        body,
+        endPoint,
+        allowHeader: true,
+        multiPart: file,
+      );
+
+      // Convert to normal response
+      final response = await http.Response.fromStream(streamedResponse);
+      loadingIndicator.hide(context);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        logcat('updateResponse', data.toString());
+
+        if (data['status']?.toString().toLowerCase() == 'success') {
+          showDialogForScreen(
+            context,
+            "Installation Update",
+            data['message'] ?? "Update successful!",
+            callback: () {
+              resetCustomerUpdateFieldsExceptWarranty();
+              Get.back(result: true);
+              getLeadList(
+                context: context,
+                isInitialLoad: true,
+                page: 1,
+                hideLoading: false,
+              );
+            },
+          );
+        } else {
+          showDialogForScreen(
+            context,
+            "Error",
+            data['message'] ?? "Failed to update customer",
+            callback: () => Get.back(),
+          );
+        }
+      } else {
+        logcat('Error Response', response.body);
+        final data = jsonDecode(response.body);
+        String errorMessage = 'Something went wrong';
+
+        if (data['errors'] != null && data['errors'] is Map) {
+          final firstKey = data['errors'].keys.first;
+          final firstErrorList = data['errors'][firstKey];
+
+          if (firstErrorList is List && firstErrorList.isNotEmpty) {
+            errorMessage =
+                firstErrorList.first; // ✅ get first error dynamically
+          }
+        } else if (data['message'] != null) {
+          errorMessage = data['message'];
+        }
+
+        showDialogForScreen(
+          context,
+          "Installation Update",
+          errorMessage,
+          callback: () => Get.back(),
+        );
+      }
+    } catch (e) {
+      loadingIndicator.hide(context);
+      logcat("Exception", e.toString());
+      showDialogForScreen(
+        context,
+        "Error",
+        e.toString(),
+        callback: () => Get.back(),
+      );
+    }
+  }
+
   Widget setWarrantyTypeListDialog() {
     return Obx(() {
       if (isWarrantyTypeListApiCallLoading.value) {
@@ -718,8 +902,61 @@ class LeadController extends GetxController {
     update();
   }
 
+  var warrantyTypeforFilter = <LabelValue>[].obs;
+
+  // Future<void> getFillterOptions(context, {showLoader = true}) async {
+  //   User? userData = await UserPreferences().getSignInInfo();
+  //   var loadingIndicator = LoadingProgressDialog();
+  //   commonGetApiCallFormate(
+  //     context,
+  //     title: 'Dashboard Screen',
+  //     apiEndPoint: "${ApiUrl.getfillter}?user_id=${userData?.userId ?? ''}",
+  //     allowHeader: true,
+  //     state: state,
+  //     message: message,
+  //     apisLoading: (isloaing) {
+  //       if (showLoader == true) {
+  //         if (isloaing == true) {
+  //           loadingIndicator.show(context, '');
+  //         } else {
+  //           loadingIndicator.hide(context);
+  //         }
+  //       }
+  //     },
+  //     onResponse: (data) {
+  //       logcat('Filter Options Data', data.toString());
+  //       districtList.clear();
+  //       clustersList.clear();
+  //       var innerData = data['data'];
+  //       FiltterData responseDetail = FiltterData.fromJson(innerData);
+  //       districtList.addAll(responseDetail.districts);
+  //       clustersList.addAll(responseDetail.clusters);
+  //       // warrantyType.assignAll(
+  //       //   responseDetail.warrantyType.where((e) => e.value != 'under-warranty'),
+  //       // );
+  //       warrantyTypeforFilter.assignAll(responseDetail.warrantyType);
+  //       cusotmerUpdateWarrantyType.assignAll(
+  //         responseDetail.warrantyType.where((e) => e.value != 'under-warranty'),
+  //       );
+  //       filterWarrantyType.assignAll(
+  //         responseDetail.warrantyType.where((e) => e.value != 'under-warranty'),
+  //       );
+
+  //       // warrantyType.assignAll(responseDetail.warrantyType);
+  //       // filterWarrantyType.assignAll(responseDetail.warrantyType);
+
+  //       // warrantyType.assignAll(responseDetail.warrantyType);
+  //       // filterWarrantyType.assignAll(responseDetail.warrantyType);
+
+  //       update();
+  //     },
+  //     networkManager: networkManager,
+  //   );
+  // }
+
   RxBool isUpdateEnabled = true.obs;
-  void updateCustomer(context) async {
+  void updateCustomer(context, LeadData leadData) async {
+    resetCustomerUpdateFieldsExceptWarranty();
     var result = await showModalBottomSheet(
       context: context,
       isDismissible: false,
@@ -778,6 +1015,7 @@ class LeadController extends GetxController {
                                       dateRx: expectedDate,
                                       model: dateModel,
                                       showTimePickers: false,
+                                      useApiFormat: true,
                                     );
                                     // final picked = await showDatePicker(
                                     //   context: context,
@@ -831,7 +1069,7 @@ class LeadController extends GetxController {
                                   isenable: false,
                                   isdropdown: true,
                                   wantsuffix: true,
-                                  usegesture: false,
+                                  usegesture: true,
 
                                   isRequired: true,
                                   gestureFunction: () {
@@ -908,6 +1146,7 @@ class LeadController extends GetxController {
                                     child: getFormButton(
                                       context,
                                       () {
+                                        resetCustomerUpdateFieldsExceptWarranty();
                                         Get.back();
                                       },
                                       'Cancle',
@@ -920,7 +1159,12 @@ class LeadController extends GetxController {
                                       return getFormButton(
                                         context,
                                         () {
-                                          if (isUpdateEnabled.value == true) {}
+                                          if (isUpdateEnabled.value == true) {
+                                            updateInstallationApi(
+                                              context,
+                                              leadData.id,
+                                            );
+                                          }
                                         },
                                         "Update",
                                         // validate: true,
@@ -1154,21 +1398,26 @@ class LeadController extends GetxController {
     required Rx<ValidationModel> model,
     bool showTimePickers = false,
     bool isEndDate = false,
+    bool useApiFormat = false, // <-- NEW FLAG
   }) {
+    final DateFormat format = useApiFormat
+        ? DateFormat('yyyy-MM-dd')
+        : DateFormat('MMMM yyyy');
+
     showCommonDatePicker(
       context: context,
       title: title,
-      initialDate: dateRx.value.isNotEmpty
-          ? dateFormat.parse(dateRx.value)
-          : null,
+      initialDate: dateRx.value.isNotEmpty ? format.parse(dateRx.value) : null,
       minDate: startDate.value.isNotEmpty
-          ? dateFormat.parse(startDate.value)
+          ? format.parse(startDate.value)
           : null,
       showTimePickers: showTimePickers,
       onDatePicked: (DateTime date) {
-        final formatted = dateFormat.format(date);
+        final formatted = format.format(date);
+
         dateRx.value = formatted;
         controller.text = formatted;
+
         model.value = ValidationModel(formatted, null, isValidate: true);
         enableSubmitButton();
       },
