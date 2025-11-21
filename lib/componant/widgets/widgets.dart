@@ -62,7 +62,7 @@ String formatText(String text) {
 }
 
 /// 🔹 Header Section
-Widget buildHeader(BuildContext context, String title) {
+Widget buildHeader(BuildContext context, String? title) {
   return Stack(
     children: [
       ClipRRect(
@@ -76,7 +76,7 @@ Widget buildHeader(BuildContext context, String title) {
           child: Align(
             alignment: Alignment.center,
             child: Text(
-              "Update Customer",
+              title ?? "Update Customer",
               style: TextStyle(
                 color: white,
                 fontSize: 16.sp,

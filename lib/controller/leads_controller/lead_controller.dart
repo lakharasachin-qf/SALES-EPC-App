@@ -1037,7 +1037,7 @@ class LeadController extends GetxController {
                                   hint: 'Select Date',
                                 ),
                               ),
-
+                              getDynamicSizedBox(height: 1.h),
                               Obx(() {
                                 return getTextField(
                                   context: context,
@@ -1138,6 +1138,7 @@ class LeadController extends GetxController {
                               //     isRequired: true,
                               //   );
                               // }),
+                              getDynamicSizedBox(height: 1.h),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
